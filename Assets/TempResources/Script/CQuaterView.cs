@@ -52,12 +52,13 @@ public class CQuaterView : MonoBehaviour
         Vector3 desiredPos;
         Quaternion desiredRot;
 
-        desiredPos = _player.transform.position + _quaterPos * _quaterSharpness;
+        desiredPos = _player.transform.position + _quaterPos;
 
-        Vector3 lookPlayerPos = desiredPos + Vector3.up * _quaterHeight;
+        Vector3 lookPlayerPos = desiredPos + Vector3.up * _quaterHeight * _quaterSharpness;
 
         desiredRot = Quaternion.LookRotation(lookPlayerPos - desiredPos, Vector3.up);
 
+        ApplyCam(desiredPos, desiredRot, _quaterSharpness);
 
     }
 
@@ -69,6 +70,9 @@ public class CQuaterView : MonoBehaviour
             return;
         }
 
+        float t = Mathf.Exp(-sharpness * Time.deltaTime);
+        _cameraTr.position = Vector3.Lerp(_cameraTr.position, desiredPos, t);
+        _cameraTr.rotation = Quaternion.Slerp(_cameraTr.rotation, desiredRot, t);
 
     }
 
