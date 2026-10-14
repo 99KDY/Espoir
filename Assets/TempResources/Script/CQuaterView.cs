@@ -8,7 +8,7 @@ public class CQuaterView : MonoBehaviour
     #region ¿ŒΩ∫∆—≈Õ
     [SerializeField] private GameObject _player;
     [SerializeField] private Transform _cameraTr;
-    [SerializeField] private Vector3 _quaterPos = new Vector3(8f, 10f, 8f);
+    [SerializeField] private Vector3 _quaterOffset = new Vector3(8f, 10f, 8f);
 
     [SerializeField] private float _quaterHeight = 1.5f;
     [SerializeField] private float _quaterSharpness = 5.0f;
@@ -39,7 +39,7 @@ public class CQuaterView : MonoBehaviour
         Vector3 desiredPos;
         Quaternion desiredRot;
 
-        desiredPos = _player.transform.position + _quaterPos; 
+        desiredPos = _player.transform.position + _quaterOffset; 
         
         Vector3 lookPlayerPos = desiredPos + Vector3.up * _quaterHeight;
 
@@ -52,7 +52,7 @@ public class CQuaterView : MonoBehaviour
         Vector3 desiredPos;
         Quaternion desiredRot;
 
-        desiredPos = _player.transform.position + _quaterPos;
+        desiredPos = _player.transform.position + _quaterOffset;
 
         Vector3 lookPlayerPos = desiredPos + Vector3.up * _quaterHeight * _quaterSharpness;
 
