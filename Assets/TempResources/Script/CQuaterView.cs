@@ -26,7 +26,7 @@ public class CQuaterView : MonoBehaviour
     #endregion
 
     private Vector3 _currentOffset;
-    public float _zoomDamped = 0f;
+    private float _zoomDamped = 0f;
 
     private void Start()
     {
