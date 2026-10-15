@@ -114,7 +114,7 @@ public class CQuaterView : MonoBehaviour
         }
 
 
-            float t = Mathf.Exp(-sharpness * Time.deltaTime);
+            float t = 1 - Mathf.Exp(-sharpness * Time.deltaTime);
             _cameraTr.position = Vector3.Lerp(_cameraTr.position, desiredPos, t);
             _cameraTr.rotation = Quaternion.Slerp(_cameraTr.rotation, desiredRot, t);
         
