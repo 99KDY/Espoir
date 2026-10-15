@@ -7,9 +7,9 @@ public struct SDamageInfo
     public float damage;
     // public CSkill skill;
     public bool isFixed;
-    public CState stateOnHit;
+    public CStatus stateOnHit;
 
-    public SDamageInfo (float damage, bool isFixed, CState stateOnHit)
+    public SDamageInfo (float damage, bool isFixed, CStatus stateOnHit)
     {
         this.damage = damage;
         this.isFixed = isFixed;
@@ -44,7 +44,7 @@ public abstract class CUnit : MonoBehaviour
     protected float _attack;
     protected float _defence;
 
-    protected List<CState> _states;
+    protected List<CStatus> _statuses;
     #endregion
 
     #region 프로퍼티
@@ -76,7 +76,7 @@ public abstract class CUnit : MonoBehaviour
         _hpCurrent = _hpMax;
         _attack = _baseAttack;
         _defence = _baseDefence;
-        _states = new List<CState>();
+        _statuses = new List<CStatus>();
     }
 
     /// <summary>
