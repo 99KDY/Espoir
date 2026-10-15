@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class CQuaterView : MonoBehaviour
 {
@@ -17,14 +18,17 @@ public class CQuaterView : MonoBehaviour
     [SerializeField] private float _quaterSharpness = 5.0f;
 
     [Header("QuaterView Zoom")]
-    [SerializeField] private float _zoomSharpness = 10.0f;
-    [SerializeField] private float _minZoom = -5f;
-    [SerializeField] private float _maxZoom = 7f;
+    [SerializeField] private Vector3 _quaterMinOffset = new Vector3(10f, 8f, 10f);
+    [SerializeField] private Vector3 _quaterMaxOffset = new Vector3(15f, 12f, 15f);
+
+    [SerializeField] private float _zoomSharpness = 10f;
 
     #endregion
 
+    private Vector3 _currentOffset;
+    public float _zoomDamped = 0f;
 
-    private void Awake()
+    private void Start()
     {
         if(_cameraTr == null)
         {
@@ -36,7 +40,7 @@ public class CQuaterView : MonoBehaviour
 
     private void Update()
     {
-        QuaterZoom();
+
 
     }
 
@@ -67,6 +71,30 @@ public class CQuaterView : MonoBehaviour
         Vector3 desiredPos;
         Quaternion desiredRot;
 
+        float scroll = Input.GetAxis("Mouse ScrollWheel");
+
+
+        if (Mathf.Abs(scroll) > 0.01f)
+        {
+            Debug.Log("Scroll 움직였어.");
+            _zoomDamped += _zoomSharpness * (-scroll);
+            float t = Mathf.Clamp(_zoomDamped, 0, 1);
+            if(_zoomDamped < -1)
+            {
+                _zoomDamped = -1;
+            }
+
+            else if(_zoomDamped > 1)
+            {
+                _zoomDamped = 1;
+            }
+
+                _quaterOffset = Vector3.Lerp(_quaterMinOffset, _quaterMaxOffset, t);
+
+        }
+
+
+
         desiredPos = _player.transform.position + _quaterOffset;
 
         Vector3 lookPlayerPos = _player.transform.position + Vector3.up * _quaterHeight * _quaterSharpness;
@@ -85,31 +113,11 @@ public class CQuaterView : MonoBehaviour
             return;
         }
 
-        float t = Mathf.Exp(-sharpness * Time.deltaTime);
-        _cameraTr.position = Vector3.Lerp(_cameraTr.position, desiredPos, t);
-        _cameraTr.rotation = Quaternion.Slerp(_cameraTr.rotation, desiredRot, t);
 
-    }
-
-    private void QuaterZoom()
-    {
-        if(_cameraTr == null)
-        {
-            return;
-        }
-
-        float scroll = Input.GetAxis("Mouse ScrollWheel");
-        // 1. 카메라 가르키는 방향 찾기
-        Vector3 zoomCam = _player.transform.position - _cameraTr.position;
-
-        zoomCam +=  zoomCam.normalized * scroll * _zoomSharpness;
-
-        float zoomdis = Mathf.Clamp(zoomCam.magnitude, _minZoom, _maxZoom);
-
-        _cameraTr.position = zoomCam * zoomdis;
+            float t = Mathf.Exp(-sharpness * Time.deltaTime);
+            _cameraTr.position = Vector3.Lerp(_cameraTr.position, desiredPos, t);
+            _cameraTr.rotation = Quaternion.Slerp(_cameraTr.rotation, desiredRot, t);
         
-       
     }
-
 
 }
