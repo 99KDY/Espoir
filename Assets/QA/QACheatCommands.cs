@@ -13,6 +13,9 @@ public class QACheatCommands : MonoBehaviour
 
         // 숫자 입력받는 명령어
         DebugLogConsole.AddCommand<int>("gold", "입력한 만큼 골드를 추가합니다. (예: gold 5000)", AddGold);
+
+        DebugLogConsole.AddCommand<float>("speed", "게임 배속을 조절합니다. (예: speed 2.0 / 기본값 1.0)", SetGameSpeed);
+        DebugLogConsole.AddCommand("inf_mana", "마나 및 스킬 쿨타임을 무제한으로 만듭니다.", ToggleInfiniteMana);
     }
 
     public void GodMode()
@@ -55,6 +58,26 @@ public class QACheatCommands : MonoBehaviour
         // TODO : 플레이어 사망 코드 연동예정
 
         // FindObjectOfType<CPlayer>().Die();
+    }
+
+    /// <summary>
+    /// 게임 배속 제어 치트
+    /// </summary>
+    public void SetGameSpeed(float speedAmount)
+    {
+        Time.timeScale = speedAmount;
+        CLogger.Log($"[QA] 게임 속도가 {speedAmount}배속으로 변경되었습니다.");
+    }
+
+    /// <summary>
+    /// 마나 무제한 치트
+    /// </summary>
+    private bool isInfiniteMana = false;
+    public void ToggleInfiniteMana()
+    {
+        isInfiniteMana = !isInfiniteMana;
+        CLogger.Log($"[QA] 무제한 마나 모드 상태: {isInfiniteMana}");
+        // TODO : 스킬 / 마나 소모 스크립트에 bool값을 연결
     }
 
 }
