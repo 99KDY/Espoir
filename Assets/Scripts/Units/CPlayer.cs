@@ -15,6 +15,10 @@ public class CPlayer : CUnit
     [SerializeField, Min(0.01f)] private float _dashDuration = 0.3f;
     [SerializeField] private float _dashCooldown = 1f;
 
+    [Header("공격 설정")]
+    [SerializeField] private CPlayerAttack _playerAttack;
+    [SerializeField, Range(0f, 1f)] private float _attackHitTime = 0.3f;
+
     [Header("입력 설정")]
     [SerializeField] private InputActionReference _moveClick;
     [SerializeField] private InputActionReference _pointerPosition;
@@ -31,6 +35,7 @@ public class CPlayer : CUnit
     private Vector3 _targetPosition;
     private bool _isAttacking;
     private bool _hasEnteredAttack;
+    private bool _hasAppliedAttack;
 
     private Vector3 _dashTargetPosition;
     private float _dashCooldownRemaining;
@@ -99,6 +104,7 @@ public class CPlayer : CUnit
     {
         _isAttacking = true;
         _hasEnteredAttack = false;
+        _hasAppliedAttack = false;
         _targetPosition = transform.position;
 
         _animator.SetBool(_IS_MOVING_HASH, false);
@@ -112,8 +118,15 @@ public class CPlayer : CUnit
         if (currentState.shortNameHash == _ATTACK_HASH)
         {
             _hasEnteredAttack = true;
+
+            if (!_hasAppliedAttack &&
+                currentState.normalizedTime >= _attackHitTime)
+            {
+                _hasAppliedAttack = true;
+                _playerAttack.Attack(this);
+            }
         }
-       
+        
         else if (_hasEnteredAttack && !_animator.IsInTransition(0))
         {
             _isAttacking = false;
