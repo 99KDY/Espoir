@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -16,16 +16,14 @@ public enum EEnemyInfo
 public class CEmemyBasicSO : MonoBehaviour 
 {
 
-    #region ÀÎ½ºÆÑÅÍ
+    #region ì¸ìŠ¤íŒ©í„°
     [SerializeField] string _enemyName = "Enemy";
     [SerializeField] private float _enemyHp;
     [SerializeField] private float _enemyAtk;
     [SerializeField] private float _enemyDef;
-
     #endregion
 
-
-    #region ÇÁ·ÎÆÛÆ¼
+    #region í”„ë¡œí¼í‹°
     public string EEnemyName => _enemyName;
     public float EnemyHP => _enemyHp;
     public float EnemyAtk => _enemyAtk;
@@ -33,7 +31,7 @@ public class CEmemyBasicSO : MonoBehaviour
 
     #endregion
 
-    #region ³»ºÎ º¯¼ö
+    #region ë‚´ë¶€ ë³€ìˆ˜
     protected float _currentHp;
     protected float _currentAtk;
     protected float _currentDef;
@@ -56,7 +54,7 @@ public class CEmemyBasicSO : MonoBehaviour
 
     public virtual void OnHitPlayer()
     {
-        // TODO : ÇÃ·¹ÀÌ¾î¿¡°Ô ÁÖ´Â È÷Æ®¹æ½Ä
+        // TODO : í”Œë ˆì´ì–´ì—ê²Œ ì£¼ëŠ” íˆíŠ¸ë°©ì‹
         
     }
 
@@ -74,9 +72,9 @@ public class CEmemyBasicSO : MonoBehaviour
 
     protected virtual void OnDie()
     {
-        // TODO : Á×´Â ¾Ö´Ï¸ŞÀÌ¼Ç
-        // TODO : ¸¸µé¾îµĞ ¿¬ÃâÀû ¿µ»ó?
-        // TODO : Player¿¡°Ô Èû ³Ñ°ÜÁÖ±â
+        // TODO : ì£½ëŠ” ì• ë‹ˆë©”ì´ì…˜
+        // TODO : ë§Œë“¤ì–´ë‘” ì—°ì¶œì  ì˜ìƒ?
+        // TODO : Playerì—ê²Œ í˜ ë„˜ê²¨ì£¼ê¸°
 
 
     }
