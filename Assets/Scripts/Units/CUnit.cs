@@ -7,9 +7,9 @@ public struct SDamageInfo
     public float damage;
     // public CSkill skill;
     public bool isFixed;
-    public CStatus stateOnHit;
+    public CStatusSO stateOnHit;
 
-    public SDamageInfo (float damage, bool isFixed, CStatus stateOnHit)
+    public SDamageInfo (float damage, bool isFixed, CStatusSO stateOnHit)
     {
         this.damage = damage;
         this.isFixed = isFixed;
@@ -31,18 +31,18 @@ public abstract class CUnit : MonoBehaviour
     #endregion
 
     #region 내부 변수
-    protected float _hpMaxAdd;
-    protected float _attackAdd;
-    protected float _defenceAdd;
+    protected float _hpMaxAdd = 0;
+    protected float _attackAdd = 0;
+    protected float _defenceAdd = 0;
 
-    protected float _hpMaxRatio;
-    protected float _attackRatio;
-    protected float _defenceRatio;
+    protected float _hpMaxRatio = 1;
+    protected float _attackRatio = 1;
+    protected float _defenceRatio = 1;
 
-    protected float _hpCurrent;
-    protected float _hpMax;
-    protected float _attack;
-    protected float _defence;
+    protected float _hpCurrent = 1;
+    protected float _hpMax = 1;
+    protected float _attack = 0;
+    protected float _defence = 0;
 
     protected List<CStatus> _statuses;
     #endregion
@@ -70,7 +70,7 @@ public abstract class CUnit : MonoBehaviour
     }
     #endregion
 
-    private void Awake()
+    protected virtual void Awake()
     {
         _hpMax = _baseHpMax;
         _hpCurrent = _hpMax;
@@ -80,7 +80,8 @@ public abstract class CUnit : MonoBehaviour
     }
 
     /// <summary>
-    /// 객체가 공격을 받을 때 호출이 되는 함수입니다.
+    /// 객체가 공격을 받을 때 호출이 되는 함수입니다.]
+    /// 일반적으로 defender는 this을 쓰는것도 괜찮습니다.
     /// </summary>
     /// <param name="attacker"></param>
     /// <param name="defender"></param>
@@ -90,6 +91,17 @@ public abstract class CUnit : MonoBehaviour
         float finalDamage = DamageCalculate(attacker, defender, damage);
         defender.GetDamage(finalDamage);
         AfterHit(attacker, defender);
+    }
+
+    /// <summary>
+    /// 객체가 공격을 받을 때 호출이 되는 함수입니다.]
+    /// </summary>
+    /// <param name="attacker"></param>
+    /// <param name="defender"></param>
+    /// <param name="damage"></param>
+    public virtual void OnHit(CUnit attacker, SDamageInfo damage)
+    {
+        OnHit(attacker, this, damage);
     }
 
     protected virtual float DamageCalculate(CUnit attacker, CUnit defender, SDamageInfo damage)
@@ -103,6 +115,11 @@ public abstract class CUnit : MonoBehaviour
         finalDamage = finalDamage * (100f / (100f + Mathf.Max(defender.Defence, -99.9f)));
         // TODO: 상태이상을 적용해서 대미지 정리하기
         return finalDamage;
+    }
+
+    protected virtual float DamageCalculate(CUnit attacker, SDamageInfo damage)
+    {
+        return DamageCalculate(attacker, this, damage);
     }
 
     protected virtual void AfterHit(CUnit attacker, CUnit defender)
