@@ -69,9 +69,9 @@ public class CPlayerUI : MonoBehaviour
 
         OnSync?.Invoke();
 
-        if (_maxHP <= 0f)
+        if (_currentHp <= 0f)
         {
-            _maxHP = 0;
+            _currentHp = 0;
         }
 
         _hpFill.fillAmount = ratio;
@@ -88,8 +88,32 @@ public class CPlayerUI : MonoBehaviour
         float ratio = _maxMP > 0 ? _currentMp / _maxMP : 0f;
 
         OnSync?.Invoke();
+
+        if (_currentMp <= 0)
+        {
+            _currentMp = 0;
+
+        }
+
         _mpFill.fillAmount = ratio;
     }
+
+    public void ResetHP()
+    {
+        // TODO : 마을을 복귀했거나, 레이드 처음시도 or 재시도 떄에 전체 회복
+        _currentHp = _maxHP;
+
+        UpdateHp();
+    }
+
+    public void ResetMP()
+    {
+        // TODO : 마을을 복귀했거나, 레이드 처음시도 or 재시도 떄에 전체 회복
+        _currentMp = _maxMP;
+
+        UpdateMp();
+    }
+
 
     public void ReceiveDamage(float damage)
     {
