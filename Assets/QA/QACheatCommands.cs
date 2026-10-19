@@ -18,18 +18,42 @@ public class QACheatCommands : MonoBehaviour
         DebugLogConsole.AddCommand("inf_mana", "마나 및 스킬 쿨타임을 무제한으로 만듭니다.", ToggleInfiniteMana);
     }
 
+    /// <summary>
+    /// 무적 치트
+    /// </summary>
     public void GodMode()
     {
         CLogger.Log("[QA] 무적 모드가 활성화되었습니다. (기능 연결 필요)");
         // TODO : 플레이어 코드를 완성하면 여기에 체력 감소 안되게 하는거 추가예정
     }
 
+    /// <summary>
+    /// 적 처치 치트
+    /// </summary>
     public void KillAllEnemies()
     {
-        CLogger.Log("[QA] 모든 적에게 즉사 명령을 내렸습니다. (기능 연결 필요)");
-        // TODO : 적 시스템 완성하면 여기에 모든 적 파괴 코드 추가예정
+        CEnemy[] enemies = FindObjectsOfType<CEnemy>();
+        int killedCount = 0;
+
+        for (int i = 0; i < enemies.Length; i++)
+        {
+            CEnemy enemy = enemies[i];
+
+            if (enemy.HpCurrent <= 0f)
+            {
+                continue;
+            }
+
+            enemy.GetDamage(enemy.HpCurrent);
+            killedCount++;
+        }
+
+        CLogger.Log($"[QA] 적 {killedCount}명을 처치했습니다.");
     }
 
+    /// <summary>
+    /// 골드 추가 치트
+    /// </summary>
     public void AddGold(int amount)
     {
         CLogger.Log($"[QA] 골드가 {amount}만큼 추가되었습니다. (기능 연결 필요)");
@@ -41,11 +65,15 @@ public class QACheatCommands : MonoBehaviour
     /// </summary>
     public void Cheat_HealPlayer()
     {
-        CLogger.Log("[QA] 플레이어 체력 회복 명령을 실행합니다. (기능 연결 필요)");
+        CPlayer player = FindPlayer();
 
-        // TODO : 플레이어 체력코드 연동예정
+        if (player == null)
+        {
+            return;
+        }
 
-        // FindObjectOfType<CPlayer>().currentHP = 100;
+        player.GetHeal(player.HpMax);
+        CLogger.Log($"[QA] 플레이어 체력을 회복했습니다. 현재 체력: {player.HpCurrent}");
     }
 
     /// <summary>
@@ -53,11 +81,15 @@ public class QACheatCommands : MonoBehaviour
     /// </summary>
     public void Cheat_KillPlayer()
     {
-        CLogger.Log("[QA] 플레이어 강제 사망 명령을 실행합니다. (기능 연결 필요)");
+        CPlayer player = FindPlayer();
 
-        // TODO : 플레이어 사망 코드 연동예정
+        if (player == null)
+        {
+            return;
+        }
 
-        // FindObjectOfType<CPlayer>().Die();
+        player.GetDamage(player.HpCurrent);
+        CLogger.Log($"[QA] 플레이어를 사망 처리했습니다. 현재 체력: {player.HpCurrent}");
     }
 
     /// <summary>
@@ -78,6 +110,18 @@ public class QACheatCommands : MonoBehaviour
         isInfiniteMana = !isInfiniteMana;
         CLogger.Log($"[QA] 무제한 마나 모드 상태: {isInfiniteMana}");
         // TODO : 스킬 / 마나 소모 스크립트에 bool값을 연결
+    }
+
+    private CPlayer FindPlayer()
+    {
+        CPlayer player = FindObjectOfType<CPlayer>();
+
+        if (player == null)
+        {
+            CLogger.Log("[QA] 플레이어를 찾지 못했습니다.");
+        }
+
+        return player;
     }
 
 }
