@@ -12,11 +12,12 @@ public class CPlayerUI : MonoBehaviour
     #region 인스팩터
     [SerializeField] private CPlayer _player;
     [SerializeField] private float _maxHP;
-    [SerializeField] private float _maxMP;
+    //[SerializeField] private float _maxMP;
 
     [SerializeField] private Image _hpFill = null;
-    [SerializeField] private Image _mpFill = null;
+    //[SerializeField] private Image _mpFill = null;
 
+    [SerializeField] private TMP_Text _hpText = null;
     [SerializeField] private TMP_Text _damageText = null;
 
     // 뉴인풋 시스템에서 스킬 셋 하나 만들어 두자.
@@ -28,8 +29,10 @@ public class CPlayerUI : MonoBehaviour
     #endregion
 
     #region 내부변수
+
     private float _currentHp;
-    private float _currentMp;
+    private float _maxHp;
+
 
     #endregion
     public event Action OnSync;
@@ -38,11 +41,28 @@ public class CPlayerUI : MonoBehaviour
 
     #region 프로퍼티
     public float CurrentHP => _currentHp;
-    public float CurrentMp => _currentMp;
-    public float MaxHP => _maxHP;
-    public float MaxMP => _maxMP;
+    // public float CurrentMp => 
+    public float MaxHP => _maxHp;
+    //public float MaxMP => this._maxMP;
 
     #endregion
+
+
+    private void Start()
+    {
+        if(_player == null)
+        {
+            CLogger.Warn("CPlayerUI의 인스팩터에 플레이어 연결이 안되어 있음");
+            return;
+        }
+
+        _maxHP = _player.HpMax;
+        _currentHp = _player.HpCurrent;
+
+        ResetHP();
+
+
+    }
 
     private void OnEnable()
     {
@@ -74,29 +94,34 @@ public class CPlayerUI : MonoBehaviour
             _currentHp = 0;
         }
 
+        if(_hpText != null)
+        {
+            _hpText.text = $"{_currentHp} / {_maxHP}";
+        }
+
         _hpFill.fillAmount = ratio;
     }
 
 
-    public void UpdateMp()
-    {
-        if (_mpFill == null)
-        {
-            return;
-        }
+    //public void UpdateMp()
+    //{
+    //    if (_mpFill == null)
+    //    {
+    //        return;
+    //    }
 
-        float ratio = _maxMP > 0 ? _currentMp / _maxMP : 0f;
+    //    float ratio = _maxMP > 0 ? _currentMp / _maxMP : 0f;
 
-        OnSync?.Invoke();
+    //    OnSync?.Invoke();
 
-        if (_currentMp <= 0)
-        {
-            _currentMp = 0;
+    //    if (_currentMp <= 0)
+    //    {
+    //        _currentMp = 0;
 
-        }
+    //    }
 
-        _mpFill.fillAmount = ratio;
-    }
+    //    _mpFill.fillAmount = ratio;
+    //}
 
     public void ResetHP()
     {
@@ -106,13 +131,13 @@ public class CPlayerUI : MonoBehaviour
         UpdateHp();
     }
 
-    public void ResetMP()
-    {
-        // TODO : 마을을 복귀했거나, 레이드 처음시도 or 재시도 떄에 전체 회복
-        _currentMp = _maxMP;
+    //public void ResetMP()
+    //{
+    //    // TODO : 마을을 복귀했거나, 레이드 처음시도 or 재시도 떄에 전체 회복
+    //    _currentMp = _maxMP;
 
-        UpdateMp();
-    }
+    //    UpdateMp();
+    //}
 
 
     public void ReceiveDamage(float damage)
@@ -137,7 +162,7 @@ public class CPlayerUI : MonoBehaviour
     {
         _maxHP = Mathf.Max(1.0f, _maxHP);
         
-        _maxMP = Mathf.Max(1.0f, _maxMP);
+        //_maxMP = Mathf.Max(1.0f, _maxMP);
 
     }
 

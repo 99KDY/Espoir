@@ -15,13 +15,13 @@ public class CQuaterView : MonoBehaviour
     [Header("QuaterView Info")]
     [SerializeField] private Vector3 _quaterOffset = new Vector3(10f, 8f, 10f);
     [SerializeField] private float _quaterHeight = 1.5f;
-    [SerializeField] private float _quaterSharpness = 5.0f;
+    [SerializeField] private float _quaterSharpness = 2.0f;
 
     [Header("QuaterView Zoom")]
-    [SerializeField] private Vector3 _quaterMinOffset = new Vector3(10f, 8f, 10f);
+    [SerializeField] private Vector3 _quaterMinOffset = new Vector3(8f, 6f, 8f);
     [SerializeField] private Vector3 _quaterMaxOffset = new Vector3(15f, 12f, 15f);
 
-    [SerializeField] private float _zoomSharpness = 10f;
+    [SerializeField] private float _zoomSharpness = 2f;
 
     #endregion
 
