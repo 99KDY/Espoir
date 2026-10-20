@@ -8,11 +8,11 @@ public class CPlayerAttack : MonoBehaviour
     [SerializeField] private Vector3 _attackSize = Vector3.one;
     [SerializeField] private LayerMask _targetLayer;
 
-    private const int _INITIAL_HIT_CAPACITY = 5; 
+    private const int _INITIAL_HIT_CAPACITY = 5;
 
     private Collider[] _hitColliders = new Collider[_INITIAL_HIT_CAPACITY];
 
-    private readonly HashSet<CUnit> _hitTargets = new HashSet<CUnit>();
+    private readonly HashSet<CUnit> _HIT_TARGETS = new HashSet<CUnit>();
 
     private void Start()
     {
@@ -23,14 +23,15 @@ public class CPlayerAttack : MonoBehaviour
     }
 
     /// <summary>
-    /// 공격 범위에 있는 대상에게 피해를 전달합니다.
+    /// 공격 범위에 피해를 전달하고 체력이 감소한 대상이 있는지 반환합니다.
     /// </summary>
-    
-    public void Attack(CUnit attacker)
+
+    public bool Attack(CUnit attacker)
     {
-        _hitTargets.Clear();
+        _HIT_TARGETS.Clear();
 
         int hitCount = FindTargets();
+        bool hasHit = false;
 
         for (int i = 0; i < hitCount; i++)
         {
@@ -46,16 +47,20 @@ public class CPlayerAttack : MonoBehaviour
                 continue;
             }
 
-            if (!_hitTargets.Add(target))
+            if (!_HIT_TARGETS.Add(target))
             {
                 continue;
             }
 
             SDamageInfo damageInfo = new SDamageInfo(attacker.Attack);
+            float previousHp = target.HpCurrent;
             target.OnHit(attacker, target, damageInfo);
+            hasHit |= target.HpCurrent < previousHp;
 
             CLogger.Log($"{target.name} 현재 체력: {target.HpCurrent}");
         }
+
+        return hasHit;
     }
 
     private int FindTargets()
