@@ -9,7 +9,6 @@ using UnityEngine.UI;
 public class CEnemyUI : MonoBehaviour
 {
     [SerializeField] private CEnemy _enemy;
-    [SerializeField] private float _enemyHP;
 
     [SerializeField] private Image _enemyHpFill = null;
 
@@ -17,7 +16,17 @@ public class CEnemyUI : MonoBehaviour
 
     public event Action OnEnemySync;
 
+    private float _maxEnemyHP;
     private float _currentEnemyHp;
+
+    public float CurrentEnemyHp => _currentEnemyHp;
+
+
+    private void Start()
+    {
+        _currentEnemyHp = _enemy.HpCurrent;
+        _maxEnemyHP = _enemy.HpMax;
+    }
 
 
     public void UpdateEnemyHP()
@@ -28,7 +37,7 @@ public class CEnemyUI : MonoBehaviour
         }
 
 
-        float ratio = _enemyHP > 0 ? _currentEnemyHp / _enemyHP : 0f;
+        float ratio = _maxEnemyHP > 0 ? _currentEnemyHp / _maxEnemyHP : 0f;
 
         OnEnemySync?.Invoke();
 
@@ -38,11 +47,11 @@ public class CEnemyUI : MonoBehaviour
 
     public void ResetEnemyHP()
     {
-        _currentEnemyHp = _enemyHP;
+        _currentEnemyHp = _maxEnemyHP;
 
         UpdateEnemyHP();
 
-        CLogger.Log($" 현재 체력 : {_currentEnemyHp} / 최대 최력 : {_enemyHP}");
+        CLogger.Log($" 현재 체력 : {_currentEnemyHp} / 최대 최력 : {_maxEnemyHP}");
 
     }
 
@@ -60,13 +69,13 @@ public class CEnemyUI : MonoBehaviour
             _damageText.text = $"{damage}";
         }
 
-        CLogger.Log($" 받은 피해 : {damage} / 현재 체력 : {_currentEnemyHp} / 최대 체력 : {_enemyHP}  ");
+        CLogger.Log($" 받은 피해 : {damage} / 현재 체력 : {_currentEnemyHp} / 최대 체력 : {_maxEnemyHP}  ");
 
     }
 
     private void OnValidate()
     {
-        _enemyHP = Mathf.Max(0, _enemyHP);
+        _maxEnemyHP = Mathf.Max(0, _maxEnemyHP);
 
     }
 
