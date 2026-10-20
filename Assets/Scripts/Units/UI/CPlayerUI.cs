@@ -11,20 +11,11 @@ public class CPlayerUI : MonoBehaviour
 {
     #region 인스팩터
     [SerializeField] private CPlayer _player;
-    [SerializeField] private float _maxHP;
-    //[SerializeField] private float _maxMP;
-
+    
     [SerializeField] private Image _hpFill = null;
-    //[SerializeField] private Image _mpFill = null;
 
     [SerializeField] private TMP_Text _hpText = null;
     [SerializeField] private TMP_Text _damageText = null;
-
-    // 뉴인풋 시스템에서 스킬 셋 하나 만들어 두자.
-    //[SerializeField] private KeyCode _skill_Q = KeyCode.Q;
-    //[SerializeField] private KeyCode _skill_W = KeyCode.W;
-    //[SerializeField] private KeyCode _skill_E = KeyCode.E;
-    //[SerializeField] private KeyCode _skill_R = KeyCode.R;
 
     #endregion
 
@@ -56,7 +47,7 @@ public class CPlayerUI : MonoBehaviour
             return;
         }
 
-        _maxHP = _player.HpMax;
+        _maxHp = _player.HpMax;
         _currentHp = _player.HpCurrent;
 
         ResetHP();
@@ -85,7 +76,7 @@ public class CPlayerUI : MonoBehaviour
             return;
         }
 
-        float ratio = _maxHP > 0 ? _currentHp / _maxHP : 0f;
+        float ratio = _maxHp > 0 ? _currentHp / _maxHp : 0f;
 
         OnSync?.Invoke();
 
@@ -96,7 +87,7 @@ public class CPlayerUI : MonoBehaviour
 
         if(_hpText != null)
         {
-            _hpText.text = $"{_currentHp} / {_maxHP}";
+            _hpText.text = $"{_currentHp} / {_maxHp}";
         }
 
         _hpFill.fillAmount = ratio;
@@ -126,7 +117,7 @@ public class CPlayerUI : MonoBehaviour
     public void ResetHP()
     {
         // TODO : 마을을 복귀했거나, 레이드 처음시도 or 재시도 떄에 전체 회복
-        _currentHp = _maxHP;
+        _currentHp = _maxHp;
 
         UpdateHp();
     }
@@ -153,14 +144,14 @@ public class CPlayerUI : MonoBehaviour
             _damageText.text = $" - {damage}";
         }
 
-        CLogger.Log($" 현재 채력 : {_currentHp} / 전체 체력 : {_maxHP} / 받은 피해 : {damage}");
+        CLogger.Log($" 현재 채력 : {_currentHp} / 전체 체력 : {_maxHp} / 받은 피해 : {damage}");
 
 
     }
 
     private void OnValidate()
     {
-        _maxHP = Mathf.Max(1.0f, _maxHP);
+        _maxHp = Mathf.Max(1.0f, _maxHp);
         
         //_maxMP = Mathf.Max(1.0f, _maxMP);
 
