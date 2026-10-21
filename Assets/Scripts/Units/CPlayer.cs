@@ -4,6 +4,7 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+[RequireComponent(typeof(CharacterController))]
 public class CPlayer : CUnit
 {
     [Serializable]
@@ -60,6 +61,8 @@ public class CPlayer : CUnit
     private int[] _attackStateHashes;
     private int[] _recoverStateHashes;
 
+    private CharacterController _characterController;
+    private float _verticalSpeed;
     private Vector3 _targetPosition;
     private bool _isAttacking;
     private bool _hasEnteredAttack;
@@ -73,7 +76,8 @@ public class CPlayer : CUnit
     private float _animatorSpeed;
     private CancellationTokenSource _hitStopCancellation;
 
-    private Vector3 _dashTargetPosition;
+    private Vector3 _dashDirection;
+    private float _dashTimeRemaining;
     private float _dashCooldownRemaining;
     private bool _isDashing;
     private bool _hasEnteredDash;
@@ -107,6 +111,7 @@ public class CPlayer : CUnit
 
     private void Start()
     {
+        _characterController = GetComponent<CharacterController>();
         _targetPosition = transform.position;
 
         if (!HasValidAttackSettings())
@@ -171,6 +176,7 @@ public class CPlayer : CUnit
 
     private void Update()
     {
+        ApplyGravity();
         _dashCooldownRemaining = Mathf.Max(_dashCooldownRemaining - Time.deltaTime, 0f);
 
         if (_isAttacking)
@@ -198,7 +204,7 @@ public class CPlayer : CUnit
             return;
         }
 
-        if (_moveClick.action.WasPressedThisFrame())
+        if (_moveClick.action.IsPressed())
         {
             SetMoveTarget();
         }
@@ -273,7 +279,7 @@ public class CPlayer : CUnit
             float moveProgress = Mathf.InverseLerp(step.moveStart, step.moveEnd, currentState.normalizedTime);
             float distance = Mathf.Max(moveProgress - _attackMoveProgress, 0f) * step.moveDistance;
 
-            transform.position += transform.forward * distance;
+            _characterController.Move(transform.forward * distance);
             _attackMoveProgress = moveProgress;
             _targetPosition = transform.position;
 
@@ -376,8 +382,8 @@ public class CPlayer : CUnit
         _dashCooldownRemaining = _dashCooldown;
         _targetPosition = transform.position;
 
-        _dashTargetPosition =
-            transform.position + transform.forward * _dashDistance;
+        _dashDirection = transform.forward;
+        _dashTimeRemaining = _dashDuration;
 
         _animator.SetBool(_IS_MOVING_HASH, false);
         _animator.SetTrigger(_DASH_HASH);
@@ -387,11 +393,9 @@ public class CPlayer : CUnit
     {
         float dashSpeed = _dashDistance / _dashDuration;
 
-        transform.position = Vector3.MoveTowards(
-            transform.position,
-            _dashTargetPosition,
-            dashSpeed * Time.deltaTime
-        );
+        float moveTime = Mathf.Min(Time.deltaTime, _dashTimeRemaining);
+        _characterController.Move(_dashDirection * (dashSpeed * moveTime));
+        _dashTimeRemaining = Mathf.Max(_dashTimeRemaining - Time.deltaTime, 0f);
 
         AnimatorStateInfo currentState = _animator.GetCurrentAnimatorStateInfo(0);
 
@@ -402,7 +406,7 @@ public class CPlayer : CUnit
 
         else if (_hasEnteredDash &&
                  !_animator.IsInTransition(0) &&
-                 transform.position == _dashTargetPosition)
+                 _dashTimeRemaining <= 0f)
         {
             _isDashing = false;
             _targetPosition = transform.position;
@@ -414,7 +418,6 @@ public class CPlayer : CUnit
         if (TryGetPointerGroundPosition(out Vector3 position))
         {
             _targetPosition = position;
-            _targetPosition.y = transform.position.y;
         }
     }
 
@@ -433,18 +436,29 @@ public class CPlayer : CUnit
         return false;
     }
 
+    private void ApplyGravity()
+    {
+        _verticalSpeed += Physics.gravity.y * Time.deltaTime;
+        CollisionFlags collision = _characterController.Move(Vector3.up * (_verticalSpeed * Time.deltaTime));
+
+        if ((collision & CollisionFlags.Below) != 0 && _verticalSpeed < 0f)
+        {
+            _verticalSpeed = 0f;
+        }
+    }
+
     private void Move()
     {
         Vector3 previousPosition = transform.position;
 
-        transform.position = Vector3.MoveTowards(
-            previousPosition,
-            _targetPosition,
-            _moveSpeed * Time.deltaTime
-        );
+        Vector3 targetDirection = _targetPosition - previousPosition;
+        targetDirection.y = 0f;
+
+        _characterController.Move(Vector3.ClampMagnitude(targetDirection, _moveSpeed * Time.deltaTime));
 
         Vector3 moveDirection = transform.position - previousPosition;
-        bool isMoving = transform.position != previousPosition;
+        moveDirection.y = 0f;
+        bool isMoving = moveDirection != Vector3.zero;
 
         if (isMoving)
         {
