@@ -49,25 +49,33 @@ public class SoundManager : MonoBehaviour
 
     private float _fadeFactor = 1.0f;
 
-    //private static SoundManager _instance;
+    private static SoundManager _instance;
 
-    //public static SoundManager Instance
-    //{
-    //    get { return _instance; }
-    //    protected set { _instance = value; }
-    //}
+    public static SoundManager Instance
+    {
+        get { return _instance; }
+        protected set { _instance = value; }
+    }
 
     private void Awake()
     {
-        //if (_instance != null && _instance != this)
-        //{
-        //    Destroy(this.gameObject);
-        //    return;
-        //}
-        //_instance = this;
+        if (_instance != null && _instance != this)
+        {
+            Destroy(this.gameObject);
+            return;
+        }
+        _instance = this;
         _bgmDict = new Dictionary<EBackgroundSound, AudioSource>();
         _seDict = new Dictionary<EEffectSound, AudioSource>();
         ResetDictionary();
+    }
+
+    private void OnDestroy()
+    {
+        if (_instance == this)
+        {
+            _instance = null;
+        }
     }
     void Update()
     {

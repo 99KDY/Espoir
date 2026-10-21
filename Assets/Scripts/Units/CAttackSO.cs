@@ -2,15 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CAttackSO : MonoBehaviour
+[CreateAssetMenu(fileName = "NewAttackStat", menuName = "Espoir/AttackSO")]
+public class CAttackSO : ScriptableObject
 {
-    void Start()
-    {
-        
-    }
+    [SerializeField] private float _attackRatio = 1f;
+    [SerializeField] private bool _enableCritical = true;
 
-    void Update()
-    {
-        
-    }
 }

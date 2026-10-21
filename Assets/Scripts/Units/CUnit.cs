@@ -7,18 +7,22 @@ public struct SDamageInfo
     public float damage;
     // public CSkill skill;
     public bool isFixed;
-    public CStatusSO stateOnHit;
+    public bool enableCritical;
+    public List<CStatusSO> stateOnHit;
 
-    public SDamageInfo (float damage, bool isFixed, CStatusSO stateOnHit)
+    public SDamageInfo (float damage, bool isFixed, bool enableCritical, List<CStatusSO> stateOnHit)
     {
         this.damage = damage;
         this.isFixed = isFixed;
+        this.enableCritical = enableCritical;
         this.stateOnHit = stateOnHit;
     }
     public SDamageInfo(float damage)
-        : this(damage, false, null) { }
+        : this(damage, false, true, null) { }
     public SDamageInfo(float damage, bool isFixed)
-        : this(damage, isFixed, null) { }
+        : this(damage, isFixed, true, null) { }
+    public SDamageInfo(float damage, bool isFixed, List<CStatusSO> stateOnHit)
+    : this(damage, isFixed, true, stateOnHit) { }
 }
 
 public abstract class CUnit : MonoBehaviour
@@ -44,6 +48,9 @@ public abstract class CUnit : MonoBehaviour
     protected float _attack = 0;
     protected float _defence = 0;
 
+    protected float _critRate = 0.05f;
+    protected float _critDmg = 1.5f;
+
     protected List<CStatus> _statuses;
     #endregion
 
@@ -67,6 +74,16 @@ public abstract class CUnit : MonoBehaviour
     {
         get => _defence;
         // set => _defence = value;
+    }
+
+    public float CriticalRate
+    {
+        get => _critRate;
+    }
+
+    public float CriticalDamage
+    {
+        get => _critDmg;
     }
     #endregion
 
@@ -104,17 +121,36 @@ public abstract class CUnit : MonoBehaviour
         OnHit(attacker, this, damage);
     }
 
-    protected virtual float DamageCalculate(CUnit attacker, CUnit defender, SDamageInfo damage)
+    protected virtual float DamageCalculate(CUnit attacker, CUnit defender, SDamageInfo damage, out bool isCritical)
     {
+        isCritical = false;
+        float finalDamage = damage.damage;
+        if (damage.enableCritical)
+        {
+            if (UnityEngine.Random.value < attacker._critRate)
+            {
+                finalDamage *= attacker._critDmg;
+                isCritical = true;
+            }
+        }
         if (damage.isFixed)
         {   
             return damage.damage;
         }
 
-        float finalDamage = damage.damage;
         finalDamage = finalDamage * (100f / (100f + Mathf.Max(defender.Defence, -99.9f)));
         // TODO: 상태이상을 적용해서 대미지 정리하기
         return finalDamage;
+    }
+
+    protected virtual float DamageCalculate(CUnit attacker, CUnit defender, SDamageInfo damage)
+    {
+        return DamageCalculate(attacker, defender, damage, out bool temp);
+    }
+
+    protected virtual float DamageCalculate(CUnit attacker, SDamageInfo damage, out bool isCritical)
+    {
+        return DamageCalculate(attacker, this, damage, out isCritical);
     }
 
     protected virtual float DamageCalculate(CUnit attacker, SDamageInfo damage)
