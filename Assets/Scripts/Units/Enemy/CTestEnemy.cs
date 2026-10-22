@@ -1,9 +1,12 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
+using Random = UnityEngine.Random;
+
 
 public class CTestEnemy : CEnemy
 {
@@ -22,9 +25,11 @@ public class CTestEnemy : CEnemy
 
     [SerializeField] private float _offsetDir = 1.5f;
     [SerializeField] private float _moveSpeed = 3.0f;
-    [SerializeField] private float _rotateSpeed = 10.0f;
+    [SerializeField] private float _rotateSpeed = 30.0f;
     [SerializeField] private float _sightView = 6.0f;
+    
     [SerializeField] private float _forgetTime = 1.0f;
+    [SerializeField] private float _patrolTime = 2.0f;
 
     [Header("공격 타겟")]
     [SerializeField] private CPlayer _player;
@@ -33,14 +38,17 @@ public class CTestEnemy : CEnemy
 
     [SerializeField] private float _atkRange = 2.0f;
 
-    [SerializeField] float _attackTimer = 0f;
-    [SerializeField] float _forgetTimer = 0f;
+    [SerializeField] float _attackTimer = 0.0f;
+    [SerializeField] float _forgetTimer = 0.0f;
+    [SerializeField] float _patrolTimer = 0.0f;
     
     [SerializeField] private bool _OnTarget = false;
 
     #endregion 
 
     private CPlayer Player => _player;
+
+
 
     private Vector3 _startPos;
     private Rigidbody _rb;
@@ -53,6 +61,7 @@ public class CTestEnemy : CEnemy
 
     private bool _isAttack;
     private bool _isMove;
+    private bool _isPatrol;
     #endregion
 
 
@@ -64,6 +73,7 @@ public class CTestEnemy : CEnemy
         _startPos = transform.position;
         _animator = GetComponent<Animator>();
         _rb = this.GetComponent<Rigidbody>();
+
 
     }
 
@@ -106,10 +116,14 @@ public class CTestEnemy : CEnemy
         float distance = toTarget.magnitude;
 
         _OnTarget = distance <= _sightView ? true : false;
+        _isPatrol = !_OnTarget;
                 
         if(_OnTarget == true)
         {
-            FollowPlayer(toTarget, distance);
+            _isMove = true;
+
+            FollowPlayer(target, distance);
+            
             _forgetTimer = 0.0f;
         }
 
@@ -118,9 +132,10 @@ public class CTestEnemy : CEnemy
             if(_forgetTimer < _forgetTime)
             {
                 _forgetTimer += Time.deltaTime;
-                if (_isMove)
+
+                if (_isMove == true)
                 {
-                    FollowPlayer(toTarget, distance);
+                    FollowPlayer(target, distance);
                 }
             }
 
@@ -128,16 +143,15 @@ public class CTestEnemy : CEnemy
             {
                 _isMove = false;
 
-                transform.position = Vector3.MoveTowards(transform.position, _startPos, (1.5f *_moveSpeed) * Time.deltaTime);
-
+                CLogger.Log("원래 위치로");
+                transform.position = Vector3.MoveTowards(transform.position, _startPos, (1.5f * _moveSpeed) * Time.deltaTime);
+                //EnemyPatrol();
                 // TODO : 필요하면 패트롤 함수 넣어서 움직이게 해도 좋다.
             }
 
         }
 
-
             _animator.SetBool(_hashMove, _isMove);
-
 
     }
 
@@ -155,8 +169,7 @@ public class CTestEnemy : CEnemy
 
             Vector3 targetPos = target - (n_toTarget * _offsetDir);
 
-
-            transform.position = Vector3.MoveTowards(transform.position, target, _moveSpeed * Time.deltaTime);
+            transform.position = Vector3.MoveTowards(transform.position, targetPos, _moveSpeed * Time.deltaTime);
 
         }
 
@@ -173,6 +186,7 @@ public class CTestEnemy : CEnemy
     private void OnAttack()
     {
 
+
         if(_isMove == true)
         {
             return;
@@ -188,6 +202,7 @@ public class CTestEnemy : CEnemy
                 // TODO : TakeDamage 공격로직 추가 예정
                 _animator.SetTrigger(_hashAttack);
 
+
             }
 
         }
@@ -201,7 +216,58 @@ public class CTestEnemy : CEnemy
 
     }
 
+    // 콜라이더를 해서 얻은 정보로 가져올 수 있는 객체의 컴포넌트(CUnit)를 가져온다.
 
+
+
+    private void EnemyPatrol()
+    {
+        if(_OnTarget == false && _isPatrol == true)
+        {
+            float pingpong = Random.Range(-4.0f, 4.0f);
+
+            Vector3 arrival = new Vector3(pingpong, 0f , pingpong);
+
+            if (_patrolTimer > _patrolTime)
+            {
+                CLogger.Log("패트롤 하는 중");
+                transform.position = Vector3.MoveTowards(transform.position, transform.position + arrival, _moveSpeed * Time.deltaTime);
+                _patrolTimer = 0.0f;
+                
+            }
+
+            _patrolTime += Time.deltaTime;
+        }
+
+        else
+        {
+         
+            _isPatrol = true;
+        }
+
+    }
+
+    private void TakeDamage(float damage)
+    {
+    
+        this.GetDamage(damage);
+
+        if(this.HpCurrent <= 0)
+        {
+            this.CallDie();
+        }
+    
+    }
+
+    //private void AttackPlayer(CUnit defender)
+    //{
+    //    if(defender = _player)
+    //    {
+
+    //    }
+
+
+    //}
 
 
 
