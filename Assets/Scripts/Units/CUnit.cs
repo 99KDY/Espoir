@@ -1,28 +1,49 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.Rendering.DebugUI;
 
 public struct SDamageInfo
 {
     public float damage;
     // public CSkill skill;
     public bool isFixed;
+    public ERatioSwitch ratioSwitch;
     public bool enableCritical;
     public List<CStatusSO> stateOnHit;
+
+    public SDamageInfo(float damage, bool isFixed, ERatioSwitch ratioSwitch, bool enableCritical, List<CStatusSO> stateOnHit)
+    {
+        this.damage = damage;
+        this.isFixed = isFixed;
+        this.ratioSwitch = ratioSwitch;
+        this.enableCritical = enableCritical;
+        this.stateOnHit = stateOnHit;
+    }
 
     public SDamageInfo (float damage, bool isFixed, bool enableCritical, List<CStatusSO> stateOnHit)
     {
         this.damage = damage;
         this.isFixed = isFixed;
+        this.ratioSwitch = ERatioSwitch.Constant;
         this.enableCritical = enableCritical;
         this.stateOnHit = stateOnHit;
     }
-    public SDamageInfo(float damage)
-        : this(damage, false, true, null) { }
-    public SDamageInfo(float damage, bool isFixed)
-        : this(damage, isFixed, true, null) { }
+
+    public SDamageInfo(float damage, ERatioSwitch ratioSwitch = ERatioSwitch.Constant)
+        : this(damage, false, ratioSwitch, true, null) { }
+    public SDamageInfo(float damage, bool isFixed, ERatioSwitch ratioSwitch = ERatioSwitch.Constant)
+        : this(damage, isFixed, ratioSwitch, true, null) { }
     public SDamageInfo(float damage, bool isFixed, List<CStatusSO> stateOnHit)
     : this(damage, isFixed, true, stateOnHit) { }
+}
+
+public enum ERatioSwitch
+{
+    Constant,   // 고정치
+    ByMax,      // 최대치 비례
+    ByCurrent,  // 현재치 비례
+    ByLose      // 잃은수치 비례
 }
 
 public abstract class CUnit : MonoBehaviour
@@ -85,6 +106,12 @@ public abstract class CUnit : MonoBehaviour
     {
         get => _critDmg;
     }
+
+    public List<CStatus> Status
+    {
+        get => _statuses;
+        set => _statuses = value;
+    }
     #endregion
 
     protected virtual void Awake()
@@ -124,7 +151,25 @@ public abstract class CUnit : MonoBehaviour
     protected virtual float DamageCalculate(CUnit attacker, CUnit defender, SDamageInfo damage, out bool isCritical)
     {
         isCritical = false;
-        float finalDamage = damage.damage;
+        float finalDamage;
+        switch (damage.ratioSwitch)
+        {
+            case ERatioSwitch.Constant:
+                finalDamage = damage.damage;
+                break;
+            case ERatioSwitch.ByMax:
+                finalDamage = defender.HpMax * damage.damage;
+                break;
+            case ERatioSwitch.ByCurrent:
+                finalDamage = defender.HpCurrent * damage.damage;
+                break;
+            case ERatioSwitch.ByLose:
+                finalDamage = (defender.HpMax - defender.HpCurrent) * damage.damage;
+                break;
+            default:
+                finalDamage = damage.damage;
+                break;
+        }
         if (damage.enableCritical)
         {
             if (UnityEngine.Random.value < attacker._critRate)
@@ -163,9 +208,24 @@ public abstract class CUnit : MonoBehaviour
 
     }
 
-    public virtual void GetDamage(float damage)
+    public virtual void GetDamage(float value, ERatioSwitch ratioSwitch = ERatioSwitch.Constant)
     {
-        _hpCurrent -= damage;
+        switch (ratioSwitch)
+        {
+            case ERatioSwitch.Constant:
+                _hpCurrent -= value;
+                break;
+            case ERatioSwitch.ByMax:
+                _hpCurrent -= (_hpMax * value);
+                break;
+            case ERatioSwitch.ByCurrent:
+                _hpCurrent -= (_hpCurrent * value);
+                break;
+            case ERatioSwitch.ByLose:
+                _hpCurrent -= ((_hpMax - _hpCurrent) * value);
+                break;
+        }
+        _hpCurrent = Mathf.Min(_hpCurrent, _hpMax);
         _hpCurrent = Mathf.Max(_hpCurrent, 0f);
 
         if (_hpCurrent <= 0f)
@@ -179,10 +239,25 @@ public abstract class CUnit : MonoBehaviour
 
     }
 
-    public virtual void GetHeal(float heal)
+    public virtual void GetHeal(float value, ERatioSwitch ratioSwitch = ERatioSwitch.Constant)
     {
-        _hpCurrent += heal;
+        switch (ratioSwitch)
+        {
+            case ERatioSwitch.Constant:
+                _hpCurrent += value;
+                break;
+            case ERatioSwitch.ByMax:
+                _hpCurrent += (_hpMax * value);
+                break;
+            case ERatioSwitch.ByCurrent:
+                _hpCurrent += (_hpCurrent * value);
+                break;
+            case ERatioSwitch.ByLose:
+                _hpCurrent += ((_hpMax - _hpCurrent) * value);
+                break;
+        }
         _hpCurrent = Mathf.Min(_hpCurrent, _hpMax);
+        _hpCurrent = Mathf.Max(_hpCurrent, 0f);
 
         if (_hpCurrent <= 0f)
         {
