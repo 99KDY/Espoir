@@ -15,6 +15,7 @@ public enum EStatusStack
 public enum EStatusTrigger
 {
     None = 0,           // 자체적으로 효과 없는 경우
+    // 트리거 플래그
     OnEquip = 1 << 0,   // 장비로서 적용되는 경우
     OnApply = 1 << 1,   // 적용될 때 적용되는 효과가 있는 경우
     OnRemove = 1 << 2,  // 사라질 때 적용되는 효과가 있는 경우 (Apply한거 있으면 여기서 해제해야함!
@@ -22,6 +23,8 @@ public enum EStatusTrigger
     OnDefence = 1 << 4, // 방어할 때 적용되는 효과가 있는 경우
     OnDelta = 1 << 5,   // Time.deltaTime마다 적용되는 효과가 있는 경우
     OnBattleEnd = 1 << 6, // 전투가 끝날 때 적용되는 효과가 있는 경우 (그냥 상태이상 해제용)
+    // 효과 플래그
+    IsStun = 1 << 16    // 기절 계열
 }
 
 public enum EStatusAction
@@ -54,5 +57,10 @@ public struct SStatusAction
 
 public class CStatus
 {
+    private EStatusTrigger _trigger;
 
+    public EStatusTrigger Trigger
+    {
+        get { return _trigger; }
+    }
 }

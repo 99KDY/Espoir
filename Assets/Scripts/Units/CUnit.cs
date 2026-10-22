@@ -72,6 +72,8 @@ public abstract class CUnit : MonoBehaviour
     protected float _critRate = 0.05f;
     protected float _critDmg = 1.5f;
 
+    protected bool _isStunned = false;
+
     protected List<CStatus> _statuses;
     #endregion
 
@@ -81,6 +83,7 @@ public abstract class CUnit : MonoBehaviour
         get => _hpCurrent;
         // set => _hpCurrent = value;
     }
+
     public float HpMax
     {
         get => _hpMax;
@@ -105,6 +108,11 @@ public abstract class CUnit : MonoBehaviour
     public float CriticalDamage
     {
         get => _critDmg;
+    }
+
+    public bool IsStunned
+    {
+        get => _isStunned;
     }
 
     public List<CStatus> Status
@@ -263,5 +271,20 @@ public abstract class CUnit : MonoBehaviour
         {
             Die();
         }
+    }
+
+    public void GetStunned()
+    {
+        if (!_isStunned) _isStunned = true; 
+    }
+
+    public void ReleaseStunned(CStatus status)
+    {
+        int count = 0;
+        for (int i = 0; i < _statuses.Count; i++)
+        {
+            if (_statuses[i].Trigger.HasFlag(EStatusTrigger.IsStun)) count++;
+        }
+        if (count <= 1) _isStunned = false;
     }
 }
