@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: DesertRockLowPoly
+  m_Shader: {fileID: 4800000, guid: 41a298b9b4a57ce4a94b7ba7e393a435, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs: []
+    m_Ints: []
+    m_Floats:
+    - _AmbientStrength: 0.45
+    - _Bands: 2
+    - _Blotch: 0
+    - _CastShadowStrength: 0
+    - _Cavity: 0.3
+    - _EdgeHi: 0
+    - _FaceJit: 0.16
+    - _Flat: 1
+    - _FogFar: 820
+    - _FogNear: 200
+    - _Fres: 0.18
+    - _GlowBaseRock: 0
+    - _GoldGlowRock: 0.5
+    - _Grad: 0.85
+    - _GradTop: 20
+    - _MapHeight: -5
+    - _RimAmount: 0.8
+    - _ShadeMix: 0
+    - _ShadowAmount: 1
+    - _Soft: 0.06
+    - _SpecAmount: 0.5
+    - _SpecHard: 0.5
+    - _SpecPow: 64
+    - _SpecSmooth: 0
+    - _Thresh: 0.5
+    m_Colors:
+    - _Ambient: {r: 0.6274509, g: 0.69019604, b: 0.8784313, a: 1}
+    - _Cliff: {r: 0.88627446, g: 0.7843137, b: 0.6588235, a: 1}
+    - _Cliff2: {r: 0.79999995, g: 0.6823529, b: 0.5568627, a: 1}
+    - _Edge: {r: 0.9647059, g: 0.88627446, b: 0.7529411, a: 1}
+    - _FogColor: {r: 0.917647, g: 0.8549019, b: 0.79999995, a: 1}
+    - _GlintColor: {r: 1, g: 0.9411764, b: 0.7215686, a: 1}
+    - _LightTint: {r: 1, g: 0.90196073, b: 0.77647054, a: 1}
+    - _Shade: {r: 0.5411764, g: 0.47843134, b: 0.6274509, a: 1}
+    - _ShadowTint: {r: 0.60392153, g: 0.5960784, b: 0.79999995, a: 1}
+    - _SkyHi: {r: 0.6235293, g: 0.7215686, b: 0.88627446, a: 1}
+    - _Spec: {r: 1, g: 0.95686275, b: 0.88627446, a: 1}
+    - _Talus: {r: 0.862745, g: 0.7215686, b: 0.572549, a: 1}
+    - _Talus2: {r: 0.7843137, g: 0.63137245, b: 0.48627448, a: 1}
+    - _Upper: {r: 0.92549014, g: 0.8392156, b: 0.72941166, a: 1}
+    - _Upper2: {r: 0.8392156, g: 0.73725486, b: 0.61176467, a: 1}
+  m_BuildTextureStacks: []

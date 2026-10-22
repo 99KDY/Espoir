@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: DesertGlassClear
+  m_Shader: {fileID: 4800000, guid: 95ddf28d3caa53447aea4396b32df791, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 0
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses:
+  - GRABPASS
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs: []
+    m_Ints: []
+    m_Floats:
+    - _FogFar: 360
+    - _FogNear: 100
+    m_Colors:
+    - _FogColor: {r: 0.917647, g: 0.8549019, b: 0.79999995, a: 1}
+    - _LightTint: {r: 1, g: 0.90196073, b: 0.77647054, a: 1}
+    - _SkyHorizon: {r: 0.98431367, g: 0.8784313, b: 0.79999995, a: 1}
+    - _SkyZenith: {r: 0.47843134, g: 0.65098035, b: 0.862745, a: 1}
+    - _Tint: {r: 0.87450975, g: 0.9490196, b: 0.9333333, a: 1}
+  m_BuildTextureStacks: []

@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+[RequireComponent(typeof(CharacterController))]
 public class CPlayer : CUnit
 {
     [Serializable]
@@ -27,8 +28,10 @@ public class CPlayer : CUnit
     [Header("이동 설정")]
     [SerializeField] private float _moveSpeed = 5f;
     [SerializeField] private float _rotationSpeed = 720f;
+    [SerializeField, Min(0f)] private float _groundSnapDistance = 0.6f;
 
     [SerializeField] private Camera _mainCamera;
+    [SerializeField] private CTestCamera _testCamera;
     [SerializeField] private LayerMask _groundLayer;
 
     [Header("대쉬 설정")]
@@ -60,6 +63,8 @@ public class CPlayer : CUnit
     private int[] _attackStateHashes;
     private int[] _recoverStateHashes;
 
+    private CharacterController _characterController;
+    private float _verticalSpeed;
     private Vector3 _targetPosition;
     private bool _isAttacking;
     private bool _hasEnteredAttack;
@@ -73,7 +78,8 @@ public class CPlayer : CUnit
     private float _animatorSpeed;
     private CancellationTokenSource _hitStopCancellation;
 
-    private Vector3 _dashTargetPosition;
+    private Vector3 _dashDirection;
+    private float _dashTimeRemaining;
     private float _dashCooldownRemaining;
     private bool _isDashing;
     private bool _hasEnteredDash;
@@ -107,6 +113,7 @@ public class CPlayer : CUnit
 
     private void Start()
     {
+        _characterController = GetComponent<CharacterController>();
         _targetPosition = transform.position;
 
         if (!HasValidAttackSettings())
@@ -171,6 +178,7 @@ public class CPlayer : CUnit
 
     private void Update()
     {
+        ApplyGravity();
         _dashCooldownRemaining = Mathf.Max(_dashCooldownRemaining - Time.deltaTime, 0f);
 
         if (_isAttacking)
@@ -192,18 +200,23 @@ public class CPlayer : CUnit
             return;
         }
 
-        if (_attackInput.action.WasPressedThisFrame())
+        if (!IsCameraInputBlocked() && _attackInput.action.WasPressedThisFrame())
         {
             StartAttack(CanContinueCombo() ? _COMBO_HASH : _ATTACK_HASH);
             return;
         }
 
-        if (_moveClick.action.WasPressedThisFrame())
+        if (!IsCameraInputBlocked() && _moveClick.action.IsPressed())
         {
             SetMoveTarget();
         }
 
         Move();
+    }
+
+    private bool IsCameraInputBlocked()
+    {
+        return _testCamera != null && _testCamera.IsInputBlocked;
     }
 
     private void StartAttack(int triggerHash)
@@ -251,7 +264,7 @@ public class CPlayer : CUnit
             _hasQueuedCombo = false;
         }
 
-        if (_attackInput.action.WasPressedThisFrame() && comboIndex >= 0 &&
+        if (!IsCameraInputBlocked() && _attackInput.action.WasPressedThisFrame() && comboIndex >= 0 &&
             comboIndex < _attackStateHashes.Length - 1 && !_animator.IsInTransition(0))
         {
             _queuedAttackDirection = GetAttackDirection();
@@ -273,7 +286,7 @@ public class CPlayer : CUnit
             float moveProgress = Mathf.InverseLerp(step.moveStart, step.moveEnd, currentState.normalizedTime);
             float distance = Mathf.Max(moveProgress - _attackMoveProgress, 0f) * step.moveDistance;
 
-            transform.position += transform.forward * distance;
+            MoveOnGround(transform.forward * distance);
             _attackMoveProgress = moveProgress;
             _targetPosition = transform.position;
 
@@ -376,8 +389,8 @@ public class CPlayer : CUnit
         _dashCooldownRemaining = _dashCooldown;
         _targetPosition = transform.position;
 
-        _dashTargetPosition =
-            transform.position + transform.forward * _dashDistance;
+        _dashDirection = transform.forward;
+        _dashTimeRemaining = _dashDuration;
 
         _animator.SetBool(_IS_MOVING_HASH, false);
         _animator.SetTrigger(_DASH_HASH);
@@ -387,11 +400,9 @@ public class CPlayer : CUnit
     {
         float dashSpeed = _dashDistance / _dashDuration;
 
-        transform.position = Vector3.MoveTowards(
-            transform.position,
-            _dashTargetPosition,
-            dashSpeed * Time.deltaTime
-        );
+        float moveTime = Mathf.Min(Time.deltaTime, _dashTimeRemaining);
+        MoveOnGround(_dashDirection * (dashSpeed * moveTime));
+        _dashTimeRemaining = Mathf.Max(_dashTimeRemaining - Time.deltaTime, 0f);
 
         AnimatorStateInfo currentState = _animator.GetCurrentAnimatorStateInfo(0);
 
@@ -402,7 +413,7 @@ public class CPlayer : CUnit
 
         else if (_hasEnteredDash &&
                  !_animator.IsInTransition(0) &&
-                 transform.position == _dashTargetPosition)
+                 _dashTimeRemaining <= 0f)
         {
             _isDashing = false;
             _targetPosition = transform.position;
@@ -414,7 +425,6 @@ public class CPlayer : CUnit
         if (TryGetPointerGroundPosition(out Vector3 position))
         {
             _targetPosition = position;
-            _targetPosition.y = transform.position.y;
         }
     }
 
@@ -433,18 +443,68 @@ public class CPlayer : CUnit
         return false;
     }
 
+    private void ApplyGravity()
+    {
+        _verticalSpeed += Physics.gravity.y * Time.deltaTime;
+        CollisionFlags collision = _characterController.Move(Vector3.up * (_verticalSpeed * Time.deltaTime));
+
+        if ((collision & CollisionFlags.Below) != 0 && _verticalSpeed < 0f)
+        {
+            _verticalSpeed = 0f;
+        }
+    }
+
+    private void MoveOnGround(Vector3 motion)
+    {
+        int moveCount = Mathf.Max(1, Mathf.CeilToInt(motion.magnitude / _characterController.radius));
+        Vector3 moveStep = motion / moveCount;
+        float slopeAngle = _characterController.slopeLimit * Mathf.Deg2Rad;
+        float slope = Mathf.Tan(slopeAngle);
+        float minGroundNormal = Mathf.Cos(slopeAngle);
+
+        for (int i = 0; i < moveCount; i++)
+        {
+            bool wasGrounded = _characterController.isGrounded;
+            Vector3 previousPosition = transform.position;
+            _characterController.Move(moveStep);
+
+            if (!wasGrounded || _verticalSpeed > 0f) continue;
+
+            Vector3 moveDirection = transform.position - previousPosition;
+            moveDirection.y = 0f;
+            float snapDistance = Mathf.Min(moveDirection.magnitude * slope, _groundSnapDistance);
+
+            if (snapDistance <= 0f) continue;
+
+            Bounds bounds = _characterController.bounds;
+            float groundDistance = bounds.extents.y + _characterController.skinWidth;
+            float rayDistance = groundDistance + _groundSnapDistance;
+
+            if (!Physics.Raycast(bounds.center, Vector3.down, out RaycastHit hit,
+                rayDistance, _groundLayer, QueryTriggerInteraction.Ignore))
+            {
+                continue;
+            }
+
+            if (Vector3.Dot(hit.normal, Vector3.up) < minGroundNormal) continue;
+
+            float distance = Mathf.Clamp(hit.distance - groundDistance, 0f, snapDistance);
+            _characterController.Move(Vector3.down * distance);
+        }
+    }
+
     private void Move()
     {
         Vector3 previousPosition = transform.position;
 
-        transform.position = Vector3.MoveTowards(
-            previousPosition,
-            _targetPosition,
-            _moveSpeed * Time.deltaTime
-        );
+        Vector3 targetDirection = _targetPosition - previousPosition;
+        targetDirection.y = 0f;
+
+        MoveOnGround(Vector3.ClampMagnitude(targetDirection, _moveSpeed * Time.deltaTime));
 
         Vector3 moveDirection = transform.position - previousPosition;
-        bool isMoving = transform.position != previousPosition;
+        moveDirection.y = 0f;
+        bool isMoving = moveDirection != Vector3.zero;
 
         if (isMoving)
         {

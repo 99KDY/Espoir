@@ -6,10 +6,12 @@ Shader "Hidden/Espoir/PlayerToonPost"
     TEXTURE2D_SAMPLER2D(_MainTex, sampler_MainTex);
     TEXTURE2D_SAMPLER2D(_CameraDepthTexture, sampler_CameraDepthTexture);
     float4 _MainTex_TexelSize;
-    float4 _Edge;       // x 세기, y 두께(px), z 기준 거리(m), w 1px 시야각
+    float4 _Edge;       // x 세기, y 두께(px), z 판정 기준, w 1px 시야각
     float4 _EdgeColor;  // rgb 선 색, a 장면 색 사용 정도
     float4 _Grade;      // x 노출, y 채도, z 대비, w 비네팅
     float _EdgeDark;
+    float _SeparateGrading;
+    float _EdgeFadeDistance;
 
     float ViewDepth(float2 uv)
     {
@@ -41,8 +43,17 @@ Shader "Hidden/Espoir/PlayerToonPost"
             float e = smoothstep(thr, thr * 1.6, d0 - best) * _Edge.x;
             float3 nearCol = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, bestUv).rgb;
             float3 lineCol = lerp(_EdgeColor.rgb, nearCol * _EdgeDark, _EdgeColor.a);
+            if (_SeparateGrading > 0.5)
+            {
+                thr = _Edge.z * d0 + 0.02;
+                float fade = 1.0 - smoothstep(_EdgeFadeDistance * 0.6, _EdgeFadeDistance, d0);
+                e = smoothstep(thr, thr * 1.8, d0 - best) * _Edge.x * fade;
+                lineCol = lerp(_EdgeColor.rgb, min(col, nearCol) * _EdgeDark, _EdgeColor.a);
+            }
             col = lerp(col, lineCol, e);
         }
+
+        if (_SeparateGrading > 0.5) return float4(col, 1.0);
 
         // 선형 공간에서 노출·채도를 조정하고 sRGB 공간에서 대비·비네팅을 적용한다.
         col *= _Grade.x;

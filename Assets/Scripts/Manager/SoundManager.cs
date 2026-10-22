@@ -7,6 +7,7 @@ using UnityEngine.UI;
 public enum EBackgroundSound
 {
     None,
+    OasisOfGold,
     // 여기서부터 배경음 리스트 만들기
 }
 
