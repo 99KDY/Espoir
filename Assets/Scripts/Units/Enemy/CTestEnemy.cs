@@ -43,6 +43,9 @@ public class CTestEnemy : CEnemy
     [SerializeField] float _patrolTimer = 0.0f;
     
     [SerializeField] private bool _OnTarget = false;
+    [SerializeField] private bool _sightCheck = false;
+    [SerializeField] private LayerMask _obtacleMask;
+    [SerializeField] private Collider[] _hitCollider = new Collider[2];
 
     #endregion 
 
@@ -106,8 +109,9 @@ public class CTestEnemy : CEnemy
 
 
         Vector3 target = new Vector3(_target.position.x , 0f, _target.position.z);
-        
-        Collider[] hit = Physics.OverlapSphere(transform.position, _sightView, _tartgetMask);
+
+
+
 
         transform.rotation = Quaternion.LookRotation(target, Vector3.up);
 
@@ -200,6 +204,7 @@ public class CTestEnemy : CEnemy
             if (_isAttack)
             {
                 // TODO : TakeDamage 공격로직 추가 예정
+                HitPlayer(this);
                 _animator.SetTrigger(_hashAttack);
 
 
@@ -216,7 +221,91 @@ public class CTestEnemy : CEnemy
 
     }
 
-    // 콜라이더를 해서 얻은 정보로 가져올 수 있는 객체의 컴포넌트(CUnit)를 가져온다.
+
+    private int FindPlayer()
+    {
+        int hit = Physics.OverlapSphereNonAlloc
+                    (
+                        transform.position,
+                        _sightView,
+                        _hitCollider,
+                        _tartgetMask
+                    );
+
+
+
+        for (int i = 0; i < _hitCollider.Length; i++)
+        {
+            if (_hitCollider[i] == null)
+            {
+                continue;
+            }
+
+
+            Vector3 toPlayer = _hitCollider[i].transform.position - transform.position;
+            float toPlayerDis = toPlayer.magnitude;
+
+            if (_sightCheck)
+            {
+                Vector3 originPos = transform.position;
+                Vector3 dir = toPlayer.normalized;
+
+                float realDis = Mathf.Sqrt(toPlayerDis);
+
+                if (Physics.Raycast(originPos, dir, realDis, _obtacleMask))
+                {
+                    continue;
+                }
+
+            }
+
+            _target = _hitCollider[i].transform;
+
+            break; // 단일 타겟 추적
+        }
+
+        return hit;
+        
+    }
+
+    private void HitPlayer(CUnit attacker)
+    {
+        int hit = FindPlayer();
+        
+        for(int  i = 0; i < hit; i++)
+        {
+
+            if (_hitCollider[i] == null)
+            {
+                continue;
+            }
+
+            CUnit player = _hitCollider[i].GetComponent<CUnit>();
+
+            if(player == null)
+            {
+                continue;
+            }
+
+            if(player.HpCurrent <= 0f)
+            {
+                continue;
+            }
+
+            SDamageInfo damagePlayer = new SDamageInfo(attacker.Attack);
+            
+            float lastHP = player.HpCurrent;
+            
+            player.OnHit(attacker, player, damagePlayer);
+            
+            CLogger.Log($"{player.name}의 현재 체력 : {player.HpCurrent}");
+
+        }
+
+ 
+
+    }
+
 
 
 
@@ -259,15 +348,15 @@ public class CTestEnemy : CEnemy
     
     }
 
-    //private void AttackPlayer(CUnit defender)
-    //{
-    //    if(defender = _player)
-    //    {
+    private void AttackPlayer(CUnit defender)
+    {
+        if (defender = _player)
+        {
 
-    //    }
+        }
 
 
-    //}
+    }
 
 
 
