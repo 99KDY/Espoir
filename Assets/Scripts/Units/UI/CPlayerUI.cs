@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -9,7 +9,7 @@ using UnityEngine.InputSystem;
 
 public class CPlayerUI : MonoBehaviour
 {
-    #region ÀÎ½ºÆÑÅÍ
+    #region ì¸ìŠ¤íŒ©í„°
     [SerializeField] private CPlayer _player;
     
     [SerializeField] private Image _hpFill = null;
@@ -19,7 +19,7 @@ public class CPlayerUI : MonoBehaviour
 
     #endregion
 
-    #region ³»ºÎº¯¼ö
+    #region ë‚´ë¶€ë³€ìˆ˜
 
     private float _currentHp;
     private float _maxHp;
@@ -30,7 +30,7 @@ public class CPlayerUI : MonoBehaviour
 
 
 
-    #region ÇÁ·ÎÆÛÆ¼
+    #region í”„ë¡œí¼í‹°
     public float CurrentHP => _currentHp;
     // public float CurrentMp => 
     public float MaxHP => _maxHp;
@@ -43,7 +43,7 @@ public class CPlayerUI : MonoBehaviour
     {
         if(_player == null)
         {
-            CLogger.Warn("CPlayerUIÀÇ ÀÎ½ºÆÑÅÍ¿¡ ÇÃ·¹ÀÌ¾î ¿¬°áÀÌ ¾ÈµÇ¾î ÀÖÀ½");
+            CLogger.Warn("CPlayerUIì˜ ì¸ìŠ¤íŒ©í„°ì— í”Œë ˆì´ì–´ ì—°ê²°ì´ ì•ˆë˜ì–´ ìžˆìŒ");
             return;
         }
 
@@ -69,6 +69,11 @@ public class CPlayerUI : MonoBehaviour
 
     }
 
+    private void Update()
+    {
+        UpdateHp();
+    }
+
     public void UpdateHp()
     {
         if(_hpFill == null)
@@ -76,9 +81,12 @@ public class CPlayerUI : MonoBehaviour
             return;
         }
 
+        _maxHp = _player.HpMax;
+        _currentHp = _player.HpCurrent;
+
         float ratio = _maxHp > 0 ? _currentHp / _maxHp : 0f;
 
-        OnSync?.Invoke();
+        // OnSync?.Invoke();
 
         if (_currentHp <= 0f)
         {
@@ -116,7 +124,7 @@ public class CPlayerUI : MonoBehaviour
 
     public void ResetHP()
     {
-        // TODO : ¸¶À»À» º¹±ÍÇß°Å³ª, ·¹ÀÌµå Ã³À½½Ãµµ or Àç½Ãµµ ‹š¿¡ ÀüÃ¼ È¸º¹
+        // TODO : ë§ˆì„ì„ ë³µê·€í–ˆê±°ë‚˜, ë ˆì´ë“œ ì²˜ìŒì‹œë„ or ìž¬ì‹œë„ ë–„ì— ì „ì²´ íšŒë³µ
         _currentHp = _maxHp;
 
         UpdateHp();
@@ -124,7 +132,7 @@ public class CPlayerUI : MonoBehaviour
 
     //public void ResetMP()
     //{
-    //    // TODO : ¸¶À»À» º¹±ÍÇß°Å³ª, ·¹ÀÌµå Ã³À½½Ãµµ or Àç½Ãµµ ‹š¿¡ ÀüÃ¼ È¸º¹
+    //    // TODO : ë§ˆì„ì„ ë³µê·€í–ˆê±°ë‚˜, ë ˆì´ë“œ ì²˜ìŒì‹œë„ or ìž¬ì‹œë„ ë–„ì— ì „ì²´ íšŒë³µ
     //    _currentMp = _maxMP;
 
     //    UpdateMp();
@@ -144,7 +152,7 @@ public class CPlayerUI : MonoBehaviour
             _damageText.text = $" - {damage}";
         }
 
-        CLogger.Log($" ÇöÀç Ã¤·Â : {_currentHp} / ÀüÃ¼ Ã¼·Â : {_maxHp} / ¹ÞÀº ÇÇÇØ : {damage}");
+        CLogger.Log($" í˜„ìž¬ ì±„ë ¥ : {_currentHp} / ì „ì²´ ì²´ë ¥ : {_maxHp} / ë°›ì€ í”¼í•´ : {damage}");
 
 
     }

@@ -8,6 +8,7 @@ public class CPlayerAttack : MonoBehaviour
     [SerializeField] private Vector3 _attackSize = Vector3.one;
     [SerializeField] private LayerMask _targetLayer;
 
+    private SoundManager _soundManager;
     private const int _INITIAL_HIT_CAPACITY = 5;
 
     private Collider[] _hitColliders = new Collider[_INITIAL_HIT_CAPACITY];
@@ -19,6 +20,11 @@ public class CPlayerAttack : MonoBehaviour
         if (_targetLayer.value == 0)
         {
             CLogger.Warn($"{name}: 공격 대상 레이어가 설정되지 않았습니다.");
+        }
+        _soundManager = FindFirstObjectByType<SoundManager>();
+        if (_soundManager == null)
+        {
+            CLogger.Warn($"사운드매니저 찾기 실패");
         }
     }
 
@@ -55,6 +61,10 @@ public class CPlayerAttack : MonoBehaviour
             SDamageInfo damageInfo = new SDamageInfo(attacker.Attack);
             float previousHp = target.HpCurrent;
             target.OnHit(attacker, target, damageInfo);
+            if (_soundManager != null)
+            {
+                _soundManager.PlaySE(EEffectSound.MonsterHit);
+            }
             hasHit |= target.HpCurrent < previousHp;
 
             CLogger.Log($"{target.name} 현재 체력: {target.HpCurrent}");

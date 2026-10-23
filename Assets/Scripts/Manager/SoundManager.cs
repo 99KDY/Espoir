@@ -14,7 +14,10 @@ public enum EBackgroundSound
 public enum EEffectSound
 {
     None,
-    // 여기서부터 효과음 리스트 만들기
+    PlayerHit,
+    MonsterHit,
+    PlayerSlash,
+    MonsterSlash,
 }
 
 [Serializable]
@@ -146,8 +149,8 @@ public class SoundManager : MonoBehaviour
 
     private void SetVolume()
     {
-        float bgmVolume = _bgmSlider.value * _fadeFactor;
-        float seVolume = _seSlider.value;
+        float bgmVolume = (_bgmSlider == null) ? _fadeFactor : _bgmSlider.value * _fadeFactor;
+        float seVolume = (_seSlider == null) ? 1f : _seSlider.value;
 
         if (bgmVolume <= 0.0001f)
         {

@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -28,6 +28,11 @@ public class CEnemyUI : MonoBehaviour
         _maxEnemyHP = _enemy.HpMax;
     }
 
+    private void Update()
+    {
+        UpdateEnemyHP();
+    }
+
 
     public void UpdateEnemyHP()
     {
@@ -36,13 +41,15 @@ public class CEnemyUI : MonoBehaviour
             return;
         }
 
+        _currentEnemyHp = _enemy.HpCurrent;
+        _maxEnemyHP = _enemy.HpMax;
 
         float ratio = _maxEnemyHP > 0 ? _currentEnemyHp / _maxEnemyHP : 0f;
 
-        OnEnemySync?.Invoke();
+        // OnEnemySync?.Invoke();
 
         _enemyHpFill.fillAmount = ratio;
-
+        _damageText.text = _currentEnemyHp.ToString();
     }
 
     public void ResetEnemyHP()
@@ -51,7 +58,7 @@ public class CEnemyUI : MonoBehaviour
 
         UpdateEnemyHP();
 
-        CLogger.Log($" ÇöÀç Ã¼·Â : {_currentEnemyHp} / ÃÖ´ë ÃÖ·Â : {_maxEnemyHP}");
+        CLogger.Log($" í˜„ì¬ ì²´ë ¥ : {_currentEnemyHp} / ìµœëŒ€ ìµœë ¥ : {_maxEnemyHP}");
 
     }
 
@@ -69,7 +76,7 @@ public class CEnemyUI : MonoBehaviour
             _damageText.text = $"{damage}";
         }
 
-        CLogger.Log($" ¹ŞÀº ÇÇÇØ : {damage} / ÇöÀç Ã¼·Â : {_currentEnemyHp} / ÃÖ´ë Ã¼·Â : {_maxEnemyHP}  ");
+        CLogger.Log($" ë°›ì€ í”¼í•´ : {damage} / í˜„ì¬ ì²´ë ¥ : {_currentEnemyHp} / ìµœëŒ€ ì²´ë ¥ : {_maxEnemyHP}  ");
 
     }
 
