@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UIElements;
 using Random = UnityEngine.Random;
 
 
@@ -33,8 +34,6 @@ public class CTestEnemy : CEnemy
 
     [Header("공격 타겟")]
     [SerializeField] private CPlayer _player;
-    [SerializeField] private Transform _target;
-
 
     [SerializeField] private float _atkRange = 2.0f;
 
@@ -51,8 +50,8 @@ public class CTestEnemy : CEnemy
 
     private CPlayer Player => _player;
 
-
-
+    private SoundManager _soundManager;
+    private Transform _target;
     private Vector3 _startPos;
     private Rigidbody _rb;
 
@@ -61,10 +60,12 @@ public class CTestEnemy : CEnemy
     
     private int _hashMove = Animator.StringToHash("bMove");
     private int _hashAttack = Animator.StringToHash("tAttack");
+    private int _hashDie = Animator.StringToHash("bDie");
 
     private bool _isAttack;
     private bool _isMove;
     private bool _isPatrol;
+    private bool _isDie;
     #endregion
 
 
@@ -72,16 +73,37 @@ public class CTestEnemy : CEnemy
     protected override void Awake()
     {
         base.Awake();
+        if (_player == null)
+        {
+            _player = FindFirstObjectByType<CPlayer>();
+        }
+        if (_player == null)
+        {
+            CLogger.Error("플레이어 찾을 수 없음");
+        }
         _target = Player.transform;
         _startPos = transform.position;
         _animator = GetComponent<Animator>();
         _rb = this.GetComponent<Rigidbody>();
-
-
+        _soundManager = FindFirstObjectByType<SoundManager>();
+        if (_soundManager == null)
+        {
+            CLogger.Warn($"사운드매니저 찾기 실패");
+        }
     }
 
     protected override void Update()
     {
+        if (_hpCurrent <= 0)
+        {
+            _isDie = true;
+            _animator.SetBool(_hashDie, true);
+            Destroy(this.gameObject, 3f);
+        }
+        if (_isDie)
+        {
+            return;
+        }
         // TODO : 플레이어를 쫓아가기
         OnTargetMove();
 
@@ -147,7 +169,20 @@ public class CTestEnemy : CEnemy
             {
                 _isMove = false;
 
-                CLogger.Log("원래 위치로");
+                // CLogger.Log("원래 위치로");
+                Vector3 direction = _startPos - transform.position;
+                direction.y = 0f;
+
+                if (direction.sqrMagnitude > 0.001f)
+                {
+                    Quaternion targetRotation = Quaternion.LookRotation(direction);
+                    transform.rotation = Quaternion.RotateTowards(
+                        transform.rotation,
+                        targetRotation,
+                        3600f * Time.deltaTime
+                    );
+                }
+
                 transform.position = Vector3.MoveTowards(transform.position, _startPos, (1.5f * _moveSpeed) * Time.deltaTime);
                 //EnemyPatrol();
                 // TODO : 필요하면 패트롤 함수 넣어서 움직이게 해도 좋다.
@@ -162,7 +197,18 @@ public class CTestEnemy : CEnemy
 
     private void FollowPlayer(Vector3 target, float dis)
     {
-       
+        Vector3 direction = target - transform.position;
+        direction.y = 0f;
+
+        if (direction.sqrMagnitude > 0.001f)
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(direction);
+            transform.rotation = Quaternion.RotateTowards(
+                transform.rotation,
+                targetRotation,
+                3600f * Time.deltaTime
+            );
+        }
 
         if (dis > _offsetDir)
         {
@@ -206,6 +252,10 @@ public class CTestEnemy : CEnemy
                 // TODO : TakeDamage 공격로직 추가 예정
                 HitPlayer(this);
                 _animator.SetTrigger(_hashAttack);
+                if (_soundManager != null)
+                {
+                    _soundManager.PlaySE(EEffectSound.MonsterSlash);
+                }
 
 
             }
@@ -297,7 +347,10 @@ public class CTestEnemy : CEnemy
             float lastHP = player.HpCurrent;
             
             player.OnHit(attacker, player, damagePlayer);
-            
+            if (_soundManager != null)
+            {
+                _soundManager.PlaySE(EEffectSound.PlayerHit);
+            }
             CLogger.Log($"{player.name}의 현재 체력 : {player.HpCurrent}");
 
         }
