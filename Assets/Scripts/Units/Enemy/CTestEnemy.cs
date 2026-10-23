@@ -135,7 +135,7 @@ public class CTestEnemy : CEnemy
 
 
 
-        transform.rotation = Quaternion.LookRotation(target, Vector3.up);
+        // transform.rotation = Quaternion.LookRotation(target, Vector3.up);
 
         Vector3 toTarget = target - transform.position;
 

@@ -95,7 +95,7 @@ public class CPlayerUI : MonoBehaviour
 
         if(_hpText != null)
         {
-            _hpText.text = $"{_currentHp} / {_maxHp}";
+            _hpText.text = $"{_currentHp:F0} / {_maxHp:F0}";
         }
 
         _hpFill.fillAmount = ratio;
