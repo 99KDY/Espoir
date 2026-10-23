@@ -49,7 +49,7 @@ public class CEnemyUI : MonoBehaviour
         // OnEnemySync?.Invoke();
 
         _enemyHpFill.fillAmount = ratio;
-        _damageText.text = _currentEnemyHp.ToString();
+        _damageText.text = $"{_currentEnemyHp:F0}";
     }
 
     public void ResetEnemyHP()

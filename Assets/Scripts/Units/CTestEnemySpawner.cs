@@ -6,6 +6,7 @@ public class CTestEnemySpawner : MonoBehaviour
 {
     [SerializeField] private List<GameObject> _targetEnemy;
     [SerializeField] private float _spawnRadius = 3.0f;
+    [SerializeField] private float _minDistance = 1.0f;
     [SerializeField] private int _maxCount = 5;
     [SerializeField] private float _regenInterval = 2f;
 
@@ -67,15 +68,13 @@ public class CTestEnemySpawner : MonoBehaviour
 
     private void SpawnEnemy()
     {
-        GameObject target = _targetEnemy[Random.Range(0, _targetEnemy.Count)];
+        if (!TryGetSpawnPosition(out Vector3 targetPos))
+        {
+            CLogger.Warn("Spawner : 빈 공간 찾기에 실패해 이번 주기 스폰 스킵함");
+            return;
+        }
 
-        Vector2 offset = Random.insideUnitCircle * _spawnRadius;
-        Vector3 targetPos = transform.position + new Vector3
-            (
-                offset.x,
-                0f,
-                offset.y
-            );
+        GameObject target = _targetEnemy[Random.Range(0, _targetEnemy.Count)];
         Quaternion targetRot = Quaternion.Euler
             (
                 0f,
@@ -85,5 +84,50 @@ public class CTestEnemySpawner : MonoBehaviour
 
 
         Instantiate(target, targetPos, targetRot, transform);
+    }
+
+    private bool TryGetSpawnPosition(out Vector3 spawnPos)
+    {
+        float minDistanceSqr = _minDistance * _minDistance;
+        for (int i = 0; i < 30; i++)
+        {
+            Vector2 offset = Random.insideUnitCircle * _spawnRadius;
+            Vector3 targetPos = transform.position + new Vector3
+                (
+                    offset.x,
+                    0f,
+                    offset.y
+                );
+
+            bool enableSpawn = true;
+
+            for (int j = 0; i < transform.childCount; i++)
+            {
+                Transform child = transform.GetChild(i);
+
+                if (!child.TryGetComponent<CEnemy>(out _))
+                {
+                    continue;
+                }
+
+                Vector2 candidateXZ = new Vector2(targetPos.x, targetPos.z);
+                Vector2 enemyXZ = new Vector2(child.position.x, child.position.z);
+
+                if ((candidateXZ - enemyXZ).sqrMagnitude < minDistanceSqr)
+                {
+                    enableSpawn = false;
+                    break;
+                }
+            }
+
+            if (enableSpawn)
+            {
+                spawnPos = targetPos;
+                return true;
+            }
+        }
+
+        spawnPos = Vector3.zero;
+        return false;
     }
 }
