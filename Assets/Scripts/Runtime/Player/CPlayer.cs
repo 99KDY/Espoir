@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -26,7 +27,94 @@ public class CPlayer : CUnit
 
     private CPlayerMovement _movement;
     private CPlayerSkill _skill;
+    private List<CItemEquipment> _equipment = new List<CItemEquipment>();
+    private List<CStatus> _equipmentStatus = new List<CStatus>();
     private bool _actionsBlocked;
+
+    protected float _hpMaxBaseline = 1;
+    protected float _attackBaseline = 0;
+    protected float _defenceBaseline = 0;
+
+    protected float _critRateBaseline = 0.05f;
+    protected float _critDmgBaseline = 1.5f;
+
+    public List<CItemEquipment> Equipment
+    {
+        get { return _equipment; }
+        set { _equipment = value; }
+    }
+
+    public List<CStatus> EquipmentStatus
+    {
+        get { return _equipmentStatus; }
+        set { _equipmentStatus = value; }
+    }
+
+    public float HpMaxBaseline
+    {
+        get { return _hpMaxBaseline; }
+        set { _hpMaxBaseline = value; }
+    }
+
+    public float AttackBaseline
+    {
+        get { return _attackBaseline; }
+        set { _attackBaseline = value; }
+    }
+
+    public float DefenceBaseline
+    {
+        get { return _defenceBaseline; }
+        set { _defenceBaseline = value; }
+    }
+
+    public float CritRateBaseline
+    {
+        get { return _critRateBaseline; }
+        set { _critRateBaseline = value; }
+    }
+
+    public float CritDmgBaseline
+    {
+        get { return _critDmgBaseline; }
+        set { _critDmgBaseline = value; }
+    }
+
+
+    public void EquipmentResync()
+    {
+        _equipmentStatus.Clear();
+        _hpMaxBaseline = _baseHpMax;
+        _attackBaseline = _baseAttack;
+        _defenceBaseline = _baseDefence;
+        _critRateBaseline = 0.05f;
+        _critDmgBaseline = 1.5f;
+        for(int i = 0; i < _equipment.Count; i++)
+        {
+            _equipment[i].OnEarlySync(this);
+        }
+        for (int i = 0; i < _equipment.Count; i++)
+        {
+            _equipment[i].OnLateSync(this);
+        }
+        for (int i = 0; i < _equipment.Count; i++)
+        {
+            _equipment[i].OnStatusSync(this);
+        }
+        _hpMax = _hpMaxBaseline;
+        _attack = _attackBaseline;
+        _defence = _defenceBaseline;
+        _critRate = _critRateBaseline;
+        _critDmg = _critDmgBaseline;
+
+        for (int i = 0; i < _equipmentStatus.Count; i++)
+        {
+            for (int j = 0; j < _equipmentStatus[i].OnEquip.Count; j++)
+            {
+                _equipmentStatus[i].OnEquip[j](this);
+            }
+        }
+    }
 
     protected override void Awake()
     {

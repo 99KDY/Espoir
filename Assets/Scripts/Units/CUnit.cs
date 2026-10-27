@@ -56,14 +56,6 @@ public abstract class CUnit : MonoBehaviour
     #endregion
 
     #region 내부 변수
-    protected float _hpMaxAdd = 0;
-    protected float _attackAdd = 0;
-    protected float _defenceAdd = 0;
-
-    protected float _hpMaxRatio = 1;
-    protected float _attackRatio = 1;
-    protected float _defenceRatio = 1;
-
     protected float _hpCurrent = 1;
     protected float _hpMax = 1;
     protected float _attack = 0;
