@@ -16,6 +16,11 @@ public class CItemSO : ScriptableObject
     private static Dictionary<string, CItemSO> _stringToItem = new Dictionary<string, CItemSO>();
     private static bool _isBuilded = false;
 
+    public static bool IsBuilded
+    {
+        get { return  _isBuilded; }
+    }
+
     public int Id
     {
         get { return _id; }
@@ -36,7 +41,7 @@ public class CItemSO : ScriptableObject
         get { return _description; }
     }
 
-    public static void Build(bool force)
+    public static void Build(bool force = false)
     {
         if (force || !_isBuilded) BuildInternal();
     }

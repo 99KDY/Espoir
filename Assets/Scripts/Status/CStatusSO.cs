@@ -19,12 +19,22 @@ public class CStatusSO : ScriptableObject
 
     [Tooltip("상태이상 기본 지속시간")]
     [SerializeField] private float _duration;
+    [Tooltip("상태이상 갱신 스타일")]
+    [SerializeField] private EStatusStack _stack;
+    [Tooltip("스택 제거 방식")]
+    [SerializeField] private EStatusRemove _remove;
+    [Tooltip("스택 제거 타이머")]
+    [SerializeField] private float _stackDuration;
     [Tooltip("상태이상 효과")]
     [SerializeField] private List<SStatusAction> _actionList;
 
     private static Dictionary<int, CStatusSO> _idToStatus = new Dictionary<int, CStatusSO>();
     private static Dictionary<string, CStatusSO> _stringToStatus = new Dictionary<string, CStatusSO>();
     private static bool _isBuilded = false;
+    public static bool IsBuilded
+    {
+        get { return _isBuilded; }
+    }
 
     public static void Build(bool force)
     {
@@ -56,13 +66,13 @@ public class CStatusSO : ScriptableObject
         return;
     }
 
-    public static CStatus Setup(int id, float duration)
+    public static CStatusSO Find(int id)
     {
-        return null;
+        return _idToStatus[id];
     }
 
-    public static CStatus Setup(SStatusApply target)
+    public static CStatusSO Find(string name)
     {
-        return Setup(target.statusId, target.duration);
+        return _stringToStatus[name];
     }
 }
