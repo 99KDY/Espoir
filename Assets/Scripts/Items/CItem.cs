@@ -11,31 +11,12 @@ public abstract class CItem
     protected string _description;
     protected int _quantity;
 
-    public CItemSO OriginItem
-    {
-        get => _originItem;
-    }
-
-    public int Id
-    {
-        get => _id;
-    }
-
-    public string Name
-    {
-        get => _name;
-    }
-
-    public Sprite ItemIcon
-    {
-        get => _itemIcon;
-    }
-
-    public string Description
-    {
-        get => _description;
-    }
-
+    public CItemSO OriginItem => _originItem;
+    public int Id => _id;
+    public string Name => _name;
+    public Sprite ItemIcon => _itemIcon;
+    public string Description => _description;
+    
     public abstract int Quantity { get; set;}
 
     public abstract bool AvailableInLobby();

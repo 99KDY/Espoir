@@ -12,11 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6259a6906ef408840bf9cd6a107a7d2b, type: 3}
   m_Name: NewEquipment
   m_EditorClassIdentifier: 
-  _id: 0
+  _id: -2
   _name: 
   _itemIcon: {fileID: 0}
   _description: 
   _action:
   - action: 1
     param: 100
-  _equipmentStatus: []
+  _equipmentStatus:
+  - statusId: 0
+    duration: 0

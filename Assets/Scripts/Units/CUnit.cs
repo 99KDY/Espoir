@@ -70,48 +70,17 @@ public abstract class CUnit : MonoBehaviour
     #endregion
 
     #region 프로퍼티
-    public float HpCurrent
-    {
-        get => _hpCurrent;
-        // set => _hpCurrent = value;
-    }
+    public float HpCurrent => _hpCurrent;
+    public float HpMax => _hpMax;
+    public float Attack => _attack;
+    public float Defence => _defence;
 
-    public float HpMax
-    {
-        get => _hpMax;
-        // set => _hpMax = value;
-    }
-    public float Attack
-    {
-        get => _attack;
-        // set => _attack = value;
-    }
-    public float Defence
-    {
-        get => _defence;
-        // set => _defence = value;
-    }
+    public float CriticalRate => _critRate;
+    public float CriticalDamage => _critDmg;
 
-    public float CriticalRate
-    {
-        get => _critRate;
-    }
+    public bool IsStunned => _isStunned;
 
-    public float CriticalDamage
-    {
-        get => _critDmg;
-    }
-
-    public bool IsStunned
-    {
-        get => _isStunned;
-    }
-
-    public List<CStatus> Status
-    {
-        get => _statuses;
-        set => _statuses = value;
-    }
+    public IReadOnlyList<CStatus> Status => _statuses;
     #endregion
 
     protected virtual void Awake()
@@ -278,5 +247,10 @@ public abstract class CUnit : MonoBehaviour
             if (_statuses[i].Trigger.HasFlag(EStatusTrigger.IsStun)) count++;
         }
         if (count <= 1) _isStunned = false;
+    }
+
+    public void AddStatus(CStatus status)
+    {
+
     }
 }

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 596eb7770359a4649bbd36b366edc57e, type: 3}
   m_Name: NewEtc
   m_EditorClassIdentifier: 
-  _id: 0
+  _id: -3
   _name: 
   _itemIcon: {fileID: 0}
   _description: 

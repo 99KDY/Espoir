@@ -11,16 +11,7 @@ public class CItemConsumableSO : CItemSO
     [Tooltip("던지는 아이템인지 유무 (던지는 아이템이면 위의 것들이 맞으면 적용되는거로 처리됨)")]
     [SerializeField] private bool _isThrow = false;
 
-    public List<CConsumableAction> Action
-    {
-        get { return _action; }
-    }
-    public List<SStatusApply> ItemStatus
-    {
-        get { return _itemStatus; }
-    }
-    public bool IsThrow
-    {
-        get { return _isThrow; }
-    }
+    public IReadOnlyList<CConsumableAction> Action => _action;
+    public IReadOnlyList<SStatusApply> ItemStatus => _itemStatus;
+    public bool IsThrow => _isThrow;
 }

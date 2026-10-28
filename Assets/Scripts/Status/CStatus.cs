@@ -109,23 +109,10 @@ public class CStatus
 
     private EStatusTrigger _trigger;
 
-    public EStatusTrigger Trigger
-    {
-        get { return _trigger; }
-    }
-    public float Duration
-    {
-        get { return _duration; }
-    }
-    public int Stack
-    {
-        get { return _stack; }
-    }
-
-    public EStatusStack StackSwitch
-    {
-        get { return _stackSwitch; }
-    }
+    public EStatusTrigger Trigger => _trigger;
+    public float Duration => _duration;
+    public int Stack => _stack;
+    public EStatusStack StackSwitch => _stackSwitch;
 
 
     private List<Action<CUnit>> _onEquip = new List<Action<CUnit>>();
