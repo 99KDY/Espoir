@@ -40,8 +40,16 @@ public enum EStatusAction
     MultiplyAttack,
     [InspectorName("방어력 비율 변화")]
     MultiplyDefence,
-    [InspectorName("최종피해량 비율 변화")]
-    MultiplyDamage,
+    [InspectorName("치명타확률 비율 변화 (상수/플레이어용)")]
+    AddCriticalRate,
+    [InspectorName("치명타확률 비율 변화 (비율/플레이어용)")]
+    MultiplyCriticalRate,
+    [InspectorName("치명타피해 비율 변화 (플레이어용)")]
+    MultiplyCriticalDmg,
+    [InspectorName("주는피해량 비율 변화")]
+    MultiplyAttackerDamage,
+    [InspectorName("받는피해량 비율 변화")]
+    MultiplyDefenderDamage,
     [InspectorName("이동속도 변화")]
     MultiplyMovement,
     [InspectorName("기절")]
@@ -71,7 +79,9 @@ public struct SStatusAction
 [Serializable]
 public struct SStatusApply
 {
+    [Tooltip("상태이상 Id")]
     public int statusId;
+    [Tooltip("상태이상 지속시간 (0 : 영속, 음수 : 기본값)")]
     public float duration;
 }
 
