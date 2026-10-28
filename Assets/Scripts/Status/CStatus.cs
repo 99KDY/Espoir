@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public enum EStatusStack
 {
@@ -13,6 +14,15 @@ public enum EStatusStack
     Refresh,            // 지속시간만 갱신
     [InspectorName("이미 있는 경우 적용안함")]
     Ignore              // 이미 있을경우 적용 안함
+}
+public enum EStatusRemove
+{
+    [InspectorName("스택에 상관없이, 시간이 지나면 사라짐")]
+    RemoveAll,
+    [InspectorName("스택이 하나씩 사라짐")]
+    RemoveOne,
+    [InspectorName("별개의 스택제거 시간이 있음")]
+    RemoveFor,
 }
 
 [Flags]
@@ -88,29 +98,100 @@ public struct SStatusApply
 
 public class CStatus
 {
+    private int _id;
+    private float _duration;
+    private string _name;
+    private string _description;
+    private string _tooltip;
+    private Image _image;
+    private int _stack;
+    private EStatusStack _stackSwitch;
+
     private EStatusTrigger _trigger;
 
     public EStatusTrigger Trigger
     {
         get { return _trigger; }
     }
+    public float Duration
+    {
+        get { return _duration; }
+    }
+    public int Stack
+    {
+        get { return _stack; }
+    }
 
-    private List<Action<CPlayer>> _onEquip = new List<Action<CPlayer>>();
-    private List<Action<CPlayer>> _onApply = new List<Action<CPlayer>>();
-    private List<Action<CPlayer>> _onRemove = new List<Action<CPlayer>>();
+    public EStatusStack StackSwitch
+    {
+        get { return _stackSwitch; }
+    }
 
-    public List<Action<CPlayer>> OnEquip
+
+    private List<Action<CUnit>> _onEquip = new List<Action<CUnit>>();
+    private List<Action<CUnit>> _onApply = new List<Action<CUnit>>();
+    private List<Action<CUnit>> _onRemove = new List<Action<CUnit>>();
+    private List<Func<CUnit, CUnit, float, float>> _onAttack = new List<Func<CUnit, CUnit, float, float>>();
+    private List<Func<CUnit, CUnit, float, float>> _onDefence = new List<Func<CUnit, CUnit, float, float>>();
+    private List<Action<CUnit>> _onDelta = new List<Action<CUnit>>();
+    private List<Action<CUnit, bool>> _onBattleEnd = new List<Action<CUnit, bool>>();
+
+    public List<Action<CUnit>> OnEquip
     {
         get => _onEquip;
     }
 
-    public List<Action<CPlayer>> OnApply
+    public List<Action<CUnit>> OnApply
     {
         get => _onApply;
     }
 
-    public List<Action<CPlayer>> OnRemove
+    public List<Action<CUnit>> OnRemove
     {
         get => _onRemove;
+    }
+
+    public List<Func<CUnit, CUnit, float, float>> OnAttack
+    {
+        get => _onAttack;
+    }
+
+    public List<Func<CUnit, CUnit, float, float>> OnDefence
+    {
+        get => _onDefence;
+    }
+
+    public List<Action<CUnit>> OnDelta
+    {
+        get => _onDelta;
+    }
+
+    public void OnDuration(float time)
+    {
+
+    }
+
+    private List<Action<CUnit, bool>> OnBattleEnd
+    {
+        get => _onBattleEnd;
+    }
+
+    public static CStatus MakeStatus(SStatusApply targetStatus, int stack = 1)
+    {
+        return MakeStatus(targetStatus.statusId, targetStatus.duration, stack);
+    }
+
+
+    public static CStatus MakeStatus(int id, float duration = -1, int stack = 1)
+    {
+        CStatus status = new CStatus();
+        status.Setup(id, duration, stack);
+        return status;
+    }
+
+    public void Setup(int id, float duration = -1, int stack = 1)
+    {
+        CStatusSO targetSO = CStatusSO.Find(id);
+        return;
     }
 }
