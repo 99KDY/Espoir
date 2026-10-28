@@ -19,6 +19,9 @@ MonoBehaviour:
     \uBC1B\uB294\uB2E4."
   _tooltip: 
   _duration: 3
+  _stack: 2
+  _remove: 0
+  _stackDuration: 0
   _actionList:
   - action: 12
     param: 0.01

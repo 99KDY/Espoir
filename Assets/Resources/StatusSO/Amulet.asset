@@ -19,6 +19,9 @@ MonoBehaviour:
     \uAC10\uC18C\uD558\uACE0, \uC774\uB3D9\uC18D\uB3C4\uAC00 \uC99D\uAC00\uD55C\uB2E4."
   _tooltip: 
   _duration: 5
+  _stack: 3
+  _remove: 0
+  _stackDuration: 0
   _actionList:
   - action: 8
     param: 0.8

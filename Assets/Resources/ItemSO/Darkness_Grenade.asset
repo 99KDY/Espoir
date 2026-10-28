@@ -12,15 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05f3260cc46fcc845b3bbb3cb2b72dd3, type: 3}
   m_Name: Darkness_Grenade
   m_EditorClassIdentifier: 
-  _id: 4
+  _id: 404
   _name: "\uC554\uD751 \uC218\uB958\uD0C4"
   _itemIcon: {fileID: 0}
   _description: "\uB358\uC838\uC11C \uC801\uC774 \uBC1B\uB294 \uD53C\uD574\uB97C
     10% \uC99D\uAC00\uC2DC\uD0A8\uB2E4."
-  _action:
-    effect: 0
-    value: 0
+  _action: []
   _itemStatus:
-    statusId: 1
+  - statusId: 1
     duration: 10
   _isThrow: 1

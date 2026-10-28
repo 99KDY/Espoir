@@ -12,14 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05f3260cc46fcc845b3bbb3cb2b72dd3, type: 3}
   m_Name: HighGrade_Potion
   m_EditorClassIdentifier: 
-  _id: 2
+  _id: 402
   _name: "\uACE0\uAE09 \uD3EC\uC158"
   _itemIcon: {fileID: 0}
   _description: "\uCCB4\uB825\uC744 30% \uD68C\uBCF5\uD55C\uB2E4."
   _action:
-    effect: 3
-    value: 0.3
-  _itemStatus:
-    statusId: 0
-    duration: 0
+  - effect: 3
+    value: 30
+  _itemStatus: []
   _isThrow: 0

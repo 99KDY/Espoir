@@ -12,15 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05f3260cc46fcc845b3bbb3cb2b72dd3, type: 3}
   m_Name: Adrophin_Potion
   m_EditorClassIdentifier: 
-  _id: 6
+  _id: 406
   _name: "\uC544\uB4DC\uB85C\uD540"
   _itemIcon: {fileID: 0}
   _description: "\uCCB4\uB825\uC744 10% \uC783\uACE0, \uC7A0\uC2DC \uB3D9\uC548 \uC8FC\uB294
     \uD53C\uD574\uAC00 20% \uC99D\uAC00\uD55C\uB2E4."
   _action:
-    effect: 4
+  - effect: 4
     value: 0.1
   _itemStatus:
-    statusId: 2
+  - statusId: 2
     duration: 10
   _isThrow: 0

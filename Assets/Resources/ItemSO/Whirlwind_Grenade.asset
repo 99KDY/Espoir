@@ -12,15 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05f3260cc46fcc845b3bbb3cb2b72dd3, type: 3}
   m_Name: Whirlwind_Grenade
   m_EditorClassIdentifier: 
-  _id: 5
+  _id: 405
   _name: "\uD68C\uC624\uB9AC \uC218\uB958\uD0C4"
   _itemIcon: {fileID: 0}
   _description: "\uB358\uC838\uC11C \uAC15\uB825\uD55C \uBB34\uB825\uD654\uD53C\uD574\uB97C
     \uC90D\uB2C8\uB2E4."
   _action:
-    effect: 0
+  - effect: 0
     value: 0
   _itemStatus:
-    statusId: 0
+  - statusId: 0
     duration: 0
   _isThrow: 1

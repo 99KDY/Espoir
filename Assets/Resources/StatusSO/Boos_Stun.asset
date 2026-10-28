@@ -19,6 +19,9 @@ MonoBehaviour:
     10%\uC99D\uAC00\uD55C\uB2E4"
   _tooltip: 
   _duration: 5
+  _stack: 3
+  _remove: 0
+  _stackDuration: 0
   _actionList:
   - action: 10
     param: 0
