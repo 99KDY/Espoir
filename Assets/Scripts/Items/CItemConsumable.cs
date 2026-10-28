@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public enum EConsumableEffect
@@ -24,7 +25,9 @@ public class CConsumableAction
 
 public abstract class CItemConsumable : CItem
 {
-    Action<CPlayer> _onUse;
+    List<Action<CUnit>> _onUse;
+    List<CStatus> _itemStatus;
+    bool _isThrow = false;
 
     public override bool AvailableInLobby() => false;
     public override bool AvailableInBattle() => true;
@@ -40,10 +43,24 @@ public abstract class CItemConsumable : CItem
         Setup(targetItem);
     }
 
-    public void OnUse(CPlayer player)
+    public void OnUse(CUnit unit)
     {
-        if (_onUse == null) return;
-        _onUse(player);
+        if (_onUse != null && _onUse.Count != 0)
+        {
+            for (int i = 0; i < _onUse.Count; i++)
+            {
+                _onUse[i](unit);
+            }
+        }
+
+        if (_itemStatus != null && _itemStatus.Count != 0)
+        {
+            for (int i = 0; i < _itemStatus.Count; i++)
+            {
+                unit.AddStatus(_itemStatus[i]);
+            }
+        }
+            
     }
 
     public override bool OnDiscard(CPlayer player, int quantity)
@@ -61,18 +78,38 @@ public abstract class CItemConsumable : CItem
             this._name = targetConsumable.Name;
             this._itemIcon = targetConsumable.ItemIcon;
             this._description = targetConsumable.Description;
+            this._isThrow = targetConsumable.IsThrow;
 
-            switch (targetConsumable.Action.effect)
+            _onUse = new List<Action<CUnit>>();
+            _itemStatus = new List<CStatus>();
+
+            for (int i = 0; i < targetConsumable.Action.Count; i++)
             {
-                case EConsumableEffect.None:
-                    _onUse = (CPlayer player) => { };
-                    break;
-                case EConsumableEffect.HealConstant:
-                    _onUse = (CPlayer player) => player.GetHeal(targetConsumable.Action.value);
-                    break;
-                case EConsumableEffect.HealRatio:
-                    _onUse = (CPlayer player) => player.GetHeal(targetConsumable.Action.value, ERatioSwitch.ByMax);
-                    break;
+                EConsumableEffect actionData = targetConsumable.Action[i].effect;
+                float temp = targetConsumable.Action[i].value;
+                switch (actionData)
+                {
+                    case EConsumableEffect.None:
+                        _onUse.Add((CUnit unit) => { });
+                        break;
+                    case EConsumableEffect.HealConstant:
+                        _onUse.Add((CUnit unit) => unit.GetHeal(temp));
+                        break;
+                    case EConsumableEffect.HealRatio:
+                        _onUse.Add((CUnit unit) => unit.GetHeal(temp, ERatioSwitch.ByMax));
+                        break;
+                    case EConsumableEffect.DealConstant:
+                        _onUse.Add((CUnit unit) => unit.GetDamage(temp));
+                        break;
+                    case EConsumableEffect.DealRatio:
+                        _onUse.Add((CUnit unit) => unit.GetDamage(temp, ERatioSwitch.ByMax));
+                        break;
+                }
+            }
+
+            for (int i = 0; i < targetConsumable.ItemStatus.Count; i++)
+            {
+                _itemStatus.Add(CStatus.MakeStatus(targetConsumable.ItemStatus[i]));
             }
 
             return true;

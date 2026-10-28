@@ -131,6 +131,7 @@ public abstract class CItemEquipment : CItem
 
     public override bool Setup(CItemSO targetItem)
     {
+        if (!CItemSO.IsBuilded) CItemSO.Build();
         if (targetItem is CItemEquipmentSO targetEquipment)
         {
             this._id = targetEquipment.Id;
@@ -206,7 +207,7 @@ public abstract class CItemEquipment : CItem
 
             for (int i = 0; i < targetEquipment.EquipmentStatus.Count; i++)
             {
-                _equipmentStatus.Add(CStatusSO.Setup(targetEquipment.EquipmentStatus[i]));
+                _equipmentStatus.Add(CStatus.MakeStatus(targetEquipment.EquipmentStatus[i]));
             }
             return true;
         }

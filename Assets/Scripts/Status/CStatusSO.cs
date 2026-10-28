@@ -28,6 +28,21 @@ public class CStatusSO : ScriptableObject
     [Tooltip("상태이상 효과")]
     [SerializeField] private List<SStatusAction> _actionList;
 
+    #region Member Property
+    public int Id => _id;
+    public string Name => _name;
+    public string Description => _description;
+    public string Tooltip => _tooltip;
+    public float Duration => _duration;
+    public EStatusStack Stack => _stack;
+    public EStatusRemove Remove => _remove;
+    public float StackDuration => _stackDuration;
+    public IReadOnlyList<SStatusAction> ActionList => _actionList;
+    #endregion
+
+
+
+
     private static Dictionary<int, CStatusSO> _idToStatus = new Dictionary<int, CStatusSO>();
     private static Dictionary<string, CStatusSO> _stringToStatus = new Dictionary<string, CStatusSO>();
     private static bool _isBuilded = false;

@@ -16,30 +16,12 @@ public class CItemSO : ScriptableObject
     private static Dictionary<string, CItemSO> _stringToItem = new Dictionary<string, CItemSO>();
     private static bool _isBuilded = false;
 
-    public static bool IsBuilded
-    {
-        get { return  _isBuilded; }
-    }
+    public static bool IsBuilded => _isBuilded;
 
-    public int Id
-    {
-        get { return _id; }
-    }
-
-    public string Name
-    {
-        get { return _name; }
-    }
-    
-    public Sprite ItemIcon
-    {
-        get { return _itemIcon; }
-    }
-
-    public string Description
-    {
-        get { return _description; }
-    }
+    public int Id => _id;
+    public string Name => _name;
+    public Sprite ItemIcon => _itemIcon;
+    public string Description => _description;
 
     public static void Build(bool force = false)
     {
