@@ -5,14 +5,21 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "NewStatus", menuName = "Espoir/StatusSO")]
 public class CStatusSO : ScriptableObject
 {
+    [Tooltip("상태이상 ID")]
     [SerializeField] private int _id;
+    [Tooltip("상태이상 이름")]
     [SerializeField] private string _name;
+    [Tooltip("상태이상 아이콘")]
     [SerializeField] private Sprite _icon;
 
+    [Tooltip("상태이상 설명")]
     [SerializeField][TextArea(1, 5)] private string _description;
+    [Tooltip("상태이상 툴팁")]
     [SerializeField][TextArea(1, 5)] private string _tooltip;
 
+    [Tooltip("상태이상 기본 지속시간")]
     [SerializeField] private float _duration;
+    [Tooltip("상태이상 효과")]
     [SerializeField] private List<SStatusAction> _actionList;
 
     private static Dictionary<int, CStatusSO> _idToStatus = new Dictionary<int, CStatusSO>();
@@ -49,8 +56,13 @@ public class CStatusSO : ScriptableObject
         return;
     }
 
-    public static CStatus Setup(CStatusSO target, float param)
+    public static CStatus Setup(int id, float duration)
     {
         return null;
+    }
+
+    public static CStatus Setup(SStatusApply target)
+    {
+        return Setup(target.statusId, target.duration);
     }
 }

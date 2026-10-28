@@ -1,23 +1,30 @@
 ﻿using System;
+using UnityEngine;
 
 public enum EConsumableEffect
 {
     None,
+    [InspectorName("상수 회복")]
     HealConstant,
+    [InspectorName("상수 피해")]
+    DealConstant,
+    [InspectorName("비율 회복")]
     HealRatio,
+    [InspectorName("비율 피해")]
+    DealRatio,
 }
 
 [Serializable]
 public class CConsumableAction
 {
     public EConsumableEffect effect;
+    [Tooltip("비율은 증가시 1.xx 감소시 0.xx로!")]
     public float value;
 }
 
 public abstract class CItemConsumable : CItem
 {
     Action<CPlayer> _onUse;
-    private int _quantity;
 
     public override bool AvailableInLobby() => false;
     public override bool AvailableInBattle() => true;
