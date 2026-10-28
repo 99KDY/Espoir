@@ -17,4 +17,7 @@ MonoBehaviour:
   _icon: {fileID: 0}
   _description: 
   _tooltip: 
-  _actionList: []
+  _duration: 0
+  _actionList:
+  - action: 0
+    param: 0

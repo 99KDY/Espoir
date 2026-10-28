@@ -3,9 +3,13 @@ using UnityEngine;
 
 public class CItemSO : ScriptableObject
 {
+    [Tooltip("아이템 id")]
     [SerializeField] protected int _id;
+    [Tooltip("아이템 이름")]
     [SerializeField] protected string _name;
+    [Tooltip("아이템 아이콘")]
     [SerializeField] protected Sprite _itemIcon;
+    [Tooltip("아이템 설명")]
     [SerializeField] protected string _description;
 
     private static Dictionary<int, CItemSO> _idToItem = new Dictionary<int, CItemSO>();
