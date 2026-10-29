@@ -10,17 +10,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4b00a2f5381819c4787825906254b3b2, type: 3}
-  m_Name: stigma
+  m_Name: Stigma
   m_EditorClassIdentifier: 
   _id: 11
-  _name: "\uD50C\uB808\uC774\uC5B4 \uAE30\uC808"
+  _name: "\uC9C8\uD22C\uC758 \uB099\uC778"
   _icon: {fileID: 0}
-  _description: "\uD3C9\uD0C0 \uC801\uC911\uB2F9 MP\uD68C\uBCF5"
+  _description: "\uC9C0\uC18D\uC2DC\uAC04 6\uCD08, \uCD5C\uB300 5\uC911\uCCA9, \uCD94\uAC00
+    \uBD80\uC5EC \uC2DC \uAC31\uC2E0\n\uC911\uCCA9\uB2F9 \uBC29\uC5B4\uB825 5%\uAC10\uC18C,
+    \uCD5C\uB300 25%\uAC10\uC18C\n5\uC911\uC811 \uB300\uC0C1 \uC801\uC911 \uC2DC
+    \uC804\uD22C\uC758 \uD750\uB984 \uD68D\uB4DD\uB7C9 2\uBC30"
   _tooltip: 
-  _duration: 1
+  _duration: 6
   _stack: 0
-  _remove: 0
-  _stackDuration: 0
+  _remove: 1
+  _stackDuration: 6
   _actionList:
-  - action: 10
-    param: 0
+  - action: 3
+    param: 0.95
