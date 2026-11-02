@@ -16,6 +16,7 @@ public partial class CStatus
         {
             _initialTimer = 0;
             _isPermanent = true;
+            _baseTimer = -1;
         }
         else if (duration < 0)
         {
@@ -23,16 +24,19 @@ public partial class CStatus
             {
                 _initialTimer = 0;
                 _isPermanent = true;
+                _baseTimer = -1;
             }
             else
             {
                 _initialTimer = targetSO.Duration;
+                _baseTimer = _initialTimer;
                 _isPermanent = false;
             }
         }
         else
         {
             _initialTimer = duration;
+            _baseTimer = _initialTimer;
             _isPermanent = false;
         }
         _duration = _initialTimer;
@@ -40,7 +44,12 @@ public partial class CStatus
         _description = targetSO.Description;
         _tooltip = targetSO.Tooltip;
         _image = targetSO.Icon;
-        _stack = stack;
+        _stack = stack > 0 ? stack : 1;
+        _maxStack = targetSO.MaxStack > 0 ? targetSO.MaxStack : 0b1000000000000000;
+        if (_stack > _maxStack)
+        {
+            _stack = _maxStack;
+        }
         _stackSwitch = targetSO.Stack;
         _removeSwitch = targetSO.Remove;
         _removeTimer = targetSO.StackDuration;
