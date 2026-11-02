@@ -25,6 +25,7 @@ public abstract class CItem
     protected Sprite _itemIcon;
     protected string _description;
     protected int _quantity;
+    protected int _cost;
 
     public CItemSO OriginItem => _originItem;
     public int Id => _id;
@@ -32,6 +33,7 @@ public abstract class CItem
     public EItemRarity Rarity => _rarity;
     public Sprite ItemIcon => _itemIcon;
     public string Description => _description;
+    public int Cost => _cost;
     
     public abstract int Quantity { get; set;}
 

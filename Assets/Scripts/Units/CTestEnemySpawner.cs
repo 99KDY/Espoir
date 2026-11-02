@@ -101,9 +101,9 @@ public class CTestEnemySpawner : MonoBehaviour
 
             bool enableSpawn = true;
 
-            for (int j = 0; i < transform.childCount; i++)
+            for (int j = 0; j < transform.childCount; j++)
             {
-                Transform child = transform.GetChild(i);
+                Transform child = transform.GetChild(j);
 
                 if (!child.TryGetComponent<CEnemy>(out _))
                 {
