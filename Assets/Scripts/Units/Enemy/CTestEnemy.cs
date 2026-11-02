@@ -99,6 +99,7 @@ public class CTestEnemy : CEnemy
 
     protected override void Update()
     {
+        base.Update();
         if (_hpCurrent <= 0)
         {
             _isDie = true;

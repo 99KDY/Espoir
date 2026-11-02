@@ -38,6 +38,9 @@ public class CPlayer : CUnit
     protected float _critRateBaseline = 0.05f;
     protected float _critDmgBaseline = 1.5f;
 
+    protected float _movementBaseline = 1f;
+    protected float _attackSpeedBaseline = 1f;
+
     public Dictionary<EEquipmentSlot, CItemEquipment> Equipment
     {
         get { return _equipment; }
@@ -83,6 +86,7 @@ public class CPlayer : CUnit
 
     public void EquipmentResync()
     {
+        float hpRatio = HpCurrent / HpMax;
         _equipmentStatus.Clear();
 
         _hpMaxBaseline = _baseHpMax;
@@ -90,6 +94,8 @@ public class CPlayer : CUnit
         _defenceBaseline = _baseDefence;
         _critRateBaseline = 0.05f;
         _critDmgBaseline = 1.5f;
+        _movementBaseline = 1f;
+        _attackSpeedBaseline = 1f;
 
         Dictionary<int, int> equipmentSet = new Dictionary<int, int>();
         List<CItemEquipment> equipments = new List<CItemEquipment>(_equipment.Values);
@@ -175,16 +181,19 @@ public class CPlayer : CUnit
             * statMultiple[EStatusStats.CritRate] * statDivide[EStatusStats.CritRate];
         _critDmgBaseline = (1.5f + statConstant[EStatusStats.CritDmg])
             * statMultiple[EStatusStats.CritDmg] * statDivide[EStatusStats.CritDmg];
-        _movementMultiply = (1f + statConstant[EStatusStats.Movement])
+        _movementBaseline = (1f + statConstant[EStatusStats.Movement])
             * statMultiple[EStatusStats.Movement] * statDivide[EStatusStats.Movement];
-        _attackSpeedMultiply = (1f + statConstant[EStatusStats.AttackSpeed])
+        _attackSpeedBaseline = (1f + statConstant[EStatusStats.AttackSpeed])
             * statMultiple[EStatusStats.AttackSpeed] * statDivide[EStatusStats.AttackSpeed];
 
         _hpMax = _hpMaxBaseline;
+        _hpCurrent = _hpMax * hpRatio;
         _attack = _attackBaseline;
         _defence = _defenceBaseline;
         _critRate = _critRateBaseline;
         _critDmg = _critDmgBaseline;
+        _movementMultiply = _movementBaseline;
+        _attackSpeedMultiply = _attackSpeedBaseline;
 
         ResyncStatus();
     }
@@ -232,6 +241,7 @@ public class CPlayer : CUnit
 
         _hpMax = (_hpMaxBaseline + statConstant[EStatusStats.Hp])
             * statMultiple[EStatusStats.Hp] * statDivide[EStatusStats.Hp];
+        _hpCurrent = Mathf.Min(_hpCurrent, _hpMax);
         _attack = (_attackBaseline + statConstant[EStatusStats.Attack])
             * statMultiple[EStatusStats.Attack] * statDivide[EStatusStats.Attack];
         _defence = (_defenceBaseline + statConstant[EStatusStats.Defence])
@@ -240,10 +250,64 @@ public class CPlayer : CUnit
             * statMultiple[EStatusStats.CritRate] * statDivide[EStatusStats.CritRate];
         _critDmg = (_critDmgBaseline + statConstant[EStatusStats.CritDmg])
             * statMultiple[EStatusStats.CritDmg] * statDivide[EStatusStats.CritDmg];
-        _movementMultiply = (_movementMultiply + statConstant[EStatusStats.Movement])
+        _movementMultiply = (_movementBaseline + statConstant[EStatusStats.Movement])
             * statMultiple[EStatusStats.Movement] * statDivide[EStatusStats.Movement];
-        _attackSpeedMultiply = (_attackSpeedMultiply + statConstant[EStatusStats.AttackSpeed])
+        _attackSpeedMultiply = (_attackSpeedBaseline + statConstant[EStatusStats.AttackSpeed])
             * statMultiple[EStatusStats.AttackSpeed] * statDivide[EStatusStats.AttackSpeed];
+    }
+
+    public override void InvokeOnDelta(float t)
+    {
+        if (!(_equipmentStatus == null || _equipmentStatus.Count == 0))
+        {
+            for (int i = _equipmentStatus.Count - 1; i >= 0; i--)
+            {
+                if (_equipmentStatus[i].Trigger.HasFlag(EStatusTrigger.OnDelta))
+                {
+                    for (int j = 0; j < _equipmentStatus[i].OnDelta.Count; j++)
+                    {
+                        _equipmentStatus[i].OnDelta[j](this, t);
+                    }
+                }
+            }
+        }
+        base.InvokeOnDelta(t);
+    }
+
+    public override void InvokeOnBattleStart(bool isBossBattle)
+    {
+        if (!(_equipmentStatus == null || _equipmentStatus.Count == 0))
+        {
+            for (int i = _equipmentStatus.Count - 1; i >= 0; i--)
+            {
+                if (_equipmentStatus[i].Trigger.HasFlag(EStatusTrigger.OnBattleStart))
+                {
+                    for (int j = 0; j < _equipmentStatus[i].OnBattleStart.Count; j++)
+                    {
+                        _equipmentStatus[i].OnBattleStart[j](this, isBossBattle);
+                    }
+                }
+            }
+        }
+        base.InvokeOnBattleStart(isBossBattle);
+    }
+
+    public override void InvokeOnBattleEnd(bool isBossBattle)
+    {
+        if (!(_equipmentStatus == null || _equipmentStatus.Count == 0))
+        {
+            for (int i = _equipmentStatus.Count - 1; i >= 0; i--)
+            {
+                if (_equipmentStatus[i].Trigger.HasFlag(EStatusTrigger.OnBattleEnd))
+                {
+                    for (int j = 0; j < _equipmentStatus[i].OnBattleEnd.Count; j++)
+                    {
+                        _equipmentStatus[i].OnBattleEnd[j](this, isBossBattle);
+                    }
+                }
+            }
+        }
+        base.InvokeOnBattleEnd(isBossBattle);
     }
 
     protected override void Awake()
@@ -310,6 +374,8 @@ public class CPlayer : CUnit
             enabled = false;
             return;
         }
+
+        EquipmentResync();
 
         if (_skillSlots == null)
         {

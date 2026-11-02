@@ -6,6 +6,11 @@ public partial class CStatus
     public void Setup(int id, float duration = -1, int stack = 1)
     {
         CStatusSO targetSO = CStatusSO.Find(id);
+        if (targetSO == null)
+        {
+            CLogger.Error($"CStatus : 상태이상 {id}를 찾을 수 없습니다.");
+            return;
+        }
         _id = targetSO.Id;
         if (duration == 0)
         {
@@ -35,7 +40,7 @@ public partial class CStatus
         _description = targetSO.Description;
         _tooltip = targetSO.Tooltip;
         _image = targetSO.Icon;
-        _stack = 1;
+        _stack = stack;
         _stackSwitch = targetSO.Stack;
         _removeSwitch = targetSO.Remove;
         _removeTimer = targetSO.StackDuration;

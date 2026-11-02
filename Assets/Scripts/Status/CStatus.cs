@@ -163,8 +163,8 @@ public partial class CStatus
     private List<Action<CUnit>> _onRemove = new List<Action<CUnit>>(); // Deprecated
     private List<Func<CUnit, CUnit, float, float>> _onAttack = new List<Func<CUnit, CUnit, float, float>>();
     private List<Func<CUnit, CUnit, float, float>> _onDefence = new List<Func<CUnit, CUnit, float, float>>();
-    private List<Func<CUnit, CUnit, float, float>> _onHit = new List<Func<CUnit, CUnit, float, float>>();
-    private List<Func<CUnit, CUnit, float, float>> _onDamage = new List<Func<CUnit, CUnit, float, float>>();
+    private List<Action<CUnit, CUnit, float>> _onHit = new List<Action<CUnit, CUnit, float>>();
+    private List<Action<CUnit, CUnit, float>> _onDamage = new List<Action<CUnit, CUnit, float>>();
     private List<Action<CUnit, float>> _onDelta = new List<Action<CUnit, float>>();
     private List<Action<CUnit, bool>> _onBattleStart = new List<Action<CUnit, bool>>();
     private List<Action<CUnit, bool>> _onBattleEnd = new List<Action<CUnit, bool>>();
@@ -193,12 +193,12 @@ public partial class CStatus
     {
         get => _onDefence;
     }
-    public List<Func<CUnit, CUnit, float, float>> OnHit
+    public List<Action<CUnit, CUnit, float>> OnHit
     {
         get => _onHit;
     }
 
-    public List<Func<CUnit, CUnit, float, float>> OnDamage
+    public List<Action<CUnit, CUnit, float>> OnDamage
     {
         get => _onDamage;
     }
