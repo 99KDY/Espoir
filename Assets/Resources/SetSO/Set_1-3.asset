@@ -27,4 +27,6 @@ MonoBehaviour:
     param: 1.35
   _equipmentStatusSet3: []
   _actionSet4: []
-  _equipmentStatusSet4: []
+  _equipmentStatusSet4:
+  - statusId: 19
+    duration: 0
