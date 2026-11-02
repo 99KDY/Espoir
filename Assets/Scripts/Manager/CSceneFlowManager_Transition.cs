@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using UnityEngine;
 
-public partial class SceneFlowManager
+public partial class CSceneFlowManager
 {
     private void TransitionInitialize()
     {

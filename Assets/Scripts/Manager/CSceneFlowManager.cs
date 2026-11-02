@@ -23,7 +23,7 @@ public class SceneEntry
     public string SceneName;
 }
 
-public partial class SceneFlowManager : MonoBehaviour
+public partial class CSceneFlowManager : MonoBehaviour
 {
     #region Inspector
     [Header("씬 카탈로그")]
@@ -37,7 +37,7 @@ public partial class SceneFlowManager : MonoBehaviour
     #endregion
 
     #region Member Variable
-    private static SceneFlowManager _instance;
+    private static CSceneFlowManager _instance;
     private int _targetSaveData = -1;
     private bool _loadSavedData = false;
     //private float _bgmLevel = 1f;
@@ -71,7 +71,7 @@ public partial class SceneFlowManager : MonoBehaviour
     //    }
     //}
 
-    public static SceneFlowManager Instance
+    public static CSceneFlowManager Instance
     {
         get { return _instance; }
         protected set { _instance = value; }

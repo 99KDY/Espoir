@@ -4,40 +4,58 @@ using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.UI;
 
-[Serializable]
-class CBackgroundSound_Test
+public enum EBackgroundSound
 {
-    public string soundType;
+    None,
+    OasisOfGold,
+    // 여기서부터 배경음 리스트 만들기
+}
+
+public enum EEffectSound
+{
+    None,
+    PlayerHit,
+    MonsterHit,
+    PlayerSlash,
+    MonsterSlash,
+}
+
+[Serializable]
+class CBackgroundSound
+{
+    public EBackgroundSound soundType;
     public AudioSource audioClip;
     public float volume = 1.0f;
     public bool loop = true;
 }
 
 [Serializable]
-class CEffectSound_Test
+class CEffectSound
 {
-    public string soundType;
+    public EEffectSound soundType;
     public AudioSource audioClip;
     public float volume = 1.0f;
     public bool loop = false;
 }
 
-public class SoundManager_Test : MonoBehaviour
+public class CSoundManager : MonoBehaviour
 {
-    [SerializeField] private List<CBackgroundSound_Test> _backgroundSounds;
-    [SerializeField] private List<CEffectSound_Test> _effectSounds;
+    [SerializeField] private List<CBackgroundSound> _backgroundSounds;
+    [SerializeField] private List<CEffectSound> _effectSounds;
     [SerializeField] private AudioMixer _audioMixer;
+    [SerializeField] private Slider _bgmSlider;
+    [SerializeField] private Slider _seSlider;
 
-    Dictionary<string, AudioSource> _bgmDict;
-    Dictionary<string, AudioSource> _seDict;
-    private string _lastBackGround = "";
-    private string _currentBackGround = "";
+    Dictionary<EBackgroundSound, AudioSource> _bgmDict;
+    Dictionary<EEffectSound, AudioSource> _seDict;
+    private EBackgroundSound _lastBackGround = EBackgroundSound.None;
+    private EBackgroundSound _currentBackGround = EBackgroundSound.None;
 
     private float _fadeFactor = 1.0f;
 
-    private static SoundManager_Test _instance;
+    private static CSoundManager _instance;
 
-    public static SoundManager_Test Instance
+    public static CSoundManager Instance
     {
         get { return _instance; }
         protected set { _instance = value; }
@@ -51,13 +69,21 @@ public class SoundManager_Test : MonoBehaviour
             return;
         }
         _instance = this;
-        _bgmDict = new Dictionary<string, AudioSource>();
-        _seDict = new Dictionary<string, AudioSource>();
+        _bgmDict = new Dictionary<EBackgroundSound, AudioSource>();
+        _seDict = new Dictionary<EEffectSound, AudioSource>();
         ResetDictionary();
+    }
+
+    private void OnDestroy()
+    {
+        if (_instance == this)
+        {
+            _instance = null;
+        }
     }
     void Update()
     {
-        if (string.IsNullOrEmpty(_lastBackGround) && !string.IsNullOrEmpty(_currentBackGround))
+        if (_lastBackGround == EBackgroundSound.None && _currentBackGround != EBackgroundSound.None)
         {
             _fadeFactor = 1.0f;
             _lastBackGround = _currentBackGround;
@@ -74,7 +100,7 @@ public class SoundManager_Test : MonoBehaviour
                 _fadeFactor = 0.0f;
                 _lastBackGround = _currentBackGround;
                 StopBGMInternal();
-                if (!string.IsNullOrEmpty(_currentBackGround)) _bgmDict[_currentBackGround].Play();
+                if (_currentBackGround != EBackgroundSound.None) _bgmDict[_currentBackGround].Play();
             }
         }
         else
@@ -123,8 +149,8 @@ public class SoundManager_Test : MonoBehaviour
 
     private void SetVolume()
     {
-        float bgmVolume = 1f * _fadeFactor;
-        float seVolume = 1f;
+        float bgmVolume = (_bgmSlider == null) ? _fadeFactor : _bgmSlider.value * _fadeFactor;
+        float seVolume = (_seSlider == null) ? 1f : _seSlider.value;
 
         if (bgmVolume <= 0.0001f)
         {
@@ -145,7 +171,18 @@ public class SoundManager_Test : MonoBehaviour
         }
     }
 
-    public void PlaySE(string soundType)
+    public void SetVolumeForce(float bgm, float se)
+    {
+        _bgmSlider.value = bgm;
+        _seSlider.value = se;
+    }
+
+    public (float bgmLevel, float seLevel) GetVolume()
+    {
+        return (_bgmSlider.value, _seSlider.value);
+    }
+
+    public void PlaySE(EEffectSound soundType)
     {
         if (_seDict.ContainsKey(soundType))
         {
@@ -157,11 +194,11 @@ public class SoundManager_Test : MonoBehaviour
         }
     }
 
-    public void PlayBGM(string soundType)
+    public void PlayBGM(EBackgroundSound soundType)
     {
-        if (string.IsNullOrEmpty(soundType))
+        if (soundType == EBackgroundSound.None)
         {
-            _currentBackGround = "";
+            _currentBackGround = EBackgroundSound.None;
         }
         else if (_bgmDict.ContainsKey(soundType))
         {
@@ -176,7 +213,7 @@ public class SoundManager_Test : MonoBehaviour
     public void StopBGM()
     {
         _fadeFactor = 0.0f;
-        _currentBackGround = "";
+        _currentBackGround = EBackgroundSound.None;
         StopBGMInternal();
     }
 
