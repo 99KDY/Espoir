@@ -15,7 +15,7 @@ public class CItemSO : ScriptableObject
     [Tooltip("아이템 설명")]
     [SerializeField][TextArea(1, 5)] protected string _description;
     [Tooltip("아이템 가격")]
-    [SerializeField][TextArea(1, 5)] protected int _cost;
+    [SerializeField] protected int _cost;
 
     private static Dictionary<int, CItemSO> _idToItem = new Dictionary<int, CItemSO>();
     private static Dictionary<string, CItemSO> _stringToItem = new Dictionary<string, CItemSO>();
