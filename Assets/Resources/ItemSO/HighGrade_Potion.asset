@@ -18,6 +18,6 @@ MonoBehaviour:
   _description: "\uCCB4\uB825\uC744 30% \uD68C\uBCF5\uD55C\uB2E4."
   _action:
   - effect: 3
-    value: 30
+    value: 0.3
   _itemStatus: []
   _isThrow: 0
