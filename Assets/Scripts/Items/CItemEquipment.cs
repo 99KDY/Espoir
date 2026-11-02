@@ -148,6 +148,7 @@ public class CItemEquipment : CItem
             this._itemIcon = targetEquipment.ItemIcon;
             this._rarity = targetEquipment.Rarity;
             this._description = targetEquipment.Description;
+            this._cost = targetEquipment.Cost;
 
             _onCalculate = new List<SStatusOnApply>();
             _equipmentStatus = new List<CStatus>();

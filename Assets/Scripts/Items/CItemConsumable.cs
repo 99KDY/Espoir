@@ -60,7 +60,6 @@ public class CItemConsumable : CItem
                 unit.AddStatus(_itemStatus[i]);
             }
         }
-            
     }
 
     public override bool OnDiscard(CPlayer player, int quantity)
@@ -81,6 +80,7 @@ public class CItemConsumable : CItem
             this._description = targetConsumable.Description;
             this._rarity = targetConsumable.Rarity;
             this._isThrow = targetConsumable.IsThrow;
+            this._cost = targetConsumable.Cost;
 
             _onUse = new List<Action<CUnit>>();
             _itemStatus = new List<CStatus>();
