@@ -152,8 +152,11 @@ public abstract class CUnit : MonoBehaviour
             }
         }
 
+
+
         _hpMax = (_baseHpMax + statConstant[EStatusStats.Hp])
             * statMultiple[EStatusStats.Hp] * statDivide[EStatusStats.Hp];
+        _hpCurrent = Mathf.Min(_hpCurrent, _hpMax);
         _attack = (_baseAttack + statConstant[EStatusStats.Attack])
             * statMultiple[EStatusStats.Attack] * statDivide[EStatusStats.Attack];
         _defence = (_baseDefence + statConstant[EStatusStats.Defence])
@@ -184,6 +187,36 @@ public abstract class CUnit : MonoBehaviour
         }
     }
 
+    public virtual void InvokeOnBattleStart(bool isBossBattle)
+    {
+        if (_status == null || _status.Count == 0) return;
+        for (int i = _status.Count - 1; i >= 0; i--)
+        {
+            if (_status[i].Trigger.HasFlag(EStatusTrigger.OnBattleStart))
+            {
+                for (int j = 0; j < _status[i].OnBattleStart.Count; j++)
+                {
+                    _status[i].OnBattleStart[j](this, isBossBattle);
+                }
+            }
+        }
+    }
+
+    public virtual void InvokeOnBattleEnd(bool isBossBattle)
+    {
+        if (_status == null || _status.Count == 0) return;
+        for (int i = _status.Count - 1; i >= 0; i--)
+        {
+            if (_status[i].Trigger.HasFlag(EStatusTrigger.OnBattleEnd))
+            {
+                for (int j = 0; j < _status[i].OnBattleEnd.Count; j++)
+                {
+                    _status[i].OnBattleEnd[j](this, isBossBattle);
+                }
+            }
+        }
+    }
+
     /// <summary>
     /// 객체가 공격을 받을 때 호출이 되는 함수입니다.]
     /// 일반적으로 defender는 this을 쓰는것도 괜찮습니다.
@@ -195,6 +228,13 @@ public abstract class CUnit : MonoBehaviour
     {
         float finalDamage = DamageCalculate(attacker, defender, damage);
         defender.GetDamage(finalDamage);
+        if (damage.stateOnHit != null && damage.stateOnHit.Count > 0 && finalDamage > 0)
+        {
+            for (int i = 0; i < damage.stateOnHit.Count; i++)
+            {
+                defender.AddStatus(damage.stateOnHit[i].Id);
+            }
+        }
         AfterHit(attacker, defender);
     }
 
@@ -212,32 +252,10 @@ public abstract class CUnit : MonoBehaviour
     protected virtual float DamageCalculate(CUnit attacker, CUnit defender, SDamageInfo damage, out bool isCritical)
     {
         isCritical = false;
-        float finalDamage;
-        switch (damage.ratioSwitch)
-        {
-            case ERatioSwitch.Constant:
-                finalDamage = damage.damage;
-                break;
-            case ERatioSwitch.ByMax:
-                finalDamage = defender.HpMax * damage.damage;
-                break;
-            case ERatioSwitch.ByCurrent:
-                finalDamage = defender.HpCurrent * damage.damage;
-                break;
-            case ERatioSwitch.ByLose:
-                finalDamage = (defender.HpMax - defender.HpCurrent) * damage.damage;
-                break;
-            default:
-                finalDamage = damage.damage;
-                break;
-        }
+        float finalDamage = DamageRatioCaculate(attacker, defender, damage);
         if (damage.enableCritical)
         {
-            if (UnityEngine.Random.value < attacker._critRate)
-            {
-                finalDamage *= attacker._critDmg;
-                isCritical = true;
-            }
+            finalDamage = DamageCriticalCalculate(attacker, finalDamage, out isCritical);
         }
         if (damage.isFixed)
         {   
@@ -245,7 +263,62 @@ public abstract class CUnit : MonoBehaviour
         }
 
         finalDamage = finalDamage * (100f / (100f + Mathf.Max(defender.Defence, -99.9f)));
-        // TODO: 상태이상을 적용해서 대미지 정리하기
+
+        List<CStatus> attackerStatus = new List<CStatus>();
+        List<CStatus> defenderStatus = new List<CStatus>();
+
+        if (attacker is CPlayer attackPlayer)
+        {
+            attackerStatus.AddRange(attackPlayer.EquipmentStatus);
+        }
+        attackerStatus.AddRange(attacker.Status);
+        if (defender is CPlayer defendPlayer)
+        {
+            defenderStatus.AddRange(defendPlayer.EquipmentStatus);
+        }
+        defenderStatus.AddRange(defender.Status);
+
+        for (int i = 0; i < attackerStatus.Count; i++)
+        {
+            if (attackerStatus[i].Trigger.HasFlag(EStatusTrigger.OnAttack))
+            {
+                for (int j = 0; j < attackerStatus[i].OnAttack.Count; j++)
+                {
+                    finalDamage = attackerStatus[i].OnAttack[j](attacker, defender, finalDamage);
+                }
+            }
+        }
+        for (int i = 0; i < defenderStatus.Count; i++)
+        {
+            if (defenderStatus[i].Trigger.HasFlag(EStatusTrigger.OnDefence))
+            {
+                for (int j = 0; j < defenderStatus[i].OnDefence.Count; j++)
+                {
+                    finalDamage = defenderStatus[i].OnDefence[j](attacker, defender, finalDamage);
+                }
+            }
+        }
+        for (int i = 0; i < attackerStatus.Count; i++)
+        {
+            if (attackerStatus[i].Trigger.HasFlag(EStatusTrigger.OnHit))
+            {
+                for (int j = 0; j < attackerStatus[i].OnHit.Count; j++)
+                {
+                    attackerStatus[i].OnHit[j](attacker, defender, finalDamage);
+                }
+            }
+        }
+        for (int i = 0; i < defenderStatus.Count; i++)
+        {
+            if (defenderStatus[i].Trigger.HasFlag(EStatusTrigger.OnDamage))
+            {
+                for (int j = 0; j < defenderStatus[i].OnDamage.Count; j++)
+                {
+                    defenderStatus[i].OnDamage[j](attacker, defender, finalDamage);
+                }
+            }
+        }
+
         return finalDamage;
     }
 
@@ -262,6 +335,33 @@ public abstract class CUnit : MonoBehaviour
     protected virtual float DamageCalculate(CUnit attacker, SDamageInfo damage)
     {
         return DamageCalculate(attacker, this, damage);
+    }
+
+    protected float DamageRatioCaculate(CUnit attacker, CUnit defender, SDamageInfo damage)
+    {
+        switch (damage.ratioSwitch)
+        {
+            case ERatioSwitch.Constant:
+                return damage.damage;
+            case ERatioSwitch.ByMax:
+                return defender.HpMax * damage.damage;
+            case ERatioSwitch.ByCurrent:
+                return defender.HpCurrent * damage.damage;
+            case ERatioSwitch.ByLose:
+                return (defender.HpMax - defender.HpCurrent) * damage.damage;
+            default:
+                return damage.damage;
+        }
+    }
+    protected float DamageCriticalCalculate(CUnit attacker, float damage, out bool isCritical)
+    {
+        isCritical = false;
+        if (UnityEngine.Random.value < attacker._critRate)
+        {
+            isCritical = true;
+            return damage * attacker._critDmg;
+        }
+        return damage;
     }
 
     protected virtual void AfterHit(CUnit attacker, CUnit defender)
@@ -409,21 +509,22 @@ public abstract class CUnit : MonoBehaviour
     public int RemoveStatus(int id, bool removeAll = true)
     {
         if (_status == null || _status.Count == 0) return -1;
-        int temp = 0;
+        int temp = -1;
 
         for (int i = _status.Count - 1; i >= 0; i--)
         {
             if ( _status[i].Id == id)
             {
                 if (temp < _status[i].Stack) temp = _status[i].Stack;
-                if (_status[i].Trigger.HasFlag(EStatusTrigger.OnRemove))
-                {
-                    for (int j = 0; j < _status[i].OnRemove.Count; j++)
-                    {
-                        _status[i].OnRemove[j](this);
-                    }
-                }
+                //if (_status[i].Trigger.HasFlag(EStatusTrigger.OnRemove))
+                //{
+                //    for (int j = 0; j < _status[i].OnRemove.Count; j++)
+                //    {
+                //        _status[i].OnRemove[j](this);
+                //    }
+                //}
                 _status.Remove(_status[i]);
+                ResyncStatus();
                 if (!removeAll) return temp;
             }
         }
@@ -440,14 +541,15 @@ public abstract class CUnit : MonoBehaviour
     {
         if (!_status.Contains(status)) return -1;
         int temp = status.Stack;
-        if (status.Trigger.HasFlag(EStatusTrigger.OnRemove))
-        {
-            for (int i = 0; i < status.OnRemove.Count; i++)
-            {
-                status.OnRemove[i](this);
-            }
-        }
+        //if (status.Trigger.HasFlag(EStatusTrigger.OnRemove))
+        //{
+        //    for (int i = 0; i < status.OnRemove.Count; i++)
+        //    {
+        //        status.OnRemove[i](this);
+        //    }
+        //}
         _status.Remove(status);
+        ResyncStatus();
         return temp;
     }
 }

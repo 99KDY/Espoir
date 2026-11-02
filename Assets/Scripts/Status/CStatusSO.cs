@@ -84,11 +84,21 @@ public class CStatusSO : ScriptableObject
 
     public static CStatusSO Find(int id)
     {
-        return _idToStatus[id];
+        if (_idToStatus.ContainsKey(id)) return _idToStatus[id];
+        else
+        {
+            CLogger.Error($"CStatusSO : 상태이상 ID를 찾을 수 없음 - {id}");
+            return null;
+        }
     }
 
     public static CStatusSO Find(string name)
     {
-        return _stringToStatus[name];
+        if (_stringToStatus.ContainsKey(name)) return _stringToStatus[name];
+        else
+        {
+            CLogger.Error($"CStatusSO : 상태이상 이름을 찾을 수 없음 - {name}");
+            return null;
+        }
     }
 }
