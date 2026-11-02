@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: 405
   _name: "\uD68C\uC624\uB9AC \uC218\uB958\uD0C4"
+  _rarity: 0
   _itemIcon: {fileID: 0}
   _description: "\uB358\uC838\uC11C \uAC15\uB825\uD55C \uBB34\uB825\uD654\uD53C\uD574\uB97C
     \uC90D\uB2C8\uB2E4."
@@ -21,6 +22,6 @@ MonoBehaviour:
   - effect: 0
     value: 0
   _itemStatus:
-  - statusId: 0
+  - statusId: 24
     duration: 0
   _isThrow: 1

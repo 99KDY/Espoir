@@ -15,10 +15,17 @@ MonoBehaviour:
   _id: 303
   _name: "\uBD84\uB178\uC758 \uC794\uC7AC"
   _description: "\uBD84\uB178\uC758 \uC794\uC7AC\uAC00 \uB290\uAEF4\uC9C0\uB294 \uC7A5\uBE44\uC785\uB2C8\uB2E4.\n(2)
-    \n(3) \n(4) "
-  _actionSet2: []
+    \uACF5\uACA9\uB825 +10%\n(3) \uCE58\uBA85\uD0C0\uD53C\uD574 +25%\n(4) \uC783\uC740\uCCB4\uB8252%\uB2F9
+    \uC8FC\uB294\uD53C\uD574 +1%"
+  _actionSet2:
+  - action: 4
+    param: 1.1
   _equipmentStatusSet2: []
-  _actionSet3: []
+  _actionSet3:
+  - action: 9
+    param: 0.25
   _equipmentStatusSet3: []
   _actionSet4: []
-  _equipmentStatusSet4: []
+  _equipmentStatusSet4:
+  - statusId: 23
+    duration: 0
