@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public partial class SceneFlowManager
+public partial class CSceneFlowManager
 {
     [ContextMenu("BuildMaps (Rebuild Catalog)")]
     public void BuildMaps()

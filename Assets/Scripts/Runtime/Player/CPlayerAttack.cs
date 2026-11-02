@@ -7,7 +7,7 @@ public class CPlayerAttack : MonoBehaviour
     [SerializeField] private LayerMask _targetLayer;
     [SerializeField] private CSkillSO _previewSkill;
 
-    private SoundManager _soundManager;
+    private CSoundManager _soundManager;
     private const int _INITIAL_HIT_CAPACITY = 5;
 
     private Collider[] _hitColliders = new Collider[_INITIAL_HIT_CAPACITY];
@@ -20,7 +20,7 @@ public class CPlayerAttack : MonoBehaviour
         {
             CLogger.Warn($"{name}: 공격 대상 레이어가 설정되지 않았습니다.");
         }
-        _soundManager = FindFirstObjectByType<SoundManager>();
+        _soundManager = FindFirstObjectByType<CSoundManager>();
         
         if (_soundManager == null)
         {

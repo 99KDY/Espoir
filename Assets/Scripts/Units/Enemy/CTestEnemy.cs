@@ -50,7 +50,7 @@ public class CTestEnemy : CEnemy
 
     private CPlayer Player => _player;
 
-    private SoundManager _soundManager;
+    private CSoundManager _soundManager;
     private Transform _target;
     private Vector3 _startPos;
 
@@ -90,7 +90,7 @@ public class CTestEnemy : CEnemy
         _startPos = transform.position;
         _animator = GetComponent<Animator>();
         _rb = this.GetComponent<Rigidbody>();
-        _soundManager = FindFirstObjectByType<SoundManager>();
+        _soundManager = FindFirstObjectByType<CSoundManager>();
         if (_soundManager == null)
         {
             CLogger.Warn($"사운드매니저 찾기 실패");
