@@ -130,10 +130,12 @@ public partial class CStatus
     private string _tooltip;
     private Sprite _image;
     private int _stack;
+    private int _maxStack;
     private EStatusStack _stackSwitch;
     private EStatusRemove _removeSwitch;
     private float _initialTimer;
     private float _removeTimer;
+    private float _baseTimer;
     private EStatusTrigger _trigger;
 
     private int _intParam;
@@ -151,6 +153,16 @@ public partial class CStatus
     {
         get { return _stack; }
         set { _stack = value; }
+    }
+    public int MaxStack => _maxStack;
+    public float TimerRatio
+    {
+        get
+        {
+            if (_isPermanent) return 1;
+            if (_baseTimer <= 0) return 1;
+            return _duration / _baseTimer;
+        }
     }
     public EStatusStack StackSwitch => _stackSwitch;
     public EStatusRemove RemoveSwitch => _removeSwitch;
@@ -241,6 +253,7 @@ public partial class CStatus
                     else
                     {
                         _duration = _initialTimer + _duration;
+                        _baseTimer = _initialTimer;
                     }
                     break;
                 case EStatusRemove.RemoveFor:
@@ -252,6 +265,7 @@ public partial class CStatus
                     else
                     {
                         _duration = _removeTimer + _duration;
+                        _baseTimer = _removeTimer;
                     }
                     break;
             }
@@ -276,6 +290,7 @@ public partial class CStatus
         if (t == 0)
         {
             _isPermanent = true;
+            _baseTimer = -1;
             _duration = 0;
         }
         else if (t < 0)
@@ -283,11 +298,13 @@ public partial class CStatus
             if (_initialTimer <= 0)
             {
                 _duration = 0;
+                _baseTimer = -1;
                 _isPermanent = true;
             }
             else
             {
                 _duration = _initialTimer;
+                _baseTimer = _initialTimer;
                 _isPermanent = false;
             }
         }
@@ -295,6 +312,7 @@ public partial class CStatus
         {
             _isPermanent = false;
             _duration = t;
+            _baseTimer = t;
         }
     }
 

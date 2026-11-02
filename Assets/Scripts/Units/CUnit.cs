@@ -446,7 +446,11 @@ public abstract class CUnit : MonoBehaviour
         switch (status.StackSwitch)
         {
             case EStatusStack.StackAndRefresh:
-                currentStatus.Stack += stack;
+                currentStatus.Stack += Mathf.Max(0, stack);
+                if (currentStatus.Stack > currentStatus.MaxStack)
+                {
+                    currentStatus.Stack = currentStatus.MaxStack;
+                }
                 currentStatus.ResetTimer(duration);
                 if (status.Trigger.HasFlag(EStatusTrigger.OnApply))
                 {
