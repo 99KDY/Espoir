@@ -1,5 +1,6 @@
 ﻿using System;
 using Unity.VisualScripting;
+using UnityEngine;
 
 public partial class CStatus
 {
@@ -28,14 +29,14 @@ public partial class CStatus
             }
             else
             {
-                _initialTimer = targetSO.Duration;
+                _initialTimer = Mathf.Max(0.01f, targetSO.Duration);
                 _baseTimer = _initialTimer;
                 _isPermanent = false;
             }
         }
         else
         {
-            _initialTimer = duration;
+            _initialTimer = Mathf.Max(0.01f, duration);
             _baseTimer = _initialTimer;
             _isPermanent = false;
         }
@@ -45,14 +46,16 @@ public partial class CStatus
         _tooltip = targetSO.Tooltip;
         _image = targetSO.Icon;
         _stack = stack > 0 ? stack : 1;
-        _maxStack = targetSO.MaxStack > 0 ? targetSO.MaxStack : 0b1000000000000000;
+        _initialRemoveStack = targetSO.InitialRemoveStack > 0 ? targetSO.InitialRemoveStack : 1;
+        _removeStack = targetSO.RemoveStack > 0 ? targetSO.RemoveStack : 1;
+        _maxStack = targetSO.MaxStack > 0 ? targetSO.MaxStack : 0b1000000000000000; // 32768
         if (_stack > _maxStack)
         {
             _stack = _maxStack;
         }
         _stackSwitch = targetSO.Stack;
         _removeSwitch = targetSO.Remove;
-        _removeTimer = targetSO.StackDuration;
+        _removeTimer = Mathf.Max(0.01f, targetSO.StackDuration);
         _trigger = EStatusTrigger.None;
 
         if (targetSO.ActionList == null || targetSO.ActionList.Count == 0) return;
@@ -67,57 +70,77 @@ public partial class CStatus
                 case EStatusAction.MultiplyHpMax:
                     _trigger |= EStatusTrigger.OnApply;
                     _onApply.Add(
-                            new SStatusOnApply(EStatusStats.Hp, param, false)
+                            new SStatusOnApply(EStatusStats.Hp, param, false, targetAction.applyStack)
                             );
                     break;
                 case EStatusAction.MultiplyAttack:
                     _trigger |= EStatusTrigger.OnApply;
                     _onApply.Add(
-                            new SStatusOnApply(EStatusStats.Attack, param, false)
+                            new SStatusOnApply(EStatusStats.Attack, param, false, targetAction.applyStack)
                             );
                     break;
                 case EStatusAction.MultiplyDefence:
                     _trigger |= EStatusTrigger.OnApply;
                     _onApply.Add(
-                            new SStatusOnApply(EStatusStats.Defence, param, false)
+                            new SStatusOnApply(EStatusStats.Defence, param, false, targetAction.applyStack)
                             );
                     break;
                 case EStatusAction.AddCriticalRate:
                     _trigger |= EStatusTrigger.OnApply;
                     _onApply.Add(
-                            new SStatusOnApply(EStatusStats.CritRate, param, true)
+                            new SStatusOnApply(EStatusStats.CritRate, param, true, targetAction.applyStack)
                             );
                     break;
                 case EStatusAction.MultiplyCriticalRate:
                     _trigger |= EStatusTrigger.OnApply;
                     _onApply.Add(
-                            new SStatusOnApply(EStatusStats.CritRate, param, false)
+                            new SStatusOnApply(EStatusStats.CritRate, param, false, targetAction.applyStack)
                             );
                     break;
                 case EStatusAction.MultiplyCriticalDmg:
                     _trigger |= EStatusTrigger.OnApply;
                     _onApply.Add(
-                            new SStatusOnApply(EStatusStats.CritDmg, param, false)
+                            new SStatusOnApply(EStatusStats.CritDmg, param, false, targetAction.applyStack)
                             );
                     break;
                 case EStatusAction.MultiplyAttackerDamage:
                     _trigger |= EStatusTrigger.OnAttack;
-                    _onAttack.Add((CUnit attacker, CUnit defender, float damage) =>
+                    if (targetAction.applyStack)
                     {
-                        return damage * param;
-                    });
+                        _onAttack.Add((CUnit attacker, CUnit defender, float damage, bool isCritical) =>
+                        {
+                            return Mathf.Max(0, damage * (1f + (param - 1f) * _stack));
+                        });
+                    }
+                    else
+                    {
+                        _onAttack.Add((CUnit attacker, CUnit defender, float damage, bool isCritical) =>
+                        {
+                            return Mathf.Max(0, damage * param);
+                        });
+                    }
                     break;
                 case EStatusAction.MultiplyDefenderDamage:
                     _trigger |= EStatusTrigger.OnDefence;
-                    _onDefence.Add((CUnit attacker, CUnit defender, float damage) =>
+                    if (targetAction.applyStack)
                     {
-                        return damage * param;
-                    });
+                        _onDefence.Add((CUnit attacker, CUnit defender, float damage, bool isCritical) =>
+                        {
+                            return Mathf.Max(0, damage * (1f + (param - 1f) * _stack));
+                        });
+                    }
+                    else
+                    {
+                        _onDefence.Add((CUnit attacker, CUnit defender, float damage, bool isCritical) =>
+                        {
+                            return Mathf.Max(0, damage * param);
+                        });
+                    }
                     break;
                 case EStatusAction.MultiplyMovement:
                     _trigger |= EStatusTrigger.OnApply;
                     _onApply.Add(
-                            new SStatusOnApply(EStatusStats.Movement, param, false)
+                            new SStatusOnApply(EStatusStats.Movement, param, false, targetAction.applyStack)
                             );
                     break;
                 case EStatusAction.Stun:
@@ -127,20 +150,22 @@ public partial class CStatus
                     _trigger |= EStatusTrigger.OnDelta;
                     _onDelta.Add((CUnit unit, float deltaTime) =>
                     {
-                        unit.GetDamage(param * deltaTime, ERatioSwitch.Constant);
+                        unit.GetDamage(param * deltaTime *
+                            (targetAction.applyStack ? _stack : 1), ERatioSwitch.Constant);
                     });
                     break;
                 case EStatusAction.DamageOverTimeByRatio:
                     _trigger |= EStatusTrigger.OnDelta;
                     _onDelta.Add((CUnit unit, float deltaTime) =>
                     {
-                        unit.GetDamage(param * deltaTime, ERatioSwitch.ByMax);
+                        unit.GetDamage(param * deltaTime *
+                            (targetAction.applyStack ? _stack : 1), ERatioSwitch.ByMax);
                     });
                     break;
                 case EStatusAction.MultiplyAttackSpeed:
                     _trigger |= EStatusTrigger.OnApply;
                     _onApply.Add(
-                            new SStatusOnApply(EStatusStats.AttackSpeed, param, false)
+                            new SStatusOnApply(EStatusStats.AttackSpeed, param, false, targetAction.applyStack)
                             );
                     break;
                 case EStatusAction.RemoveWhenBattleOver:

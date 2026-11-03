@@ -24,12 +24,18 @@ MonoBehaviour:
   _duration: 8
   _stack: 0
   _maxStack: 50
-  _remove: 0
-  _stackDuration: 8
+  _remove: 2
+  _initialRemoveStack: 5
+  _removeStack: 1
+  _stackDuration: 1
   _actionList:
   - action: 9
     param: 1.003
+    applyStack: 1
   - action: 2
     param: 1.004
+    applyStack: 1
   - action: 13
     param: 1.003
+    applyStack: 1
+  _customStatus: 0

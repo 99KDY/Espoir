@@ -153,6 +153,14 @@ public class CPlayer : CUnit
             sets[i].OnStatusSync(this);
         }
 
+        for (int i = 0; i < _equipmentStatus.Count; i++)
+        {
+            if (_equipmentStatus[i].Trigger.HasFlag(EStatusTrigger.OnApply))
+            {
+                effects.AddRange(_equipmentStatus[i].OnApply);
+            }
+        }
+
         Dictionary<EStatusStats, float> statConstant = new Dictionary<EStatusStats, float>();
         Dictionary<EStatusStats, float> statMultiple = new Dictionary<EStatusStats, float>();
         Dictionary<EStatusStats, float> statDivide = new Dictionary<EStatusStats, float>();
@@ -217,7 +225,17 @@ public class CPlayer : CUnit
         {
             if (_status[i].Trigger.HasFlag(EStatusTrigger.OnApply))
             {
-                effects.AddRange(_status[i].OnApply);
+                for (int j = 0; j < _status[i].OnApply.Count; j++)
+                {
+                    SStatusOnApply targetEffect = _status[i].OnApply[j];
+                    if (targetEffect.applyStack)
+                    {
+                        if (targetEffect.isConstant) targetEffect.value *= _status[i].Stack;
+                        else targetEffect.value = 1f + ((targetEffect.value - 1f) * _status[i].Stack);
+                        targetEffect.applyStack = false;
+                    }
+                    effects.Add(targetEffect);
+                }
             }
         }
 
