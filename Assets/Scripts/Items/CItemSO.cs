@@ -67,12 +67,12 @@ public class CItemSO : ScriptableObject
                     continue;
                 }
                 _idToItem.Add(targetItem[i]._id, targetItem[i]);
+                _stringToItem.Add(targetItem[i]._name, targetItem[i]);
 
                 #region 테스트 빌드가 끝나면 지울것!
                 if (targetItem[i] is CItemEquipmentSO)
                 {
                     _equipmentPools.Add(targetItem[i]._id);
-                    _stringToItem.Add(targetItem[i]._name, targetItem[i]);
                     if (!_stagePools.ContainsKey(targetItem[i]._id / 100))
                     {
                         _stagePools.Add(targetItem[i]._id / 100, new List<int>());
