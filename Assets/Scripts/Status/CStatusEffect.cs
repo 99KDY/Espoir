@@ -1,0 +1,208 @@
+﻿using System;
+using Unity.VisualScripting;
+using UnityEngine;
+
+public partial class CStatus
+{
+    public void Setup(int id, float duration = -1, int stack = 1)
+    {
+        CStatusSO targetSO = CStatusSO.Find(id);
+        if (targetSO == null)
+        {
+            CLogger.Error($"CStatus : 상태이상 {id}를 찾을 수 없습니다.");
+            return;
+        }
+        _id = targetSO.Id;
+        if (duration == 0)
+        {
+            _initialTimer = 0;
+            _isPermanent = true;
+            _baseTimer = -1;
+        }
+        else if (duration < 0)
+        {
+            if (targetSO.Duration <= 0)
+            {
+                _initialTimer = 0;
+                _isPermanent = true;
+                _baseTimer = -1;
+            }
+            else
+            {
+                _initialTimer = Mathf.Max(0.01f, targetSO.Duration);
+                _baseTimer = _initialTimer;
+                _isPermanent = false;
+            }
+        }
+        else
+        {
+            _initialTimer = Mathf.Max(0.01f, duration);
+            _baseTimer = _initialTimer;
+            _isPermanent = false;
+        }
+        _duration = _initialTimer;
+        _name = targetSO.Name;
+        _description = targetSO.Description;
+        _tooltip = targetSO.Tooltip;
+        _image = targetSO.Icon;
+        _stack = stack > 0 ? stack : 1;
+        _initialRemoveStack = targetSO.InitialRemoveStack > 0 ? targetSO.InitialRemoveStack : 1;
+        _removeStack = targetSO.RemoveStack > 0 ? targetSO.RemoveStack : 1;
+        _maxStack = targetSO.MaxStack > 0 ? targetSO.MaxStack : 0b1000000000000000; // 32768
+        if (_stack > _maxStack)
+        {
+            _stack = _maxStack;
+        }
+        _stackSwitch = targetSO.Stack;
+        _removeSwitch = targetSO.Remove;
+        _removeTimer = Mathf.Max(0.01f, targetSO.StackDuration);
+        _trigger = EStatusTrigger.None;
+
+        if (targetSO.ActionList == null || targetSO.ActionList.Count == 0) return;
+        for (int i = 0; i < targetSO.ActionList.Count; i++)
+        {
+            SStatusAction targetAction = targetSO.ActionList[i];
+            float param = targetAction.param;
+            switch (targetAction.action)
+            {
+                case EStatusAction.None:
+                    break;
+                case EStatusAction.MultiplyHpMax:
+                    _trigger |= EStatusTrigger.OnApply;
+                    _onApply.Add(
+                            new SStatusOnApply(EStatusStats.Hp, param, false, targetAction.applyStack)
+                            );
+                    break;
+                case EStatusAction.MultiplyAttack:
+                    _trigger |= EStatusTrigger.OnApply;
+                    _onApply.Add(
+                            new SStatusOnApply(EStatusStats.Attack, param, false, targetAction.applyStack)
+                            );
+                    break;
+                case EStatusAction.MultiplyDefence:
+                    _trigger |= EStatusTrigger.OnApply;
+                    _onApply.Add(
+                            new SStatusOnApply(EStatusStats.Defence, param, false, targetAction.applyStack)
+                            );
+                    break;
+                case EStatusAction.AddCriticalRate:
+                    _trigger |= EStatusTrigger.OnApply;
+                    _onApply.Add(
+                            new SStatusOnApply(EStatusStats.CritRate, param, true, targetAction.applyStack)
+                            );
+                    break;
+                case EStatusAction.MultiplyCriticalRate:
+                    _trigger |= EStatusTrigger.OnApply;
+                    _onApply.Add(
+                            new SStatusOnApply(EStatusStats.CritRate, param, false, targetAction.applyStack)
+                            );
+                    break;
+                case EStatusAction.MultiplyCriticalDmg:
+                    _trigger |= EStatusTrigger.OnApply;
+                    _onApply.Add(
+                            new SStatusOnApply(EStatusStats.CritDmg, param, false, targetAction.applyStack)
+                            );
+                    break;
+                case EStatusAction.MultiplyAttackerDamage:
+                    _trigger |= EStatusTrigger.OnAttack;
+                    if (targetAction.applyStack)
+                    {
+                        _onAttack.Add((CUnit attacker, CUnit defender, float damage, bool isCritical) =>
+                        {
+                            return Mathf.Max(0, damage * (1f + (param - 1f) * _stack));
+                        });
+                    }
+                    else
+                    {
+                        _onAttack.Add((CUnit attacker, CUnit defender, float damage, bool isCritical) =>
+                        {
+                            return Mathf.Max(0, damage * param);
+                        });
+                    }
+                    break;
+                case EStatusAction.MultiplyDefenderDamage:
+                    _trigger |= EStatusTrigger.OnDefence;
+                    if (targetAction.applyStack)
+                    {
+                        _onDefence.Add((CUnit attacker, CUnit defender, float damage, bool isCritical) =>
+                        {
+                            return Mathf.Max(0, damage * (1f + (param - 1f) * _stack));
+                        });
+                    }
+                    else
+                    {
+                        _onDefence.Add((CUnit attacker, CUnit defender, float damage, bool isCritical) =>
+                        {
+                            return Mathf.Max(0, damage * param);
+                        });
+                    }
+                    break;
+                case EStatusAction.MultiplyMovement:
+                    _trigger |= EStatusTrigger.OnApply;
+                    _onApply.Add(
+                            new SStatusOnApply(EStatusStats.Movement, param, false, targetAction.applyStack)
+                            );
+                    break;
+                case EStatusAction.Stun:
+                    _trigger |= EStatusTrigger.IsStun;
+                    break;
+                case EStatusAction.DamageOverTime:
+                    _trigger |= EStatusTrigger.OnDelta;
+                    _onDelta.Add((CUnit unit, float deltaTime) =>
+                    {
+                        unit.GetDamage(param * deltaTime *
+                            (targetAction.applyStack ? _stack : 1), ERatioSwitch.Constant);
+                    });
+                    break;
+                case EStatusAction.DamageOverTimeByRatio:
+                    _trigger |= EStatusTrigger.OnDelta;
+                    _onDelta.Add((CUnit unit, float deltaTime) =>
+                    {
+                        unit.GetDamage(param * deltaTime *
+                            (targetAction.applyStack ? _stack : 1), ERatioSwitch.ByMax);
+                    });
+                    break;
+                case EStatusAction.MultiplyAttackSpeed:
+                    _trigger |= EStatusTrigger.OnApply;
+                    _onApply.Add(
+                            new SStatusOnApply(EStatusStats.AttackSpeed, param, false, targetAction.applyStack)
+                            );
+                    break;
+                case EStatusAction.RemoveWhenBattleOver:
+                    _trigger |= EStatusTrigger.OnBattleEnd;
+                    _onBattleEnd.Add((CUnit unit, bool onlyBoss) =>
+                    {
+                        unit.RemoveStatus(this);
+                    });
+                    break;
+            }
+        }
+
+        if (targetSO.CustomStatus > 0)
+        {
+            SetCustomStatus(targetSO.CustomStatus);
+        }
+
+        return;
+    }
+
+    private void SetCustomStatus(int customStatus)
+    {
+        switch (customStatus)
+        {
+            case 0:
+                break;
+            case 1:
+                break;
+            case 2:
+                break;
+            case 3:
+                break;
+            case 4:
+                break;
+            default:
+                CLogger.Error($"CStatus : 알 수 없는 커스텀 상태이상 {customStatus}");
+                break;
+        }
+    }
+}

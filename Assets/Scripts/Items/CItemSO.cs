@@ -1,16 +1,21 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
+
 public class CItemSO : ScriptableObject
 {
     [Tooltip("아이템 id")]
     [SerializeField] protected int _id;
     [Tooltip("아이템 이름")]
     [SerializeField] protected string _name;
+    [Tooltip("아이템 레어도")]
+    [SerializeField] protected EItemRarity _rarity;
     [Tooltip("아이템 아이콘")]
     [SerializeField] protected Sprite _itemIcon;
     [Tooltip("아이템 설명")]
     [SerializeField][TextArea(1, 5)] protected string _description;
+    [Tooltip("아이템 가격")]
+    [SerializeField] protected int _cost;
 
     private static Dictionary<int, CItemSO> _idToItem = new Dictionary<int, CItemSO>();
     private static Dictionary<string, CItemSO> _stringToItem = new Dictionary<string, CItemSO>();
@@ -22,6 +27,8 @@ public class CItemSO : ScriptableObject
     public string Name => _name;
     public Sprite ItemIcon => _itemIcon;
     public string Description => _description;
+    public int Cost => _cost;
+    public EItemRarity Rarity => _rarity;
 
     public static void Build(bool force = false)
     {

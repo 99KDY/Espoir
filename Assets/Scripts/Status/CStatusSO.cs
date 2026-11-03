@@ -21,27 +21,37 @@ public class CStatusSO : ScriptableObject
     [SerializeField] private float _duration;
     [Tooltip("상태이상 갱신 스타일")]
     [SerializeField] private EStatusStack _stack;
+    [Tooltip("상태이상 최대 스택 수")]
+    [SerializeField] private int _maxStack;
     [Tooltip("스택 제거 방식")]
     [SerializeField] private EStatusRemove _remove;
+    [Tooltip("최초 스택 감소수")]
+    [SerializeField] private int _initialRemoveStack;
+    [Tooltip("스택 감소수")]
+    [SerializeField] private int _removeStack;
     [Tooltip("스택 제거 타이머")]
     [SerializeField] private float _stackDuration;
     [Tooltip("상태이상 효과")]
     [SerializeField] private List<SStatusAction> _actionList;
+    [Tooltip("커스텀 상태이상 (0이면 없음)")]
+    [SerializeField] private int _customStatus = 0;
 
     #region Member Property
     public int Id => _id;
     public string Name => _name;
     public string Description => _description;
     public string Tooltip => _tooltip;
+    public Sprite Icon => _icon;
     public float Duration => _duration;
     public EStatusStack Stack => _stack;
+    public int MaxStack => _maxStack;
+    public int InitialRemoveStack => _initialRemoveStack;
+    public int RemoveStack => _removeStack;
     public EStatusRemove Remove => _remove;
     public float StackDuration => _stackDuration;
     public IReadOnlyList<SStatusAction> ActionList => _actionList;
+    public int CustomStatus => _customStatus;
     #endregion
-
-
-
 
     private static Dictionary<int, CStatusSO> _idToStatus = new Dictionary<int, CStatusSO>();
     private static Dictionary<string, CStatusSO> _stringToStatus = new Dictionary<string, CStatusSO>();
@@ -83,11 +93,21 @@ public class CStatusSO : ScriptableObject
 
     public static CStatusSO Find(int id)
     {
-        return _idToStatus[id];
+        if (_idToStatus.ContainsKey(id)) return _idToStatus[id];
+        else
+        {
+            CLogger.Error($"CStatusSO : 상태이상 ID를 찾을 수 없음 - {id}");
+            return null;
+        }
     }
 
     public static CStatusSO Find(string name)
     {
-        return _stringToStatus[name];
+        if (_stringToStatus.ContainsKey(name)) return _stringToStatus[name];
+        else
+        {
+            CLogger.Error($"CStatusSO : 상태이상 이름을 찾을 수 없음 - {name}");
+            return null;
+        }
     }
 }

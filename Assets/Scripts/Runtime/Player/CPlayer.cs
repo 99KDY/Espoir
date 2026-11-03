@@ -25,6 +25,13 @@ public class CPlayer : CUnit
     [SerializeField] private InputActionReference _dashInput;
     [SerializeField] private SSkillSlot[] _skillSlots;
 
+    [Header("MP 설정")]
+    [SerializeField, Min(1)] private int _maxMp = 150;
+    [SerializeField, Min(0)] private int _mpPerBasicHit = 5;
+
+    [Header("패시브 설정")]
+    [SerializeField] private CPlayerPassive _passive = new CPlayerPassive();
+
     private CPlayerMovement _movement;
     private CPlayerSkill _skill;
     private Dictionary<EEquipmentSlot, CItemEquipment> _equipment = new Dictionary<EEquipmentSlot, CItemEquipment>();
@@ -37,6 +44,13 @@ public class CPlayer : CUnit
 
     protected float _critRateBaseline = 0.05f;
     protected float _critDmgBaseline = 1.5f;
+
+    protected float _movementBaseline = 1f;
+    protected float _attackSpeedBaseline = 1f;
+
+    public int CurrentMp { get; private set; }
+    public float AttackSpeedMultiplier => _attackSpeedMultiply;
+    internal CPlayerPassive Passive => _passive;
 
     public Dictionary<EEquipmentSlot, CItemEquipment> Equipment
     {
@@ -83,29 +97,7 @@ public class CPlayer : CUnit
 
     public void EquipmentResync()
     {
-        if (_equipmentStatus != null && _equipmentStatus.Count > 0)
-        {
-            for (int i = 0; i < _equipmentStatus.Count; i++)
-            {
-                if (!_equipmentStatus[i].Trigger.HasFlag(EStatusTrigger.OnRemove)) continue;
-                for (int j = 0; j < _equipmentStatus[i].OnRemove.Count; j++)
-                {
-                    _equipmentStatus[i].OnRemove[j](this);
-                }
-            }
-        }
-        if (_status != null && _status.Count > 0)
-        {
-            for (int i = 0; i < _status.Count; i++)
-            {
-                if (!_status[i].Trigger.HasFlag(EStatusTrigger.OnRemove)) continue;
-                for (int j = 0; j < _status[i].OnRemove.Count; j++)
-                {
-                    _status[i].OnRemove[j](this);
-                }
-            }
-        }
-
+        float hpRatio = HpCurrent / HpMax;
         _equipmentStatus.Clear();
 
         _hpMaxBaseline = _baseHpMax;
@@ -113,6 +105,8 @@ public class CPlayer : CUnit
         _defenceBaseline = _baseDefence;
         _critRateBaseline = 0.05f;
         _critDmgBaseline = 1.5f;
+        _movementBaseline = 1f;
+        _attackSpeedBaseline = 1f;
 
         Dictionary<int, int> equipmentSet = new Dictionary<int, int>();
         List<CItemEquipment> equipments = new List<CItemEquipment>(_equipment.Values);
@@ -129,7 +123,6 @@ public class CPlayer : CUnit
                     equipmentSet[equipments[i].SetNumber] = 1;
                 }
             }
-            equipments[i].OnEarlySync(this);
         }
 
         List<CSet> sets = new List<CSet>();
@@ -141,18 +134,16 @@ public class CPlayer : CUnit
             }
         }
 
-        for (int i = 0; i < sets.Count; i++)
-        {
-            sets[i].OnEarlySync(this);
-        }
+        List<SStatusOnApply> effects = new List<SStatusOnApply>();
         for (int i = 0; i < equipments.Count; i++)
         {
-            equipments[i].OnLateSync(this);
+            effects.AddRange(equipments[i].OnSync());
         }
         for (int i = 0; i < sets.Count; i++)
         {
-            sets[i].OnLateSync(this);
+            effects.AddRange(sets[i].OnSync());
         }
+
         for (int i = 0; i < equipments.Count; i++)
         {
             equipments[i].OnStatusSync(this);
@@ -161,41 +152,234 @@ public class CPlayer : CUnit
         {
             sets[i].OnStatusSync(this);
         }
-        _hpMax = _hpMaxBaseline;
-        _attack = _attackBaseline;
-        _defence = _defenceBaseline;
-        _critRate = _critRateBaseline;
-        _critDmg = _critDmgBaseline;
-        if (_equipmentStatus != null && _equipmentStatus.Count > 0)
+
+        for (int i = 0; i < _equipmentStatus.Count; i++)
         {
-            for (int i = 0; i < _equipmentStatus.Count; i++)
+            if (_equipmentStatus[i].Trigger.HasFlag(EStatusTrigger.OnApply))
             {
-                if (!_equipmentStatus[i].Trigger.HasFlag(EStatusTrigger.OnApply)) continue;
-                for (int j = 0; j < _equipmentStatus[i].OnApply.Count; j++)
+                effects.AddRange(_equipmentStatus[i].OnApply);
+            }
+        }
+
+        Dictionary<EStatusStats, float> statConstant = new Dictionary<EStatusStats, float>();
+        Dictionary<EStatusStats, float> statMultiple = new Dictionary<EStatusStats, float>();
+        Dictionary<EStatusStats, float> statDivide = new Dictionary<EStatusStats, float>();
+        foreach(EStatusStats stat in Enum.GetValues(typeof(EStatusStats)))
+        {
+            statConstant.Add(stat, 0f);
+            statMultiple.Add(stat, 1f);
+            statDivide.Add(stat, 1f);
+        }
+
+        for(int i = 0; i < effects.Count; i++)
+        {
+            if (effects[i].isConstant)
+            {
+                statConstant[effects[i].target] += effects[i].value;
+            }
+            else
+            {
+                if (effects[i].value < 1f)
                 {
-                    _equipmentStatus[i].OnApply[j](this);
+                    statDivide[effects[i].target] *= effects[i].value;
+                }
+                else
+                {
+                    statMultiple[effects[i].target] += effects[i].value - 1f;
                 }
             }
         }
 
-        if (_status != null && _status.Count > 0)
+        _hpMaxBaseline = (_baseHpMax + statConstant[EStatusStats.Hp])
+            * statMultiple[EStatusStats.Hp] * statDivide[EStatusStats.Hp];
+        _attackBaseline = (_baseAttack + statConstant[EStatusStats.Attack])
+            * statMultiple[EStatusStats.Attack] * statDivide[EStatusStats.Attack];
+        _defenceBaseline = (_baseDefence + statConstant[EStatusStats.Defence])
+            * statMultiple[EStatusStats.Defence] * statDivide[EStatusStats.Defence];
+        _critRateBaseline = (0.05f + statConstant[EStatusStats.CritRate])
+            * statMultiple[EStatusStats.CritRate] * statDivide[EStatusStats.CritRate];
+        _critDmgBaseline = (1.5f + statConstant[EStatusStats.CritDmg])
+            * statMultiple[EStatusStats.CritDmg] * statDivide[EStatusStats.CritDmg];
+        _movementBaseline = (1f + statConstant[EStatusStats.Movement])
+            * statMultiple[EStatusStats.Movement] * statDivide[EStatusStats.Movement];
+        _attackSpeedBaseline = (1f + statConstant[EStatusStats.AttackSpeed])
+            * statMultiple[EStatusStats.AttackSpeed] * statDivide[EStatusStats.AttackSpeed];
+
+        _hpMax = _hpMaxBaseline;
+        _hpCurrent = _hpMax * hpRatio;
+        _attack = _attackBaseline;
+        _defence = _defenceBaseline;
+        _critRate = _critRateBaseline;
+        _critDmg = _critDmgBaseline;
+        _movementMultiply = _movementBaseline;
+        _attackSpeedMultiply = _attackSpeedBaseline;
+
+        ResyncStatus();
+    }
+
+    public override void ResyncStatus()
+    {
+        List<SStatusOnApply> effects = new List<SStatusOnApply>();
+
+        for (int i = 0; i < _status.Count; i++)
         {
-            for (int i = 0; i < _status.Count; i++)
+            if (_status[i].Trigger.HasFlag(EStatusTrigger.OnApply))
             {
-                if (!_status[i].Trigger.HasFlag(EStatusTrigger.OnApply)) continue;
-                for (int j = 0; j < _status[i].OnRemove.Count; j++)
+                for (int j = 0; j < _status[i].OnApply.Count; j++)
                 {
-                    _status[i].OnApply[j](this);
+                    SStatusOnApply targetEffect = _status[i].OnApply[j];
+                    if (targetEffect.applyStack)
+                    {
+                        if (targetEffect.isConstant) targetEffect.value *= _status[i].Stack;
+                        else targetEffect.value = 1f + ((targetEffect.value - 1f) * _status[i].Stack);
+                        targetEffect.applyStack = false;
+                    }
+                    effects.Add(targetEffect);
                 }
             }
         }
+
+        Dictionary<EStatusStats, float> statConstant = new Dictionary<EStatusStats, float>();
+        Dictionary<EStatusStats, float> statMultiple = new Dictionary<EStatusStats, float>();
+        Dictionary<EStatusStats, float> statDivide = new Dictionary<EStatusStats, float>();
+        foreach (EStatusStats stat in Enum.GetValues(typeof(EStatusStats)))
+        {
+            statConstant.Add(stat, 0f);
+            statMultiple.Add(stat, 1f);
+            statDivide.Add(stat, 1f);
+        }
+
+        for (int i = 0; i < effects.Count; i++)
+        {
+            if (effects[i].isConstant)
+            {
+                statConstant[effects[i].target] += effects[i].value;
+            }
+            else
+            {
+                if (effects[i].value < 1f)
+                {
+                    statDivide[effects[i].target] *= effects[i].value;
+                }
+                else
+                {
+                    statMultiple[effects[i].target] += effects[i].value - 1f;
+                }
+            }
+        }
+
+        _hpMax = (_hpMaxBaseline + statConstant[EStatusStats.Hp])
+            * statMultiple[EStatusStats.Hp] * statDivide[EStatusStats.Hp];
+        _hpCurrent = Mathf.Min(_hpCurrent, _hpMax);
+        _attack = (_attackBaseline + statConstant[EStatusStats.Attack])
+            * statMultiple[EStatusStats.Attack] * statDivide[EStatusStats.Attack];
+        _defence = (_defenceBaseline + statConstant[EStatusStats.Defence])
+            * statMultiple[EStatusStats.Defence] * statDivide[EStatusStats.Defence];
+        _critRate = (_critRateBaseline + statConstant[EStatusStats.CritRate])
+            * statMultiple[EStatusStats.CritRate] * statDivide[EStatusStats.CritRate];
+        _critDmg = (_critDmgBaseline + statConstant[EStatusStats.CritDmg])
+            * statMultiple[EStatusStats.CritDmg] * statDivide[EStatusStats.CritDmg];
+        _movementMultiply = (_movementBaseline + statConstant[EStatusStats.Movement])
+            * statMultiple[EStatusStats.Movement] * statDivide[EStatusStats.Movement];
+        _attackSpeedMultiply = (_attackSpeedBaseline + statConstant[EStatusStats.AttackSpeed])
+            * statMultiple[EStatusStats.AttackSpeed] * statDivide[EStatusStats.AttackSpeed];
+    }
+
+    public override void InvokeOnDelta(float t)
+    {
+        if (!(_equipmentStatus == null || _equipmentStatus.Count == 0))
+        {
+            for (int i = _equipmentStatus.Count - 1; i >= 0; i--)
+            {
+                if (_equipmentStatus[i].Trigger.HasFlag(EStatusTrigger.OnDelta))
+                {
+                    for (int j = 0; j < _equipmentStatus[i].OnDelta.Count; j++)
+                    {
+                        _equipmentStatus[i].OnDelta[j](this, t);
+                    }
+                }
+            }
+        }
+        base.InvokeOnDelta(t);
+    }
+
+    public override void InvokeOnBattleStart(bool isBossBattle)
+    {
+        if (!(_equipmentStatus == null || _equipmentStatus.Count == 0))
+        {
+            for (int i = _equipmentStatus.Count - 1; i >= 0; i--)
+            {
+                if (_equipmentStatus[i].Trigger.HasFlag(EStatusTrigger.OnBattleStart))
+                {
+                    for (int j = 0; j < _equipmentStatus[i].OnBattleStart.Count; j++)
+                    {
+                        _equipmentStatus[i].OnBattleStart[j](this, isBossBattle);
+                    }
+                }
+            }
+        }
+        base.InvokeOnBattleStart(isBossBattle);
+    }
+
+    public override void InvokeOnBattleEnd(bool isBossBattle)
+    {
+        if (!(_equipmentStatus == null || _equipmentStatus.Count == 0))
+        {
+            for (int i = _equipmentStatus.Count - 1; i >= 0; i--)
+            {
+                if (_equipmentStatus[i].Trigger.HasFlag(EStatusTrigger.OnBattleEnd))
+                {
+                    for (int j = 0; j < _equipmentStatus[i].OnBattleEnd.Count; j++)
+                    {
+                        _equipmentStatus[i].OnBattleEnd[j](this, isBossBattle);
+                    }
+                }
+            }
+        }
+        base.InvokeOnBattleEnd(isBossBattle);
     }
 
     protected override void Awake()
     {
         base.Awake();
+        CStatusSO.Build(false);
         _movement = GetComponent<CPlayerMovement>();
         _skill = GetComponent<CPlayerSkill>();
+    }
+
+    /// <summary>
+    /// 기본 공격 한 번이 적중했을 때 MP를 회복합니다.
+    /// </summary>
+
+    public void RecoverBasicAttackMp()
+    {
+        CurrentMp = Mathf.Min(CurrentMp + _mpPerBasicHit, _maxMp);
+    }
+
+    internal bool TrySpendMp(int cost)
+    {
+        if (cost > CurrentMp)
+        {
+            return false;
+        }
+
+        CurrentMp -= cost;
+        return true;
+    }
+
+    /// <summary>
+    /// 적의 공격으로 체력이 감소하면 전투의 흐름을 차감합니다.
+    /// </summary>
+
+    public override void OnHit(CUnit attacker, CUnit defender, SDamageInfo damage)
+    {
+        float previousHp = HpCurrent;
+        base.OnHit(attacker, defender, damage);
+
+        if (defender == this && HpCurrent < previousHp)
+        {
+            _passive.OnPlayerDamaged(this);
+        }
     }
 
     private void OnEnable()
@@ -256,6 +440,8 @@ public class CPlayer : CUnit
             return;
         }
 
+        EquipmentResync();
+
         if (_skillSlots == null)
         {
             return;
@@ -274,8 +460,9 @@ public class CPlayer : CUnit
         }
     }
 
-    private void Update()
+    protected override void Update()
     {
+        base.Update();
         _movement.ApplyGravity();
 
         if (HpCurrent <= 0f)
@@ -329,7 +516,7 @@ public class CPlayer : CUnit
             _movement.SetMoveTarget(position);
         }
 
-        _movement.Move();
+        _movement.Move(_movementMultiply);
     }
 
     private Vector3 GetAttackDirection()

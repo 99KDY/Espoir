@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class CSceneBgm : MonoBehaviour
 {
@@ -6,12 +6,12 @@ public class CSceneBgm : MonoBehaviour
 
     private void Start()
     {
-        if (SoundManager.Instance == null)
+        if (CSoundManager.Instance == null)
         {
             CLogger.Error($"{name}: SoundManager가 연결되지 않았습니다.");
             return;
         }
 
-        SoundManager.Instance.PlayBGM(_backgroundSound);
+        CSoundManager.Instance.PlayBGM(_backgroundSound);
     }
 }

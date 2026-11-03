@@ -4,6 +4,33 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+public enum EStatusStats
+{
+    Hp = 0,
+    Attack = 1,
+    Defence = 2,
+    CritRate = 3,
+    CritDmg = 4,
+    Movement = 5,
+    AttackSpeed = 6,
+}
+
+public struct SStatusOnApply
+{
+    public EStatusStats target;
+    public float value;
+    public bool isConstant;
+    public bool applyStack;
+
+    public SStatusOnApply(EStatusStats target, float value, bool isConstant, bool applyStack = false)
+    {
+        this.target = target;
+        this.value = value;
+        this.isConstant = isConstant;
+        this.applyStack = applyStack;
+    }
+}
+
 public enum EStatusStack
 {
     [InspectorName("스택이 쌓이고, 지속시간이 갱신됨")]
@@ -32,11 +59,14 @@ public enum EStatusTrigger
     // 트리거 플래그
     OnEquip = 1 << 0,   // (Deprecated) 장비로서 적용되는 경우
     OnApply = 1 << 1,   // 적용될 때 적용되는 효과가 있는 경우
-    OnRemove = 1 << 2,  // 사라질 때 적용되는 효과가 있는 경우 (Apply한거 있으면 여기서 해제해야함!
+    OnRemove = 1 << 2,  // (Deprecated) 사라질 때 적용되는 효과가 있는 경우
     OnAttack = 1 << 3,  // 공격할 때 적용되는 효과가 있는 경우
     OnDefence = 1 << 4, // 방어할 때 적용되는 효과가 있는 경우
-    OnDelta = 1 << 5,   // Time.deltaTime마다 적용되는 효과가 있는 경우
-    OnBattleEnd = 1 << 6, // 전투가 끝날 때 적용되는 효과가 있는 경우 (그냥 상태이상 해제용)
+    OnHit = 1 << 5,  // 대미지 연산이 끝난 후, 대미지가 들어갈 때 적용되는 효과가 있는 경우
+    OnDamage = 1 << 6, // 대미지 연산이 끝난 후, 대미지가 들어올 때 적용되는 효과가 있는 경우
+    OnDelta = 1 << 7,   // Time.deltaTime마다 적용되는 효과가 있는 경우
+    OnBattleStart = 1 << 8, // 전투가 끝날 때 적용되는 효과가 있는 경우 (그냥 상태이상 해제용)
+    OnBattleEnd = 1 << 9, // 전투가 끝날 때 적용되는 효과가 있는 경우 (그냥 상태이상 해제용)
     // 효과 플래그
     IsStun = 1 << 16    // 기절 계열
 }
@@ -70,14 +100,8 @@ public enum EStatusAction
     DamageOverTimeByRatio,
     [InspectorName("공격속도 변화")]
     MultiplyAttackSpeed,
-    [InspectorName("커스텀 - OnApply")]
-    CustomActionOnApply,
-    [InspectorName("커스텀 - OnAttack")]
-    CustomActionOnAttack,
-    [InspectorName("커스텀 - OnDefence")]
-    CustomActionOnDefence,
-    [InspectorName("커스텀 - OnDelta")]
-    CustomActionOnDelta,
+    [InspectorName("전투 종료시 제거")]
+    RemoveWhenBattleOver,
 }
 
 [Serializable]
@@ -86,6 +110,8 @@ public struct SStatusAction
     public EStatusAction action;
     [Tooltip("비율은 증가시 1.xx 감소시 0.xx로!")]
     public float param;
+    [Tooltip("스택만큼 적용되게 할지?")]
+    public bool applyStack;
 }
 
 [Serializable]
@@ -102,39 +128,69 @@ public partial class CStatus
 {
     private int _id;
     private float _duration;
+    private bool _isPermanent;
     private string _name;
     private string _description;
     private string _tooltip;
-    private Image _image;
+    private Sprite _image;
     private int _stack;
+    private int _maxStack;
     private EStatusStack _stackSwitch;
     private EStatusRemove _removeSwitch;
+    private float _initialTimer;
     private float _removeTimer;
+    private float _baseTimer;
+    private int _initialRemoveStack;
+    private int _removeStack;
+    private bool _isStackRemoving = false;
     private EStatusTrigger _trigger;
+
+    private int _intParam;
+    private float _floatParam;
+    private float _timerParam;
+    private bool _boolParam;
 
     public int Id => _id;
     public float Duration => _duration;
     public string Name => _name;
     public string Description => _description;
     public string Tooltip => _tooltip;
-    public Image Image => _image;
+    public Sprite Image => _image;
     public int Stack
     {
         get { return _stack; }
         set { _stack = value; }
     }
+    public int MaxStack => _maxStack;
+    public float TimerRatio
+    {
+        get
+        {
+            if (_isPermanent) return 1;
+            if (_baseTimer <= 0) return 1;
+            return _duration / _baseTimer;
+        }
+    }
     public EStatusStack StackSwitch => _stackSwitch;
     public EStatusRemove RemoveSwitch => _removeSwitch;
     public float RemoveTimer => _removeTimer;
     public EStatusTrigger Trigger => _trigger;
+    public bool IsStackRemoving
+    {
+        get { return _isStackRemoving; }
+        set { _isStackRemoving = value; }
+    }
 
 
     // private List<Action<CUnit>> _onEquip = new List<Action<CUnit>>();
-    private List<Action<CUnit>> _onApply = new List<Action<CUnit>>();
-    private List<Action<CUnit>> _onRemove = new List<Action<CUnit>>();
-    private List<Func<CUnit, CUnit, float, float>> _onAttack = new List<Func<CUnit, CUnit, float, float>>();
-    private List<Func<CUnit, CUnit, float, float>> _onDefence = new List<Func<CUnit, CUnit, float, float>>();
-    private List<Action<CUnit>> _onDelta = new List<Action<CUnit>>();
+    private List<SStatusOnApply> _onApply = new List<SStatusOnApply>();
+    private List<Action<CUnit>> _onRemove = new List<Action<CUnit>>(); // Deprecated
+    private List<Func<CUnit, CUnit, float, bool, float>> _onAttack = new List<Func<CUnit, CUnit, float, bool, float>>();
+    private List<Func<CUnit, CUnit, float, bool, float>> _onDefence = new List<Func<CUnit, CUnit, float, bool, float>>();
+    private List<Action<CUnit, CUnit, float>> _onHit = new List<Action<CUnit, CUnit, float>>();
+    private List<Action<CUnit, CUnit, float>> _onDamage = new List<Action<CUnit, CUnit, float>>();
+    private List<Action<CUnit, float>> _onDelta = new List<Action<CUnit, float>>();
+    private List<Action<CUnit, bool>> _onBattleStart = new List<Action<CUnit, bool>>();
     private List<Action<CUnit, bool>> _onBattleEnd = new List<Action<CUnit, bool>>();
 
     //public List<Action<CUnit>> OnEquip
@@ -142,7 +198,7 @@ public partial class CStatus
     //    get => _onEquip;
     //}
 
-    public List<Action<CUnit>> OnApply
+    public List<SStatusOnApply> OnApply
     {
         get => _onApply;
     }
@@ -152,29 +208,87 @@ public partial class CStatus
         get => _onRemove;
     }
 
-    public List<Func<CUnit, CUnit, float, float>> OnAttack
+    public List<Func<CUnit, CUnit, float, bool, float>> OnAttack
     {
         get => _onAttack;
     }
 
-    public List<Func<CUnit, CUnit, float, float>> OnDefence
+    public List<Func<CUnit, CUnit, float, bool, float>> OnDefence
     {
         get => _onDefence;
     }
+    public List<Action<CUnit, CUnit, float>> OnHit
+    {
+        get => _onHit;
+    }
 
-    public List<Action<CUnit>> OnDelta
+    public List<Action<CUnit, CUnit, float>> OnDamage
+    {
+        get => _onDamage;
+    }
+
+    public List<Action<CUnit, float>> OnDelta
     {
         get => _onDelta;
     }
-
-    public void OnDuration(float time)
+    public List<Action<CUnit, bool>> OnBattleStart
     {
-
+        get => _onBattleStart;
     }
-
-    private List<Action<CUnit, bool>> OnBattleEnd
+    public List<Action<CUnit, bool>> OnBattleEnd
     {
         get => _onBattleEnd;
+    }
+
+    public CStatus(int id, float duration, int stack)
+    {
+        Setup(id, duration, stack);
+    }
+
+    public void OnDuration(CUnit target, float time)
+    {
+        if (_isPermanent) return;
+        _duration -= time;
+        while (_duration < 0)
+        {
+            switch (_removeSwitch)
+            {
+                case EStatusRemove.RemoveAll:
+                    target.RemoveStatus(this);
+                    return;
+                case EStatusRemove.RemoveOne:
+                    _stack -= _isStackRemoving ? _removeStack : _initialRemoveStack;
+                    _isStackRemoving = true;
+                    if (_stack <= 0)
+                    {
+                        target.RemoveStatus(this);
+                        return;
+                    }
+                    else
+                    {
+                        _duration = _initialTimer + _duration;
+                        _baseTimer = _initialTimer;
+                        target.ResyncStatus();
+                    }
+                    break;
+                case EStatusRemove.RemoveFor:
+                    _stack -= _isStackRemoving ? _removeStack : _initialRemoveStack;
+                    _isStackRemoving = true;
+                    if (_stack <= 0)
+                    {
+                        target.RemoveStatus(this);
+                        return;
+                    }
+                    else
+                    {
+                        _duration = _removeTimer + _duration;
+                        _baseTimer = _removeTimer;
+                        target.ResyncStatus();
+                    }
+                    break;
+            }
+        }
+
     }
 
     public static CStatus MakeStatus(SStatusApply targetStatus, int stack = 1)
@@ -185,19 +299,39 @@ public partial class CStatus
 
     public static CStatus MakeStatus(int id, float duration = -1, int stack = 1)
     {
-        CStatus status = new CStatus();
-        status.Setup(id, duration, stack);
+        CStatus status = new CStatus(id, duration, stack);
         return status;
     }
 
     public void ResetTimer(float t = -1)
     {
-        
+        if (t == 0)
+        {
+            _isPermanent = true;
+            _baseTimer = -1;
+            _duration = 0;
+        }
+        else if (t < 0)
+        {
+            if (_initialTimer <= 0)
+            {
+                _duration = 0;
+                _baseTimer = -1;
+                _isPermanent = true;
+            }
+            else
+            {
+                _duration = _initialTimer;
+                _baseTimer = _initialTimer;
+                _isPermanent = false;
+            }
+        }
+        else
+        {
+            _isPermanent = false;
+            _duration = t;
+            _baseTimer = t;
+        }
     }
 
-    public void Setup(int id, float duration = -1, int stack = 1)
-    {
-        CStatusSO targetSO = CStatusSO.Find(id);
-        return;
-    }
 }

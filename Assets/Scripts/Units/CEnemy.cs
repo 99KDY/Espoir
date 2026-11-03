@@ -9,14 +9,11 @@ public class CEnemy : CUnit
     [SerializeField] private CEnemyStatSO _targetStatSO;
 
     protected override void Awake()
-    {    
+    {
+        base.Awake();
         if (_targetStatSO != null)
         {
             Setup(_targetStatSO);
-        }
-        else
-        {
-            base.Awake();
         }
     }
 
@@ -37,9 +34,9 @@ public class CEnemy : CUnit
         
     }
 
-    protected virtual void Update()
+    protected override void Update()
     {
-        
+        base.Update();
     }
 
     // 디버그용
