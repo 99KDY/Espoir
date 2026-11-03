@@ -178,9 +178,7 @@ public partial class CStatus
                         break;
                 }
             }
-        }
-        ;
-        
+        }        
 
         if (targetSO.CustomStatus > 0)
         {
