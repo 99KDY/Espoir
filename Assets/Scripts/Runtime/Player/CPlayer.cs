@@ -25,6 +25,13 @@ public class CPlayer : CUnit
     [SerializeField] private InputActionReference _dashInput;
     [SerializeField] private SSkillSlot[] _skillSlots;
 
+    [Header("MP 설정")]
+    [SerializeField, Min(1)] private int _maxMp = 150;
+    [SerializeField, Min(0)] private int _mpPerBasicHit = 5;
+
+    [Header("패시브 설정")]
+    [SerializeField] private CPlayerPassive _passive = new CPlayerPassive();
+
     private CPlayerMovement _movement;
     private CPlayerSkill _skill;
     private Dictionary<EEquipmentSlot, CItemEquipment> _equipment = new Dictionary<EEquipmentSlot, CItemEquipment>();
@@ -40,6 +47,10 @@ public class CPlayer : CUnit
 
     protected float _movementBaseline = 1f;
     protected float _attackSpeedBaseline = 1f;
+
+    public int CurrentMp { get; private set; }
+    public float AttackSpeedMultiplier => _attackSpeedMultiply;
+    internal CPlayerPassive Passive => _passive;
 
     public Dictionary<EEquipmentSlot, CItemEquipment> Equipment
     {
@@ -313,8 +324,44 @@ public class CPlayer : CUnit
     protected override void Awake()
     {
         base.Awake();
+        CStatusSO.Build(false);
         _movement = GetComponent<CPlayerMovement>();
         _skill = GetComponent<CPlayerSkill>();
+    }
+
+    /// <summary>
+    /// 기본 공격 한 번이 적중했을 때 MP를 회복합니다.
+    /// </summary>
+
+    public void RecoverBasicAttackMp()
+    {
+        CurrentMp = Mathf.Min(CurrentMp + _mpPerBasicHit, _maxMp);
+    }
+
+    internal bool TrySpendMp(int cost)
+    {
+        if (cost > CurrentMp)
+        {
+            return false;
+        }
+
+        CurrentMp -= cost;
+        return true;
+    }
+
+    /// <summary>
+    /// 적의 공격으로 체력이 감소하면 전투의 흐름을 차감합니다.
+    /// </summary>
+
+    public override void OnHit(CUnit attacker, CUnit defender, SDamageInfo damage)
+    {
+        float previousHp = HpCurrent;
+        base.OnHit(attacker, defender, damage);
+
+        if (defender == this && HpCurrent < previousHp)
+        {
+            _passive.OnPlayerDamaged(this);
+        }
     }
 
     private void OnEnable()
@@ -451,7 +498,7 @@ public class CPlayer : CUnit
             _movement.SetMoveTarget(position);
         }
 
-        _movement.Move();
+        _movement.Move(_movementMultiply);
     }
 
     private Vector3 GetAttackDirection()
