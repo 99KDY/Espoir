@@ -145,10 +145,10 @@ public partial class CStatus
     private bool _isStackRemoving = false;
     private EStatusTrigger _trigger;
 
-    private int _intParam;
-    private float _floatParam;
-    private float _timerParam;
-    private bool _boolParam;
+    private int _intParam = 0;
+    private float _floatParam = 0f;
+    private float _timerParam = 0f;
+    private bool _boolParam = false;
 
     public int Id => _id;
     public float Duration => _duration;
@@ -187,8 +187,8 @@ public partial class CStatus
     private List<Action<CUnit>> _onRemove = new List<Action<CUnit>>(); // Deprecated
     private List<Func<CUnit, CUnit, float, bool, float>> _onAttack = new List<Func<CUnit, CUnit, float, bool, float>>();
     private List<Func<CUnit, CUnit, float, bool, float>> _onDefence = new List<Func<CUnit, CUnit, float, bool, float>>();
-    private List<Action<CUnit, CUnit, float>> _onHit = new List<Action<CUnit, CUnit, float>>();
-    private List<Action<CUnit, CUnit, float>> _onDamage = new List<Action<CUnit, CUnit, float>>();
+    private List<Func<CUnit, CUnit, float, float>> _onHit = new List<Func<CUnit, CUnit, float, float>>();
+    private List<Func<CUnit, CUnit, float, float>> _onDamage = new List<Func<CUnit, CUnit, float, float>>();
     private List<Action<CUnit, float>> _onDelta = new List<Action<CUnit, float>>();
     private List<Action<CUnit, bool>> _onBattleStart = new List<Action<CUnit, bool>>();
     private List<Action<CUnit, bool>> _onBattleEnd = new List<Action<CUnit, bool>>();
@@ -217,12 +217,12 @@ public partial class CStatus
     {
         get => _onDefence;
     }
-    public List<Action<CUnit, CUnit, float>> OnHit
+    public List<Func<CUnit, CUnit, float, float>> OnHit
     {
         get => _onHit;
     }
 
-    public List<Action<CUnit, CUnit, float>> OnDamage
+    public List<Func<CUnit, CUnit, float, float>> OnDamage
     {
         get => _onDamage;
     }

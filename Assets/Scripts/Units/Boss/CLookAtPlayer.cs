@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class CLookAtPlayer : MonoBehaviour
 {
-    #region ÀÎ½ºÆÑÅÍ
+    #region Ã€ÃÂ½ÂºÃ†Ã‘Ã…Ã
     [SerializeField] private CPlayer _player;
 
     [SerializeField] private float _moveSpeed = 5.0f;

@@ -19,7 +19,7 @@ public class CSlothBoss : CEnemy
 
 
 
-    #region ÀÎ½ºÆÑÅÍ
+    #region ì¸ìŠ¤íŒ©í„°
     [SerializeField] private CPlayer _player;
 
     [Header("Attack Player")]
@@ -42,7 +42,7 @@ public class CSlothBoss : CEnemy
 
 
 
-    [Header("ÈÎÀ©µå")]
+    [Header("í›¨ìœˆë“œ")]
     [SerializeField] private float _whirlRound = 10f;
 
 
@@ -53,7 +53,7 @@ public class CSlothBoss : CEnemy
 
     #endregion
 
-    #region Animator º¯¼ö
+    #region Animator ë³€ìˆ˜
 
     private int _fisrtNorm = Animator.StringToHash("nAttack01");
     private int _secondNorm = Animator.StringToHash("nAttack02");
@@ -74,7 +74,7 @@ public class CSlothBoss : CEnemy
 
 
 
-    #region ³»ºÎº¯¼ö
+    #region ë‚´ë¶€ë³€ìˆ˜
 
     private ESlothBossState _startState;
     private ESlothBossState _currentState;
@@ -104,7 +104,7 @@ public class CSlothBoss : CEnemy
 
             if (_player == null)
             {
-                CLogger.Error("ÇÃ·¹ÀÌ¾î Ã£À» ¼ö ¾øÀ½");
+                CLogger.Error("í”Œë ˆì´ì–´ ì°¾ì„ ìˆ˜ ì—†ìŒ");
             }
 
         }
@@ -114,7 +114,7 @@ public class CSlothBoss : CEnemy
             _soundManager = FindFirstObjectByType<CSoundManager>();
             if(_soundManager == null)
             {
-                CLogger.Warn("»ç¿îµå ¸Å´ÏÀú Ã£À» ¼ö ¾øÀ½");
+                CLogger.Warn("ì‚¬ìš´ë“œ ë§¤ë‹ˆì € ì°¾ì„ ìˆ˜ ì—†ìŒ");
             }
 
         }
@@ -139,9 +139,6 @@ public class CSlothBoss : CEnemy
     protected override void Update()
     {
         base.Update();
-
-
-
     }
 
     private void FixedUpdate()
@@ -184,8 +181,7 @@ public class CSlothBoss : CEnemy
 
 
     private void SubAttackPattern()
-    {
-        
+    {        
 
         int subAttack = Random.Range(0, 4);
 
@@ -241,8 +237,6 @@ public class CSlothBoss : CEnemy
         {
             return;
         }
-
-        
 
 
         switch (_currentState)
@@ -342,7 +336,7 @@ public class CSlothBoss : CEnemy
 
             _target = _hitCollider[i].transform;
 
-            break; // ´ÜÀÏ Å¸°Ù ÃßÀû
+            break; // ë‹¨ì¼ íƒ€ê²Ÿ ì¶”ì 
         }
 
         return hit;
@@ -385,7 +379,7 @@ public class CSlothBoss : CEnemy
             }
 
 
-            CLogger.Log($"{player.name}ÀÇ ÇöÀç Ã¼·Â : {player.HpCurrent}");
+            CLogger.Log($"{player.name}ì˜ í˜„ì¬ ì²´ë ¥ : {player.HpCurrent}");
 
         }
 
