@@ -19,7 +19,7 @@ public class CSlothBoss : CEnemy
 
 
 
-    #region ÀÎ½ºÆÑÅÍ
+    #region ì¸ìŠ¤íŒ©í„°
     [SerializeField] private CPlayer _player;
 
     [Header("Attack Player")]
@@ -35,12 +35,14 @@ public class CSlothBoss : CEnemy
 
     [Header("Boss Info")]
     [SerializeField] private Animator _animator;
+    [SerializeField] private float _rotateSpeed = 1000.0f;
     [SerializeField] private float _atkTimer = 2.0f;
     [SerializeField] private float _normalAtkRange = 5.0f;
-    [SerializeField] private float _detectedRange = 10.0f;
+    [SerializeField] private float _detectedRange = 15.0f;
 
 
-    [Header("ÈÎÀ©µå")]
+
+    [Header("í›¨ìœˆë“œ")]
     [SerializeField] private float _whirlRound = 10f;
 
 
@@ -51,7 +53,7 @@ public class CSlothBoss : CEnemy
 
     #endregion
 
-    #region Animator º¯¼ö
+    #region Animator ë³€ìˆ˜
 
     private int _fisrtNorm = Animator.StringToHash("nAttack01");
     private int _secondNorm = Animator.StringToHash("nAttack02");
@@ -72,13 +74,13 @@ public class CSlothBoss : CEnemy
 
 
 
-    #region ³»ºÎº¯¼ö
+    #region ë‚´ë¶€ë³€ìˆ˜
 
     private ESlothBossState _startState;
     private ESlothBossState _currentState;
 
 
-    private SoundManager _soundManager;
+    private CSoundManager _soundManager;
     private Transform _target;
 
 
@@ -102,23 +104,22 @@ public class CSlothBoss : CEnemy
 
             if (_player == null)
             {
-                CLogger.Error("ÇÃ·¹ÀÌ¾î Ã£À» ¼ö ¾øÀ½");
+                CLogger.Error("í”Œë ˆì´ì–´ ì°¾ì„ ìˆ˜ ì—†ìŒ");
             }
 
         }
 
-        if (_soundManager == null)
+        if(_soundManager == null)
         {
-
-            _soundManager = FindFirstObjectByType<SoundManager>();
-            if (_soundManager == null)
+            _soundManager = FindFirstObjectByType<CSoundManager>();
+            if(_soundManager == null)
             {
-                CLogger.Warn($"»ç¿îµå¸Å´ÏÀú Ã£±â ½ÇÆĞ");
+                CLogger.Warn("ì‚¬ìš´ë“œ ë§¤ë‹ˆì € ì°¾ì„ ìˆ˜ ì—†ìŒ");
             }
 
         }
 
-
+      
 
         _target = _player.transform;
         _previewPattern = this.GetComponent<CPreviewPattern>();
@@ -138,6 +139,12 @@ public class CSlothBoss : CEnemy
     protected override void Update()
     {
         base.Update();
+    }
+
+    private void FixedUpdate()
+    {
+        RotateToPlayer();
+        BossState();
     }
 
 
@@ -174,11 +181,7 @@ public class CSlothBoss : CEnemy
 
 
     private void SubAttackPattern()
-    {
-        if (_currentState == ESlothBossState.SubAttack)
-        {
-            _isSub = true;
-        }
+    {        
 
         int subAttack = Random.Range(0, 4);
 
@@ -204,10 +207,7 @@ public class CSlothBoss : CEnemy
 
     private void MainAttackPattern()
     {
-        if (_currentState == ESlothBossState.MainAttack)
-        {
-            _isMain = true;
-        }
+   
 
         int mainAttack = Random.Range(0, 3);
 
@@ -238,6 +238,7 @@ public class CSlothBoss : CEnemy
             return;
         }
 
+
         switch (_currentState)
         {
             case ESlothBossState.Idle:
@@ -265,6 +266,32 @@ public class CSlothBoss : CEnemy
 
     }
 
+
+    private void RotateToPlayer()
+    {
+        Vector3 targer = new Vector3(_target.position.x, 0f, _target.position.z);
+
+        Vector3 lookPlayer = targer - this.transform.position;
+
+        float distance = lookPlayer.magnitude;
+
+        if (distance <= _detectedRange)
+        {
+            Vector3 dir = lookPlayer.normalized;
+            Quaternion lookRotation = Quaternion.LookRotation(dir);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, lookRotation, _rotateSpeed * Time.deltaTime);
+
+            _currentState = ESlothBossState.SubAttack;
+
+            if (distance <= _normalAtkRange)
+            {
+                _currentState = ESlothBossState.NormalAttack;
+            }
+
+
+        }
+
+    }
 
 
 
@@ -309,7 +336,7 @@ public class CSlothBoss : CEnemy
 
             _target = _hitCollider[i].transform;
 
-            break; // ´ÜÀÏ Å¸°Ù ÃßÀû
+            break; // ë‹¨ì¼ íƒ€ê²Ÿ ì¶”ì 
         }
 
         return hit;
@@ -345,11 +372,14 @@ public class CSlothBoss : CEnemy
             float lastHP = player.HpCurrent;
 
             player.OnHit(attacker, player, damagePlayer);
-            if (_soundManager != null)
+         
+            if(_soundManager != null)
             {
                 _soundManager.PlaySE(EEffectSound.PlayerHit);
             }
-            CLogger.Log($"{player.name}ÀÇ ÇöÀç Ã¼·Â : {player.HpCurrent}");
+
+
+            CLogger.Log($"{player.name}ì˜ í˜„ì¬ ì²´ë ¥ : {player.HpCurrent}");
 
         }
 
