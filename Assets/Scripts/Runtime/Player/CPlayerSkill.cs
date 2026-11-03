@@ -114,6 +114,18 @@ public class CPlayerSkill : MonoBehaviour
     }
 
     /// <summary>
+    /// 등록된 모든 스킬의 쿨타임을 초기화합니다.
+    /// </summary>
+
+    public void ResetCooldowns()
+    {
+        foreach (CSkillRuntime runtime in _SKILLS.Values)
+        {
+            runtime.readyTime = 0f;
+        }
+    }
+
+    /// <summary>
     /// 기본 공격을 시작하거나 다음 연격의 방향을 예약합니다.
     /// </summary>
 
