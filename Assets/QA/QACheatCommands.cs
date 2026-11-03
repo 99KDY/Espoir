@@ -15,7 +15,8 @@ public class QACheatCommands : MonoBehaviour
         DebugLogConsole.AddCommand<int>("gold", "입력한 만큼 골드를 추가합니다. (예: gold 5000)", AddGold);
 
         DebugLogConsole.AddCommand<float>("speed", "게임 배속을 조절합니다. (예: speed 2.0 / 기본값 1.0)", SetGameSpeed);
-        DebugLogConsole.AddCommand("inf_mana", "마나 및 스킬 쿨타임을 무제한으로 만듭니다.", ToggleInfiniteMana);
+        DebugLogConsole.AddCommand("cool", "스킬 쿨타임을 무제한으로 만듭니다.", ToggleInfiniteMana);
+        DebugLogConsole.AddCommand("mp", "플레이어 MP를 최대치로 채웁니다.", Cheat_FillMp);
     }
 
     /// <summary>
@@ -103,7 +104,7 @@ public class QACheatCommands : MonoBehaviour
     }
 
     /// <summary>
-    /// 마나 무제한 치트
+    /// 스킬 쿨타임제거 치트
     /// </summary>
     private bool isInfiniteMana = false;
     public void ToggleInfiniteMana()
@@ -111,6 +112,24 @@ public class QACheatCommands : MonoBehaviour
         isInfiniteMana = !isInfiniteMana;
         CLogger.Log($"[QA] 무제한 마나 모드 상태: {isInfiniteMana}");
         // TODO : 스킬 / 마나 소모 스크립트에 bool값을 연결
+    }
+
+    // 마나채우는 치트
+    public void Cheat_FillMp()
+    {
+        CPlayer player = FindPlayer();
+
+        if (player == null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < 40; i++)
+        {
+            player.RecoverBasicAttackMp();
+        }
+
+        CLogger.Log($"[QA] 플레이어 MP를 채웠습니다. 현재 MP: {player.CurrentMp}");
     }
 
     private CPlayer FindPlayer()
