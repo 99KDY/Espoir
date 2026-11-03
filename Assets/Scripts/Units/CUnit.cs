@@ -324,23 +324,23 @@ public abstract class CUnit : MonoBehaviour
                 }
             }
         }
-        for (int i = 0; i < attackerStatus.Count; i++)
-        {
-            if (attackerStatus[i].Trigger.HasFlag(EStatusTrigger.OnHit))
-            {
-                for (int j = 0; j < attackerStatus[i].OnHit.Count; j++)
-                {
-                    attackerStatus[i].OnHit[j](attacker, defender, finalDamage);
-                }
-            }
-        }
         for (int i = 0; i < defenderStatus.Count; i++)
         {
             if (defenderStatus[i].Trigger.HasFlag(EStatusTrigger.OnDamage))
             {
                 for (int j = 0; j < defenderStatus[i].OnDamage.Count; j++)
                 {
-                    defenderStatus[i].OnDamage[j](attacker, defender, finalDamage);
+                    finalDamage = defenderStatus[i].OnDamage[j](attacker, defender, finalDamage);
+                }
+            }
+        }
+        for (int i = 0; i < attackerStatus.Count; i++)
+        {
+            if (attackerStatus[i].Trigger.HasFlag(EStatusTrigger.OnHit))
+            {
+                for (int j = 0; j < attackerStatus[i].OnHit.Count; j++)
+                {
+                    finalDamage = attackerStatus[i].OnHit[j](attacker, defender, finalDamage);
                 }
             }
         }
