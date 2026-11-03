@@ -27,7 +27,7 @@ public class CPreviewPattern : MonoBehaviour
     private Vector3 _endVec;
 
     private Mesh _mesh;
-    
+
 
     void Start()
     {
@@ -36,13 +36,7 @@ public class CPreviewPattern : MonoBehaviour
         
     }
 
-
-    void Update()
-    {
- 
-    }
-
-    // 
+    // 패턴 구역 채우기 
     private void DrawFilled(int sides, float radius)
     {
         _polygonPoint = GetCirclePoint(sides,radius).ToArray();
@@ -78,7 +72,6 @@ public class CPreviewPattern : MonoBehaviour
     }
 
     // 원형 모양으로 공격범위 그리기
-        
     private List<Vector3> GetCirclePoint(int sides, float radius)
     {
         List<Vector3> points = new List<Vector3>();
