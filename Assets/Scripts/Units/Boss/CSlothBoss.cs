@@ -35,9 +35,11 @@ public class CSlothBoss : CEnemy
 
     [Header("Boss Info")]
     [SerializeField] private Animator _animator;
+    [SerializeField] private float _rotateSpeed = 1000.0f;
     [SerializeField] private float _atkTimer = 2.0f;
     [SerializeField] private float _normalAtkRange = 5.0f;
-    [SerializeField] private float _detectedRange = 10.0f;
+    [SerializeField] private float _detectedRange = 15.0f;
+
 
 
     [Header("훨윈드")]
@@ -78,7 +80,7 @@ public class CSlothBoss : CEnemy
     private ESlothBossState _currentState;
 
 
-    private SoundManager _soundManager;
+    private CSoundManager _soundManager;
     private Transform _target;
 
 
@@ -107,18 +109,17 @@ public class CSlothBoss : CEnemy
 
         }
 
-        if (_soundManager == null)
+        if(_soundManager == null)
         {
-
-            _soundManager = FindFirstObjectByType<SoundManager>();
-            if (_soundManager == null)
+            _soundManager = FindFirstObjectByType<CSoundManager>();
+            if(_soundManager == null)
             {
-                CLogger.Warn($"사운드매니저 찾기 실패");
+                CLogger.Warn("사운드 매니저 찾을 수 없음");
             }
 
         }
 
-
+      
 
         _target = _player.transform;
         _previewPattern = this.GetComponent<CPreviewPattern>();
@@ -138,6 +139,15 @@ public class CSlothBoss : CEnemy
     protected override void Update()
     {
         base.Update();
+
+
+
+    }
+
+    private void FixedUpdate()
+    {
+        RotateToPlayer();
+        BossState();
     }
 
 
@@ -175,10 +185,7 @@ public class CSlothBoss : CEnemy
 
     private void SubAttackPattern()
     {
-        if (_currentState == ESlothBossState.SubAttack)
-        {
-            _isSub = true;
-        }
+        
 
         int subAttack = Random.Range(0, 4);
 
@@ -204,10 +211,7 @@ public class CSlothBoss : CEnemy
 
     private void MainAttackPattern()
     {
-        if (_currentState == ESlothBossState.MainAttack)
-        {
-            _isMain = true;
-        }
+   
 
         int mainAttack = Random.Range(0, 3);
 
@@ -238,6 +242,9 @@ public class CSlothBoss : CEnemy
             return;
         }
 
+        
+
+
         switch (_currentState)
         {
             case ESlothBossState.Idle:
@@ -265,6 +272,32 @@ public class CSlothBoss : CEnemy
 
     }
 
+
+    private void RotateToPlayer()
+    {
+        Vector3 targer = new Vector3(_target.position.x, 0f, _target.position.z);
+
+        Vector3 lookPlayer = targer - this.transform.position;
+
+        float distance = lookPlayer.magnitude;
+
+        if (distance <= _detectedRange)
+        {
+            Vector3 dir = lookPlayer.normalized;
+            Quaternion lookRotation = Quaternion.LookRotation(dir);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, lookRotation, _rotateSpeed * Time.deltaTime);
+
+            _currentState = ESlothBossState.SubAttack;
+
+            if (distance <= _normalAtkRange)
+            {
+                _currentState = ESlothBossState.NormalAttack;
+            }
+
+
+        }
+
+    }
 
 
 
@@ -345,10 +378,13 @@ public class CSlothBoss : CEnemy
             float lastHP = player.HpCurrent;
 
             player.OnHit(attacker, player, damagePlayer);
-            if (_soundManager != null)
+         
+            if(_soundManager != null)
             {
                 _soundManager.PlaySE(EEffectSound.PlayerHit);
             }
+
+
             CLogger.Log($"{player.name}의 현재 체력 : {player.HpCurrent}");
 
         }

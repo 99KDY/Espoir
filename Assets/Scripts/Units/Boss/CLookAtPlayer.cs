@@ -24,7 +24,7 @@ public class CLookAtPlayer : MonoBehaviour
 
 
 
-    private bool _hasMove = false;
+    private bool _hasMove;
 
     private Rigidbody _rb;
     private Animator _animator;
@@ -74,9 +74,9 @@ public class CLookAtPlayer : MonoBehaviour
         if(_onTarget == true)
         {
             _isMove = true;
+            _hasMove = false;
 
-
-            if(distance <= _atkRange)
+            if (distance <= _atkRange)
             {
                 _isAttack = true;
 
@@ -131,8 +131,7 @@ public class CLookAtPlayer : MonoBehaviour
 
         else
         {
-            _rb.velocity = Vector3.zero;
-
+            
             Quaternion toTarget = Quaternion.LookRotation(lookPlayer);
             Quaternion viewTarget = Quaternion.RotateTowards
                 (
