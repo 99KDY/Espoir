@@ -27,6 +27,14 @@ public class CPlayerUI_Build : MonoBehaviour
     [SerializeField] private CTooltipUI _tooltip = null;
 
     [SerializeField] private TMP_Text _debugText = null;
+
+    //[SerializeField] private CSkillUI _skillP1 = null;
+    //[SerializeField] private CSkillUI _skillP2 = null;
+    //[SerializeField] private CSkillUI _skillQ = null;
+    //[SerializeField] private CSkillUI _skillW = null;
+    [SerializeField] private CSkillUI _skillE = null;
+    [SerializeField] private CSkillUI _skillR = null;
+    [SerializeField] private CSkillUI _skillD = null;
     #endregion
 
     #region 내부변수
@@ -70,6 +78,7 @@ public class CPlayerUI_Build : MonoBehaviour
         UpdateHp();
         UpdateMp();
         if (_debugText != null) UpdateDebug();
+        UpdateSkill();
         UpdateStatus();
     }
 
@@ -174,6 +183,21 @@ public class CPlayerUI_Build : MonoBehaviour
                 Destroy(target.gameObject);
             }
         }
+    }
+
+    public void UpdateSkill()
+    {
+        float ratio;
+        float remainCooldown;
+
+        //_skillQ.Refresh();
+        //_skillW.Refresh();
+        _player.GetSkillCooldown(ESkillType.Rush, out ratio, out remainCooldown);
+        _skillE.Refresh(ratio, remainCooldown);
+        _player.GetSkillCooldown(ESkillType.Slam, out ratio, out remainCooldown);
+        _skillR.Refresh(ratio, remainCooldown);
+        _player.GetSkillCooldown(ESkillType.Dash, out ratio, out remainCooldown);
+        _skillD.Refresh(ratio, remainCooldown);
     }
     public void ResetHP()
     {

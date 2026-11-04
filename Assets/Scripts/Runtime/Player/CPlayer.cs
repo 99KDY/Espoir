@@ -49,9 +49,11 @@ public class CPlayer : CUnit
     protected float _attackSpeedBaseline = 1f;
 
     public int CurrentMp { get; private set; }
+    public float MovementSpeedMultiplier => _movementMultiply;
     public float AttackSpeedMultiplier => _attackSpeedMultiply;
     public float MaxMp => _maxMp;
-    internal CPlayerPassive Passive => _passive;
+    public CPlayerPassive Passive => _passive;
+    public IReadOnlyList<CSkillSO> Skills => _skill.RegisteredSkills;
 
     public Dictionary<EEquipmentSlot, CItemEquipment> Equipment
     {
@@ -340,6 +342,10 @@ public class CPlayer : CUnit
         base.InvokeOnBattleEnd(isBossBattle);
     }
 
+    public void GetSkillCooldown(ESkillType type, out float ratio, out float remainCooldown)
+    {
+        _skill.GetSkillCooldown(type, out ratio, out remainCooldown);
+    }
     protected override void Awake()
     {
         base.Awake();

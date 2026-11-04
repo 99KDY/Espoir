@@ -8,7 +8,10 @@ public class CTooltipUI : MonoBehaviour
     [SerializeField] private TMP_Text _tooltip;
 
     private CStatusUI _targetStatus;
+    private CSkillUI _targetSkill;
+
     public CStatusUI TargetStatus => _targetStatus;
+
     private bool _isOn = false;
 
     void Start()
@@ -79,6 +82,16 @@ public class CTooltipUI : MonoBehaviour
     {
         _isOn = true;
         _targetStatus = target;
+        _targetSkill = null;
+        _tooltip.gameObject.SetActive(true);
+        _tooltip.text = target.Tooltip;
+    }
+
+    public void Enable(CSkillUI target)
+    {
+        _isOn = true;
+        _targetSkill = target;
+        _targetStatus = null;
         _tooltip.gameObject.SetActive(true);
         _tooltip.text = target.Tooltip;
     }
@@ -87,6 +100,7 @@ public class CTooltipUI : MonoBehaviour
     {
         _isOn = false;
         _targetStatus = null;
+        _targetSkill = null;
         _tooltip.gameObject.SetActive(false);
     }
 }
