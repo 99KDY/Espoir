@@ -16,7 +16,7 @@ MonoBehaviour:
   _name: "\uBC1B\uB294\uD53C\uD574\uAC10\uC18C 20%"
   _icon: {fileID: 21300000, guid: 2675d4bb8a31b6b4a9555afe56e3b981, type: 3}
   _description: "\uBC1B\uB294\uD53C\uD574\uAC10\uC18C 20%"
-  _tooltip: 
+  _tooltip: "\uBC1B\uB294 \uD53C\uD574\uAC00 20% \uAC10\uC18C\uD569\uB2C8\uB2E4."
   _duration: 0
   _stack: 0
   _maxStack: 0
