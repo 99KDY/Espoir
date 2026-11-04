@@ -46,11 +46,31 @@ public class CPlayerSkill : MonoBehaviour
     private float _animatorSpeed;
     private float _baseAttackSpeed;
 
+    private readonly List<CSkillSO> _registeredSkills = new();
+    public IReadOnlyList<CSkillSO> RegisteredSkills => _registeredSkills;
+
     public bool IsBusy => _currentSkill != null;
 
     private void OnDisable()
     {
         CancelSkill();
+    }
+
+    /// <summary>
+    /// 지정한 스킬의 재사용 대기시간과 그 비율을 반환합니다.
+    /// </summary>
+    public void GetSkillCooldown(ESkillType type, out float ratio, out float remainCooldown)
+    {
+        ratio = 0f;
+        remainCooldown = 0f;
+
+        foreach (KeyValuePair<CSkillSO, CSkillRuntime> pair in _SKILLS)
+        {
+            if (pair.Key.Type != type) continue;
+            remainCooldown = Mathf.Max(0f,pair.Value.readyTime - Time.time);
+            ratio = pair.Key.Cooldown > 0f ? Mathf.Clamp01(remainCooldown / pair.Key.Cooldown) : 0f;
+            return;
+        }
     }
 
     /// <summary>
@@ -110,6 +130,7 @@ public class CPlayerSkill : MonoBehaviour
         }
 
         _SKILLS.Add(skill, runtime);
+        _registeredSkills.Add(skill);
         return true;
     }
 

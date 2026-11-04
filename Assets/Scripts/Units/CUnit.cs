@@ -247,7 +247,7 @@ public abstract class CUnit : MonoBehaviour
     {
         float finalDamage = DamageCalculate(attacker, defender, damage, out bool isCritical);
         defender.GetDamage(finalDamage);
-        if (_debugLog) CLogger.Log($"Enemy : 피해 {finalDamage} / 방어력 {defender.Defence}, 크리여부 {isCritical} ({attacker.CriticalRate * 100}%% - {attacker.CriticalDamage * 100}%%");
+        if (_debugLog) CLogger.Log($"Enemy : 피해 {finalDamage} / 방어력 {defender.Defence}, 크리여부 {isCritical} ({attacker.CriticalRate * 100}% - {attacker.CriticalDamage * 100}%)");
         if (damage.stateOnHit != null && damage.stateOnHit.Count > 0 && (finalDamage > 0 || damage.damage == 0))
         {
             for (int i = 0; i < damage.stateOnHit.Count; i++)
