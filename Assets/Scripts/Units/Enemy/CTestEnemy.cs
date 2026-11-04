@@ -273,7 +273,7 @@ public class CTestEnemy : CEnemy
         
         if (_OnTarget == true)
         {
-            CLogger.Log("타겟이 들어왔다.");
+            // CLogger.Log("타겟이 들어왔다.");
             
             _forgetTimer = 0.0f;
 
