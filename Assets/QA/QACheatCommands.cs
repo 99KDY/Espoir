@@ -15,7 +15,7 @@ public class QACheatCommands : MonoBehaviour
         DebugLogConsole.AddCommand<int>("gold", "입력한 만큼 골드를 추가합니다. (예: gold 5000)", AddGold);
 
         DebugLogConsole.AddCommand<float>("speed", "게임 배속을 조절합니다. (예: speed 2.0 / 기본값 1.0)", SetGameSpeed);
-        DebugLogConsole.AddCommand("cool", "스킬 쿨타임을 무제한으로 만듭니다.", ToggleInfiniteMana);
+        DebugLogConsole.AddCommand("cool", "현재 스킬 쿨타임을 없앱니다.", Cheat_ResetCooldown);
         DebugLogConsole.AddCommand("mp", "플레이어 MP를 최대치로 채웁니다.", Cheat_FillMp);
     }
 
@@ -106,12 +106,26 @@ public class QACheatCommands : MonoBehaviour
     /// <summary>
     /// 스킬 쿨타임제거 치트
     /// </summary>
-    private bool isInfiniteMana = false;
-    public void ToggleInfiniteMana()
+    public void Cheat_ResetCooldown()
     {
-        isInfiniteMana = !isInfiniteMana;
-        CLogger.Log($"[QA] 무제한 마나 모드 상태: {isInfiniteMana}");
-        // TODO : 스킬 / 마나 소모 스크립트에 bool값을 연결
+        CPlayer player = FindPlayer();
+
+        if (player == null)
+        {
+            return;
+        }
+
+        CPlayerSkill skill = player.GetComponent<CPlayerSkill>();
+
+        if (skill == null)
+        {
+            CLogger.Log("[QA] 플레이어 스킬 컴포넌트를 찾지 못했습니다.");
+            return;
+        }
+
+        // 혜성님꺼 연결전 오류뜸
+        // skill.ResetCooldowns();
+        CLogger.Log("[QA] 스킬 쿨타임을 없앴습니다.");
     }
 
     // 마나채우는 치트
