@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using IngameDebugConsole;
+using UnityEngine.InputSystem;
 
 public class QACheatCommands : MonoBehaviour
 {
@@ -17,6 +18,42 @@ public class QACheatCommands : MonoBehaviour
         DebugLogConsole.AddCommand<float>("speed", "게임 배속을 조절합니다. (예: speed 2.0 / 기본값 1.0)", SetGameSpeed);
         DebugLogConsole.AddCommand("cool", "현재 스킬 쿨타임을 없앱니다.", Cheat_ResetCooldown);
         DebugLogConsole.AddCommand("mp", "플레이어 MP를 최대치로 채웁니다.", Cheat_FillMp);
+    }
+
+    // 치트 UI열때 키입력 막기
+    private InputActionMap _playerMap;
+    private void Update()
+    {
+        if (_playerMap == null)
+        {
+            InputActionAsset[] assets = Resources.FindObjectsOfTypeAll<InputActionAsset>();
+            for (int i = 0; i < assets.Length; i++)
+            {
+                if (assets[i] != null && assets[i].name == "PlayerInput")
+                {
+                    _playerMap = assets[i].FindActionMap("Player");
+                    break;
+                }
+            }
+        }
+
+        if (_playerMap == null || DebugLogManager.Instance == null)
+        {
+            return;
+        }
+
+        if (DebugLogManager.Instance.IsLogWindowVisible)
+        {
+            if (_playerMap.enabled)
+            {
+                _playerMap.Disable();
+            }
+        }
+
+        else if (!_playerMap.enabled)
+        {
+            _playerMap.Enable();
+        }
     }
 
     /// <summary>
