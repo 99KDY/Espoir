@@ -119,7 +119,7 @@ public class CPlayerUI_Build : MonoBehaviour
 
     public void UpdateDebug()
     {
-        _debugText.text = $"ATK {_player.Attack:F1} / DEF {_player.Defence:F1} / Crit {_player.CriticalRate*100}% - {_player.CriticalDamage*100}% / SPD atk {_player.AttackSpeedMultiplier} mov {_player.MovementSpeedMultiplier}";
+        _debugText.text = $"ATK {_player.Attack:F1} / DEF {_player.Defence:F1} / Crit {_player.CriticalRate*100:F1}% - {_player.CriticalDamage*100:F1}% / SPD atk {_player.AttackSpeedMultiplier:F2} mov {_player.MovementSpeedMultiplier:F2}";
     }
 
     public void UpdateStatus()
