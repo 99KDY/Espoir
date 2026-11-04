@@ -25,6 +25,8 @@ public class CPlayerUI_Build : MonoBehaviour
     [SerializeField] private RectTransform _statusRoot = null;
     [SerializeField] private CStatusUI _statusPrefab = null;
     [SerializeField] private CTooltipUI _tooltip = null;
+
+    [SerializeField] private TMP_Text _debugText = null;
     #endregion
 
     #region 내부변수
@@ -67,6 +69,7 @@ public class CPlayerUI_Build : MonoBehaviour
     {
         UpdateHp();
         UpdateMp();
+        if (_debugText != null) UpdateDebug();
         UpdateStatus();
     }
 
@@ -103,6 +106,11 @@ public class CPlayerUI_Build : MonoBehaviour
         }
 
         _mpFill.fillAmount = ratio;
+    }
+
+    public void UpdateDebug()
+    {
+        _debugText.text = $"ATK {_player.Attack:F1} / DEF {_player.Defence:F1} / Crit {_player.CriticalRate*100}% - {_player.CriticalDamage*100}% / SPD atk {_player.AttackSpeedMultiplier} mov {_player.MovementSpeedMultiplier}";
     }
 
     public void UpdateStatus()
