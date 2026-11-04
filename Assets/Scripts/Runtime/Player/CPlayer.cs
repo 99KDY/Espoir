@@ -50,6 +50,7 @@ public class CPlayer : CUnit
 
     public int CurrentMp { get; private set; }
     public float AttackSpeedMultiplier => _attackSpeedMultiply;
+    public float MaxMp => _maxMp;
     internal CPlayerPassive Passive => _passive;
 
     public Dictionary<EEquipmentSlot, CItemEquipment> Equipment

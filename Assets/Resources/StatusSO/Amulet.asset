@@ -14,16 +14,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: 3
   _name: "\uBD80\uC801"
-  _icon: {fileID: 0}
+  _icon: {fileID: 21300000, guid: 4138ec7baf6862f4a90fe94858319ecc, type: 3}
   _description: "\uC9C0\uC18D\uC2DC\uAC04\uB3D9\uC548 \uBC1B\uB294\uD53C\uD574\uAC00
     \uAC10\uC18C\uD558\uACE0, \uC774\uB3D9\uC18D\uB3C4\uAC00 \uC99D\uAC00\uD55C\uB2E4."
   _tooltip: 
   _duration: 5
   _stack: 3
+  _maxStack: 0
   _remove: 0
+  _initialRemoveStack: 0
+  _removeStack: 0
   _stackDuration: 0
   _actionList:
   - action: 8
     param: 0.8
+    applyStack: 0
   - action: 9
     param: 1.2
+    applyStack: 0
+  _customStatus: 0

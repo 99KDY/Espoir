@@ -175,6 +175,8 @@ public partial class CStatus
     public EStatusRemove RemoveSwitch => _removeSwitch;
     public float RemoveTimer => _removeTimer;
     public EStatusTrigger Trigger => _trigger;
+    public bool IsPermanent => _isPermanent;
+    public bool IsStackable => (_stackSwitch == EStatusStack.StackAndRefresh);
     public bool IsStackRemoving
     {
         get { return _isStackRemoving; }

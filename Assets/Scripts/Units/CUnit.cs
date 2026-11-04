@@ -61,6 +61,7 @@ public abstract class CUnit : MonoBehaviour
     [SerializeField] protected float _baseHpMax;
     [SerializeField] protected float _baseAttack;
     [SerializeField] protected float _baseDefence;
+    [SerializeField] protected bool _debugLog = false;
     protected float _baseCritRate = 0.05f;
     protected float _baseCritDmg = 1.5f;
     #endregion
@@ -244,9 +245,10 @@ public abstract class CUnit : MonoBehaviour
     /// <param name="damage"></param>
     public virtual void OnHit(CUnit attacker, CUnit defender, SDamageInfo damage)
     {
-        float finalDamage = DamageCalculate(attacker, defender, damage);
+        float finalDamage = DamageCalculate(attacker, defender, damage, out bool isCritical);
         defender.GetDamage(finalDamage);
-        if (damage.stateOnHit != null && damage.stateOnHit.Count > 0 && finalDamage > 0)
+        if (_debugLog) CLogger.Log($"Enemy : 피해 {finalDamage} / 방어력 {defender.Defence}, 크리여부 {isCritical} ({attacker.CriticalRate * 100}%% - {attacker.CriticalDamage * 100}%%");
+        if (damage.stateOnHit != null && damage.stateOnHit.Count > 0 && (finalDamage > 0 || damage.damage == 0))
         {
             for (int i = 0; i < damage.stateOnHit.Count; i++)
             {
