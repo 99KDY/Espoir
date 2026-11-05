@@ -15,7 +15,7 @@ MonoBehaviour:
   _id: 152
   _name: "\uD0D0\uC695\uC758 \uD314\uCC0C(\uC77C\uBC18)"
   _rarity: 0
-  _itemIcon: {fileID: 0}
+  _itemIcon: {fileID: -91815370, guid: 9f455ccc94b25ce45b56838524402ac1, type: 3}
   _description: 
   _slot: 2
   _setNumber: 104

@@ -15,7 +15,7 @@ MonoBehaviour:
   _id: 405
   _name: "\uD68C\uC624\uB9AC \uC218\uB958\uD0C4"
   _rarity: 0
-  _itemIcon: {fileID: 0}
+  _itemIcon: {fileID: -1756157630, guid: 3c38a022703b20145b12d05f01f10e62, type: 3}
   _description: "\uB358\uC838\uC11C \uAC15\uB825\uD55C \uBB34\uB825\uD654\uD53C\uD574\uB97C
     \uC90D\uB2C8\uB2E4."
   _action:
