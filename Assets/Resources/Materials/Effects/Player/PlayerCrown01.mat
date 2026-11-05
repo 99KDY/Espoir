@@ -1,0 +1,788 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &-8532227414662219044
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Ground3
+  m_Shader: {fileID: 4800000, guid: f1be50bed2d9d834da9978190d331e27, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs: []
+    m_Ints: []
+    m_Floats:
+    - _Expand: 1.4
+    - _Half: 4.68
+    - _Lifetime: 0.3
+    - _R0: 2.08
+    - _Strength: 0.04
+    - _Width: 0.4
+    m_Colors: []
+  m_BuildTextureStacks: []
+--- !u!21 &-4747674036148134839
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: R05
+  m_Shader: {fileID: 4800000, guid: 94f1c673382d16e448998aab9f08a647, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: 3015
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _Noise:
+        m_Texture: {fileID: 2800000, guid: 75c11bdbb9bc1434a803977c04c69ce9, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Times:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _Alpha: 0.8
+    - _Burst: 0
+    - _BurstCentered: 0
+    - _BurstEnds: 0
+    - _BurstFadeFrom: 0.3
+    - _BurstGrow: 0
+    - _BurstGrowTime: 0.08
+    - _BurstHold: 0
+    - _BurstR0: 0
+    - _BurstR1: 0
+    - _DissolveMax: 1.05
+    - _Duration: 0.3
+    - _EdgeFade: 0
+    - _Expand: 0.15
+    - _FloorOffset: -1.03
+    - _Freq: 1
+    - _HasTimes: 0
+    - _HoldTail: 0.12
+    - _Hot: 0.6
+    - _Lifetime: 0.97
+    - _Linger: 0.4
+    - _OuterRough: 0
+    - _Rigid: 0
+    - _Rough: 1
+    - _SoftEnds: 1
+    - _SoftHead: 0
+    - _TailStart: 0.5
+    - _Thick: 1
+    m_Colors:
+    - _C0: {r: 0.03, g: 0, b: 0.01, a: 0}
+    - _C1: {r: 0.3, g: 0, b: 0.03, a: 0}
+    - _C2: {r: 2, g: 0.04, b: 0.06, a: 0}
+    - _C3: {r: 4.5, g: 1.6, b: 1.2, a: 0}
+  m_BuildTextureStacks: []
+--- !u!21 &-2784558596934073370
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Shock0
+  m_Shader: {fileID: 4800000, guid: 33dddf43f0c35654a9b4623cc468aa94, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs: []
+    m_Ints: []
+    m_Floats:
+    - _Lifetime: 0.2
+    - _SecondAge: 1
+    - _SecondStrength: 0
+    - _Strength: 0.045
+    m_Colors:
+    - _Second: {r: 0, g: 0, b: 0, a: 0}
+  m_BuildTextureStacks: []
+--- !u!21 &-2101829944645656457
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: R04
+  m_Shader: {fileID: 4800000, guid: 94f1c673382d16e448998aab9f08a647, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: 3015
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _Noise:
+        m_Texture: {fileID: 2800000, guid: 75c11bdbb9bc1434a803977c04c69ce9, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Times:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _Alpha: 0.8
+    - _Burst: 0
+    - _BurstCentered: 0
+    - _BurstEnds: 0
+    - _BurstFadeFrom: 0.3
+    - _BurstGrow: 0
+    - _BurstGrowTime: 0.08
+    - _BurstHold: 0
+    - _BurstR0: 0
+    - _BurstR1: 0
+    - _DissolveMax: 1.05
+    - _Duration: 0.3
+    - _EdgeFade: 0
+    - _Expand: 0.15
+    - _FloorOffset: -1.03
+    - _Freq: 1
+    - _HasTimes: 0
+    - _HoldTail: 0.12
+    - _Hot: 0.6
+    - _Lifetime: 0.97
+    - _Linger: 0.4
+    - _OuterRough: 0
+    - _Rigid: 0
+    - _Rough: 1
+    - _SoftEnds: 1
+    - _SoftHead: 0
+    - _TailStart: 0.5
+    - _Thick: 1
+    m_Colors:
+    - _C0: {r: 0.03, g: 0, b: 0.01, a: 0}
+    - _C1: {r: 0.3, g: 0, b: 0.03, a: 0}
+    - _C2: {r: 2, g: 0.04, b: 0.06, a: 0}
+    - _C3: {r: 4.5, g: 1.6, b: 1.2, a: 0}
+  m_BuildTextureStacks: []
+--- !u!21 &-1787998446019179588
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: R03
+  m_Shader: {fileID: 4800000, guid: 94f1c673382d16e448998aab9f08a647, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: 3015
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _Noise:
+        m_Texture: {fileID: 2800000, guid: 75c11bdbb9bc1434a803977c04c69ce9, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Times:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _Alpha: 1
+    - _Burst: 0
+    - _BurstCentered: 0
+    - _BurstEnds: 0
+    - _BurstFadeFrom: 0.3
+    - _BurstGrow: 0
+    - _BurstGrowTime: 0.08
+    - _BurstHold: 0
+    - _BurstR0: 0
+    - _BurstR1: 0
+    - _DissolveMax: 1.05
+    - _Duration: 0.3
+    - _EdgeFade: 0
+    - _Expand: 0.15
+    - _FloorOffset: -1.03
+    - _Freq: 1
+    - _HasTimes: 0
+    - _HoldTail: 0.12
+    - _Hot: 0.6
+    - _Lifetime: 0.97
+    - _Linger: 0.4
+    - _OuterRough: 0
+    - _Rigid: 0
+    - _Rough: 1
+    - _SoftEnds: 1
+    - _SoftHead: 0
+    - _TailStart: 0.5
+    - _Thick: 1
+    m_Colors:
+    - _C0: {r: 0.03, g: 0, b: 0.01, a: 0}
+    - _C1: {r: 0.3, g: 0, b: 0.03, a: 0}
+    - _C2: {r: 2, g: 0.04, b: 0.06, a: 0}
+    - _C3: {r: 4.5, g: 1.6, b: 1.2, a: 0}
+  m_BuildTextureStacks: []
+--- !u!21 &-1039272212480119242
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: R01
+  m_Shader: {fileID: 4800000, guid: 94f1c673382d16e448998aab9f08a647, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: 3015
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _Noise:
+        m_Texture: {fileID: 2800000, guid: 75c11bdbb9bc1434a803977c04c69ce9, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Times:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _Alpha: 1
+    - _Burst: 0
+    - _BurstCentered: 0
+    - _BurstEnds: 0
+    - _BurstFadeFrom: 0.3
+    - _BurstGrow: 0
+    - _BurstGrowTime: 0.08
+    - _BurstHold: 0
+    - _BurstR0: 0
+    - _BurstR1: 0
+    - _DissolveMax: 1.05
+    - _Duration: 0.08
+    - _EdgeFade: 0
+    - _Expand: 0.5
+    - _FloorOffset: -1.03
+    - _Freq: 1
+    - _HasTimes: 0
+    - _HoldTail: 0.08
+    - _Hot: 1
+    - _Lifetime: 0.71000004
+    - _Linger: 0.4
+    - _OuterRough: 0
+    - _Rigid: 0
+    - _Rough: 1
+    - _SoftEnds: 1
+    - _SoftHead: 0
+    - _TailStart: 0.5
+    - _Thick: 1
+    m_Colors:
+    - _C0: {r: 0.03, g: 0, b: 0.01, a: 0}
+    - _C1: {r: 0.3, g: 0, b: 0.03, a: 0}
+    - _C2: {r: 2, g: 0.04, b: 0.06, a: 0}
+    - _C3: {r: 4.5, g: 1.6, b: 1.2, a: 0}
+  m_BuildTextureStacks: []
+--- !u!21 &-729668149586113702
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: R01Wisp
+  m_Shader: {fileID: 4800000, guid: 901a94966157d3243821d4aee2d7880b, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: 3014
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _Noise:
+        m_Texture: {fileID: 2800000, guid: 75c11bdbb9bc1434a803977c04c69ce9, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Times:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _Alpha: 0.85
+    - _Duration: 0.08
+    - _Expand: 0.5
+    - _FloorOffset: -1.03
+    - _HasTimes: 0
+    - _HoldTail: 0.08
+    - _Lifetime: 0.71000004
+    - _Linger: 0.4
+    - _SoftEnds: 1
+    - _TailStart: 0.5
+    m_Colors:
+    - _Color: {r: 0.9, g: 0.02, b: 0.06, a: 0}
+    - _Edge: {r: 1.4, g: 0.12, b: 0.1, a: 0}
+  m_BuildTextureStacks: []
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: PlayerCrown01
+  m_Shader: {fileID: 4800000, guid: 94f1c673382d16e448998aab9f08a647, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: 3015
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _Noise:
+        m_Texture: {fileID: 2800000, guid: 75c11bdbb9bc1434a803977c04c69ce9, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Times:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _Alpha: 1
+    - _Burst: 0
+    - _BurstCentered: 0
+    - _BurstEnds: 0
+    - _BurstFadeFrom: 0.3
+    - _BurstGrow: 0
+    - _BurstGrowTime: 0.08
+    - _BurstHold: 0
+    - _BurstR0: 0
+    - _BurstR1: 0
+    - _DissolveMax: 1.05
+    - _Duration: 0.08
+    - _EdgeFade: 0
+    - _Expand: 0.5
+    - _FloorOffset: -1.03
+    - _Freq: 1
+    - _HasTimes: 0
+    - _HoldTail: 0.08
+    - _Hot: 1
+    - _Lifetime: 0.71000004
+    - _Linger: 0.4
+    - _OuterRough: 0
+    - _Rigid: 0
+    - _Rough: 1
+    - _SoftEnds: 1
+    - _SoftHead: 0
+    - _TailStart: 0.5
+    - _Thick: 1
+    m_Colors:
+    - _C0: {r: 0.03, g: 0, b: 0.01, a: 0}
+    - _C1: {r: 0.3, g: 0, b: 0.03, a: 0}
+    - _C2: {r: 2, g: 0.04, b: 0.06, a: 0}
+    - _C3: {r: 4.5, g: 1.6, b: 1.2, a: 0}
+  m_BuildTextureStacks: []
+--- !u!21 &444379727719103196
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: R02
+  m_Shader: {fileID: 4800000, guid: 94f1c673382d16e448998aab9f08a647, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: 3015
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _Noise:
+        m_Texture: {fileID: 2800000, guid: 75c11bdbb9bc1434a803977c04c69ce9, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Times:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _Alpha: 1
+    - _Burst: 0
+    - _BurstCentered: 0
+    - _BurstEnds: 0
+    - _BurstFadeFrom: 0.3
+    - _BurstGrow: 0
+    - _BurstGrowTime: 0.08
+    - _BurstHold: 0
+    - _BurstR0: 0
+    - _BurstR1: 0
+    - _DissolveMax: 1.05
+    - _Duration: 0.08
+    - _EdgeFade: 0
+    - _Expand: 0.5
+    - _FloorOffset: -1.03
+    - _Freq: 1
+    - _HasTimes: 0
+    - _HoldTail: 0.08
+    - _Hot: 1
+    - _Lifetime: 0.71000004
+    - _Linger: 0.4
+    - _OuterRough: 0
+    - _Rigid: 0
+    - _Rough: 1
+    - _SoftEnds: 1
+    - _SoftHead: 0
+    - _TailStart: 0.5
+    - _Thick: 1
+    m_Colors:
+    - _C0: {r: 0.03, g: 0, b: 0.01, a: 0}
+    - _C1: {r: 0.3, g: 0, b: 0.03, a: 0}
+    - _C2: {r: 2, g: 0.04, b: 0.06, a: 0}
+    - _C3: {r: 4.5, g: 1.6, b: 1.2, a: 0}
+  m_BuildTextureStacks: []
+--- !u!21 &896769751596809106
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Ground0
+  m_Shader: {fileID: 4800000, guid: f1be50bed2d9d834da9978190d331e27, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs: []
+    m_Ints: []
+    m_Floats:
+    - _Expand: 2.52
+    - _Half: 4.52
+    - _Lifetime: 0.4
+    - _R0: 0.5
+    - _Strength: 0.05
+    - _Width: 0.5
+    m_Colors: []
+  m_BuildTextureStacks: []
+--- !u!21 &3358452209909250661
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Ground1
+  m_Shader: {fileID: 4800000, guid: f1be50bed2d9d834da9978190d331e27, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs: []
+    m_Ints: []
+    m_Floats:
+    - _Expand: 1.4
+    - _Half: 3.56
+    - _Lifetime: 0.3
+    - _R0: 0.96
+    - _Strength: 0.04
+    - _Width: 0.4
+    m_Colors: []
+  m_BuildTextureStacks: []
+--- !u!21 &3776361148246381293
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: R02Wisp
+  m_Shader: {fileID: 4800000, guid: 901a94966157d3243821d4aee2d7880b, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: 3014
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _Noise:
+        m_Texture: {fileID: 2800000, guid: 75c11bdbb9bc1434a803977c04c69ce9, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Times:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _Alpha: 0.85
+    - _Duration: 0.08
+    - _Expand: 0.5
+    - _FloorOffset: -1.03
+    - _HasTimes: 0
+    - _HoldTail: 0.08
+    - _Lifetime: 0.71000004
+    - _Linger: 0.4
+    - _SoftEnds: 1
+    - _TailStart: 0.5
+    m_Colors:
+    - _Color: {r: 0.9, g: 0.02, b: 0.06, a: 0}
+    - _Edge: {r: 1.4, g: 0.12, b: 0.1, a: 0}
+  m_BuildTextureStacks: []
+--- !u!21 &4991307259198542213
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: R03Wisp
+  m_Shader: {fileID: 4800000, guid: 901a94966157d3243821d4aee2d7880b, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: 3014
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _Noise:
+        m_Texture: {fileID: 2800000, guid: 75c11bdbb9bc1434a803977c04c69ce9, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Times:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _Alpha: 0.85
+    - _Duration: 0.3
+    - _Expand: 0.15
+    - _FloorOffset: -1.03
+    - _HasTimes: 0
+    - _HoldTail: 0.12
+    - _Lifetime: 0.97
+    - _Linger: 0.4
+    - _SoftEnds: 1
+    - _TailStart: 0.5
+    m_Colors:
+    - _Color: {r: 0.9, g: 0.02, b: 0.06, a: 0}
+    - _Edge: {r: 1.4, g: 0.12, b: 0.1, a: 0}
+  m_BuildTextureStacks: []
+--- !u!21 &6192064536779408351
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Ground2
+  m_Shader: {fileID: 4800000, guid: f1be50bed2d9d834da9978190d331e27, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs: []
+    m_Ints: []
+    m_Floats:
+    - _Expand: 1.4
+    - _Half: 4.12
+    - _Lifetime: 0.3
+    - _R0: 1.52
+    - _Strength: 0.04
+    - _Width: 0.4
+    m_Colors: []
+  m_BuildTextureStacks: []
+--- !u!21 &6265714152467521933
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: R00Wisp
+  m_Shader: {fileID: 4800000, guid: 901a94966157d3243821d4aee2d7880b, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: 3014
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _Noise:
+        m_Texture: {fileID: 2800000, guid: 75c11bdbb9bc1434a803977c04c69ce9, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Times:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _Alpha: 0.85
+    - _Duration: 0.08
+    - _Expand: 0.5
+    - _FloorOffset: -1.03
+    - _HasTimes: 0
+    - _HoldTail: 0.08
+    - _Lifetime: 0.71000004
+    - _Linger: 0.4
+    - _SoftEnds: 1
+    - _TailStart: 0.5
+    m_Colors:
+    - _Color: {r: 0.9, g: 0.02, b: 0.06, a: 0}
+    - _Edge: {r: 1.4, g: 0.12, b: 0.1, a: 0}
+  m_BuildTextureStacks: []
+--- !u!21 &9034309127171459623
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Flare0
+  m_Shader: {fileID: 4800000, guid: d80208ff16e530f4a9d542a05b6614f2, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs: []
+    m_Ints: []
+    m_Floats:
+    - _Lifetime: 0.35
+    - _Peak: 0.6
+    - _Size: 1.44
+    m_Colors:
+    - _Hot: {r: 6, g: 2.6, b: 2.1, a: 0}
+    - _Red: {r: 2.6, g: 0.07, b: 0.09, a: 0}
+  m_BuildTextureStacks: []

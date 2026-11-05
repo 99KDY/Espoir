@@ -178,7 +178,12 @@ public class CPlayerEffectRenderer : MonoBehaviour
             _composite.SetFloat("_ImpactInvert", _screenCue.y);
             _composite.SetFloat("_White", _screenCue.z);
             SetPalette();
-            Composite(layer, destination);
+            CPlayerEffectStart.GetChroma(out float chroma, out Vector3 center);
+            Vector3 viewport = _effectCamera.WorldToViewportPoint(center);
+            _composite.SetVector("_ChromaCenter", viewport);
+            _composite.SetFloat("_ChromaAspect", (float)source.width / source.height);
+            _composite.SetFloat("_ChromaAmt", chroma);
+            Composite(layer, destination, viewport.z > 0f ? chroma : 0f);
         }
         
         finally
@@ -234,12 +239,13 @@ public class CPlayerEffectRenderer : MonoBehaviour
         return peak > 0f ? color / peak : Color.black;
     }
 
-    private void Composite(RenderTexture layer, RenderTexture destination)
+    private void Composite(RenderTexture layer, RenderTexture destination, float chroma)
     {
         int h = Mathf.Min(_BLOOM_HEIGHT, layer.height);
         int w = Mathf.Max(1, Mathf.RoundToInt(h * (float)layer.width / layer.height));
         RenderTexture bright = GetTarget(w, h);
         RenderTexture bloom = GetTarget(w, h);
+        RenderTexture combined = null;
 
         try
         {
@@ -274,13 +280,28 @@ public class CPlayerEffectRenderer : MonoBehaviour
 
             Graphics.Blit(null, bloom, _composite, 2);
             _composite.SetTexture("_Bloom", bloom);
-            Graphics.Blit(layer, destination, _composite, 3);
+            if (chroma > 0.0002f)
+            {
+                combined = GetTarget(layer.width, layer.height);
+                Graphics.Blit(layer, combined, _composite, 3);
+                Graphics.Blit(combined, destination, _composite, 4);
+            }
+
+            else
+            {
+                Graphics.Blit(layer, destination, _composite, 3);
+            }
         }
        
         finally
         {
             RenderTexture.ReleaseTemporary(bright);
             RenderTexture.ReleaseTemporary(bloom);
+
+            if (combined != null)
+            {
+                RenderTexture.ReleaseTemporary(combined);
+            }
 
             for (int i = 0; i < _BLOOM_LEVELS; i++)
             {

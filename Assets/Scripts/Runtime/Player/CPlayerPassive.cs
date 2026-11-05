@@ -35,7 +35,12 @@ public class CPlayerPassive
     {
         if (_mark != null)
         {
-            target.FindStatus(_mark.Id)?.ResetTimer();
+            CStatus mark = target.FindStatus(_mark.Id);
+            if (mark != null)
+            {
+                mark.ResetTimer();
+                mark.IsStackRemoving = false;
+            }
         }
     }
 
@@ -79,13 +84,6 @@ public class CPlayerPassive
     {
         if (status == null || amount <= 0)
         {
-            return;
-        }
-
-        CStatus current = target.FindStatus(status.Id);
-        if (current != null && current.StackSwitch == EStatusStack.StackAndRefresh && current.Stack == current.MaxStack)
-        {
-            current.ResetTimer();
             return;
         }
 
