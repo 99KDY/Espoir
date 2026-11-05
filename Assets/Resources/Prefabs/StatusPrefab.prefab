@@ -130,6 +130,7 @@ MonoBehaviour:
   _iconImage: {fileID: 182069265800070764}
   _stackText: {fileID: 1527084801101058419}
   _durationFill: {fileID: 6314460350614678911}
+  _tooltip: {fileID: 0}
 --- !u!1 &7532016530091182946
 GameObject:
   m_ObjectHideFlags: 0

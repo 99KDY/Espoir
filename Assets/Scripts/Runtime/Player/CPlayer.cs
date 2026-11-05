@@ -13,6 +13,9 @@ public class CPlayer : CUnit
         public CSkillSO skill;
     }
 
+    [Header("인벤토리 연결")]
+    [SerializeField] private CInventory _inventory;
+
     [Header("카메라 설정")]
     [SerializeField] private Camera _mainCamera;
     [SerializeField] private CTestCamera _testCamera;
