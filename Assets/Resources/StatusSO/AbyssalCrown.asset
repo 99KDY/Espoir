@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b00a2f5381819c4787825906254b3b2, type: 3}
+  m_Name: AbyssalCrown
+  m_EditorClassIdentifier: 
+  _id: 25
+  _name: "\uC2EC\uC5F0\uC758 \uC655\uAD00"
+  _icon: {fileID: 21300000, guid: 14495d9b3aad48247a67a743b0c1fc73, type: 3}
+  _description: "\uC911\uCCA9\uB2F9 \uAE30\uBCF8 \uACF5\uACA9 \uC18D\uB3C4 5% \uC99D\uAC00.
+    \uCD5C\uB300 3\uC911\uCCA9."
+  _tooltip: "\uC911\uCCA9\uB2F9 \uACF5\uACA9\uC18D\uB3C4 5% \uC99D\uAC00\n15\uCD08
+    \uB4A4 1\uC911\uCCA9 \uAC10\uC18C, \uC774\uD6C4 5\uCD08\uB9C8\uB2E4 1\uC911\uCCA9
+    \uAC10\uC18C"
+  _duration: 15
+  _stack: 0
+  _maxStack: 3
+  _remove: 2
+  _initialRemoveStack: 1
+  _removeStack: 1
+  _stackDuration: 5
+  _actionList:
+  - action: 13
+    param: 1.05
+    applyStack: 1
+  _customStatus: 0

@@ -1,0 +1,167 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 42141cf8eb324aad8935776fa0250525, type: 3}
+  m_Name: PlayerCrownAttack01
+  m_EditorClassIdentifier: 
+  _type: 0
+  _cooldown: 0
+  _mpCost: 0
+  _startTrigger: Attack
+  _comboTrigger: Combo
+  _rotationSpeed: 1080
+  _comboGraceTime: 0.8
+  _dashDuration: 0.25
+  _dashStartDelay: 0
+  _dashEasePower: 1
+  _dashTrail:
+    startShock: {fileID: 0}
+    endShock: {fileID: 0}
+    startHeight: 0
+    endHeight: 0
+    ghostMaterial: {fileID: 0}
+    firstDistance: 0
+    spacing: 0
+    lateProgress: 0
+    earlyLifetimeStep: 0
+    alphaStep: 0
+    minAlpha: 0
+    ghostWindow: {x: 0, y: 0}
+    departure:
+      lifetime: 0
+      alpha: 0
+      smear: 0
+      hold: 0
+    early:
+      lifetime: 0
+      alpha: 0
+      smear: 0
+      hold: 0
+    late:
+      lifetime: 0
+      alpha: 0
+      smear: 0
+      hold: 0
+  _movementCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  _followEffect: {fileID: 0}
+  _markedCooldownReduction: 0
+  _fullHitFlow: 0
+  _crownStatus: {fileID: 0}
+  _crownWindow: 2
+  _empowerDuration: 8
+  _empoweredAttacks: []
+  _crownEffects: []
+  _crownEffectYaw: 225
+  _syncEffectSpeed: 1
+  _steps:
+  - stateName: Attack
+    recoverStateName: AttackRecover
+    moveDistance: 0.25
+    moveStart: 0.1
+    moveEnd: 0.6
+    moveCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    sideMoveCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    hits:
+    - time: 0.5
+      damageRatio: 1.2
+      hitStopDuration: 0.045
+      offset: {x: 0, y: 0, z: 1}
+      size: {x: 2, y: 2, z: 2}
+      appliesMark: 0
+      opensCrownWindow: 0
+    effectPrefab: {fileID: 304632146862748227, guid: 0503de6a173431f4081c4ce81249a897, type: 3}
+    effectTime: 0.5053846
+    effectLifetime: 0
+  - stateName: Attack2
+    recoverStateName: Attack2Recover
+    moveDistance: 0.3
+    moveStart: 0.1
+    moveEnd: 0.6
+    moveCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    sideMoveCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    hits:
+    - time: 0.45
+      damageRatio: 1.44
+      hitStopDuration: 0.065
+      offset: {x: 0, y: 0, z: 1}
+      size: {x: 2, y: 2, z: 2}
+      appliesMark: 0
+      opensCrownWindow: 0
+    effectPrefab: {fileID: 3107306218669551119, guid: 34771da9dcea7f24592c2261e344f1f7, type: 3}
+    effectTime: 0.45
+    effectLifetime: 0
+  - stateName: Attack3
+    recoverStateName: 
+    moveDistance: 0.45
+    moveStart: 0.1
+    moveEnd: 0.7
+    moveCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    sideMoveCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    hits:
+    - time: 0.3
+      damageRatio: 1.44
+      hitStopDuration: 0.035
+      offset: {x: 0, y: 0, z: 1}
+      size: {x: 2, y: 2, z: 2}
+      appliesMark: 0
+      opensCrownWindow: 1
+    - time: 0.33
+      damageRatio: 1.44
+      hitStopDuration: 0.05
+      offset: {x: 0, y: 0, z: 1}
+      size: {x: 2, y: 2, z: 2}
+      appliesMark: 0
+      opensCrownWindow: 1
+    - time: 0.36
+      damageRatio: 1.44
+      hitStopDuration: 0.12
+      offset: {x: 0, y: 0, z: 1}
+      size: {x: 2, y: 2, z: 2}
+      appliesMark: 0
+      opensCrownWindow: 1
+    effectPrefab: {fileID: 4349060216969175534, guid: 4e3b31f8adaa8b547b015f4a976c2a9b, type: 3}
+    effectTime: 0.318
+    effectLifetime: 0

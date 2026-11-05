@@ -1,0 +1,75 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 42141cf8eb324aad8935776fa0250525, type: 3}
+  m_Name: PlayerSkillW
+  m_EditorClassIdentifier: 
+  _type: 4
+  _cooldown: 12
+  _mpCost: 20
+  _startTrigger: 
+  _comboTrigger: 
+  _rotationSpeed: 1080
+  _comboGraceTime: 0.8
+  _dashDuration: 0.25
+  _dashStartDelay: 0
+  _dashEasePower: 1
+  _dashTrail:
+    startShock: {fileID: 0}
+    endShock: {fileID: 0}
+    startHeight: 0
+    endHeight: 0
+    ghostMaterial: {fileID: 0}
+    firstDistance: 0
+    spacing: 0
+    lateProgress: 0
+    earlyLifetimeStep: 0
+    alphaStep: 0
+    minAlpha: 0
+    ghostWindow: {x: 0, y: 0}
+    departure:
+      lifetime: 0
+      alpha: 0
+      smear: 0
+      hold: 0
+    early:
+      lifetime: 0
+      alpha: 0
+      smear: 0
+      hold: 0
+    late:
+      lifetime: 0
+      alpha: 0
+      smear: 0
+      hold: 0
+  _movementCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  _followEffect: {fileID: 0}
+  _markedCooldownReduction: 0
+  _fullHitFlow: 0
+  _crownStatus: {fileID: 11400000, guid: 078eceb1d4f206447aa6a202a71a3d1f, type: 2}
+  _crownWindow: 2
+  _empowerDuration: 8
+  _empoweredAttacks:
+  - {fileID: 11400000, guid: d4f5f463114c5614694927ae7ee15a69, type: 2}
+  - {fileID: 11400000, guid: 763b37739926f9b4daf2ee8099af84df, type: 2}
+  - {fileID: 11400000, guid: b015787e896c7894cacb51a77258b9a0, type: 2}
+  _crownEffects:
+  - {fileID: 3100793756998708761, guid: 12093e912c332c941bdb5705bc52d842, type: 3}
+  - {fileID: 8143964825807944554, guid: 4cc6c97e17d189449b0e17ff2b6636e8, type: 3}
+  - {fileID: 2839531090521364775, guid: 5a584b273dcdf5844ac786b68b686407, type: 3}
+  _crownEffectYaw: 225
+  _syncEffectSpeed: 0
+  _steps: []

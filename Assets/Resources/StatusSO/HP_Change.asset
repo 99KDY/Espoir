@@ -17,11 +17,17 @@ MonoBehaviour:
   _icon: {fileID: 0}
   _description: "\uC9C0\uC18D\uC2DC\uAC04\uB3D9\uC548 \uCD5C\uB300 \uCCB4\uB825\uC774
     50%\uAC00 \uAC10\uC18C\uD55C\uB2E4."
-  _tooltip: 
+  _tooltip: "\uC9C0\uC18D\uC2DC\uAC04\uB3D9\uC548 \uCD5C\uB300\uCCB4\uB825\uC774
+    50% \uAC10\uC18C\uD569\uB2C8\uB2E4."
   _duration: 60
   _stack: 2
+  _maxStack: 0
   _remove: 0
+  _initialRemoveStack: 0
+  _removeStack: 0
   _stackDuration: 0
   _actionList:
   - action: 1
     param: 0.5
+    applyStack: 0
+  _customStatus: 0

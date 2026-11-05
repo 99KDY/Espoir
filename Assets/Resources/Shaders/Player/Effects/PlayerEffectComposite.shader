@@ -160,5 +160,30 @@ Shader "Hidden/Espoir/Player/Effects/Composite"
             ENDCG
         }
 
+        Pass
+        {
+            CGPROGRAM
+            #pragma vertex vert
+            #pragma fragment frag
+            float _ChromaAmt, _ChromaAspect;
+            float4 _ChromaCenter;
+            float4 frag(Vary i) : SV_Target
+            {
+                float4 c = tex2D(_MainTex, i.uv);
+                float2 d = (i.uv - _ChromaCenter.xy) * float2(_ChromaAspect, 1.0);
+                float r = length(d);
+                float2 dir = r > 0.0001 ? d / r : 0.0;
+
+                float2 off = dir / float2(_ChromaAspect, 1.0) * _ChromaAmt * smoothstep(0.0, 0.3, r);
+                float rr = 0.0, bb = 0.0;
+                for (int k = 1; k <= 3; k++)
+                {
+                    rr += tex2D(_MainTex, i.uv + off * (k / 3.0)).r;
+                    bb += tex2D(_MainTex, i.uv - off * (k / 3.0)).b;
+                }
+                return float4(rr / 3.0, c.g, bb / 3.0, c.a);
+            }
+            ENDCG
+        }
     }
 }

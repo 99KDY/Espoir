@@ -11,13 +11,13 @@ using Random = UnityEngine.Random;
 
 public class CTestEnemy : CEnemy
 {
-    public enum EEnemyState
-    {
-        Idle = 0,
-        Moving,
-        Attack,
+    //public enum EEnemyState
+    //{
+    //    Idle = 0,
+    //    Moving,
+    //    Attack,
         
-    }
+    //}
 
     #region 인스팩터
     [Header("Enemy Info")]
@@ -273,7 +273,7 @@ public class CTestEnemy : CEnemy
         
         if (_OnTarget == true)
         {
-            CLogger.Log("타겟이 들어왔다.");
+            // CLogger.Log("타겟이 들어왔다.");
             
             _forgetTimer = 0.0f;
 
