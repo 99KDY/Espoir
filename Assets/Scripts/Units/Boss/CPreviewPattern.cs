@@ -11,9 +11,10 @@ public class CPreviewPattern : MonoBehaviour
     [SerializeField] private Vector3[] _polygonPoint;
     [SerializeField] private int[] _polygonTriangles;
 
-    [SerializeField] private float _polygonSides;
+    [SerializeField] private int _polygonSides;
     [SerializeField] private float _polygonRadius;
     [SerializeField] private float _centerRadius;
+
 
 
     [SerializeField] private float _atkRadiusMin = 5.0f;
@@ -28,6 +29,7 @@ public class CPreviewPattern : MonoBehaviour
 
     private Mesh _mesh;
 
+    private float _Timer;
 
     void Start()
     {
@@ -41,12 +43,13 @@ public class CPreviewPattern : MonoBehaviour
     {
         _polygonPoint = GetCirclePoint(sides,radius).ToArray();
         _polygonTriangles = DrawFilledTriangles(_polygonPoint);
+        Vector2[] meshUV = GetMeshUV(_polygonPoint);
 
         _mesh.Clear();
 
         _mesh.vertices = _polygonPoint;
         _mesh.triangles = _polygonTriangles;
-        
+        _mesh.uv = meshUV;
 
     }
 
@@ -104,7 +107,7 @@ public class CPreviewPattern : MonoBehaviour
 
         float pointFound = (float) 1 / sides;
 
-        GrowingArc();
+        DrowingArc();
 
         float degree = Vector3.SignedAngle(_startVec, _endVec, Vector3.up);
 
@@ -121,11 +124,22 @@ public class CPreviewPattern : MonoBehaviour
         return arcPoints;
     }
 
+    private Vector2[] GetMeshUV(Vector3[] points)
+    {
+        Vector2[] uvMesh = new Vector2[points.Length];
+        
+        for(int i = 0; i < points.Length; i++)
+        {
+            uvMesh[i] = new Vector2(points[i].x, points[i].z);
+        }
+        return uvMesh;
+    }
 
 
 
 
-    private void GrowingArc()
+
+    private void DrowingArc()
     {
         float radianR = _startDegree * Mathf.Deg2Rad;
         float startX = Mathf.Cos(radianR);
@@ -156,11 +170,12 @@ public class CPreviewPattern : MonoBehaviour
 
         _polygonPoint = pointsList.ToArray();
         _polygonTriangles = DrawDonutTriangles(_polygonPoint);
+        Vector2[] uvMesh = GetMeshUV(_polygonPoint);
 
         _mesh.Clear();
         _mesh.vertices = _polygonPoint;
         _mesh.triangles = _polygonTriangles;
-
+        _mesh.uv = uvMesh;
 
     }
 
@@ -175,15 +190,18 @@ public class CPreviewPattern : MonoBehaviour
         for(int i = 0; i < sides; i++)
         {
             int outerIndex = i;
+            int nextOuter = (i + 1) % sides;
+
             int innerIndex = i + sides;
+            int nextInner = ((i + 1) % sides) + sides;
 
             newTriangles.Add(outerIndex);
-            newTriangles.Add(innerIndex+2);
-            newTriangles.Add((i+1) % sides);
+            newTriangles.Add(innerIndex);
+            newTriangles.Add(nextOuter);
 
-            newTriangles.Add(outerIndex);
-            newTriangles.Add(sides + ((sides + i - 1) % sides));
-            newTriangles.Add(outerIndex + sides);
+            newTriangles.Add(nextOuter);
+            newTriangles.Add(innerIndex);
+            newTriangles.Add(nextInner);
 
         }
 
@@ -191,7 +209,58 @@ public class CPreviewPattern : MonoBehaviour
 
     }
 
+    
+    public void ShowCirclePattern(int sides, float radius)
+    {
+        if(_mesh == null)
+        {
+            _mesh = GetComponent<MeshFilter>().mesh;
+        }
+
+        DrawFilled(sides, radius);
+
+    }
+
+    public void ShowDonutPattern(int sides, float outerRadius, float innerRadius)
+    {
+        if(_mesh == null)
+        {
+            _mesh = GetComponent<MeshFilter>().mesh;
+        }
+        
+        DrawDonut(sides, outerRadius, innerRadius);
+
+    }
+
+    public void ShowArcPattern(int sides, float radius, float startDeg, float endDeg)
+    {
+        if(_mesh == null)
+        {
+            _mesh = GetComponent<MeshFilter>().mesh;
+        }
+
+        _startDegree = startDeg;
+        _endDegree = endDeg;
+
+        _polygonPoint = GetArcPoint(sides, radius).ToArray();
+        _polygonTriangles = DrawFilledTriangles(_polygonPoint);
+        Vector2[] meshUV = GetMeshUV(_polygonPoint);
+
+        _mesh.Clear();
+        _mesh.vertices = _polygonPoint;
+        _mesh.triangles = _polygonTriangles;
+        _mesh.uv = meshUV;
 
 
+    }
+
+    public void ClearPreview()
+    {
+        if(_mesh != null)
+        {
+            _mesh.Clear();
+        }
+
+    }
 
 }
