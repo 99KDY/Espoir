@@ -12,12 +12,16 @@ public class QACheatCommands : MonoBehaviour
         DebugLogConsole.AddCommand("heal", "플레이어의 체력을 즉시 100% 회복합니다.", Cheat_HealPlayer);
         DebugLogConsole.AddCommand("die", "플레이어를 즉시 사망 상태로 만듭니다.", Cheat_KillPlayer);
 
-        // 숫자 입력받는 명령어
         DebugLogConsole.AddCommand<int>("gold", "입력한 만큼 골드를 추가합니다. (예: gold 5000)", AddGold);
-
         DebugLogConsole.AddCommand<float>("speed", "게임 배속을 조절합니다. (예: speed 2.0 / 기본값 1.0)", SetGameSpeed);
+
         DebugLogConsole.AddCommand("cool", "현재 스킬 쿨타임을 없앱니다.", Cheat_ResetCooldown);
         DebugLogConsole.AddCommand("mp", "플레이어 MP를 최대치로 채웁니다.", Cheat_FillMp);
+
+        DebugLogConsole.AddCommand<int, int>("status", "상태이상을 부여합니다. (예: status 10 50)", Cheat_AddStatus);
+        DebugLogConsole.AddCommand<int, int>("estatus", "적에게 상태이상을 부여합니다. (예: status 11 5)", Cheat_AddEnemyStatus);
+
+        DebugLogConsole.AddCommand<int>("clear", "플레이어 상태이상을 제거합니다. (예: clear 10)", Cheat_ClearStatus);
     }
 
     // 치트 UI열때 키입력 막기
@@ -181,6 +185,56 @@ public class QACheatCommands : MonoBehaviour
         }
 
         CLogger.Log($"[QA] 플레이어 MP를 채웠습니다. 현재 MP: {player.CurrentMp}");
+    }
+
+    // 플레이어 상태이상 치트
+    public void Cheat_AddStatus(int id, int stack)
+    {
+        CPlayer player = FindPlayer();
+
+        if (player == null)
+        {
+            return;
+        }
+
+        player.AddStatus(id, stack: stack);
+        CLogger.Log($"[QA] 플레이어에게 상태이상 {id}를 {stack}스택 부여했습니다. 현재스택: {player.FindStatusStack(id)}");
+    }
+
+    // 플레이어 상태이상 제거 치트
+    public void Cheat_ClearStatus(int id)
+    {
+        CPlayer player = FindPlayer();
+
+        if (player == null)
+        {
+            return;
+        }
+
+        player.RemoveStatus(id);
+        CLogger.Log($"[QA] 플레이어의 상태이상{id}를 제거했습니다.");
+    }
+
+    // 적에게 상태이상 치트
+    public void Cheat_AddEnemyStatus(int id, int stack)
+    {
+        CEnemy[] enemies = FindObjectsOfType<CEnemy>();
+        int count = 0;
+
+        for (int i = 0; i < enemies.Length; i++)
+        {
+            CEnemy enemy = enemies[i];
+
+            if (enemy.HpCurrent <= 0f)
+            {
+                continue;
+            }
+
+            enemy.AddStatus(id, stack: stack);
+            count++;
+        }
+
+        CLogger.Log($"[QA] 적 {count}명에게 상태이상 {id}를 {stack}스택 부여합니다.");
     }
 
     private CPlayer FindPlayer()

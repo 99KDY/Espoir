@@ -574,6 +574,10 @@ MonoBehaviour:
   _statusRoot: {fileID: 901478385}
   _statusPrefab: {fileID: 1895737795862201015, guid: 4b99879bd2712ea4cbe85fdf01262b14, type: 3}
   _tooltip: {fileID: 1587264853}
+  _debugText: {fileID: 0}
+  _skillE: {fileID: 0}
+  _skillR: {fileID: 0}
+  _skillD: {fileID: 0}
 --- !u!1 &513255776
 GameObject:
   m_ObjectHideFlags: 0
@@ -1599,7 +1603,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 22400762, guid: 67117722a812a2e46ab8cb8eafbf5f5e, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -0.000015258789
+      value: 0.0000038146973
       objectReference: {fileID: 0}
     - target: {fileID: 22426080, guid: 67117722a812a2e46ab8cb8eafbf5f5e, type: 3}
       propertyPath: m_AnchorMax.x
