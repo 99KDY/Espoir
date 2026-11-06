@@ -11,7 +11,8 @@ Shader "Espoir/Environment/Toon"
         _BaseColor2 ("Base Color 2", Color) = (0.851, 0.706, 0.541, 1)
         // 0 Plaster, 1 Stripes, 2 Wood, 3 Tile, 4 Stone, 5 Plain, 6 Leaf, 7 Metal
         // 8 Strata, 9 Earth, 10 Foliage, 11 Rock, 12 Flag, 13 WoodClean, 14 Cloth
-        [IntRange] _Pattern ("Pattern", Range(0, 14)) = 5
+        // 20 Alabaster
+        [IntRange] _Pattern ("Pattern", Range(0, 20)) = 5
         _PatternScale ("Pattern Scale", Float) = 1
         _Emissive ("Emissive", Float) = 0
         _Gloss ("Gloss", Float) = 0
@@ -261,6 +262,18 @@ Shader "Espoir/Environment/Toon"
                     float vein = smoothstep(0.08, 0.0, abs(uv.y - 0.5));
                     result = lerp(_BaseColor2, _BaseColor, uv.x) + vein * 0.08;
                 }
+
+                else if (pattern == 20)
+                {
+                    float2 q = tp * 0.045 * _PatternScale;
+                    float f = FractalNoise(q) * 1.6 + FractalNoise(q * 2.0 + 4.0) * 0.35;
+                    float band = sin(f * 11.0) * 0.5 + 0.5;
+                    float fine = sin(f * 34.0) * 0.5 + 0.5;
+                    float3 color = lerp(_BaseColor, _BaseColor2,
+                        band * 0.28 + smoothstep(0.4, 0.8, FractalNoise(q * 0.6) * 0.5 + 0.5) * 0.12);
+                    result = lerp(color, _BaseColor * 1.03, fine * 0.08);
+                }
+
                 else
                 {
                     result = lerp(_BaseColor, _BaseColor2, FractalNoise(tp * _PatternScale) * 0.5 + 0.5);
@@ -287,7 +300,16 @@ Shader "Espoir/Environment/Toon"
                 float3 col = albedo * ramp * _LightTint * lerp(0.55, 1.0, ao);
                 col += albedo * _Ambient * _AmbientStrength * ao;
 
-                if (_Gloss > 0.0)
+                if (_Gloss > 0.0 && pattern == 20)
+                {
+                    float3 halfDirection = normalize(lightDirection + viewDirection);
+                    float specular = pow(max(dot(normalDirection, halfDirection), 0.0), 48.0) * sh;
+                    float fresnel = pow(1.0 - max(dot(normalDirection, viewDirection), 0.0), 4.0);
+                    col += _LightTint * specular * _Gloss * 0.35;
+                    col += float3(1.0, 0.96, 0.9) * fresnel * _Gloss * 0.18;
+                }
+
+                else if (_Gloss > 0.0)
                 {
                     float3 halfDirection = normalize(lightDirection + viewDirection);
                     float sp = smoothstep(0.975, 0.985, dot(normalDirection, halfDirection)) * sh;
