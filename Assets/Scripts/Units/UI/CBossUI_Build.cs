@@ -4,9 +4,6 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.InputSystem;
-using System.Data;
-using Unity.VisualScripting;
 
 
 public class CBossUI_Build : MonoBehaviour
