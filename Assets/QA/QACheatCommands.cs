@@ -28,6 +28,26 @@ public class QACheatCommands : MonoBehaviour
     private InputActionMap _playerMap;
     private void Update()
     {
+        if (_noCooldown)
+        {
+            CPlayer player = FindObjectOfType<CPlayer>();
+
+            if (player != null)
+            {
+                CPlayerSkill skill = player.GetComponent<CPlayerSkill>();
+
+                if (skill != null)
+                {
+                    skill.ResetCooldowns();
+                }
+
+                for (int i = 0; i < 40; i++)
+                {
+                    player.RecoverBasicAttackMp();
+                }
+            }
+        }
+
         if (_playerMap == null)
         {
             InputActionAsset[] assets = Resources.FindObjectsOfTypeAll<InputActionAsset>();
@@ -147,6 +167,7 @@ public class QACheatCommands : MonoBehaviour
     /// <summary>
     /// 스킬 쿨타임제거 치트
     /// </summary>
+    private bool _noCooldown;
     public void Cheat_ResetCooldown()
     {
         CPlayer player = FindPlayer();
@@ -164,9 +185,18 @@ public class QACheatCommands : MonoBehaviour
             return;
         }
 
-        // 혜성님꺼 연결전 오류뜸
-        // skill.ResetCooldowns();
-        CLogger.Log("[QA] 스킬 쿨타임을 없앴습니다.");
+        _noCooldown = !_noCooldown;
+        if (_noCooldown)
+        {
+            skill.ResetCooldowns();
+
+            for (int i = 0; i < 40; i++)
+            {
+                player.RecoverBasicAttackMp();
+            }
+        }
+                
+        CLogger.Log($"[QA] 쿨타임 제거: {_noCooldown}");
     }
 
     // 마나채우는 치트
