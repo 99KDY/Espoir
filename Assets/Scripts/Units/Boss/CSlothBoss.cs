@@ -6,6 +6,7 @@ using UnityEngine;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using static UnityEngine.GraphicsBuffer;
+using Unity.VisualScripting;
 
 public class CSlothBoss : CEnemy
 {
@@ -226,7 +227,9 @@ public class CSlothBoss : CEnemy
             case 0:
 
                 _animator.SetTrigger(_firstSub);
-                
+                TwiceAttack().Forget();
+
+
                 break;
 
             case 1:
@@ -583,10 +586,110 @@ public class CSlothBoss : CEnemy
 
     #endregion
 
+    #region Twice Attack
+    private async UniTask TwiceAttack()
+    {
+        if (_previewPattern != null)
+        {
+            _previewPattern.ShowDonutPattern(20, 13f, 7f);
+        }
+
+        else
+        {
+            CLogger.Error("PatternView 비어있음");
+        }
+
+        await UniTask.Delay(1500);
+
+        if (_previewPattern != null)
+        {
+            _previewPattern.ClearPreview();
+        }
+
+
+
+    }
+
+    private void TwiceInnerDamage()
+    {
+
+        int hit = NormalFindPlayer(4f);
+
+        for (int i = 0; i < hit; i++)
+        {
+            if (_hitCollider == null)
+            {
+                continue;
+            }
+
+            CPlayer player = _hitCollider[i].GetComponent<CPlayer>();
+
+            if (player == null || player.HpCurrent <= 0)
+            {
+                continue;
+            }
+
+            SDamageInfo damagePlayer = new SDamageInfo(this.Attack);
+            float lastHp = player.HpCurrent;
+
+            player.OnHit(this, damagePlayer);
+
+            CLogger.Log($"{player.name}의 현재 체력 : {player.HpCurrent}");
+        }
+
+
+
+    }
+
+
+    private void TiwceOuterDamage()
+    {
+        int hit = SubFindPlayer(13f);
+
+        for (int i = 0; i < hit; i++)
+        {
+            if (_hitCollider[i] == null)
+            {
+                continue;
+            }
+            CPlayer player = _hitCollider[i].GetComponent<CPlayer>();
+            if (player == null || player.HpCurrent <= 0)
+            {
+                continue;
+            }
+
+            float distance = Vector3.Distance
+            (
+                new Vector3(this.transform.position.x, 0f, this.transform.position.z),
+                new Vector3(player.transform.position.x, 0f, player.transform.position.z)
+            );
+
+            if (distance >= 7f && distance <= 13f)
+            {
+                SDamageInfo damagePlayer = new SDamageInfo(this.Attack);
+
+                player.OnHit(this, damagePlayer);
+
+                CLogger.Log($"{player.name}의 현재 체력 : {player.HpCurrent}");
+            }
+        }
+    }
+
+
+    #endregion
+
+
+
 
     private int NormalFindPlayer(float radius)
     {
         Vector3 offset = this.transform.up * 1.0f + this.transform.forward * 2f;
+
+        if(normalAtk == 2)
+        {
+            offset = this.transform.up * 1.0f + this.transform.forward * 2f - this.transform.right * 1.0f;
+        }
+
              
         int hit = Physics.OverlapSphereNonAlloc(this.transform.position + offset, radius, _hitCollider, _tartgetMask);
 
@@ -627,6 +730,17 @@ public class CSlothBoss : CEnemy
         }
 
         return hit;
+    }
+
+    private void OnValidate()
+    {
+        Vector3 targetPos = _player.transform.position - this.transform.position; 
+
+        float distance = targetPos.magnitude;
+
+        distance = Mathf.Max(2.0f, distance);
+
+
     }
 
 }
