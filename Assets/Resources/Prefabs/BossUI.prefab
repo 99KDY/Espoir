@@ -219,7 +219,7 @@ MonoBehaviour:
       m_Calls: []
   m_text: "Status \uC774\uB984"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 29ffc97924748754b9924c4ad68e61d3, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 107416ce367b8de429a92f165e54f735, type: 2}
   m_sharedMaterial: {fileID: 7176758170139287459, guid: 29ffc97924748754b9924c4ad68e61d3, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -283,7 +283,7 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
-  m_hasFontAssetChanged: 0
+  m_hasFontAssetChanged: 1
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
 --- !u!114 &6730277216106462311
@@ -350,7 +350,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 400}
+  m_AnchoredPosition: {x: 0, y: 392}
   m_SizeDelta: {x: 1280, y: 64}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!223 &2225597022534017551
