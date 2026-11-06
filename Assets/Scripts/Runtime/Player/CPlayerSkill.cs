@@ -526,9 +526,10 @@ public class CPlayerSkill : MonoBehaviour
             UpdateEffect(skill.Steps[0], state);
         }
 
-        else if (_stepIndex >= 0 && !_animator.IsInTransition(0) && _dashElapsed >= endTime)
+        if (_dashElapsed >= endTime)
         {
             FinishSkill();
+            _animator.CrossFadeInFixedTime(_IDLE_HASH, _cancelTransitionDuration);
         }
     }
 
