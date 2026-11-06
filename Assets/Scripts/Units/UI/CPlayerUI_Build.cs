@@ -97,7 +97,7 @@ public class CPlayerUI_Build : MonoBehaviour
 
     public void UpdateDebug()
     {
-        _debugText.text = $"ATK {_player.Attack:F1}\nDEF {_player.Defence:F1}\nCRI {_player.CriticalRate*100:F1}% -\n {_player.CriticalDamage*100:F1}%\nA.spd {_player.AttackSpeedMultiplier:F1}\nS.spd {_player.MovementSpeedMultiplier:F1}";
+        _debugText.text = $"ATK {_player.Attack:F1}\nDEF {_player.Defence:F1}\nCRI {_player.CriticalRate*100:F1}%\n {_player.CriticalDamage*100:F1}%\nA.spd {_player.AttackSpeedMultiplier:F2}\nS.spd {_player.MovementSpeedMultiplier:F2}";
     }
 
     public void UpdateStatus()
