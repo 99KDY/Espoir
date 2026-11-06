@@ -22,6 +22,7 @@ public class CTooltipUI : MonoBehaviour
             enabled = false;
             return;
         }
+        _tooltip.lineSpacing = -8f;
     }
 
     void Update()
@@ -54,18 +55,22 @@ public class CTooltipUI : MonoBehaviour
                 case 0:
                     pivot.x = 1;
                     pivot.y = 1;
+                    _tooltip.alignment = TextAlignmentOptions.TopRight;
                     break;
                 case 1:
                     pivot.x = 0;
                     pivot.y = 1;
+                    _tooltip.alignment = TextAlignmentOptions.TopLeft;
                     break;
                 case 2:
                     pivot.x = 1;
                     pivot.y = 0;
+                    _tooltip.alignment = TextAlignmentOptions.BottomRight;
                     break;
                 case 3:
                     pivot.x = 0;
                     pivot.y = 0;
+                    _tooltip.alignment = TextAlignmentOptions.BottomLeft;
                     break;
             }
 
