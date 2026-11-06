@@ -7805,8 +7805,24 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6873878590284063957, guid: 215ee1af7905ead40a096c6a2fce35be, type: 3}
+      propertyPath: m_Height
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 6873878590284063957, guid: 215ee1af7905ead40a096c6a2fce35be, type: 3}
       propertyPath: m_Radius
-      value: 3.627334
+      value: 2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6873878590284063957, guid: 215ee1af7905ead40a096c6a2fce35be, type: 3}
+      propertyPath: m_Center.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6873878590284063957, guid: 215ee1af7905ead40a096c6a2fce35be, type: 3}
+      propertyPath: m_Center.y
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 6873878590284063957, guid: 215ee1af7905ead40a096c6a2fce35be, type: 3}
+      propertyPath: m_Center.z
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6883443182993057841, guid: 215ee1af7905ead40a096c6a2fce35be, type: 3}
       propertyPath: m_Name
@@ -7955,6 +7971,14 @@ PrefabInstance:
       propertyPath: _target
       value: 
       objectReference: {fileID: 1598538960}
+    - target: {fileID: 3174567397649022038, guid: fb1e68ed936792243b8644bc210c5663, type: 3}
+      propertyPath: m_fontSize
+      value: 24
+      objectReference: {fileID: 0}
+    - target: {fileID: 3174567397649022038, guid: fb1e68ed936792243b8644bc210c5663, type: 3}
+      propertyPath: m_fontSizeBase
+      value: 24
+      objectReference: {fileID: 0}
     - target: {fileID: 4004854163175482566, guid: fb1e68ed936792243b8644bc210c5663, type: 3}
       propertyPath: m_Name
       value: BossUI
@@ -8198,6 +8222,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3167064873427938070, guid: 3851a08ee9723904aa573831ddbce137, type: 3}
+      propertyPath: m_fontSize
+      value: 24
+      objectReference: {fileID: 0}
+    - target: {fileID: 3167064873427938070, guid: 3851a08ee9723904aa573831ddbce137, type: 3}
+      propertyPath: m_fontSizeBase
+      value: 24
+      objectReference: {fileID: 0}
     - target: {fileID: 7274830311754938830, guid: 3851a08ee9723904aa573831ddbce137, type: 3}
       propertyPath: _player
       value: 
@@ -8205,6 +8237,10 @@ PrefabInstance:
     - target: {fileID: 7565882735492702776, guid: 3851a08ee9723904aa573831ddbce137, type: 3}
       propertyPath: m_Name
       value: PlayerUI
+      objectReference: {fileID: 0}
+    - target: {fileID: 7672487978192674151, guid: 3851a08ee9723904aa573831ddbce137, type: 3}
+      propertyPath: _tooltipText
+      value: "(\uBBF8\uAD6C\uD604)"
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
