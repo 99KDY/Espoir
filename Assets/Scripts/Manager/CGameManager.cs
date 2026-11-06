@@ -34,6 +34,10 @@ public class CGameManager : MonoBehaviour
 {
     [SerializeField] private AudioMixer _audioMixer;
 
+    [SerializeField] Button _gameShutdown;
+    [SerializeField] Button _screenChange;
+    [SerializeField] TMP_Text _screenChangeText;
+
     [SerializeField] GameObject _forcePauseSet;
     [SerializeField] CanvasGroup _menuBackground;
     [SerializeField] CanvasGroup _menuBase;
@@ -45,11 +49,16 @@ public class CGameManager : MonoBehaviour
     [SerializeField] TMP_InputField _seInput;
 
 
+
+
     private EGameState _gameState;
     private EBattleState _battleState;
     private ESettingState _settingState;
-    private bool _isPaused;
-    private float _timeScaleBeforePause;
+    private bool _isPaused = false;
+    private float _timeScaleBeforePause = 1f;
+    private bool _isFullscreen = false;
+    private int _tempWidth;
+    private int _tempHeight;
 
     public EGameState GameState => _gameState;
     public EBattleState BattleState => _battleState;
@@ -75,6 +84,11 @@ public class CGameManager : MonoBehaviour
         _gameState = EGameState.Idle;
         _battleState = EBattleState.None;
         _settingState = ESettingState.None;
+        CSoundManager.Instance.PlayBGM(EBackgroundSound.OasisOfGold);
+        _gameShutdown.onClick.AddListener(() => OnGameShutdown());
+        _screenChange.onClick.AddListener(() => OnGameResolutionChange());
+        _tempWidth = Screen.width;
+        _tempHeight = Screen.height;
 
         for (int i = 0; i < _quilitySetting.Count; i++)
         {
@@ -154,6 +168,30 @@ public class CGameManager : MonoBehaviour
         else
         {
             Time.timeScale = _timeScaleBeforePause;
+        }
+    }
+
+    private void OnGameShutdown()
+    {
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
+    }
+
+    private void OnGameResolutionChange()
+    {
+        _isFullscreen = !_isFullscreen;
+        if (_isFullscreen)
+        {
+            Screen.SetResolution(1920, 1080, FullScreenMode.FullScreenWindow);
+            _screenChangeText.text = "창모드";
+        }
+        else
+        {
+            Screen.SetResolution(_tempWidth, _tempHeight, FullScreenMode.Windowed);
+            _screenChangeText.text = "전체화면";
         }
     }
 
