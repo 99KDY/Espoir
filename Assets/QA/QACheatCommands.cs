@@ -24,10 +24,31 @@ public class QACheatCommands : MonoBehaviour
         DebugLogConsole.AddCommand<int>("clear", "플레이어 상태이상을 제거합니다. (예: clear 10)", Cheat_ClearStatus);
     }
 
-    // 치트 UI열때 키입력 막기
     private InputActionMap _playerMap;
     private void Update()
     {
+        // 쿨 초기화 ON / OFF
+        if (_noCooldown)
+        {
+            CPlayer player = FindObjectOfType<CPlayer>();
+
+            if (player != null)
+            {
+                CPlayerSkill skill = player.GetComponent<CPlayerSkill>();
+
+                if (skill != null)
+                {
+                    skill.ResetCooldowns();
+                }
+
+                for (int i = 0; i < 40; i++)
+                {
+                    player.RecoverBasicAttackMp();
+                }
+            }
+        }
+
+        // 치트중 스킬 이동 키 입력 막기
         if (_playerMap == null)
         {
             InputActionAsset[] assets = Resources.FindObjectsOfTypeAll<InputActionAsset>();
@@ -63,10 +84,18 @@ public class QACheatCommands : MonoBehaviour
     /// <summary>
     /// 무적 치트
     /// </summary>
+    private bool _isGodMode;
     public void GodMode()
     {
-        CLogger.Log("[QA] 무적 모드가 활성화되었습니다. (기능 연결 필요)");
-        // TODO : 플레이어 코드를 완성하면 여기에 체력 감소 안되게 하는거 추가예정
+        CPlayer player = FindPlayer();
+
+        if (player == null)
+        {
+            return;
+        }
+        _isGodMode = !_isGodMode;
+        player.SetInvincible(_isGodMode);
+        CLogger.Log($"[QA] 무적 모드 {_isGodMode}");
     }
 
     /// <summary>
@@ -147,6 +176,7 @@ public class QACheatCommands : MonoBehaviour
     /// <summary>
     /// 스킬 쿨타임제거 치트
     /// </summary>
+    private bool _noCooldown;
     public void Cheat_ResetCooldown()
     {
         CPlayer player = FindPlayer();
@@ -164,12 +194,23 @@ public class QACheatCommands : MonoBehaviour
             return;
         }
 
-        // 혜성님꺼 연결전 오류뜸
-        // skill.ResetCooldowns();
-        CLogger.Log("[QA] 스킬 쿨타임을 없앴습니다.");
+        _noCooldown = !_noCooldown;
+        if (_noCooldown)
+        {
+            skill.ResetCooldowns();
+
+            for (int i = 0; i < 40; i++)
+            {
+                player.RecoverBasicAttackMp();
+            }
+        }
+                
+        CLogger.Log($"[QA] 쿨타임 제거: {_noCooldown}");
     }
 
-    // 마나채우는 치트
+    /// <summary>
+    /// 마나채우는 치트
+    /// </summary>
     public void Cheat_FillMp()
     {
         CPlayer player = FindPlayer();
@@ -187,7 +228,9 @@ public class QACheatCommands : MonoBehaviour
         CLogger.Log($"[QA] 플레이어 MP를 채웠습니다. 현재 MP: {player.CurrentMp}");
     }
 
-    // 플레이어 상태이상 치트
+    /// <summary>
+    /// 플레이어 상태이상 치트
+    /// </summary>
     public void Cheat_AddStatus(int id, int stack)
     {
         CPlayer player = FindPlayer();
@@ -201,7 +244,9 @@ public class QACheatCommands : MonoBehaviour
         CLogger.Log($"[QA] 플레이어에게 상태이상 {id}를 {stack}스택 부여했습니다. 현재스택: {player.FindStatusStack(id)}");
     }
 
-    // 플레이어 상태이상 제거 치트
+    /// <summary>
+    /// 플레이어 상태이상 제거 치트
+    /// </summary>
     public void Cheat_ClearStatus(int id)
     {
         CPlayer player = FindPlayer();
@@ -215,7 +260,9 @@ public class QACheatCommands : MonoBehaviour
         CLogger.Log($"[QA] 플레이어의 상태이상{id}를 제거했습니다.");
     }
 
-    // 적에게 상태이상 치트
+    /// <summary>
+    /// 적에게 상태이상 치트
+    /// </summary>
     public void Cheat_AddEnemyStatus(int id, int stack)
     {
         CEnemy[] enemies = FindObjectsOfType<CEnemy>();
