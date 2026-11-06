@@ -1,12 +1,9 @@
 ﻿
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using static UnityEngine.GraphicsBuffer;
-using Unity.VisualScripting;
 
 public class CSlothBoss : CEnemy
 {

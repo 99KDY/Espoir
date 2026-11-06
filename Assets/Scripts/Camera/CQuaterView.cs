@@ -1,13 +1,10 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 public class CQuaterView : MonoBehaviour
 {
-    #region ÀÎ½ºÆÑÅÍ
+    #region ì¸ìŠ¤íŒ©í„°
     [Header("Inspector")]
     [SerializeField] private GameObject _player;
     [SerializeField] private Transform _cameraTr;
@@ -76,7 +73,7 @@ public class CQuaterView : MonoBehaviour
 
         if (Mathf.Abs(scroll) > 0.01f)
         {
-            CLogger.Log("Scroll ¿òÁ÷¿´¾î.");
+            CLogger.Log("Scroll ì›€ì§ì˜€ì–´.");
             _zoomDamped += _zoomSharpness * (-scroll);
             float t = Mathf.Clamp(_zoomDamped, 0, 1);
             if(_zoomDamped < -1)
@@ -109,7 +106,7 @@ public class CQuaterView : MonoBehaviour
     {
         if(_cameraTr == null)
         {
-            CLogger.Log("CQuaterView ½ºÅ©¸³Æ® Ä«¸Ş¶ó ºñ¾îÀÖÀ½.");
+            CLogger.Log("CQuaterView ìŠ¤í¬ë¦½íŠ¸ ì¹´ë©”ë¼ ë¹„ì–´ìˆìŒ.");
             return;
         }
 
