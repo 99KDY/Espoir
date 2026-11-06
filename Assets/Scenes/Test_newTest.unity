@@ -260,7 +260,7 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 80
+  m_Constraints: 94
   m_CollisionDetection: 0
 --- !u!4 &89927487 stripped
 Transform:
@@ -2891,6 +2891,26 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1929441329760321138, guid: fc44008c7d95e394abbb953b8b53d960, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7859016858234974315, guid: fc44008c7d95e394abbb953b8b53d960, type: 3}
+      propertyPath: m_Height
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 7859016858234974315, guid: fc44008c7d95e394abbb953b8b53d960, type: 3}
+      propertyPath: m_Radius
+      value: 2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7859016858234974315, guid: fc44008c7d95e394abbb953b8b53d960, type: 3}
+      propertyPath: m_Center.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7859016858234974315, guid: fc44008c7d95e394abbb953b8b53d960, type: 3}
+      propertyPath: m_Center.y
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 7859016858234974315, guid: fc44008c7d95e394abbb953b8b53d960, type: 3}
+      propertyPath: m_Center.z
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
