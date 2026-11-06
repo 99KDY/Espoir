@@ -39,16 +39,17 @@ public class CSlothBoss : CEnemy
     [Header("Boss Info")]
     [SerializeField] private Animator _animator;
     [SerializeField] private float _rotateSpeed = 1000.0f;
-    [SerializeField] private float _atkTime = 3.0f;
+    [SerializeField] private float _atkTime = 5.0f;
     [SerializeField] private float _normalAtkRange = 7.0f;
     [SerializeField] private float _detectedRange = 15.0f;
 
 
 
-    [Header("훨윈드")]
-    [SerializeField] private float _whirlRound = 10f;
-
-
+    [Header("Pattern Range")]
+    [SerializeField] private float _whirlRange = 15f;
+    [SerializeField] private float _whirlInner = 7f;
+    [SerializeField] private float _donutRange = 12f;
+    [SerializeField] private float _donutInner = 7f;
 
 
 
@@ -134,7 +135,7 @@ public class CSlothBoss : CEnemy
       
 
         _target = _player.transform;
-        _previewPattern = this.GetComponent<CPreviewPattern>();
+        _previewPattern = this.GetComponentInChildren<CPreviewPattern>();
         _animator = this.GetComponent<Animator>();
 
     }
@@ -159,15 +160,16 @@ public class CSlothBoss : CEnemy
     private void FixedUpdate()
     {
         LookAtPlayer();
-
+        
         if(_atkTimer > _atkTime)
         {
             BossState();
-
+            
             _atkTimer = 0f;
         }
         else
         {
+            
             _atkTimer += Time.fixedDeltaTime;        
         }
     }
@@ -180,6 +182,8 @@ public class CSlothBoss : CEnemy
             return;
         }
 
+        _onAttack = true;
+
         normalAtk = Random.Range(0, 3);
 
         CLogger.Log($"Normal Attack Pattern : {normalAtk}");
@@ -188,21 +192,21 @@ public class CSlothBoss : CEnemy
         {
             case 0:
                 _animator.SetTrigger(_fisrtNorm);
-                DoubleHookAttack();
+                NormalAttackDelay().Forget();
+
                 break;
 
             case 1:
                 _animator.SetTrigger(_secondNorm);
-
+                NormalAttackDelay().Forget();
                 break;
 
             case 2:
                 _animator.SetTrigger(_thirdNorm);
-
+                NormalAttackDelay().Forget();
                 break;
 
         }
-
     }
 
 
@@ -226,9 +230,8 @@ public class CSlothBoss : CEnemy
                 break;
 
             case 1:
+                WhirlWindAttack().Forget();
 
-                _animator.SetTrigger(_secondSub);
-                
                 break;
 
             case 2:
@@ -238,9 +241,8 @@ public class CSlothBoss : CEnemy
                 break;
 
             case 3:
-                DonutAttack();
-                _animator.SetTrigger(_forthSub);
-                
+                DonutAttack().Forget();
+                       
                 break;
         }
     }
@@ -282,14 +284,7 @@ public class CSlothBoss : CEnemy
         {
             return;
         }
-
-        if(_isStop == true)
-        {
-            return;
-        }
-
-        _onAttack = true;
-
+        
         switch (_currentState)
         {
             case ESlothBossState.Idle:
@@ -320,7 +315,6 @@ public class CSlothBoss : CEnemy
 
     }
 
-
     private void LookAtPlayer()
     {
         Vector3 targer = new Vector3(_target.position.x, 0f, _target.position.z);
@@ -328,38 +322,61 @@ public class CSlothBoss : CEnemy
         Vector3 lookPlayer = targer - this.transform.position;
 
         float distance = lookPlayer.magnitude;
-
+                
         if (distance <= _detectedRange)
         {
-            Vector3 dir = lookPlayer.normalized;
-            Quaternion lookRotation = Quaternion.LookRotation(dir);
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, lookRotation, _rotateSpeed * Time.deltaTime);
-
-            if (distance <= _normalAtkRange)
+            if (_onAttack == false)
             {
-                _isNormal = true;
+                Vector3 dir = lookPlayer.normalized;
+                Quaternion lookRotation = Quaternion.LookRotation(dir);
+                transform.rotation = Quaternion.RotateTowards(transform.rotation, lookRotation, _rotateSpeed * Time.deltaTime);
 
-                _currentState = ESlothBossState.NormalAttack;
+                if (distance <= _normalAtkRange)
+                {
+                    _isNormal = true;
+
+                    _currentState = ESlothBossState.NormalAttack;
+                }
+
+                else
+                {
+                    _isNormal = false;
+                    _isSub = true;
+
+                    _currentState = ESlothBossState.SubAttack;
+                }
             }
 
             else
             {
-                _isNormal = false;
-                _isSub = true;
-
-                _currentState = ESlothBossState.SubAttack;
+                CLogger.Log("Boss Animator Moving");
             }
-
-
+        
         }
+        
+
+     
+
 
     }
 
 
+    private async UniTask NormalAttackDelay()
+    {
+
+    
+
+        await UniTask.Delay(2500, DelayType.UnscaledDeltaTime);
+
+        _onAttack = false;
+
+
+    }
+
     private void DoubleHookAttack()
     {
 
-        int hit = NormalFindPlayer(6f);
+        int hit = NormalFindPlayer(3f);
 
         for (int i = 0; i < hit; i++)
         {
@@ -387,22 +404,37 @@ public class CSlothBoss : CEnemy
 
     }
 
-
-
-
-
     private void BackSpinAttack()
     {
-        Vector3 startPos = this.transform.forward;
-        Vector3 endPos = -this.transform.forward;
+        int hit = NormalFindPlayer(3f);
+        
+         for (int i = 0; i < hit; i++)
+        {
+            if (_hitCollider == null)
+            {
+                continue;
+            }
 
+            CPlayer player = _hitCollider[i].GetComponent<CPlayer>();
+
+            if (player == null || player.HpCurrent <= 0)
+            {
+                continue;
+            }
+
+            SDamageInfo damagePlayer = new SDamageInfo(this.Attack);
+           
+            player.OnHit(this, damagePlayer);
+
+            CLogger.Log($"{player.name}의 현재 체력 : {player.HpCurrent}");
+        }
 
     }
 
     private void SlamUpperAttack()
     {
 
-        int hit = NormalFindPlayer(7f);
+        int hit = NormalFindPlayer(3f);
 
         for (int i = 0; i < hit; i++)
         {
@@ -430,28 +462,34 @@ public class CSlothBoss : CEnemy
     #region whirlWind
     private async UniTask WhirlWindAttack()
     {
+
         if(_previewPattern != null)
         {
             _previewPattern.ShowDonutPattern(20, 15f, 7f);
         }
+        else
+        {
+            CLogger.Error("PatternView 비어있음");
+        }
 
-        await UniTask.Delay(1500);
+        await UniTask.Delay(2300);
+        _atkTimer = -0.8f;
 
         if (_previewPattern != null)
         {
             _previewPattern.ClearPreview();
         }
+        
+        
+        _animator.SetTrigger(_secondSub);
+
 
     }
 
     private void WhirlWindDamage()
     {
 
-        //Vector3 offset = this.transform.right * 5.0f;
-
-        //int hit = Physics.OverlapSphereNonAlloc(this.transform.position + offset, 5.0f, _hitCollider, _tartgetMask);
-
-        int hit = SubFindPlayer(15f);
+        int hit = SubFindPlayer(_whirlRange);
 
         for (int i = 0; i < hit; i++)
         {
@@ -472,7 +510,7 @@ public class CSlothBoss : CEnemy
                     new Vector3( player.transform.position.x , 0f, player.transform.position.z)
                 );
 
-            if(distance >= 7f && distance <= 15f)
+            if(distance >= 7f && distance <= _whirlRange)
             {
                 SDamageInfo damagePlayer = new SDamageInfo(this.Attack);
                 
@@ -488,23 +526,31 @@ public class CSlothBoss : CEnemy
 
     #region DonutAttack
 
-    private async void DonutAttack()
+    private async UniTask DonutAttack()
     {
         if(_previewPattern != null)
         {
-            _previewPattern.ShowDonutPattern(20, 15f, 10f);
+            _previewPattern.ShowDonutPattern(20, 12f, 7f);
         }
-        await UniTask.Delay(1500);
+
+        else
+        {
+            CLogger.Error("PatternView 비어있음");
+        }
+
+            await UniTask.Delay(2000);
 
         if (_previewPattern != null)
         {
             _previewPattern.ClearPreview();
         }
+
+        _animator.SetTrigger(_forthSub);
     }
 
     private void DonutDamage()
     {
-        int hit = SubFindPlayer(15f);
+        int hit = SubFindPlayer(_donutRange);
 
         for (int i = 0; i < hit; i++)
         {
@@ -524,11 +570,13 @@ public class CSlothBoss : CEnemy
                 new Vector3(player.transform.position.x, 0f, player.transform.position.z)
             );
 
-            if (distance >= 10f && distance <= 15f)
+            if (distance >= 8f && distance <= 12f)
             {
                 SDamageInfo damagePlayer = new SDamageInfo(this.Attack);
 
                 player.OnHit(this, damagePlayer);
+
+                CLogger.Log($"{player.name}의 현재 체력 : {player.HpCurrent}");
             }
         }
     }
@@ -538,9 +586,8 @@ public class CSlothBoss : CEnemy
 
     private int NormalFindPlayer(float radius)
     {
-        Vector3 offset =  this.transform.up * 1.0f + this.transform.forward * 2f;
-
-
+        Vector3 offset = this.transform.up * 1.0f + this.transform.forward * 2f;
+             
         int hit = Physics.OverlapSphereNonAlloc(this.transform.position + offset, radius, _hitCollider, _tartgetMask);
 
         for (int i = 0; i < _hitCollider.Length; i++)
