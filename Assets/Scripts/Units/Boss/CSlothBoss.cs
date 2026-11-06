@@ -320,7 +320,7 @@ public class CSlothBoss : CEnemy
 
     private void LookAtPlayer()
     {
-        Vector3 targer = new Vector3(_target.position.x, 0f, _target.position.z);
+        Vector3 targer = new Vector3(_target.position.x, this.transform.position.y, _target.position.z);
 
         Vector3 lookPlayer = targer - this.transform.position;
 
