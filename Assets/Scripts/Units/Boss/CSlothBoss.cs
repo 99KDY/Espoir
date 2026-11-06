@@ -549,6 +549,11 @@ public class CSlothBoss : CEnemy
         }
 
         _animator.SetTrigger(_forthSub);
+
+        _onAttack = true;
+        await UniTask.Delay(2000);
+
+        _onAttack = false;
     }
 
     private void DonutDamage()
@@ -599,6 +604,7 @@ public class CSlothBoss : CEnemy
             CLogger.Error("PatternView 비어있음");
         }
 
+        _onAttack = true;
         await UniTask.Delay(1500);
 
         if (_previewPattern != null)
@@ -606,8 +612,7 @@ public class CSlothBoss : CEnemy
             _previewPattern.ClearPreview();
         }
 
-
-
+        _onAttack = false;
     }
 
     private void TwiceInnerDamage()
