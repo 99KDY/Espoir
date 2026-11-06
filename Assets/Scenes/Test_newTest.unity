@@ -225,13 +225,16 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   _bossState: 0
-  _previewPattern: {fileID: 0}
+  _previewPattern: {fileID: 261985958}
   _animator: {fileID: 89927479}
   _rotateSpeed: 1000
-  _atkTime: 3
+  _atkTime: 5
   _normalAtkRange: 6
   _detectedRange: 10
-  _whirlRound: 10
+  _whirlRange: 14
+  _whirlInner: 7
+  _donutRange: 12
+  _donutInner: 8
 --- !u!54 &89927484
 Rigidbody:
   m_ObjectHideFlags: 0
