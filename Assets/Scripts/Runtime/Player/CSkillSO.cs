@@ -7,7 +7,8 @@ public enum ESkillType
     Dash,
     Rush,
     Slam,
-    Crown
+    Crown,
+    Strike
 }
 
 [Serializable]
@@ -15,6 +16,7 @@ public struct SSkillHit
 {
     [Range(0f, 1f)] public float time;
     [Min(0f)] public float damageRatio;
+    [Min(0f)] public float markedDamageRatio;
     [Min(0f)] public float hitStopDuration;
     public Vector3 offset;
     public Vector3 size;
@@ -35,7 +37,6 @@ public struct SSkillStep
     public SSkillHit[] hits;
     public GameObject effectPrefab;
     [Range(0f, 1f)] public float effectTime;
-    [Min(0f)] public float effectLifetime;
 }
 
 [CreateAssetMenu(fileName = "Skill", menuName = "Skill/Player Skill")]
@@ -50,6 +51,10 @@ public class CSkillSO : ScriptableObject
     [SerializeField, Min(0f)] private float _rotationSpeed = 1080f;
     [SerializeField, Min(0f)] private float _comboGraceTime = 0.8f;
 
+    [Header("취소 가능 시점")]
+    [SerializeField, Range(0f, 1f)] private float _dashCancelTime;
+    [SerializeField, Range(0f, 1f)] private float _strikeCancelTime;
+
     [Header("대쉬 설정")]
     [SerializeField, Min(0.01f)] private float _dashDuration = 0.25f;
     [SerializeField, Min(0f)] private float _dashStartDelay;
@@ -60,6 +65,11 @@ public class CSkillSO : ScriptableObject
     [SerializeField] private AnimationCurve _movementCurve;
     [SerializeField] private GameObject _followEffect;
     [SerializeField, Min(0f)] private float _markedCooldownReduction;
+
+    [Header("막타 연계 설정")]
+    [SerializeField, Min(0f)] private float _finisherWindow;
+    [SerializeField, Min(0)] private int _finisherMpCost;
+    [SerializeField, Range(0.01f, 1f)] private float _finisherWindupRatio = 1f;
 
     [Header("내리꽂기 설정")]
     [SerializeField, Min(0)] private int _fullHitFlow;
@@ -85,6 +95,8 @@ public class CSkillSO : ScriptableObject
     public string ComboTrigger => _comboTrigger;
     public float RotationSpeed => _rotationSpeed;
     public float ComboGraceTime => _comboGraceTime;
+    public float DashCancelTime => _dashCancelTime;
+    public float StrikeCancelTime => _strikeCancelTime;
     public float DashDuration => _dashDuration;
     public float DashStartDelay => _dashStartDelay;
     public float DashEasePower => _dashEasePower;
@@ -92,6 +104,9 @@ public class CSkillSO : ScriptableObject
     public AnimationCurve MovementCurve => _movementCurve;
     public GameObject FollowEffect => _followEffect;
     public float MarkedCooldownReduction => _markedCooldownReduction;
+    public float FinisherWindow => _finisherWindow;
+    public int FinisherMpCost => _finisherMpCost;
+    public float FinisherWindupRatio => _finisherWindupRatio;
     public int FullHitFlow => _fullHitFlow;
     public CStatusSO CrownStatus => _crownStatus;
     public float CrownWindow => _crownWindow;

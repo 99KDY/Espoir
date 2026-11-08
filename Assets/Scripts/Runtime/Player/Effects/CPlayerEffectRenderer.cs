@@ -35,6 +35,7 @@ public class CPlayerEffectRenderer : MonoBehaviour
     private Material _depthCopy;
     private CommandBuffer _depthCommand;
     private int _previousMask;
+    private RenderTextureFormat _distortionFormat;
     private Vector3 _screenCue;
     private Vector3 _basePosition;
     private float _baseFov;
@@ -46,6 +47,8 @@ public class CPlayerEffectRenderer : MonoBehaviour
     {
         _camera = GetComponent<Camera>();
         _previousMask = _camera.cullingMask;
+        _distortionFormat = SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.RGHalf)
+            ? RenderTextureFormat.RGHalf : RenderTextureFormat.ARGBHalf;
 
         if (_compositeShader == null || _distortionShader == null || _depthShader == null)
         {
@@ -151,7 +154,7 @@ public class CPlayerEffectRenderer : MonoBehaviour
         {
             if (CPlayerEffectStart.DistortionCount > 0)
             {
-                offset = GetTarget(source.width / 2, source.height / 2);
+                offset = GetTarget(source.width / 2, source.height / 2, 0, _distortionFormat);
                 _effectCamera.backgroundColor = Color.clear;
                 _effectCamera.targetTexture = offset;
                 _effectCamera.RenderWithShader(_distortionShader, "EspoirDistort");
@@ -314,10 +317,11 @@ public class CPlayerEffectRenderer : MonoBehaviour
         }
     }
 
-    private static RenderTexture GetTarget(int width, int height, int depth = 0)
+    private static RenderTexture GetTarget(int width, int height, int depth = 0,
+        RenderTextureFormat format = RenderTextureFormat.ARGBHalf)
     {
         RenderTexture target = RenderTexture.GetTemporary(Mathf.Max(1, width), Mathf.Max(1, height), depth,
-            RenderTextureFormat.ARGBHalf, RenderTextureReadWrite.Linear);
+            format, RenderTextureReadWrite.Linear);
         target.filterMode = FilterMode.Bilinear;
         target.wrapMode = TextureWrapMode.Clamp;
        

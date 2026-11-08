@@ -6,7 +6,22 @@ public class CPlayerDashGhostPose : ScriptableObject
     [SerializeField] private string[] _bones;
     [SerializeField] private Quaternion[] _rotations;
 
+    [SerializeField] private Mesh[] _excludedMeshes = new Mesh[0];
+
     private Dictionary<string, Quaternion> _rotationByBone;
+
+    internal bool IsExcluded(Mesh mesh)
+    {
+        foreach (Mesh excluded in _excludedMeshes)
+        {
+            if (excluded == mesh)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     internal bool TryGetRotation(string boneName, out Quaternion rotation)
     {

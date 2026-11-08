@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
@@ -33,13 +32,14 @@ public struct SDashTrailSettings
 
 internal class CPlayerDashTrail
 {
+    private CPlayerDashGhost.CSource _source;
     private Vector3 _origin;
     private float _nextDistance;
     private int _ghostCount;
     private bool _spawnedRushGhost;
 
     internal void Begin(SDashTrailSettings settings, Transform player, Animator animator, Vector3 direction,
-        List<GameObject> effects)
+        CPlayerSkillEffects effects)
     {
         Reset(player.position, settings.firstDistance);
         SpawnShock(settings.startShock, player.position, settings.startHeight, effects);
@@ -51,7 +51,7 @@ internal class CPlayerDashTrail
     }
 
     internal void Update(SDashTrailSettings settings, Transform player, Animator animator, Vector3 direction,
-        float progress, List<GameObject> effects)
+        float progress, CPlayerSkillEffects effects)
     {
         if (progress >= 1f)
         {
@@ -71,7 +71,7 @@ internal class CPlayerDashTrail
     }
 
     internal void UpdateRush(SDashTrailSettings settings, Transform player, Animator animator, Vector3 direction,
-        float time, List<GameObject> effects)
+        float time, CPlayerSkillEffects effects)
     {
         if (settings.ghostMaterial == null || time < settings.ghostWindow.x || time >= settings.ghostWindow.y)
         {
@@ -88,7 +88,7 @@ internal class CPlayerDashTrail
     }
 
     private void UpdateGhosts(SDashTrailSettings settings, Transform player, Animator animator, Vector3 direction,
-        float progress, List<GameObject> effects)
+        float progress, CPlayerSkillEffects effects)
     {
         float distance = Vector3.Dot(player.position - _origin, direction);
 
@@ -112,9 +112,14 @@ internal class CPlayerDashTrail
     }
 
     private void SpawnGhost(Animator animator, Material material, SDashGhostStyle style, Vector3 direction,
-        bool flare, List<GameObject> effects)
+        bool flare, CPlayerSkillEffects effects)
     {
-        CPlayerDashGhost ghost = CPlayerDashGhost.Spawn(animator.gameObject, material, style.lifetime,
+        if (_source == null || _source._CHARACTER != animator.gameObject)
+        {
+            _source = new CPlayerDashGhost.CSource(animator.gameObject);
+        }
+
+        CPlayerDashGhost ghost = CPlayerDashGhost.Spawn(_source, material, style.lifetime,
             style.alpha, style.smear, style.hold, direction, flare);
         if (ghost != null)
         {
@@ -122,11 +127,11 @@ internal class CPlayerDashTrail
         }
     }
 
-    private void SpawnShock(GameObject prefab, Vector3 position, float height, List<GameObject> effects)
+    private void SpawnShock(GameObject prefab, Vector3 position, float height, CPlayerSkillEffects effects)
     {
         if (prefab != null)
         {
-            effects.Add(UnityEngine.Object.Instantiate(prefab, position + Vector3.up * height, Quaternion.identity));
+            effects.Spawn(prefab, position + Vector3.up * height, Quaternion.identity);
         }
     }
 }
