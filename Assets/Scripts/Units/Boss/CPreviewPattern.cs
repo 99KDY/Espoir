@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using TMPro;
@@ -7,7 +7,7 @@ using UnityEngine;
 public class CPreviewPattern : MonoBehaviour
 {
 
-    [Header("ÆĞÅÏ ¹üÀ§ ¼³Á¤")]
+    [Header("íŒ¨í„´ ë²”ìœ„ ì„¤ì •")]
     [SerializeField] private Vector3[] _polygonPoint;
     [SerializeField] private int[] _polygonTriangles;
 
@@ -20,7 +20,7 @@ public class CPreviewPattern : MonoBehaviour
     [SerializeField] private float _atkRadiusMin = 5.0f;
     [SerializeField] private float _atkRadiusMax = 15.0f;
     
-    [SerializeField] private float _startDegree = 15f;           // È£ÀÇ ±æÀÌ¸¦ À§ÇÑ °¢µµ
+    [SerializeField] private float _startDegree = 15f;           // í˜¸ì˜ ê¸¸ì´ë¥¼ ìœ„í•œ ê°ë„
     [SerializeField] private float _endDegree= 75f;
     [SerializeField] private float _arcRadius = 10f;
 
@@ -38,7 +38,7 @@ public class CPreviewPattern : MonoBehaviour
         
     }
 
-    // ÆĞÅÏ ±¸¿ª Ã¤¿ì±â 
+    // íŒ¨í„´ êµ¬ì—­ ì±„ìš°ê¸° 
     private void DrawFilled(int sides, float radius)
     {
         _polygonPoint = GetCirclePoint(sides,radius).ToArray();
@@ -74,7 +74,7 @@ public class CPreviewPattern : MonoBehaviour
 
     }
 
-    // ¿øÇü ¸ğ¾çÀ¸·Î °ø°İ¹üÀ§ ±×¸®±â
+    // ì›í˜• ëª¨ì–‘ìœ¼ë¡œ ê³µê²©ë²”ìœ„ ê·¸ë¦¬ê¸°
     private List<Vector3> GetCirclePoint(int sides, float radius)
     {
         List<Vector3> points = new List<Vector3>();
@@ -100,7 +100,7 @@ public class CPreviewPattern : MonoBehaviour
 
 
 
-    // ÇÇÀÚ ¸ğ¾çÀ¸·Î °ø°İ¹üÀ§ ±×¸®±â
+    // í”¼ì ëª¨ì–‘ìœ¼ë¡œ ê³µê²©ë²”ìœ„ ê·¸ë¦¬ê¸°
     private List<Vector3> GetArcPoint(int sides, float radius)
     {
         List<Vector3> arcPoints = new List<Vector3>();

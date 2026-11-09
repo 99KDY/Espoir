@@ -1,7 +1,6 @@
-
+ï»¿
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
 using System.Threading;
 using Cysharp.Threading.Tasks;
@@ -22,7 +21,7 @@ public class CSlothBoss : CEnemy
 
 
 
-    #region ÀÎ½ºÆÑÅÍ
+    #region ì¸ìŠ¤íŒ©í„°
     [SerializeField] private CPlayer _player;
 
     [Header("Attack Player")]
@@ -57,7 +56,7 @@ public class CSlothBoss : CEnemy
 
     #endregion
 
-    #region Animator º¯¼ö
+    #region Animator ë³€ìˆ˜
 
     private int _fisrtNorm = Animator.StringToHash("nAttack01");
     private int _secondNorm = Animator.StringToHash("nAttack02");
@@ -78,7 +77,7 @@ public class CSlothBoss : CEnemy
 
 
 
-    #region ³»ºÎº¯¼ö
+    #region ë‚´ë¶€ë³€ìˆ˜
 
     private ESlothBossState _startState;
     private ESlothBossState _currentState;
@@ -117,7 +116,7 @@ public class CSlothBoss : CEnemy
 
             if (_player == null)
             {
-                CLogger.Error("ÇÃ·¹ÀÌ¾î Ã£À» ¼ö ¾øÀ½");
+                CLogger.Error("í”Œë ˆì´ì–´ ì°¾ì„ ìˆ˜ ì—†ìŒ");
             }
 
         }
@@ -127,7 +126,7 @@ public class CSlothBoss : CEnemy
             _soundManager = FindFirstObjectByType<CSoundManager>();
             if(_soundManager == null)
             {
-                CLogger.Warn("»ç¿îµå ¸Å´ÏÀú Ã£À» ¼ö ¾øÀ½");
+                CLogger.Warn("ì‚¬ìš´ë“œ ë§¤ë‹ˆì € ì°¾ì„ ìˆ˜ ì—†ìŒ");
             }
 
         }
@@ -393,7 +392,7 @@ public class CSlothBoss : CEnemy
 
             player.OnHit(this, damagePlayer);
 
-            CLogger.Log($"{player.name}ÀÇ ÇöÀç Ã¼·Â : {player.HpCurrent}");
+            CLogger.Log($"{player.name}ì˜ í˜„ì¬ ì²´ë ¥ : {player.HpCurrent}");
         }
 
 
@@ -422,7 +421,7 @@ public class CSlothBoss : CEnemy
            
             player.OnHit(this, damagePlayer);
 
-            CLogger.Log($"{player.name}ÀÇ ÇöÀç Ã¼·Â : {player.HpCurrent}");
+            CLogger.Log($"{player.name}ì˜ í˜„ì¬ ì²´ë ¥ : {player.HpCurrent}");
         }
 
     }
@@ -450,7 +449,7 @@ public class CSlothBoss : CEnemy
            
             player.OnHit(this, damagePlayer);
 
-            CLogger.Log($"{player.name}ÀÇ ÇöÀç Ã¼·Â : {player.HpCurrent}");
+            CLogger.Log($"{player.name}ì˜ í˜„ì¬ ì²´ë ¥ : {player.HpCurrent}");
         }
 
     }
@@ -467,7 +466,7 @@ public class CSlothBoss : CEnemy
         }
         else
         {
-            CLogger.Error("PatternView ºñ¾îÀÖÀ½");
+            CLogger.Error("PatternView ë¹„ì–´ìˆìŒ");
         }
 
         await UniTask.Delay(2300);
@@ -515,7 +514,7 @@ public class CSlothBoss : CEnemy
                 player.OnHit(this, damagePlayer);
 
 
-                CLogger.Log($"{player.name}ÀÇ ÇöÀç Ã¼·Â : {player.HpCurrent}");
+                CLogger.Log($"{player.name}ì˜ í˜„ì¬ ì²´ë ¥ : {player.HpCurrent}");
             }
 
         }
@@ -533,7 +532,7 @@ public class CSlothBoss : CEnemy
 
         else
         {
-            CLogger.Error("PatternView ºñ¾îÀÖÀ½");
+            CLogger.Error("PatternView ë¹„ì–´ìˆìŒ");
         }
 
             await UniTask.Delay(2000);
@@ -579,7 +578,7 @@ public class CSlothBoss : CEnemy
 
                 player.OnHit(this, damagePlayer);
 
-                CLogger.Log($"{player.name}ÀÇ ÇöÀç Ã¼·Â : {player.HpCurrent}");
+                CLogger.Log($"{player.name}ì˜ í˜„ì¬ ì²´ë ¥ : {player.HpCurrent}");
             }
         }
     }
@@ -596,7 +595,7 @@ public class CSlothBoss : CEnemy
 
         else
         {
-            CLogger.Error("PatternView ºñ¾îÀÖÀ½");
+            CLogger.Error("PatternView ë¹„ì–´ìˆìŒ");
         }
 
         _onAttack = true;
@@ -634,7 +633,7 @@ public class CSlothBoss : CEnemy
 
             player.OnHit(this, damagePlayer);
 
-            CLogger.Log($"{player.name}ÀÇ ÇöÀç Ã¼·Â : {player.HpCurrent}");
+            CLogger.Log($"{player.name}ì˜ í˜„ì¬ ì²´ë ¥ : {player.HpCurrent}");
         }
 
 
@@ -669,7 +668,7 @@ public class CSlothBoss : CEnemy
 
                 player.OnHit(this, damagePlayer);
 
-                CLogger.Log($"{player.name}ÀÇ ÇöÀç Ã¼·Â : {player.HpCurrent}");
+                CLogger.Log($"{player.name}ì˜ í˜„ì¬ ì²´ë ¥ : {player.HpCurrent}");
             }
         }
     }
@@ -781,6 +780,7 @@ public class CSlothBoss : CEnemy
 
     private void OnValidate()
     {
+        if (_player == null) return;
         Vector3 targetPos = _player.transform.position - this.transform.position; 
 
         float distance = targetPos.magnitude;

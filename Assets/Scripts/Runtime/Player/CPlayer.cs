@@ -351,6 +351,14 @@ public class CPlayer : CUnit
     {
         _skill.GetSkillCooldown(type, out ratio, out remainCooldown);
     }
+
+    public bool GetSkillAvailable(ESkillType type)
+    {
+        return _skill.GetSkillAvailable(type);
+    }
+
+    public float GetCrownRemaining => _skill.CrownWindowRemaining;
+
     protected override void Awake()
     {
         base.Awake();
