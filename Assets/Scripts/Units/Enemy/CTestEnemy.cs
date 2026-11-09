@@ -263,7 +263,7 @@ public class CTestEnemy : CEnemy
 
 
 
-        Vector3 target = new Vector3(_target.position.x, 0, _target.position.z);
+        Vector3 target = new Vector3(_target.position.x, this.transform.position.y, _target.position.z);
                
         Vector3 toTarget = target - transform.position;
 
