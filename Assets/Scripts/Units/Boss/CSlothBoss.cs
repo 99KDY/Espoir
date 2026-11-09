@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using static UnityEngine.GraphicsBuffer;
 
 public class CSlothBoss : CEnemy
 {
