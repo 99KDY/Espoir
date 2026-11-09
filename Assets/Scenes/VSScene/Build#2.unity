@@ -3068,6 +3068,8 @@ MonoBehaviour:
     skill: {fileID: 11400000, guid: 557fbdad63a4a0044a8fb0d8e954688a, type: 2}
   - input: {fileID: -3568252484128390957, guid: 9614690e9b07cd14abd0a8014fcfd61d, type: 3}
     skill: {fileID: 11400000, guid: e8a6e0fcc0e57044cb72a765948d7b1d, type: 2}
+  - input: {fileID: 7580534641416888525, guid: 9614690e9b07cd14abd0a8014fcfd61d, type: 3}
+    skill: {fileID: 11400000, guid: fda9d9446fd1afc4b9e2d2709d28f43d, type: 2}
   _maxMp: 150
   _mpPerBasicHit: 5
   _passive:
@@ -8170,14 +8172,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 3167064873427938070, guid: 3851a08ee9723904aa573831ddbce137, type: 3}
-      propertyPath: m_fontSize
-      value: 24
-      objectReference: {fileID: 0}
-    - target: {fileID: 3167064873427938070, guid: 3851a08ee9723904aa573831ddbce137, type: 3}
-      propertyPath: m_fontSizeBase
-      value: 24
-      objectReference: {fileID: 0}
     - target: {fileID: 7274830311754938830, guid: 3851a08ee9723904aa573831ddbce137, type: 3}
       propertyPath: _player
       value: 
@@ -8185,10 +8179,6 @@ PrefabInstance:
     - target: {fileID: 7565882735492702776, guid: 3851a08ee9723904aa573831ddbce137, type: 3}
       propertyPath: m_Name
       value: PlayerUI
-      objectReference: {fileID: 0}
-    - target: {fileID: 7672487978192674151, guid: 3851a08ee9723904aa573831ddbce137, type: 3}
-      propertyPath: _tooltipText
-      value: "(\uBBF8\uAD6C\uD604)"
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
