@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: 9
   _name: "\uD50C\uB808\uC774\uC5B4 \uAE30\uC808"
-  _icon: {fileID: 0}
+  _icon: {fileID: 21300000, guid: a2fdddafd235473aa0006149b1a75679, type: 3}
   _description: "\uC9C0\uC18D\uC2DC\uAC04\uB3D9\uC548 \uAE30\uC808\uC0C1\uD0DC"
   _tooltip: "\uAE30\uC808"
   _duration: 3
