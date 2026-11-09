@@ -211,12 +211,14 @@ public partial class CStatus
                 _onBattleStart.Add((CUnit unit, bool isBossBattle) =>
                 {
                     _boolParam = true;
+                    _stack = 1;
                 });
                 _onDamage.Add((CUnit attacker, CUnit defender, float damage) =>
                 {
                     if (_boolParam && damage > (defender.HpMax * 0.5))
                     {
                         _boolParam = false;
+                        _stack = 0;
                         return 0;
                     }
                     else return damage;
