@@ -209,7 +209,33 @@ public class CPreviewPattern : MonoBehaviour
 
     }
 
-    
+    private List<Vector3> DrawCustomArcPoints(float radius, float startDeg, float endDeg, int extent)
+    {
+        List<Vector3> points = new List<Vector3>();
+
+        points.Add(Vector3.zero);
+
+        float angleExtent= endDeg - startDeg;
+        for (int i = 0; i <= extent; i++)
+        {
+            float currentDeg = startDeg + (angleExtent *((float) i / extent));
+            float radian = currentDeg * Mathf.Deg2Rad;
+
+            float x = Mathf.Cos(radian) * radius;
+            float z = Mathf.Sin(radian) * radius;
+
+            points.Add(new Vector3(x, 0f, z));
+
+
+        }
+
+        return  points; 
+
+    }
+
+
+
+
     public void ShowCirclePattern(int sides, float radius)
     {
         if(_mesh == null)
@@ -251,9 +277,58 @@ public class CPreviewPattern : MonoBehaviour
         _mesh.triangles = _polygonTriangles;
         _mesh.uv = meshUV;
 
-
     }
 
+    public void ShowMultiArcPattern(int divides, float radius, float arcAngle, float offsetAngle)
+    {
+        if(_mesh == null)
+        {
+            _mesh = GetComponent<MeshFilter>().mesh;
+        }
+    
+        List<Vector3> allPoints = new List<Vector3>();
+        List<int> allTriangles = new List<int>();
+
+        if(divides <= 1)
+        {
+            divides = 1;
+        }
+
+        float angleStep = 360f / divides;
+    
+        for (int i = 0; i < divides; i++)
+        {
+            float standardAngle = offsetAngle + (i * angleStep);
+            float startDeg = standardAngle - (arcAngle * 0.5f);
+            float endDeg = startDeg + (arcAngle * 0.5f);
+
+            List<Vector3> dividedPoints = DrawCustomArcPoints(radius, startDeg, endDeg, 100);
+            
+            int vertexOffset = allPoints.Count;
+            allPoints.AddRange(dividedPoints);
+
+            int triangleAmount = dividedPoints.Count - 2;
+            for(int j = 0; j < triangleAmount; j++)
+            {
+                allTriangles.Add(vertexOffset + 0);
+                allTriangles.Add(vertexOffset + j + 2);
+                allTriangles.Add(vertexOffset + j + 1);
+
+            }
+
+        }
+
+        _polygonPoint = allPoints.ToArray();
+        _polygonTriangles = allTriangles.ToArray();
+        Vector2[] meshUV = GetMeshUV(_polygonPoint);
+
+        _mesh.Clear();
+        _mesh.vertices = _polygonPoint;
+        _mesh.triangles = _polygonTriangles;
+        _mesh.uv = meshUV;
+
+    }
+    
     public void ClearPreview()
     {
         if(_mesh != null)
