@@ -48,20 +48,27 @@ public class CGameManager : MonoBehaviour
     [SerializeField] TMP_InputField _bgmInput;
     [SerializeField] TMP_InputField _seInput;
 
+    [Header("디버그용")]
+    [SerializeField] TMP_Text _zoneText;
+
 
 
 
     private EGameState _gameState;
     private EBattleState _battleState;
     private ESettingState _settingState;
+    private bool _isInLobby = false;
     private bool _isPaused = false;
     private float _timeScaleBeforePause = 1f;
     private bool _isFullscreen = false;
     private int _tempWidth;
     private int _tempHeight;
 
+    private CPlayer _player;
+
     public EGameState GameState => _gameState;
     public EBattleState BattleState => _battleState;
+    public bool IsInLobby => _isInLobby;
     public bool IsPaused => _isPaused;
 
     private static CGameManager _instance;
@@ -87,6 +94,7 @@ public class CGameManager : MonoBehaviour
         CSoundManager.Instance.PlayBGM(EBackgroundSound.OasisOfGold);
         _gameShutdown.onClick.AddListener(() => OnGameShutdown());
         _screenChange.onClick.AddListener(() => OnGameResolutionChange());
+        _player = FindFirstObjectByType<CPlayer>();
         _tempWidth = Screen.width;
         _tempHeight = Screen.height;
 
@@ -153,6 +161,11 @@ public class CGameManager : MonoBehaviour
                 SetGameState(EGameState.Idle);
                 SetMenuState(ESettingState.None);
             }
+        }
+
+        if (_zoneText != null)
+        {
+            _zoneText.text = $"Game: {_gameState}\nBattle: {_battleState}\nLobby: {_isInLobby}";
         }
     }
 
@@ -287,6 +300,22 @@ public class CGameManager : MonoBehaviour
         }
         
         RefreshQualityButtons(index);
+    }
+
+    public void SetLobbyIn(bool target)
+    {
+        if (target != _isInLobby)
+        {
+            _isInLobby = target;
+            if (target)
+            {
+                _player.AddStatus(26, 0, 1);
+            }
+            else
+            {
+                _player.RemoveStatus(26, true);
+            }
+        }
     }
 
     private void RefreshQualityButtons(int index)

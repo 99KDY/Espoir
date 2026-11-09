@@ -27,7 +27,7 @@ public class CPlayerUI_Build : MonoBehaviour
 
     //[SerializeField] private CSkillUI _skillP1 = null;
     //[SerializeField] private CSkillUI _skillP2 = null;
-    //[SerializeField] private CSkillUI _skillQ = null;
+    [SerializeField] private CSkillUI _skillQ = null;
     [SerializeField] private CSkillUI _skillW = null;
     [SerializeField] private CSkillUI _skillE = null;
     [SerializeField] private CSkillUI _skillR = null;
@@ -170,6 +170,8 @@ public class CPlayerUI_Build : MonoBehaviour
 
         //_skillQ.Refresh();
         _crownRemaining.fillAmount = _player.CrownWindowRemaining / 2;
+        _player.GetSkillCooldown(ESkillType.Strike, out ratio, out remainCooldown);
+        _skillQ.Refresh(ratio, remainCooldown, _player.GetSkillAvailable(ESkillType.Strike));
         _player.GetSkillCooldown(ESkillType.Crown, out ratio, out remainCooldown);
         _skillW.Refresh(ratio, remainCooldown, _player.GetSkillAvailable(ESkillType.Crown));
         _player.GetSkillCooldown(ESkillType.Rush, out ratio, out remainCooldown);

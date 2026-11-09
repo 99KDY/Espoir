@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: 4
   _name: "\uCE58\uBA85\uC801 \uC77C\uACA9"
-  _icon: {fileID: 0}
+  _icon: {fileID: 21300000, guid: 3b0f5d739994442ca6644f89c36e2480, type: 3}
   _description: "\uC2A4\uD134(\uADF8\uB85C\uAE30) \uC0C1\uD0DC\uC778 \uC801\uC744
     \uACF5\uACA9\uD560\uB54C \uCE58\uBA85\uD0C0\uD655\uB960 10% \uCE58\uBA85\uD0C0\uD53C\uD574\uAC00
     5%\uC99D\uAC00\uD55C\uB2E4."
