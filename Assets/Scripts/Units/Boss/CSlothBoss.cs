@@ -184,7 +184,7 @@ public class CSlothBoss : CEnemy
 
         _onAttack = true;
 
-        normalAtk = Random.Range(0, 3);
+        normalAtk = Random.Range(0, 4);
 
         CLogger.Log($"Normal Attack Pattern : {normalAtk}");
 
@@ -206,6 +206,12 @@ public class CSlothBoss : CEnemy
                 NormalAttackDelay().Forget();
                 break;
 
+            case 3:
+                _animator.SetTrigger(_firstSub);
+                TwiceAttack().Forget();
+
+                break;
+
         }
     }
 
@@ -217,29 +223,21 @@ public class CSlothBoss : CEnemy
             return;
         }
 
-        subAtk = Random.Range(0, 4);
+        subAtk = Random.Range(1, 4);
 
+        subAtk = 2;
 
         CLogger.Log($"Sub Attack Pattern : {subAtk}");
         switch (subAtk)
         {
-            case 0:
-
-                _animator.SetTrigger(_firstSub);
-                TwiceAttack().Forget();
-
-
-                break;
-
             case 1:
                 WhirlWindAttack().Forget();
 
                 break;
 
             case 2:
+                AlternationAttack().Forget();
 
-                _animator.SetTrigger(_thirdSub);
-                
                 break;
 
             case 3:
@@ -362,16 +360,12 @@ public class CSlothBoss : CEnemy
 
     }
 
-
+    #region NormalAttack Patterns
     private async UniTask NormalAttackDelay()
     {
-
-    
-
         await UniTask.Delay(2500, DelayType.UnscaledDeltaTime);
 
         _onAttack = false;
-
 
     }
 
@@ -460,6 +454,8 @@ public class CSlothBoss : CEnemy
         }
 
     }
+    #endregion
+
 
     #region whirlWind
     private async UniTask WhirlWindAttack()
@@ -590,7 +586,7 @@ public class CSlothBoss : CEnemy
 
     #endregion
 
-    #region Twice Attack
+    #region Double Hook and Explosion Attack
     private async UniTask TwiceAttack()
     {
         if (_previewPattern != null)
@@ -614,7 +610,7 @@ public class CSlothBoss : CEnemy
         _onAttack = false;
     }
 
-    private void TwiceInnerDamage()
+    private void DoubleHookDamage()
     {
 
         int hit = NormalFindPlayer(4f);
@@ -645,8 +641,7 @@ public class CSlothBoss : CEnemy
 
     }
 
-
-    private void TiwceOuterDamage()
+    private void OuterExplosionDamage()
     {
         int hit = SubFindPlayer(13f);
 
@@ -679,10 +674,58 @@ public class CSlothBoss : CEnemy
         }
     }
 
-
     #endregion
 
 
+    #region 6-Direction Alternating AOE
+
+    private async UniTask AlternationAttack()
+    {
+        _onAttack = true;
+        if (_previewPattern != null)
+        {
+            _previewPattern.ShowMultiArcPattern(6, 15f, 30f, 0f);
+        }
+
+        else
+        {
+            CLogger.Error("PatternView 비어있음");
+        }
+
+        await UniTask.Delay(1500);
+
+        if (_previewPattern != null)
+        {
+            _previewPattern.ClearPreview();
+        }
+
+        if (_previewPattern != null)
+        {
+            _previewPattern.ShowMultiArcPattern(6, 15f, 30f, 30f);
+        }
+
+        else
+        {
+            CLogger.Error("PatternView 비어있음");
+        }
+
+        await UniTask.Delay(1500); ;
+
+        if (_previewPattern != null)
+        {
+            _previewPattern.ClearPreview();
+        }
+
+        _atkTimer = 0f;
+
+        _animator.SetTrigger(_thirdSub);
+
+        await UniTask.Delay(3100);
+        _onAttack = false;
+    }
+
+
+    #endregion
 
 
     private int NormalFindPlayer(float radius)
@@ -742,7 +785,7 @@ public class CSlothBoss : CEnemy
 
         float distance = targetPos.magnitude;
 
-        distance = Mathf.Max(2.0f, distance);
+        distance = Mathf.Max(3.0f, distance);
 
 
     }
