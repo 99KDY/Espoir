@@ -31,9 +31,9 @@ Material:
     m_Floats:
     - _ContactLine: 1
     - _GroundBand: 0.5
-    - _GroundY: 0
     - _GroundLift: 0.03
     - _GroundPull: 0.15
+    - _GroundY: -2.25
     - _OutlineDark: 0.35
     - _OutlineTex: 1
     - _OutlineWidth: 0.8
