@@ -77,7 +77,7 @@ public class CSkillSO : ScriptableObject
     [Header("왕관 설정")]
     [SerializeField] private CStatusSO _crownStatus;
     [SerializeField, Min(0f)] private float _crownWindow = 2f;
-    [SerializeField, Min(0f)] private float _empowerDuration = 8f;
+    [SerializeField, Min(1f)] private float _empoweredDamageMultiplier = 1.2f;
     [SerializeField] private CSkillSO[] _empoweredAttacks;
     [SerializeField] private GameObject[] _crownEffects;
     [SerializeField] private float _crownEffectYaw = 225f;
@@ -110,7 +110,7 @@ public class CSkillSO : ScriptableObject
     public int FullHitFlow => _fullHitFlow;
     public CStatusSO CrownStatus => _crownStatus;
     public float CrownWindow => _crownWindow;
-    public float EmpowerDuration => _empowerDuration;
+    public float EmpoweredDamageMultiplier => _empoweredDamageMultiplier;
     public CSkillSO[] EmpoweredAttacks => _empoweredAttacks;
     public GameObject[] CrownEffects => _crownEffects;
     public float CrownEffectYaw => _crownEffectYaw;
