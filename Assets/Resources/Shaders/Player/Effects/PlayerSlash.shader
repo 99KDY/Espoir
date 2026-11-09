@@ -28,6 +28,11 @@ Shader "Espoir/Player/Effects/Slash"
         [Header(Burst Ring)]
         [Toggle(_BURST)] _Burst ("터지는 고리", Float) = 0
         _BurstHold ("유지", Float) = 0
+        _BurstCentered ("중심 기준 확장", Float) = 0
+        _Rigid ("띠 형태 유지", Float) = 0
+        _BurstEnds ("띠 양 끝 감쇠", Float) = 0
+        _OuterRough ("바깥 가장자리 거칠기", Float) = 0
+        _DissolveMax ("소멸 최대값", Float) = 1.05
         _BurstGrow ("시작 크기 부족분", Float) = 0
         _BurstGrowTime ("자라는 시간", Float) = 0.08
         _BurstFadeFrom ("옅어지기 시작", Float) = 0.3
@@ -53,6 +58,7 @@ Shader "Espoir/Player/Effects/Slash"
 
             float4 _C0, _C1, _C2, _C3;
             float _Thick, _Rough, _Freq, _Hot, _SoftEnds, _SoftHead, _EdgeFade;
+            float _Burst, _BurstCentered, _Rigid, _BurstEnds, _OuterRough, _DissolveMax;
             float _BurstHold, _BurstGrow, _BurstGrowTime, _BurstFadeFrom, _BurstR0, _BurstR1;
 
             struct V2F
@@ -86,10 +92,16 @@ Shader "Espoir/Player/Effects/Slash"
                     float grow = _BurstGrow * (1.0 - FxEaseOut(FxSaturate(age / _BurstGrowTime)));
                     o.state.x = 1.1;
                     o.state.y = 0.0;
-                    o.state.z = burst <= 0.0 ? -0.2 : lerp(0.05, 1.05, burst);
+                    o.state.z = burst <= 0.0 ? -0.2 : lerp(0.05, _DissolveMax, burst);
                     float3 dir = normalize(v.normal);
                     float3 p = v.vertex.xyz - dir * lerp(_BurstR0, _BurstR1, v.uvAge.y) * grow;
-                    p += dir * _Expand * (1.0 - q * q * q * q) * (0.35 + v.uvAge.y);
+                    if (_BurstCentered > 0.5)
+                    {
+                        p = v.center + (v.vertex.xyz - v.center) * (1.0 - grow);
+                    }
+
+                    p += dir * _Expand * (1.0 - q * q * q * q)
+                        * lerp(0.35 + v.uvAge.y, 1.0 + 0.25 * v.uvAge.y, _Rigid);
                     p.y = max(p.y, v.center.y + _FloorOffset);
                     o.world = p;
                     o.burst = float2(0.08 + 0.82 * k, 1.0 - smoothstep(_BurstFadeFrom, 1.0, k));
@@ -127,6 +139,7 @@ Shader "Espoir/Player/Effects/Slash"
                 float outerY = 1.0;
                 float tip = tex2D(_Noise, float2(sn * 3.0 + uSeed, 0.31 + uTime * 0.05)).r * 0.6
                     + tex2D(_Noise, float2(sn * 8.0 + uSeed, 0.73)).g * 0.4;
+                outerY -= tip * tip * _OuterRough;
                 outerY -= tip * tip * (0.2 + 0.4 * (1.0 - smoothstep(0.1, 0.45, s))) * _SoftEnds;
                 float body = smoothstep(inner, inner + 0.035, y);
                 body *= 1.0 - smoothstep(outerY - 0.035, outerY, y);
@@ -138,6 +151,13 @@ Shader "Espoir/Player/Effects/Slash"
                     tailCut = smoothstep(uTail, uTail + 0.22, sc) * smoothstep(0.0, 0.35, s + tear * 0.5);
                     tailCut *= 1.0 - smoothstep(0.8, 1.0, s + tear * 0.6 - (1.0 - y) * 0.12);
                 }
+            #if defined(_BURST)
+                if (_BurstEnds > 0.5 && _Burst < 1.5)
+                {
+                    tailCut *= smoothstep(0.0, 0.24, s + (n1 - 0.5) * 0.25)
+                        * (1.0 - smoothstep(0.74, 0.98, s + (n1 - 0.5) * 0.25));
+                }
+            #endif
                 float headCut = smoothstep(0.0, 0.012 + 0.15 * _SoftHead, lag + (n1 - 0.5) * 0.08 * _SoftHead);
 
                 float yy = saturate((y - inner) / max(1.0 - inner, 0.001));

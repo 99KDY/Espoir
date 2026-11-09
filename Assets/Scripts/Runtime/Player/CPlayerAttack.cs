@@ -83,7 +83,8 @@ public class CPlayerAttack : MonoBehaviour
             }
 
             bool hadFullMark = attacker.Passive.HasFullMark(target);
-            SDamageInfo damageInfo = new SDamageInfo(attacker.Attack * hit.damageRatio);
+            float damageRatio = hit.damageRatio + (hadFullMark ? hit.markedDamageRatio : 0f);
+            SDamageInfo damageInfo = new SDamageInfo(attacker.Attack * damageRatio);
             float previousHp = target.HpCurrent;
             target.OnHit(attacker, target, damageInfo);
             if (target.HpCurrent < previousHp)

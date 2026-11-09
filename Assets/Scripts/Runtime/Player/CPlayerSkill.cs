@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(CPlayerMovement))]
@@ -23,40 +23,131 @@ public class CPlayerSkill : MonoBehaviour
 
     private static readonly int _IDLE_HASH = Animator.StringToHash("Idle");
     private readonly Dictionary<CSkillSO, CSkillRuntime> _SKILLS = new Dictionary<CSkillSO, CSkillRuntime>();
-    private readonly List<ParticleSystem> _EFFECT_PARTICLES = new List<ParticleSystem>();
-    private readonly List<GameObject> _CAST_EFFECTS = new List<GameObject>();
-    private readonly List<ParticleSystem> _PAUSED_PARTICLES = new List<ParticleSystem>();
+    private readonly CPlayerSkillEffects _EFFECTS = new CPlayerSkillEffects();
     private readonly CPlayerDashTrail _DASH_TRAIL = new CPlayerDashTrail();
     private readonly CPlayerSpellCast _SPELL = new CPlayerSpellCast();
+    private readonly CPlayerCrown _CROWN = new CPlayerCrown();
 
     private CPlayer _owner;
     private CPlayerMovement _movement;
     private CSkillRuntime _currentSkill;
+    private CSkillRuntime _lastBasicAttack;
     private int _stepIndex = -1;
     private int _stateCheckFrame;
     private int _nextHitIndex;
     private bool _hasQueuedCombo;
     private Vector3 _direction;
     private Vector3 _queuedDirection;
+    private float _lastFinisherTime = float.NegativeInfinity;
     private float _moveProgress;
+    private Vector3 _stepMovement;
+    private Vector3 _stepPosition;
+    private GameObject _stepEffect;
     private float _dashElapsed;
     private float _dashDistance;
     private bool _hasSpawnedEffect;
-    private float _hitStopRemaining;
-    private float _animatorSpeed;
     private float _baseAttackSpeed;
 
+    private readonly List<CSkillSO> _registeredSkills = new();
+    public IReadOnlyList<CSkillSO> RegisteredSkills => _registeredSkills;
+
     public bool IsBusy => _currentSkill != null;
+    public float CrownWindowRemaining => _CROWN.RemainingTime;
 
     private void OnDisable()
     {
         CancelSkill();
+        _CROWN.Clear();
+        _lastBasicAttack = null;
+        _lastFinisherTime = float.NegativeInfinity;
+    }
+
+    /// <summary>
+    /// 지정한 스킬의 재사용 대기시간과 그 비율을 반환합니다.
+    /// </summary>
+    public void GetSkillCooldown(ESkillType type, out float ratio, out float remainCooldown)
+    {
+        ratio = 0f;
+        remainCooldown = 0f;
+
+        foreach (KeyValuePair<CSkillSO, CSkillRuntime> pair in _SKILLS)
+        {
+            if (pair.Key.Type != type) continue;
+            remainCooldown = Mathf.Max(0f,pair.Value.readyTime - Time.time);
+            ratio = pair.Key.Cooldown > 0f ? Mathf.Clamp01(remainCooldown / pair.Key.Cooldown) : 0f;
+            return;
+        }
+    }
+    /// <summary>
+    /// 스킬이 사용가능한지를 반환합니다.
+    /// </summary>
+    public bool GetSkillAvailable(ESkillType type)
+    {
+        if (_owner == null || _owner.HpCurrent <= 0f || !isActiveAndEnabled)
+        {
+            return false;
+        }
+
+        CSkillRuntime runtime = null;
+        if (type == ESkillType.Melee)
+        {
+            if (_animator == null || _basicAttack == null)
+            {
+                return false;
+            }
+
+            AnimatorStateInfo state = _animator.GetCurrentAnimatorStateInfo(0);
+            if (IsBusy)
+            {
+                int index = GetStateIndex(_currentSkill.stateHashes, state.shortNameHash);
+                return _currentSkill.data.Type == type && _currentSkill.comboTriggerHash != 0 &&
+                    index >= 0 && index < _currentSkill.data.Steps.Length - 1 && !_animator.IsInTransition(0);
+            }
+
+            CSkillSO attack = _lastBasicAttack != null && CanContinue(_lastBasicAttack, state) ?
+                _lastBasicAttack.data : _CROWN.GetAttack(_owner, _basicAttack);
+            _SKILLS.TryGetValue(attack, out runtime);
+        }
+
+        else
+        {
+            foreach (CSkillRuntime registered in _SKILLS.Values)
+            {
+                if (registered.data.Type == type)
+                {
+                    runtime = registered;
+                    break;
+                }
+            }
+        }
+
+        if (runtime == null || Time.time < runtime.readyTime)
+        {
+            return false;
+        }
+
+        CSkillSO skill = runtime.data;
+        if (type == ESkillType.Crown)
+        {
+            return _CROWN.CanUse() && (!IsBusy || _currentSkill.data.Type == ESkillType.Melee) &&
+                _owner.CurrentMp >= skill.MpCost;
+        }
+
+        if (IsBusy && !CanCancelInto(type))
+        {
+            return false;
+        }
+
+        bool isFinisherLink = type == ESkillType.Strike &&
+            (Time.time <= _lastFinisherTime + skill.FinisherWindow ||
+                (IsBusy && _currentSkill.data.Type == ESkillType.Melee));
+        int mpCost = isFinisherLink ? skill.FinisherMpCost : skill.MpCost;
+        return _owner.CurrentMp >= mpCost;
     }
 
     /// <summary>
     /// 사용 주체와 기본 스킬 연결을 확인합니다.
     /// </summary>
-
     public bool Initialize(CPlayer owner)
     {
         _owner = owner;
@@ -89,17 +180,32 @@ public class CPlayerSkill : MonoBehaviour
             return false;
         }
 
+        if (skill.Type == ESkillType.Crown)
+        {
+            foreach (CSkillSO attack in skill.EmpoweredAttacks)
+            {
+                if (!RegisterSkill(attack))
+                {
+                    return false;
+                }
+            }
+
+            _CROWN.Initialize(skill);
+        }
+
+        int stepCount = skill.Steps != null ? skill.Steps.Length : 0;
         CSkillRuntime runtime = new CSkillRuntime
         {
             data = skill,
-            startTriggerHash = Animator.StringToHash(skill.StartTrigger),
+            startTriggerHash = string.IsNullOrWhiteSpace(skill.StartTrigger) ? 0 :
+                Animator.StringToHash(skill.StartTrigger),
             comboTriggerHash = string.IsNullOrWhiteSpace(skill.ComboTrigger) ? 0 :
                 Animator.StringToHash(skill.ComboTrigger),
-            stateHashes = new int[skill.Steps.Length],
-            recoverStateHashes = new int[skill.Steps.Length]
+            stateHashes = new int[stepCount],
+            recoverStateHashes = new int[stepCount]
         };
 
-        for (int i = 0; i < skill.Steps.Length; i++)
+        for (int i = 0; i < stepCount; i++)
         {
             runtime.stateHashes[i] = Animator.StringToHash(skill.Steps[i].stateName);
 
@@ -110,7 +216,20 @@ public class CPlayerSkill : MonoBehaviour
         }
 
         _SKILLS.Add(skill, runtime);
+        _registeredSkills.Add(skill);
         return true;
+    }
+
+    /// <summary>
+    /// 등록된 모든 스킬의 쿨타임을 초기화합니다.
+    /// </summary>
+
+    public void ResetCooldowns()
+    {
+        foreach (CSkillRuntime runtime in _SKILLS.Values)
+        {
+            runtime.readyTime = 0f;
+        }
     }
 
     /// <summary>
@@ -119,16 +238,27 @@ public class CPlayerSkill : MonoBehaviour
 
     public bool TryAttack(Vector3 direction)
     {
-        return TryUse(_basicAttack, direction);
+        if (IsBusy)
+        {
+            return _currentSkill.data.Type == ESkillType.Melee && TryUse(_currentSkill.data, direction);
+        }
+
+        AnimatorStateInfo state = _animator.GetCurrentAnimatorStateInfo(0);
+        if (_lastBasicAttack != null && CanContinue(_lastBasicAttack, state))
+        {
+            return TryUse(_lastBasicAttack.data, direction);
+        }
+
+        return TryUse(_CROWN.GetAttack(_owner, _basicAttack), direction);
     }
 
     /// <summary>
-    /// 대쉬를 사용할 수 있을 때 현재 행동을 취소하고 전방으로 대쉬합니다.
+    /// 대쉬를 사용할 수 있을 때 현재 행동을 취소하고 지정한 방향으로 대쉬합니다.
     /// </summary>
 
-    public bool TryDash()
+    public bool TryDash(Vector3 direction)
     {
-        return TryUse(_dash, transform.forward);
+        return TryUse(_dash, direction);
     }
 
     /// <summary>
@@ -153,24 +283,53 @@ public class CPlayerSkill : MonoBehaviour
             return false;
         }
 
+        if (skill.Type == ESkillType.Crown)
+        {
+            if (!_CROWN.CanUse() || (IsBusy && _currentSkill.data.Type != ESkillType.Melee) ||
+                !_owner.TrySpendMp(skill.MpCost))
+            {
+                return false;
+            }
+
+            _CROWN.Use(_owner);
+            runtime.readyTime = Time.time + skill.Cooldown;
+            return true;
+        }
+
         bool isCanceling = IsBusy;
 
-        if (isCanceling && (skill.Type != ESkillType.Dash || _currentSkill.data.Type == ESkillType.Dash))
+        if (isCanceling && !CanCancelInto(skill.Type))
         {
             return false;
         }
 
         AnimatorStateInfo state = _animator.GetCurrentAnimatorStateInfo(0);
-        bool canContinue = skill.Type == ESkillType.Melee && runtime.comboTriggerHash != 0 &&
-            GetStateIndex(runtime.recoverStateHashes, state.shortNameHash) >= 0 &&
-            state.normalizedTime * state.length <= skill.ComboGraceTime;
+        bool canContinue = skill.Type == ESkillType.Melee && CanContinue(runtime, state);
 
-        if (!_owner.TrySpendMp(skill.MpCost))
+        bool isFinisherLink = skill.Type == ESkillType.Strike &&
+            (Time.time <= _lastFinisherTime + skill.FinisherWindow ||
+                (isCanceling && _currentSkill.data.Type == ESkillType.Melee));
+        int mpCost = isFinisherLink ? skill.FinisherMpCost : skill.MpCost;
+
+        if (!_owner.TrySpendMp(mpCost))
         {
             return false;
         }
 
-        FinishSkill(isCanceling);
+        if (isCanceling && skill.Type == ESkillType.Strike && _currentSkill.data.Type == ESkillType.Melee)
+        {
+            int index = GetStateIndex(_currentSkill.stateHashes, state.shortNameHash);
+            if (index != _stepIndex)
+            {
+                EnterStep(index);
+            }
+
+            UpdateStepHits(_currentSkill.data, _currentSkill.data.Steps[index], state.normalizedTime, false);
+        }
+
+        bool keepEffects = isCanceling && _currentSkill.data.Type == ESkillType.Rush &&
+            skill.Type == ESkillType.Strike;
+        FinishSkill(isCanceling, keepEffects);
         _currentSkill = runtime;
         _stateCheckFrame = Time.frameCount + 1;
         runtime.readyTime = Time.time + skill.Cooldown;
@@ -178,18 +337,38 @@ public class CPlayerSkill : MonoBehaviour
 
         if (skill.Type == ESkillType.Dash)
         {
-            _DASH_TRAIL.Begin(skill.DashTrail, transform, _animator, _direction, _CAST_EFFECTS);
+            transform.rotation = Quaternion.LookRotation(_direction);
+            _DASH_TRAIL.Begin(skill.DashTrail, transform, _animator, _direction, _EFFECTS);
         }
 
         if (skill.Type == ESkillType.Rush || skill.Type == ESkillType.Slam)
         {
-            _SPELL.Begin(_owner, _direction, skill, _CAST_EFFECTS);
+            _SPELL.Begin(_owner, _direction, skill, _EFFECTS);
             _DASH_TRAIL.Reset(transform.position, skill.DashTrail.firstDistance);
         }
 
-        if (skill == _basicAttack)
+        if (skill.Type == ESkillType.Strike)
+        {
+            transform.rotation = Quaternion.LookRotation(_direction);
+            _baseAttackSpeed = _animator.speed;
+            float windupSpeed = isFinisherLink ? 1f / skill.FinisherWindupRatio : 1f;
+            _animator.speed = _baseAttackSpeed * windupSpeed;
+        }
+
+        if (skill.Type == ESkillType.Melee)
         {
             _baseAttackSpeed = _animator.speed;
+            _lastBasicAttack = runtime;
+            AnimationCurve moveCurve = skill.Steps[0].moveCurve;
+            if (moveCurve != null && moveCurve.length > 0)
+            {
+                transform.rotation = Quaternion.LookRotation(_direction);
+            }
+
+            if (!canContinue)
+            {
+                _CROWN.Consume();
+            }
         }
 
         if (isCanceling)
@@ -234,16 +413,9 @@ public class CPlayerSkill : MonoBehaviour
             }
         }
 
-        if (_hitStopRemaining > 0f)
+        if (_EFFECTS.UpdateHitStop())
         {
-            _hitStopRemaining = Mathf.Max(_hitStopRemaining - Time.unscaledDeltaTime, 0f);
-
-            if (_hitStopRemaining > 0f)
-            {
-                return;
-            }
-
-            EndHitStop();
+            return;
         }
 
         if (_currentSkill.data.Type == ESkillType.Dash)
@@ -272,6 +444,42 @@ public class CPlayerSkill : MonoBehaviour
         }
     }
 
+    private bool CanCancelInto(ESkillType type)
+    {
+        CSkillSO current = _currentSkill.data;
+        float cancelTime;
+
+        if (type == ESkillType.Dash && current.Type != ESkillType.Dash)
+        {
+            cancelTime = current.DashCancelTime;
+            if (cancelTime <= 0f)
+            {
+                return true;
+            }
+        }
+
+        else if (type == ESkillType.Strike && current.StrikeCancelTime > 0f)
+        {
+            cancelTime = current.StrikeCancelTime;
+        }
+
+        else
+        {
+            return false;
+        }
+
+        AnimatorStateInfo state = _animator.GetCurrentAnimatorStateInfo(0);
+        int index = GetStateIndex(_currentSkill.stateHashes, state.shortNameHash);
+        return index == current.Steps.Length - 1 && state.normalizedTime >= cancelTime;
+    }
+
+    private bool CanContinue(CSkillRuntime runtime, AnimatorStateInfo state)
+    {
+        int index = GetStateIndex(runtime.recoverStateHashes, state.shortNameHash);
+        return runtime.comboTriggerHash != 0 && index >= 0 && index < runtime.data.Steps.Length - 1 &&
+            state.normalizedTime * state.length <= runtime.data.ComboGraceTime;
+    }
+
     private bool QueueCombo(Vector3 direction)
     {
         AnimatorStateInfo state = _animator.GetCurrentAnimatorStateInfo(0);
@@ -296,7 +504,7 @@ public class CPlayerSkill : MonoBehaviour
 
     private void UpdateAttack()
     {
-        if (_currentSkill.data == _basicAttack)
+        if (_currentSkill.data.Type == ESkillType.Melee)
         {
             _animator.speed = _baseAttackSpeed * Mathf.Max(0f, _owner.AttackSpeedMultiplier);
         }
@@ -325,6 +533,11 @@ public class CPlayerSkill : MonoBehaviour
         }
 
         CSkillSO skill = _currentSkill.data;
+        if (skill.Type == ESkillType.Strike && state.normalizedTime >= skill.Steps[index].hits[0].time)
+        {
+            _animator.speed = _baseAttackSpeed;
+        }
+
         if (skill.Type == ESkillType.Rush)
         {
             if (_SPELL.UpdateRush(_owner, _playerAttack, _movement, skill, state.normalizedTime))
@@ -333,7 +546,7 @@ public class CPlayerSkill : MonoBehaviour
             }
 
             _DASH_TRAIL.UpdateRush(skill.DashTrail, transform, _animator, _direction,
-                state.normalizedTime, _CAST_EFFECTS);
+                state.normalizedTime, _EFFECTS);
             return;
         }
 
@@ -345,21 +558,51 @@ public class CPlayerSkill : MonoBehaviour
 
         _movement.Rotate(_direction, _currentSkill.data.RotationSpeed);
         SSkillStep step = _currentSkill.data.Steps[index];
-        float progress = Mathf.InverseLerp(step.moveStart, step.moveEnd, state.normalizedTime);
-        float distance = Mathf.Max(progress - _moveProgress, 0f) * step.moveDistance;
-        _movement.MoveOnGround(transform.forward * distance);
-        _moveProgress = progress;
+        UpdateStepMovement(step, state.normalizedTime);
         UpdateEffect(step, state);
 
-        while (_nextHitIndex < step.hits.Length && state.normalizedTime >= step.hits[_nextHitIndex].time)
+        if (_stepEffect != null && step.moveCurve != null && step.moveCurve.length > 0)
+        {
+            _stepEffect.transform.position = transform.position - transform.rotation * _stepMovement;
+        }
+
+        if (skill.SyncEffectSpeed)
+        {
+            _EFFECTS.SetSpeed(state.speed * state.speedMultiplier * _animator.speed);
+        }
+
+        UpdateStepHits(skill, step, state.normalizedTime);
+    }
+
+    private void UpdateStepMovement(SSkillStep step, float time)
+    {
+        if (step.moveCurve != null && step.moveCurve.length > 0)
+        {
+            time = Mathf.Clamp01(time);
+            float side = step.sideMoveCurve != null ? step.sideMoveCurve.Evaluate(time) : 0f;
+            Vector3 motion = new Vector3(side, 0f, step.moveCurve.Evaluate(time));
+            _movement.MoveOnGround(transform.rotation * (motion - _stepMovement));
+            _stepMovement = motion;
+        }
+
+        else
+        {
+            float progress = Mathf.InverseLerp(step.moveStart, step.moveEnd, time);
+            float distance = Mathf.Max(progress - _moveProgress, 0f) * step.moveDistance;
+            _movement.MoveOnGround(transform.forward * distance);
+            _moveProgress = progress;
+        }
+    }
+
+    private void UpdateStepHits(CSkillSO skill, SSkillStep step, float time, bool applyHitStop = true)
+    {
+        while (_nextHitIndex < step.hits.Length && time >= step.hits[_nextHitIndex].time)
         {
             SSkillHit hit = step.hits[_nextHitIndex];
             _nextHitIndex++;
 
-            bool isBasicAttack = _currentSkill.data == _basicAttack;
-            bool isFinisher = isBasicAttack && index == _basicAttack.Steps.Length - 1 &&
-                _nextHitIndex == step.hits.Length;
-            SPlayerHitResult result = _playerAttack.Attack(_owner, hit, isFinisher);
+            bool isBasicAttack = skill.Type == ESkillType.Melee;
+            SPlayerHitResult result = _playerAttack.Attack(_owner, hit, hit.appliesMark);
 
             if (!result.hasHit)
             {
@@ -369,13 +612,17 @@ public class CPlayerSkill : MonoBehaviour
             if (isBasicAttack)
             {
                 _owner.RecoverBasicAttackMp();
+                if (hit.opensCrownWindow)
+                {
+                    _CROWN.OpenWindow();
+                }
             }
 
             _owner.Passive.GainFlow(_owner, _owner.Passive.FlowPerHit(result.hitFullyMarkedTarget));
 
-            if (hit.hitStopDuration > 0f)
+            if (applyHitStop && hit.hitStopDuration > 0f)
             {
-                HitStop(hit.hitStopDuration);
+                _EFFECTS.HitStop(hit.hitStopDuration, _animator);
                 break;
             }
         }
@@ -394,7 +641,7 @@ public class CPlayerSkill : MonoBehaviour
             float distance = skill.Steps[0].moveDistance * (1f - Mathf.Pow(1f - progress, skill.DashEasePower));
             _movement.MoveOnGround(_direction * (distance - _dashDistance));
             _dashDistance = distance;
-            _DASH_TRAIL.Update(skill.DashTrail, transform, _animator, _direction, progress, _CAST_EFFECTS);
+            _DASH_TRAIL.Update(skill.DashTrail, transform, _animator, _direction, progress, _EFFECTS);
         }
 
         AnimatorStateInfo state = _animator.GetCurrentAnimatorStateInfo(0);
@@ -409,9 +656,10 @@ public class CPlayerSkill : MonoBehaviour
             UpdateEffect(skill.Steps[0], state);
         }
 
-        else if (_stepIndex >= 0 && !_animator.IsInTransition(0) && _dashElapsed >= endTime)
+        if (_dashElapsed >= endTime)
         {
             FinishSkill();
+            _animator.CrossFadeInFixedTime(_IDLE_HASH, _cancelTransitionDuration);
         }
     }
 
@@ -426,6 +674,9 @@ public class CPlayerSkill : MonoBehaviour
         _stepIndex = index;
         _nextHitIndex = 0;
         _moveProgress = 0f;
+        _stepMovement = Vector3.zero;
+        _stepPosition = transform.position;
+        _stepEffect = null;
         _hasSpawnedEffect = false;
     }
 
@@ -439,60 +690,37 @@ public class CPlayerSkill : MonoBehaviour
         _hasSpawnedEffect = true;
         float elapsed = (state.normalizedTime - step.effectTime) * state.length;
 
-        if (step.effectLifetime > 0f && elapsed >= step.effectLifetime)
+        Vector3 position = step.moveCurve != null && step.moveCurve.length > 0 ?
+            _stepPosition : transform.position;
+        GameObject effect = _EFFECTS.Spawn(step.effectPrefab, position, transform.rotation);
+        _stepEffect = effect;
+        if (_currentSkill.data.SyncEffectSpeed)
         {
-            return;
+            float stateSpeed = state.speed * state.speedMultiplier;
+            _EFFECTS.PlaySynced(effect, elapsed * stateSpeed, stateSpeed * _animator.speed);
         }
-
-        GameObject effect = Instantiate(step.effectPrefab, transform.position, transform.rotation);
-        _CAST_EFFECTS.Add(effect);
-
-        if (step.effectLifetime <= 0f)
-        {
-            return;
-        }
-
-        if (elapsed > 0f)
-        {
-            effect.GetComponentsInChildren(false, _EFFECT_PARTICLES);
-
-            foreach (ParticleSystem particle in _EFFECT_PARTICLES)
-            {
-                particle.Simulate(elapsed, false, true, false);
-                particle.Play(false);
-            }
-
-            _EFFECT_PARTICLES.Clear();
-        }
-
-        Destroy(effect, step.effectLifetime - elapsed);
     }
 
-    private void FinishSkill(bool canceled = false)
+    private void FinishSkill(bool canceled = false, bool keepEffects = false)
     {
-        if (_hitStopRemaining > 0f)
-        {
-            EndHitStop();
-        }
-
+        _EFFECTS.End(canceled, keepEffects);
         if (canceled)
         {
-            foreach (GameObject effect in _CAST_EFFECTS)
-            {
-                if (effect != null)
-                {
-                    effect.SetActive(false);
-                    Destroy(effect);
-                }
-            }
+            _lastBasicAttack = null;
         }
 
-        _CAST_EFFECTS.Clear();
         _SPELL.End();
 
         if (_currentSkill != null)
         {
-            if (_currentSkill.data == _basicAttack)
+            if (!canceled && _currentSkill.data.Type == ESkillType.Melee &&
+                _stepIndex == _currentSkill.data.Steps.Length - 1 &&
+                _nextHitIndex >= _currentSkill.data.Steps[_stepIndex].hits.Length)
+            {
+                _lastFinisherTime = Time.time;
+            }
+
+            if (_currentSkill.data.Type == ESkillType.Melee || _currentSkill.data.Type == ESkillType.Strike)
             {
                 _animator.speed = _baseAttackSpeed;
             }
@@ -512,6 +740,7 @@ public class CPlayerSkill : MonoBehaviour
         _nextHitIndex = 0;
         _hasQueuedCombo = false;
         _moveProgress = 0f;
+        _stepMovement = Vector3.zero;
         _dashElapsed = 0f;
         _dashDistance = 0f;
 
@@ -519,49 +748,6 @@ public class CPlayerSkill : MonoBehaviour
         {
             _movement.Stop();
         }
-    }
-
-    private void HitStop(float duration)
-    {
-        _hitStopRemaining = duration;
-        _animatorSpeed = _animator.speed;
-        _animator.speed = 0f;
-
-        foreach (GameObject effect in _CAST_EFFECTS)
-        {
-            if (effect == null)
-            {
-                continue;
-            }
-
-            effect.GetComponentsInChildren(false, _EFFECT_PARTICLES);
-            foreach (ParticleSystem particle in _EFFECT_PARTICLES)
-            {
-                if (particle.isPlaying && !particle.main.useUnscaledTime)
-                {
-                    particle.Pause(false);
-                    _PAUSED_PARTICLES.Add(particle);
-                }
-            }
-        }
-
-        _EFFECT_PARTICLES.Clear();
-    }
-
-    private void EndHitStop()
-    {
-        _hitStopRemaining = 0f;
-        _animator.speed = _animatorSpeed;
-
-        foreach (ParticleSystem particle in _PAUSED_PARTICLES)
-        {
-            if (particle != null)
-            {
-                particle.Play(false);
-            }
-        }
-
-        _PAUSED_PARTICLES.Clear();
     }
 
     private int GetStateIndex(int[] hashes, int hash)
@@ -579,6 +765,28 @@ public class CPlayerSkill : MonoBehaviour
 
     private bool HasValidSettings(CSkillSO skill)
     {
+        if (skill.Type == ESkillType.Crown)
+        {
+            if (skill.CrownStatus == null || skill.CrownStatus.MaxStack <= 0 ||
+                skill.EmpoweredAttacks == null || skill.EmpoweredAttacks.Length != skill.CrownStatus.MaxStack ||
+                skill.CrownEffects == null || skill.CrownEffects.Length != skill.CrownStatus.MaxStack ||
+                skill.CrownWindow <= 0f || skill.EmpowerDuration <= 0f || skill.Cooldown < 0f || skill.MpCost < 0)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < skill.EmpoweredAttacks.Length; i++)
+            {
+                if (skill.EmpoweredAttacks[i] == null || skill.EmpoweredAttacks[i].Type != ESkillType.Melee ||
+                    skill.CrownEffects[i] == null)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         if (skill.Steps == null || skill.Steps.Length == 0 || skill.Cooldown < 0f || skill.RotationSpeed < 0f ||
             skill.ComboGraceTime < 0f || !HasTrigger(skill.StartTrigger))
         {
@@ -592,6 +800,12 @@ public class CPlayerSkill : MonoBehaviour
 
         if (skill.Type == ESkillType.Rush && (skill.Steps.Length != 1 || skill.Steps[0].hits?.Length != 1 ||
             skill.MovementCurve == null || skill.MovementCurve.length == 0))
+        {
+            return false;
+        }
+
+        if (skill.Type == ESkillType.Strike && (skill.Steps.Length != 1 || skill.FinisherWindow < 0f ||
+            skill.FinisherMpCost < 0 || skill.FinisherWindupRatio <= 0f || skill.FinisherWindupRatio > 1f))
         {
             return false;
         }
@@ -621,12 +835,12 @@ public class CPlayerSkill : MonoBehaviour
             }
 
             if (step.effectPrefab != null &&
-                (step.effectTime < 0f || step.effectTime > 1f || step.effectLifetime < 0f))
+                (step.effectTime < 0f || step.effectTime > 1f))
             {
                 return false;
             }
 
-            if (step.effectPrefab != null && step.effectLifetime == 0f &&
+            if (step.effectPrefab != null &&
                 (!step.effectPrefab.TryGetComponent(out ParticleSystem particles) ||
                     particles.main.stopAction != ParticleSystemStopAction.Destroy))
             {
@@ -649,7 +863,8 @@ public class CPlayerSkill : MonoBehaviour
             foreach (SSkillHit hit in step.hits)
             {
                 if (hit.time < 0f || hit.time > 1f || hit.time <= previousTime || hit.damageRatio < 0f ||
-                    hit.hitStopDuration < 0f || hit.size.x <= 0f || hit.size.y <= 0f || hit.size.z <= 0f)
+                    hit.markedDamageRatio < 0f || hit.hitStopDuration < 0f ||
+                    hit.size.x <= 0f || hit.size.y <= 0f || hit.size.z <= 0f)
                 {
                     return false;
                 }

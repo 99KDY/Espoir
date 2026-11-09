@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42141cf8eb324aad8935776fa0250525, type: 3}
   m_Name: PlayerSkillE
   m_EditorClassIdentifier:
+  _strikeCancelTime: 0.38
   _type: 2
   _cooldown: 8
   _mpCost: 20
@@ -242,4 +243,3 @@ MonoBehaviour:
       size: {x: 2.6, y: 2.5, z: 2.5}
     effectPrefab: {fileID: 1467711750087583531, guid: 5e19c82fc973dff47b4fa21500032943, type: 3}
     effectTime: 0
-    effectLifetime: 0

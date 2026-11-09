@@ -34,10 +34,36 @@ public class CPlayerEffectStart : MonoBehaviour
         public EScreenMode mode;
     }
 
+    [Serializable]
+    private struct SStopCue
+    {
+        public float time;
+        public float duration;
+    }
+
+    [Serializable]
+    private struct SChromaCue
+    {
+        public float time;
+        public float amount;
+        public float height;
+    }
+
+    [SerializeField] private SStopCue[] _stops = Array.Empty<SStopCue>();
+    [SerializeField] private SChromaCue[] _chroma = Array.Empty<SChromaCue>();
     [SerializeField] private SCameraPunch[] _punch = Array.Empty<SCameraPunch>();
     [SerializeField] private SScreenCue[] _screens = Array.Empty<SScreenCue>();
 
+    [SerializeField] private bool _screenIgnoresParticleStop;
+    [SerializeField] private ParticleSystem[] _stopParticles = Array.Empty<ParticleSystem>();
+
+    private float _screenTime;
     private ParticleSystem _particles;
+    private ParticleSystem[] _systems;
+    private AnimationState[] _lightAnimations;
+    private float _speed = 1f;
+    private float _pauseRemaining;
+    private int _nextStop;
     private ParticleSystemRenderer[] _ribbons;
     private Vector3[] _centers;
     private bool _distorts;
@@ -59,7 +85,9 @@ public class CPlayerEffectStart : MonoBehaviour
                 continue;
             }
 
-            if (particle.sharedMaterial.GetTag("EspoirDistort", false) == "On")
+            string distortion = particle.sharedMaterial.GetTag("EspoirDistort", false);
+
+            if (distortion == "On" || distortion == "Ground")
             {
                 _distorts = true;
             }
@@ -78,9 +106,98 @@ public class CPlayerEffectStart : MonoBehaviour
             _centers[i] = _ribbons[i].mesh.bounds.center;
         }
 
+        _systems = GetComponentsInChildren<ParticleSystem>(true);
+        List<AnimationState> lightAnimations = new List<AnimationState>();
+
+        foreach (Animation animation in GetComponentsInChildren<Animation>(true))
+        {
+            foreach (AnimationState state in animation)
+            {
+                lightAnimations.Add(state);
+            }
+        }
+
+        _lightAnimations = lightAnimations.ToArray();
         _particles = GetComponent<ParticleSystem>();
+        _screenTime = _FIRST_STEP;
         _particles.Simulate(_FIRST_STEP, true, true, false);
         _particles.Play(true);
+    }
+
+    private void Update()
+    {
+        if (_screenIgnoresParticleStop)
+        {
+            _screenTime += Time.deltaTime * _speed;
+        }
+
+        if (_pauseRemaining > 0f)
+        {
+            _pauseRemaining -= Time.deltaTime;
+
+            if (_pauseRemaining <= 0f)
+            {
+                ApplySpeed();
+            }
+
+            return;
+        }
+
+        if (_nextStop < _stops.Length && _particles.time >= _stops[_nextStop].time)
+        {
+            _pauseRemaining = _stops[_nextStop].duration;
+            _nextStop++;
+            ApplySpeed();
+        }
+    }
+
+    /// <summary>
+    /// 파티클과 이펙트 조명의 재생 속도를 맞춥니다.
+    /// </summary>
+
+    public void SetSpeed(float speed)
+    {
+        speed = Mathf.Max(0f, speed);
+
+        if (_speed == speed)
+        {
+            return;
+        }
+
+        _speed = speed;
+        ApplySpeed();
+    }
+
+    internal void Play(float time, float speed)
+    {
+        SetSpeed(1f);
+        _screenTime = time;
+        _particles.Simulate(time, true, true, false);
+        _particles.Play(true);
+
+        foreach (AnimationState animation in _lightAnimations)
+        {
+            animation.time = time;
+        }
+
+        SetSpeed(speed);
+    }
+
+    private void ApplySpeed()
+    {
+        float speed = _pauseRemaining > 0f ? 0f : _speed;
+
+        foreach (ParticleSystem system in _systems)
+        {
+            ParticleSystem.MainModule main = system.main;
+            bool stops = _stopParticles.Length == 0 || Array.IndexOf(_stopParticles, system) >= 0;
+            main.simulationSpeed = stops ? speed : _speed;
+        }
+
+        foreach (AnimationState animation in _lightAnimations)
+        {
+            animation.speed = _stopParticles.Length == 0 ? speed : _speed;
+        }
     }
 
     private void OnEnable()
@@ -115,7 +232,7 @@ public class CPlayerEffectStart : MonoBehaviour
                 continue;
             }
 
-            float age = effect._particles.time;
+            float age = effect._screenIgnoresParticleStop ? effect._screenTime : effect._particles.time;
 
             foreach (SCameraPunch cue in effect._punch)
             {
@@ -145,6 +262,37 @@ public class CPlayerEffectStart : MonoBehaviour
 
                 screen.x = strength;
                 screen.y = cue.mode == EScreenMode.Invert ? 1f : 0f;
+            }
+        }
+    }
+
+    internal static void GetChroma(out float amount, out Vector3 center)
+    {
+        amount = 0f;
+        center = Vector3.zero;
+
+        foreach (CPlayerEffectStart effect in _PLAYING)
+        {
+            float age = effect._particles.time;
+
+            foreach (SChromaCue cue in effect._chroma)
+            {
+                float elapsed = age - cue.time;
+
+                if (elapsed < 0f)
+                {
+                    break;
+                }
+
+                float strength = cue.amount * Mathf.Pow(0.004f, elapsed);
+
+                if (strength <= amount)
+                {
+                    continue;
+                }
+
+                amount = strength;
+                center = effect.transform.position + Vector3.up * cue.height;
             }
         }
     }

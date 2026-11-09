@@ -1,0 +1,466 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &-4476590197300856238
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: R03Wisp
+  m_Shader: {fileID: 4800000, guid: 901a94966157d3243821d4aee2d7880b, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords:
+  - _TIMED
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: 3009
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _Noise:
+        m_Texture: {fileID: 2800000, guid: 75c11bdbb9bc1434a803977c04c69ce9, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Times:
+        m_Texture: {fileID: 7383782694418227007, guid: 42741b0e645c068469358f39be990901, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _Alpha: 0.85
+    - _Duration: 0.21667
+    - _Expand: 0.3366
+    - _FloorOffset: -1.03
+    - _HasTimes: 1
+    - _HoldTail: 0
+    - _Lifetime: 0.89667
+    - _Linger: 0.53
+    - _SoftEnds: 0
+    - _TailStart: 0.3
+    m_Colors:
+    - _Color: {r: 0.9, g: 0.02, b: 0.06, a: 0}
+    - _Edge: {r: 1.4, g: 0.12, b: 0.1, a: 0}
+  m_BuildTextureStacks: []
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: PlayerCrownCombo02
+  m_Shader: {fileID: 4800000, guid: 94f1c673382d16e448998aab9f08a647, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords:
+  - _TIMED
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: 3010
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _Noise:
+        m_Texture: {fileID: 2800000, guid: 75c11bdbb9bc1434a803977c04c69ce9, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Times:
+        m_Texture: {fileID: -7941954796035038564, guid: 42741b0e645c068469358f39be990901, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _Alpha: 1
+    - _Burst: 0
+    - _BurstCentered: 0
+    - _BurstEnds: 0
+    - _BurstFadeFrom: 0.3
+    - _BurstGrow: 0
+    - _BurstGrowTime: 0.08
+    - _BurstHold: 0
+    - _BurstR0: 0
+    - _BurstR1: 0
+    - _DissolveMax: 1.05
+    - _Duration: 0.064166665
+    - _EdgeFade: 0
+    - _Expand: 0.1782
+    - _FloorOffset: -1.03
+    - _Freq: 1
+    - _HasTimes: 1
+    - _HoldTail: 0
+    - _Hot: 0.45
+    - _Lifetime: 0.63416666
+    - _Linger: 0.42
+    - _OuterRough: 0
+    - _Rigid: 0
+    - _Rough: 1
+    - _SoftEnds: 0
+    - _SoftHead: 0
+    - _TailStart: 0.3
+    - _Thick: 0.918
+    m_Colors:
+    - _C0: {r: 0.03, g: 0, b: 0.01, a: 0}
+    - _C1: {r: 0.3, g: 0, b: 0.03, a: 0}
+    - _C2: {r: 2, g: 0.04, b: 0.06, a: 0}
+    - _C3: {r: 4.5, g: 1.6, b: 1.2, a: 0}
+  m_BuildTextureStacks: []
+--- !u!21 &2204362976247483007
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: R03
+  m_Shader: {fileID: 4800000, guid: 94f1c673382d16e448998aab9f08a647, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords:
+  - _TIMED
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: 3010
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _Noise:
+        m_Texture: {fileID: 2800000, guid: 75c11bdbb9bc1434a803977c04c69ce9, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Times:
+        m_Texture: {fileID: 7383782694418227007, guid: 42741b0e645c068469358f39be990901, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _Alpha: 1
+    - _Burst: 0
+    - _BurstCentered: 0
+    - _BurstEnds: 0
+    - _BurstFadeFrom: 0.3
+    - _BurstGrow: 0
+    - _BurstGrowTime: 0.08
+    - _BurstHold: 0
+    - _BurstR0: 0
+    - _BurstR1: 0
+    - _DissolveMax: 1.05
+    - _Duration: 0.21667
+    - _EdgeFade: 0
+    - _Expand: 0.3366
+    - _FloorOffset: -1.03
+    - _Freq: 1
+    - _HasTimes: 1
+    - _HoldTail: 0
+    - _Hot: 0.45
+    - _Lifetime: 0.89667
+    - _Linger: 0.53
+    - _OuterRough: 0
+    - _Rigid: 0
+    - _Rough: 1
+    - _SoftEnds: 0
+    - _SoftHead: 0
+    - _TailStart: 0.3
+    - _Thick: 1
+    m_Colors:
+    - _C0: {r: 0.03, g: 0, b: 0.01, a: 0}
+    - _C1: {r: 0.3, g: 0, b: 0.03, a: 0}
+    - _C2: {r: 2, g: 0.04, b: 0.06, a: 0}
+    - _C3: {r: 4.5, g: 1.6, b: 1.2, a: 0}
+  m_BuildTextureStacks: []
+--- !u!21 &3014382692741809745
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: R02Wisp
+  m_Shader: {fileID: 4800000, guid: 901a94966157d3243821d4aee2d7880b, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords:
+  - _TIMED
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: 3009
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _Noise:
+        m_Texture: {fileID: 2800000, guid: 75c11bdbb9bc1434a803977c04c69ce9, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Times:
+        m_Texture: {fileID: 8573154776071175768, guid: 42741b0e645c068469358f39be990901, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _Alpha: 0.85
+    - _Duration: 0.125
+    - _Expand: 0.26359117
+    - _FloorOffset: -1.03
+    - _HasTimes: 1
+    - _HoldTail: 0
+    - _Lifetime: 0.735
+    - _Linger: 0.46
+    - _SoftEnds: 0
+    - _TailStart: 0.3
+    m_Colors:
+    - _Color: {r: 0.9, g: 0.02, b: 0.06, a: 0}
+    - _Edge: {r: 1.4, g: 0.12, b: 0.1, a: 0}
+  m_BuildTextureStacks: []
+--- !u!21 &3489595599039405614
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: R01Wisp
+  m_Shader: {fileID: 4800000, guid: 901a94966157d3243821d4aee2d7880b, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords:
+  - _TIMED
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: 3009
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _Noise:
+        m_Texture: {fileID: 2800000, guid: 75c11bdbb9bc1434a803977c04c69ce9, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Times:
+        m_Texture: {fileID: 1857082118780172632, guid: 42741b0e645c068469358f39be990901, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _Alpha: 0.85
+    - _Duration: 0.075
+    - _Expand: 0.2574
+    - _FloorOffset: -1.03
+    - _HasTimes: 1
+    - _HoldTail: 0
+    - _Lifetime: 0.685
+    - _Linger: 0.46
+    - _SoftEnds: 0
+    - _TailStart: 0.3
+    m_Colors:
+    - _Color: {r: 0.9, g: 0.02, b: 0.06, a: 0}
+    - _Edge: {r: 1.4, g: 0.12, b: 0.1, a: 0}
+  m_BuildTextureStacks: []
+--- !u!21 &3809589112907871353
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: R00Wisp
+  m_Shader: {fileID: 4800000, guid: 901a94966157d3243821d4aee2d7880b, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords:
+  - _TIMED
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: 3009
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _Noise:
+        m_Texture: {fileID: 2800000, guid: 75c11bdbb9bc1434a803977c04c69ce9, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Times:
+        m_Texture: {fileID: -7941954796035038564, guid: 42741b0e645c068469358f39be990901, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _Alpha: 0.85
+    - _Duration: 0.064166665
+    - _Expand: 0.1782
+    - _FloorOffset: -1.03
+    - _HasTimes: 1
+    - _HoldTail: 0
+    - _Lifetime: 0.63416666
+    - _Linger: 0.42
+    - _SoftEnds: 0
+    - _TailStart: 0.3
+    m_Colors:
+    - _Color: {r: 0.9, g: 0.02, b: 0.06, a: 0}
+    - _Edge: {r: 1.4, g: 0.12, b: 0.1, a: 0}
+  m_BuildTextureStacks: []
+--- !u!21 &4271909296806302903
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: R02
+  m_Shader: {fileID: 4800000, guid: 94f1c673382d16e448998aab9f08a647, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords:
+  - _TIMED
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: 3010
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _Noise:
+        m_Texture: {fileID: 2800000, guid: 75c11bdbb9bc1434a803977c04c69ce9, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Times:
+        m_Texture: {fileID: 8573154776071175768, guid: 42741b0e645c068469358f39be990901, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _Alpha: 1
+    - _Burst: 0
+    - _BurstCentered: 0
+    - _BurstEnds: 0
+    - _BurstFadeFrom: 0.3
+    - _BurstGrow: 0
+    - _BurstGrowTime: 0.08
+    - _BurstHold: 0
+    - _BurstR0: 0
+    - _BurstR1: 0
+    - _DissolveMax: 1.05
+    - _Duration: 0.125
+    - _EdgeFade: 0
+    - _Expand: 0.26359117
+    - _FloorOffset: -1.03
+    - _Freq: 1
+    - _HasTimes: 1
+    - _HoldTail: 0
+    - _Hot: 0.45
+    - _Lifetime: 0.735
+    - _Linger: 0.46
+    - _OuterRough: 0
+    - _Rigid: 0
+    - _Rough: 1
+    - _SoftEnds: 0
+    - _SoftHead: 0
+    - _TailStart: 0.3
+    - _Thick: 1
+    m_Colors:
+    - _C0: {r: 0.03, g: 0, b: 0.01, a: 0}
+    - _C1: {r: 0.3, g: 0, b: 0.03, a: 0}
+    - _C2: {r: 2, g: 0.04, b: 0.06, a: 0}
+    - _C3: {r: 4.5, g: 1.6, b: 1.2, a: 0}
+  m_BuildTextureStacks: []
+--- !u!21 &4612783981192707297
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: R01
+  m_Shader: {fileID: 4800000, guid: 94f1c673382d16e448998aab9f08a647, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords:
+  - _TIMED
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: 3010
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _Noise:
+        m_Texture: {fileID: 2800000, guid: 75c11bdbb9bc1434a803977c04c69ce9, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Times:
+        m_Texture: {fileID: 1857082118780172632, guid: 42741b0e645c068469358f39be990901, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _Alpha: 1
+    - _Burst: 0
+    - _BurstCentered: 0
+    - _BurstEnds: 0
+    - _BurstFadeFrom: 0.3
+    - _BurstGrow: 0
+    - _BurstGrowTime: 0.08
+    - _BurstHold: 0
+    - _BurstR0: 0
+    - _BurstR1: 0
+    - _DissolveMax: 1.05
+    - _Duration: 0.075
+    - _EdgeFade: 0
+    - _Expand: 0.2574
+    - _FloorOffset: -1.03
+    - _Freq: 1
+    - _HasTimes: 1
+    - _HoldTail: 0
+    - _Hot: 0.45
+    - _Lifetime: 0.685
+    - _Linger: 0.46
+    - _OuterRough: 0
+    - _Rigid: 0
+    - _Rough: 1
+    - _SoftEnds: 0
+    - _SoftHead: 0
+    - _TailStart: 0.3
+    - _Thick: 1
+    m_Colors:
+    - _C0: {r: 0.03, g: 0, b: 0.01, a: 0}
+    - _C1: {r: 0.3, g: 0, b: 0.03, a: 0}
+    - _C2: {r: 2, g: 0.04, b: 0.06, a: 0}
+    - _C3: {r: 4.5, g: 1.6, b: 1.2, a: 0}
+  m_BuildTextureStacks: []

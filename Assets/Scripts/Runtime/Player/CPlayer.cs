@@ -13,6 +13,9 @@ public class CPlayer : CUnit
         public CSkillSO skill;
     }
 
+    [Header("인벤토리 연결")]
+    [SerializeField] private CInventory _inventory;
+
     [Header("카메라 설정")]
     [SerializeField] private Camera _mainCamera;
     [SerializeField] private CTestCamera _testCamera;
@@ -37,6 +40,7 @@ public class CPlayer : CUnit
     private Dictionary<EEquipmentSlot, CItemEquipment> _equipment = new Dictionary<EEquipmentSlot, CItemEquipment>();
     private List<CStatus> _equipmentStatus = new List<CStatus>();
     private bool _actionsBlocked;
+    private bool _isInvincible;
 
     protected float _hpMaxBaseline = 1;
     protected float _attackBaseline = 0;
@@ -49,8 +53,12 @@ public class CPlayer : CUnit
     protected float _attackSpeedBaseline = 1f;
 
     public int CurrentMp { get; private set; }
+    public float CrownWindowRemaining => _skill.CrownWindowRemaining;
+    public float MovementSpeedMultiplier => _movementMultiply;
     public float AttackSpeedMultiplier => _attackSpeedMultiply;
-    internal CPlayerPassive Passive => _passive;
+    public float MaxMp => _maxMp;
+    public CPlayerPassive Passive => _passive;
+    public IReadOnlyList<CSkillSO> Skills => _skill.RegisteredSkills;
 
     public Dictionary<EEquipmentSlot, CItemEquipment> Equipment
     {
@@ -339,12 +347,47 @@ public class CPlayer : CUnit
         base.InvokeOnBattleEnd(isBossBattle);
     }
 
+    public void GetSkillCooldown(ESkillType type, out float ratio, out float remainCooldown)
+    {
+        _skill.GetSkillCooldown(type, out ratio, out remainCooldown);
+    }
+
+    public bool GetSkillAvailable(ESkillType type)
+    {
+        return _skill.GetSkillAvailable(type);
+    }
+
+    public float GetCrownRemaining => _skill.CrownWindowRemaining;
+
     protected override void Awake()
     {
         base.Awake();
         CStatusSO.Build(false);
         _movement = GetComponent<CPlayerMovement>();
         _skill = GetComponent<CPlayerSkill>();
+    }
+
+    /// <summary>
+    /// 플레이어의 무적 상태를 켜거나 끕니다.
+    /// </summary>
+
+    public void SetInvincible(bool isInvincible)
+    {
+        _isInvincible = isInvincible;
+    }
+
+    /// <summary>
+    /// 무적 상태가 아닐 때 체력 피해를 적용합니다.
+    /// </summary>
+
+    public override void GetDamage(float value, ERatioSwitch ratioSwitch = ERatioSwitch.Constant)
+    {
+        if (_isInvincible)
+        {
+            return;
+        }
+
+        base.GetDamage(value, ratioSwitch);
     }
 
     /// <summary>
@@ -478,7 +521,7 @@ public class CPlayer : CUnit
 
         _actionsBlocked = false;
 
-        if (_dashInput.action.WasPressedThisFrame() && _skill.TryDash())
+        if (_dashInput.action.WasPressedThisFrame() && _skill.TryDash(GetPointerDirection()))
         {
             return;
         }
@@ -489,14 +532,14 @@ public class CPlayer : CUnit
         {
             if (_attackInput.action.WasPressedThisFrame())
             {
-                _skill.TryAttack(GetAttackDirection());
+                _skill.TryAttack(GetPointerDirection());
             }
 
             if (_skillSlots != null)
             {
                 foreach (SSkillSlot slot in _skillSlots)
                 {
-                    if (slot.input.action.WasPressedThisFrame() && _skill.TryUse(slot.skill, GetAttackDirection()))
+                    if (slot.input.action.WasPressedThisFrame() && _skill.TryUse(slot.skill, GetPointerDirection()))
                     {
                         break;
                     }
@@ -519,7 +562,7 @@ public class CPlayer : CUnit
         _movement.Move(_movementMultiply);
     }
 
-    private Vector3 GetAttackDirection()
+    private Vector3 GetPointerDirection()
     {
         if (TryGetPointerGroundPosition(out Vector3 position))
         {

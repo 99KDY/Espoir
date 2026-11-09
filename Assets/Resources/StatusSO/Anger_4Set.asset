@@ -16,10 +16,13 @@ MonoBehaviour:
   _name: "\uBD84\uB178\uC758 \uC794\uC7AC 4\uC14B"
   _icon: {fileID: 0}
   _description: "\uC783\uC740 \uCCB4\uB825 2%\uB2F9 \uC8FC\uB294 \uD53C\uD574 1%\uC99D\uAC00"
-  _tooltip: 
+  _tooltip: "\uC783\uC740 \uCCB4\uB825 2%\uB2F9 \uC8FC\uB294 \uD53C\uD574\uAC00 1%\uC99D\uAC00\uD569\uB2C8\uB2E4."
   _duration: 0
   _stack: 0
+  _maxStack: 0
   _remove: 0
+  _initialRemoveStack: 0
+  _removeStack: 0
   _stackDuration: 0
   _actionList: []
   _customStatus: 6

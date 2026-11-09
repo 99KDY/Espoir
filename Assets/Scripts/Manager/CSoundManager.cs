@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
-using UnityEngine.UI;
 
 public enum EBackgroundSound
 {
@@ -43,8 +42,6 @@ public class CSoundManager : MonoBehaviour
     [SerializeField] private List<CBackgroundSound> _backgroundSounds;
     [SerializeField] private List<CEffectSound> _effectSounds;
     [SerializeField] private AudioMixer _audioMixer;
-    [SerializeField] private Slider _bgmSlider;
-    [SerializeField] private Slider _seSlider;
 
     Dictionary<EBackgroundSound, AudioSource> _bgmDict;
     Dictionary<EEffectSound, AudioSource> _seDict;
@@ -149,8 +146,8 @@ public class CSoundManager : MonoBehaviour
 
     private void SetVolume()
     {
-        float bgmVolume = (_bgmSlider == null) ? _fadeFactor : _bgmSlider.value * _fadeFactor;
-        float seVolume = (_seSlider == null) ? 1f : _seSlider.value;
+        float bgmVolume = (CGameManager.Instance == null) ? _fadeFactor : CGameManager.Instance.BgmLevel * _fadeFactor;
+        float seVolume = (CGameManager.Instance == null) ? 1f : CGameManager.Instance.SeLevel;
 
         if (bgmVolume <= 0.0001f)
         {
@@ -170,18 +167,6 @@ public class CSoundManager : MonoBehaviour
             _audioMixer.SetFloat("SELevel", Mathf.Log10(seVolume) * 20);
         }
     }
-
-    public void SetVolumeForce(float bgm, float se)
-    {
-        _bgmSlider.value = bgm;
-        _seSlider.value = se;
-    }
-
-    public (float bgmLevel, float seLevel) GetVolume()
-    {
-        return (_bgmSlider.value, _seSlider.value);
-    }
-
     public void PlaySE(EEffectSound soundType)
     {
         if (_seDict.ContainsKey(soundType))

@@ -73,5 +73,61 @@ Shader "Hidden/Espoir/Player/Effects/Distortion"
             ENDCG
         }
     }
+    SubShader
+    {
+        Tags { "EspoirDistort" = "Ground" }
+        Pass
+        {
+            Cull Off ZWrite Off ZTest Always Blend One One
+            CGPROGRAM
+            #pragma vertex vert
+            #pragma fragment frag
+            #pragma target 3.5
+            #include "UnityCG.cginc"
+            float _Lifetime, _R0, _Expand, _Width, _Half, _Strength;
+
+            struct Appdata { float4 vertex : POSITION; float4 uvAge : TEXCOORD0; float3 center : TEXCOORD1; };
+            struct Vary
+            {
+                float4 pos : SV_POSITION;
+                float2 uv : TEXCOORD0;
+                float t : TEXCOORD1;
+                float4 clip : TEXCOORD2;
+                float4 cclip : TEXCOORD3;
+                float fit : TEXCOORD4;
+            };
+
+            Vary vert(Appdata v)
+            {
+                Vary o;
+                o.pos = UnityObjectToClipPos(v.vertex);
+                o.uv = v.uvAge.xy * 2.0 - 1.0;
+                o.t = v.uvAge.z;
+                o.clip = o.pos;
+                o.cclip = UnityWorldToClipPos(v.center);
+
+                o.fit = saturate(abs(UNITY_MATRIX_P[1][1]) / o.cclip.w * 5.74);
+                return o;
+            }
+
+            float4 frag(Vary i) : SV_Target
+            {
+                float k = i.t, age = k * _Lifetime;
+                float R = _R0 + _Expand * (1.0 - pow(1.0 - k, 4.0));
+                float W = _Width * (0.7 + 0.6 * k);
+                float S = _Strength * saturate(age / 0.02) * (1.0 - smoothstep(0.35, 1.0, k));
+                float r = length(i.uv) * _Half;
+                float q = (r - R) / W, q2 = (r - R + W * 1.6) / (W * 1.4);
+                float prof = exp(-q * q) - 0.45 * exp(-q2 * q2);
+                float aspect = _ScreenParams.x / _ScreenParams.y;
+                float2 d = (i.clip.xy / i.clip.w - i.cclip.xy / i.cclip.w) * float2(aspect, _ProjectionParams.x);
+                float L = length(d);
+                float2 dir = L > 0.0001 ? d / L : 0.0;
+                dir.x /= aspect;
+                return float4(dir * prof * S * i.fit, 0.0, 1.0);
+            }
+            ENDCG
+        }
+    }
     Fallback Off
 }
