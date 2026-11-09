@@ -12,7 +12,7 @@ internal class CPlayerSpellCast
     private int _awardedFlow;
     private bool _reducedCooldown;
 
-    internal void Begin(CPlayer player, Vector3 direction, CSkillSO skill, List<GameObject> effects)
+    internal void Begin(CPlayer player, Vector3 direction, CSkillSO skill, CPlayerSkillEffects effects)
     {
         _origin = player.transform.position;
         _rotation = Quaternion.LookRotation(direction);
@@ -26,12 +26,12 @@ internal class CPlayerSpellCast
         GameObject effect = skill.Steps[0].effectPrefab;
         if (effect != null)
         {
-            effects.Add(Object.Instantiate(effect, _origin, _rotation));
+            effects.Spawn(effect, _origin, _rotation);
         }
 
         if (skill.FollowEffect != null)
         {
-            effects.Add(Object.Instantiate(skill.FollowEffect, _origin, _rotation, player.transform));
+            effects.Spawn(skill.FollowEffect, _origin, _rotation, player.transform);
         }
     }
 

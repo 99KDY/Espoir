@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -12,7 +11,63 @@ public class CPlayerDashGhost : MonoBehaviour
     private static readonly int _ALPHA = Shader.PropertyToID("_AlphaNow");
     private static readonly int _SMEAR = Shader.PropertyToID("_SmearNow");
 
-    private static CPlayerDashGhostPose _coatPose;
+    internal class CSource
+    {
+        internal readonly GameObject _CHARACTER;
+        internal readonly CharacterController _CONTROLLER;
+        internal readonly SkinnedMeshRenderer[] _SKINS;
+        internal readonly MeshFilter[] _SOLIDS;
+        internal readonly MeshRenderer[] _RENDERERS;
+        internal readonly Transform[] _BONES;
+        internal readonly Quaternion[] _ROTATIONS;
+        internal readonly Quaternion[] _ORIGINAL;
+        internal readonly CPlayerDashGhostPose _POSE;
+
+        /// <summary>
+        /// 잔상에 사용할 렌더러와 보정 본을 한 번 찾아 보관합니다.
+        /// </summary>
+
+        public CSource(GameObject character)
+        {
+            _CHARACTER = character;
+            _CONTROLLER = character.GetComponentInParent<CharacterController>();
+            _SKINS = character.GetComponentsInChildren<SkinnedMeshRenderer>(true);
+            _SOLIDS = character.GetComponentsInChildren<MeshFilter>(true);
+            _RENDERERS = new MeshRenderer[_SOLIDS.Length];
+            _POSE = Resources.Load<CPlayerDashGhostPose>("Animations/Player/PlayerDashGhostPose");
+
+            for (int i = 0; i < _SOLIDS.Length; i++)
+            {
+                _SOLIDS[i].TryGetComponent(out _RENDERERS[i]);
+            }
+
+            List<Transform> bones = new List<Transform>();
+            List<Quaternion> rotations = new List<Quaternion>();
+            if (_POSE != null)
+            {
+                foreach (Transform bone in character.GetComponentsInChildren<Transform>(true))
+                {
+                    if (_POSE.TryGetRotation(bone.name, out Quaternion rotation))
+                    {
+                        bones.Add(bone);
+                        rotations.Add(rotation);
+                    }
+                }
+            }
+
+            _BONES = bones.ToArray();
+            _ROTATIONS = rotations.ToArray();
+            _ORIGINAL = new Quaternion[_BONES.Length];
+        }
+
+        internal bool ShouldCapture(Renderer renderer, Mesh mesh)
+        {
+            return renderer != null && mesh != null && renderer.enabled && renderer.gameObject.activeInHierarchy &&
+                renderer.gameObject.layer != CPlayerEffectRenderer.EFFECT_LAYER &&
+                (_POSE == null || !_POSE.IsExcluded(mesh));
+        }
+    }
+
     private static Shader _depthShader;
 
     private readonly List<Mesh> _BAKED_MESHES = new List<Mesh>();
@@ -30,7 +85,7 @@ public class CPlayerDashGhost : MonoBehaviour
     /// 현재 자세를 복사해 이동 방향을 따라 사라지는 잔상을 생성합니다.
     /// </summary>
 
-    public static CPlayerDashGhost Spawn(GameObject character, Material material, float life, float alpha,
+    internal static CPlayerDashGhost Spawn(CSource source, Material material, float life, float alpha,
         float smear, float hold, Vector3 direction, bool flare = true)
     {
         GameObject root = new GameObject("PlayerDashGhost");
@@ -41,8 +96,8 @@ public class CPlayerDashGhost : MonoBehaviour
         ghost._hold = hold;
         ghost._colorMaterial = new Material(material);
 
-        CharacterController controller = character.GetComponentInParent<CharacterController>();
-        float ground = controller != null ? controller.bounds.min.y : character.transform.position.y;
+        float ground = source._CONTROLLER != null
+            ? source._CONTROLLER.bounds.min.y : source._CHARACTER.transform.position.y;
         ghost._colorMaterial.SetVector(_DIRECTION, direction);
         ghost._colorMaterial.SetFloat(_GROUND_Y, ground);
         ghost._colorMaterial.SetFloat(_SEED, UnityEngine.Random.value * 7f);
@@ -55,41 +110,30 @@ public class CPlayerDashGhost : MonoBehaviour
         ghost._depthMaterial = new Material(_depthShader);
         ghost._depthMaterial.CopyPropertiesFromMaterial(ghost._colorMaterial);
         ghost._depthMaterial.renderQueue = _depthShader.renderQueue;
-        ghost.Capture(character, flare);
+        ghost.Capture(source, flare);
         ghost.UpdateMaterials();
         return ghost;
     }
 
-    private void Capture(GameObject character, bool flare)
+    private void Capture(CSource source, bool flare)
     {
-        List<(Transform bone, Quaternion rotation)> original = null;
-
         if (flare)
         {
-            if (_coatPose == null)
+            for (int i = 0; i < source._BONES.Length; i++)
             {
-                _coatPose = Resources.Load<CPlayerDashGhostPose>("Animations/Player/PlayerDashGhostPose");
-            }
-
-            if (_coatPose != null)
-            {
-                original = new List<(Transform, Quaternion)>();
-                foreach (Transform bone in character.GetComponentsInChildren<Transform>())
+                source._ORIGINAL[i] = source._BONES[i].localRotation;
+                if (source._BONES[i].gameObject.activeInHierarchy)
                 {
-                    if (_coatPose.TryGetRotation(bone.name, out Quaternion rotation))
-                    {
-                        original.Add((bone, bone.localRotation));
-                        bone.localRotation = rotation;
-                    }
+                    source._BONES[i].localRotation = source._ROTATIONS[i];
                 }
             }
         }
 
         try
         {
-            foreach (SkinnedMeshRenderer skin in character.GetComponentsInChildren<SkinnedMeshRenderer>())
+            foreach (SkinnedMeshRenderer skin in source._SKINS)
             {
-                if (skin.sharedMesh == null || !ShouldCapture(skin))
+                if (skin == null || !source.ShouldCapture(skin, skin.sharedMesh))
                 {
                     continue;
                 }
@@ -100,10 +144,10 @@ public class CPlayerDashGhost : MonoBehaviour
                 AddPart(skin.transform, mesh, Vector3.one);
             }
 
-            foreach (MeshFilter solid in character.GetComponentsInChildren<MeshFilter>())
+            for (int i = 0; i < source._SOLIDS.Length; i++)
             {
-                if (solid.sharedMesh != null && solid.TryGetComponent(out MeshRenderer renderer) &&
-                    ShouldCapture(renderer))
+                MeshFilter solid = source._SOLIDS[i];
+                if (solid != null && source.ShouldCapture(source._RENDERERS[i], solid.sharedMesh))
                 {
                     AddPart(solid.transform, solid.sharedMesh, solid.transform.lossyScale);
                 }
@@ -111,20 +155,14 @@ public class CPlayerDashGhost : MonoBehaviour
         }
         finally
         {
-            if (original != null)
+            if (flare)
             {
-                foreach (var pose in original)
+                for (int i = 0; i < source._BONES.Length; i++)
                 {
-                    pose.bone.localRotation = pose.rotation;
+                    source._BONES[i].localRotation = source._ORIGINAL[i];
                 }
             }
         }
-    }
-
-    private static bool ShouldCapture(Renderer renderer)
-    {
-        return renderer.enabled && renderer.gameObject.layer != CPlayerEffectRenderer.EFFECT_LAYER &&
-            renderer.name.IndexOf("bag", StringComparison.OrdinalIgnoreCase) < 0;
     }
 
     private void AddPart(Transform source, Mesh mesh, Vector3 scale)

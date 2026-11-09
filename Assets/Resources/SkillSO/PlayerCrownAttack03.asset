@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42141cf8eb324aad8935776fa0250525, type: 3}
   m_Name: PlayerCrownAttack03
   m_EditorClassIdentifier: 
+  _strikeCancelTime: 0.56
   _type: 0
   _cooldown: 0
   _mpCost: 0
@@ -3419,8 +3420,7 @@ MonoBehaviour:
       hitStopDuration: 0.12
       offset: {x: 0, y: 0, z: 1}
       size: {x: 2, y: 2, z: 2}
-      appliesMark: 0
+      appliesMark: 1
       opensCrownWindow: 1
     effectPrefab: {fileID: 1570533758284049792, guid: 38746213be5848b4e99bb2103340f5cf, type: 3}
     effectTime: 0
-    effectLifetime: 0
