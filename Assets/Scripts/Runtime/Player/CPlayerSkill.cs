@@ -55,7 +55,7 @@ public class CPlayerSkill : MonoBehaviour
     public IReadOnlyList<CSkillSO> RegisteredSkills => _registeredSkills;
 
     public bool IsBusy => _currentSkill != null;
-    internal float CrownWindowRemaining => _CROWN.RemainingTime;
+    public float CrownWindowRemaining => _CROWN.RemainingTime;
 
     private void OnDisable()
     {
@@ -80,11 +80,25 @@ public class CPlayerSkill : MonoBehaviour
             return;
         }
     }
+    /// <summary>
+    /// 스킬이 사용가능한지를 반환합니다.
+    /// </summary>
+    public bool GetSkillAvailable(ESkillType type)
+    {
+        if (IsBusy && (type != ESkillType.Dash || _currentSkill.data.Type == ESkillType.Dash))
+        {
+            return false;
+        }
+        else if (type == ESkillType.Crown && !_CROWN.CanUse())
+        {
+            return false;
+        }
+        return true;
+    }
 
     /// <summary>
     /// 사용 주체와 기본 스킬 연결을 확인합니다.
     /// </summary>
-
     public bool Initialize(CPlayer owner)
     {
         _owner = owner;
@@ -526,9 +540,10 @@ public class CPlayerSkill : MonoBehaviour
             UpdateEffect(skill.Steps[0], state);
         }
 
-        else if (_stepIndex >= 0 && !_animator.IsInTransition(0) && _dashElapsed >= endTime)
+        if (_dashElapsed >= endTime)
         {
             FinishSkill();
+            _animator.CrossFadeInFixedTime(_IDLE_HASH, _cancelTransitionDuration);
         }
     }
 

@@ -4,9 +4,6 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.InputSystem;
-using System.Data;
-using Unity.VisualScripting;
 
 
 public class CPlayerUI_Build : MonoBehaviour
@@ -31,29 +28,17 @@ public class CPlayerUI_Build : MonoBehaviour
     //[SerializeField] private CSkillUI _skillP1 = null;
     //[SerializeField] private CSkillUI _skillP2 = null;
     //[SerializeField] private CSkillUI _skillQ = null;
-    //[SerializeField] private CSkillUI _skillW = null;
+    [SerializeField] private CSkillUI _skillW = null;
     [SerializeField] private CSkillUI _skillE = null;
     [SerializeField] private CSkillUI _skillR = null;
     [SerializeField] private CSkillUI _skillD = null;
+    [SerializeField] private Image _crownRemaining = null;
     #endregion
 
     #region 내부변수
-
-    private float _currentHp;
-    private float _maxHp;
-
-
     private readonly Dictionary<CStatus, CStatusUI> _statusViews = new();
     private readonly HashSet<CStatus> _currentStatus = new();
     private readonly List<CStatus> _removedStatus = new();
-
-    #endregion
-
-
-
-    #region 프로퍼티
-    public float CurrentHP => _currentHp;
-    public float MaxHP => _maxHp;
     #endregion
 
 
@@ -64,13 +49,6 @@ public class CPlayerUI_Build : MonoBehaviour
             CLogger.Warn("CPlayerUI의 인스팩터에 플레이어 연결이 안되어 있음");
             return;
         }
-
-        _maxHp = _player.HpMax;
-        _currentHp = _player.HpCurrent;
-
-        ResetHP();
-
-
     }
 
     private void LateUpdate()
@@ -119,7 +97,7 @@ public class CPlayerUI_Build : MonoBehaviour
 
     public void UpdateDebug()
     {
-        _debugText.text = $"ATK {_player.Attack:F1} / DEF {_player.Defence:F1} / Crit {_player.CriticalRate*100:F1}% - {_player.CriticalDamage*100:F1}% / SPD atk {_player.AttackSpeedMultiplier:F2} mov {_player.MovementSpeedMultiplier:F2}";
+        _debugText.text = $"ATK {_player.Attack:F1}\nDEF {_player.Defence:F1}\nCRI {_player.CriticalRate*100:F1}%\n {_player.CriticalDamage*100:F1}%\nA.spd {_player.AttackSpeedMultiplier:F2}\nS.spd {_player.MovementSpeedMultiplier:F2}";
     }
 
     public void UpdateStatus()
@@ -191,55 +169,14 @@ public class CPlayerUI_Build : MonoBehaviour
         float remainCooldown;
 
         //_skillQ.Refresh();
-        //_skillW.Refresh();
+        _crownRemaining.fillAmount = _player.CrownWindowRemaining / 2;
+        _player.GetSkillCooldown(ESkillType.Crown, out ratio, out remainCooldown);
+        _skillW.Refresh(ratio, remainCooldown, _player.GetSkillAvailable(ESkillType.Crown));
         _player.GetSkillCooldown(ESkillType.Rush, out ratio, out remainCooldown);
-        _skillE.Refresh(ratio, remainCooldown);
+        _skillE.Refresh(ratio, remainCooldown, _player.GetSkillAvailable(ESkillType.Rush));
         _player.GetSkillCooldown(ESkillType.Slam, out ratio, out remainCooldown);
-        _skillR.Refresh(ratio, remainCooldown);
+        _skillR.Refresh(ratio, remainCooldown, _player.GetSkillAvailable(ESkillType.Slam));
         _player.GetSkillCooldown(ESkillType.Dash, out ratio, out remainCooldown);
-        _skillD.Refresh(ratio, remainCooldown);
+        _skillD.Refresh(ratio, remainCooldown, _player.GetSkillAvailable(ESkillType.Dash));
     }
-    public void ResetHP()
-    {
-        // TODO : 마을을 복귀했거나, 레이드 처음시도 or 재시도 떄에 전체 회복
-        _currentHp = _maxHp;
-
-        UpdateHp();
-    }
-
-    //public void ResetMP()
-    //{
-    //    // TODO : 마을을 복귀했거나, 레이드 처음시도 or 재시도 떄에 전체 회복
-    //    _currentMp = _maxMP;
-
-    //    UpdateMp();
-    //}
-
-
-    public void ReceiveDamage(float damage)
-    {
-        damage = Mathf.Max(0f , damage);
-
-        _currentHp = Mathf.Max(0f, _currentHp - damage);
-
-        UpdateHp();
-
-        if(_damageText != null)
-        {
-            _damageText.text = $" - {damage}";
-        }
-
-        CLogger.Log($" 현재 채력 : {_currentHp} / 전체 체력 : {_maxHp} / 받은 피해 : {damage}");
-
-
-    }
-
-    private void OnValidate()
-    {
-        _maxHp = Mathf.Max(1.0f, _maxHp);
-        
-        //_maxMP = Mathf.Max(1.0f, _maxMP);
-
-    }
-
 }
