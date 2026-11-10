@@ -211,12 +211,14 @@ public partial class CStatus
                 _onBattleStart.Add((CUnit unit, bool isBossBattle) =>
                 {
                     _boolParam = true;
+                    _stack = 1;
                 });
                 _onDamage.Add((CUnit attacker, CUnit defender, float damage) =>
                 {
                     if (_boolParam && damage > (defender.HpMax * 0.5))
                     {
                         _boolParam = false;
+                        _stack = 0;
                         return 0;
                     }
                     else return damage;
@@ -247,6 +249,7 @@ public partial class CStatus
                     {
                         _floatParam = 12f;
                     }
+                _stack = (int) Mathf.Min(Mathf.Floor(_floatParam / 2f), 5);
                 });
                 _onAttack.Add((CUnit attacker, CUnit defender, float damage, bool isCritical) =>
                 {
@@ -261,7 +264,7 @@ public partial class CStatus
                 _trigger |= EStatusTrigger.OnDelta;
                 _onDelta.Add((CUnit unit, float deltaTime) =>
                 {
-                    unit.GetHeal(unit.HpMax * 0.005f * deltaTime, ERatioSwitch.Constant);
+                    unit.GetHeal(0.05f * deltaTime, ERatioSwitch.ByMax);
                 });
                 break;
             // 분노의 잔재
@@ -273,6 +276,15 @@ public partial class CStatus
                     float lostHpRatio = 1f - (attacker.HpCurrent / attacker.HpMax);
                     float bonusDamage = lostHpRatio / 2f;
                     return damage * (1f + bonusDamage);
+                });
+                break;
+            // 마을 회복
+            // 매 초 최대체력의 20%만큼 체력을 회복합니다.
+            case 7:
+                _trigger |= EStatusTrigger.OnDelta;
+                _onDelta.Add((CUnit unit, float deltaTime) =>
+                {
+                    unit.GetHeal(0.2f * deltaTime, ERatioSwitch.ByMax);
                 });
                 break;
             default:

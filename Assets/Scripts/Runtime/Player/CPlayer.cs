@@ -13,6 +13,9 @@ public class CPlayer : CUnit
         public CSkillSO skill;
     }
 
+    [Header("디버그용 세트")]
+    [SerializeField] private int _debugSet = 0;
+
     [Header("인벤토리 연결")]
     [SerializeField] private CInventory _inventory;
 
@@ -101,8 +104,6 @@ public class CPlayer : CUnit
         get { return _critDmgBaseline; }
         set { _critDmgBaseline = value; }
     }
-
-
     public void EquipmentResync()
     {
         float hpRatio = HpCurrent / HpMax;
@@ -117,7 +118,14 @@ public class CPlayer : CUnit
         _attackSpeedBaseline = 1f;
 
         Dictionary<int, int> equipmentSet = new Dictionary<int, int>();
-        List<CItemEquipment> equipments = new List<CItemEquipment>(_equipment.Values);
+        List<CItemEquipment> equipments = new List<CItemEquipment>();
+        foreach (CItemEquipment equipment in _equipment.Values)
+        {
+            if (equipment != null)
+            {
+                equipments.Add(equipment);
+            }
+        }
         for (int i = 0; i < equipments.Count; i++)
         {
             if (equipments[i].SetNumber != 0)
@@ -365,6 +373,10 @@ public class CPlayer : CUnit
         CStatusSO.Build(false);
         _movement = GetComponent<CPlayerMovement>();
         _skill = GetComponent<CPlayerSkill>();
+        foreach(EEquipmentSlot slot in System.Enum.GetValues(typeof(EEquipmentSlot)))
+        {
+            _equipment[slot] = null;
+        }
     }
 
     /// <summary>
@@ -483,8 +495,6 @@ public class CPlayer : CUnit
             return;
         }
 
-        EquipmentResync();
-
         if (_skillSlots == null)
         {
             return;
@@ -501,6 +511,20 @@ public class CPlayer : CUnit
             enabled = false;
             return;
         }
+
+        if (_debugSet != 0)
+        {
+            CItemEquipment[] tempItems = new CItemEquipment[4];
+            int firstItemId = _debugSet + (_debugSet % 100 - 1) * 15 + 12;
+            for (int i = 0; i < tempItems.Length; i++)
+            {
+                tempItems[i] = (CItemEquipment) CItem.MakeItem(firstItemId + i);
+                CLogger.Log($"디버그용 아이템 장착 -> {i} -> {tempItems[i].Name}");
+                tempItems[i].OnEquip(this);
+            }
+        }
+
+        EquipmentResync();
     }
 
     protected override void Update()

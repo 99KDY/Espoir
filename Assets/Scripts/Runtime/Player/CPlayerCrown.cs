@@ -3,9 +3,7 @@ using UnityEngine;
 public class CPlayerCrown
 {
     private CSkillSO _settings;
-    private CSkillSO _pendingAttack;
     private float _availableUntil = float.NegativeInfinity;
-    private float _empoweredUntil = float.NegativeInfinity;
 
     internal float RemainingTime => Mathf.Max(0f, _availableUntil - Time.time);
 
@@ -31,8 +29,6 @@ public class CPlayerCrown
     {
         player.AddStatus(_settings.CrownStatus.Id);
         int index = player.FindStatusStack(_settings.CrownStatus.Id) - 1;
-        _pendingAttack = index == 0 ? _settings.EmpoweredAttacks[index] : null;
-        _empoweredUntil = Time.time + _settings.EmpowerDuration;
         _availableUntil = float.NegativeInfinity;
 
         GameObject effect = _settings.CrownEffects[index];
@@ -48,24 +44,23 @@ public class CPlayerCrown
         {
             int index = player.FindStatusStack(_settings.CrownStatus.Id) - 1;
             
-            if (index > 0)
+            if (index >= 0)
             {
                 return _settings.EmpoweredAttacks[index];
             }
         }
 
-        return _pendingAttack != null && Time.time <= _empoweredUntil ? _pendingAttack : basicAttack;
+        return basicAttack;
     }
 
-    internal void Consume()
+    internal float GetDamageMultiplier(CPlayer player)
     {
-        _pendingAttack = null;
-        _empoweredUntil = float.NegativeInfinity;
+        return _settings != null && player.FindStatusStack(_settings.CrownStatus.Id) > 0
+            ? _settings.EmpoweredDamageMultiplier : 1f;
     }
 
     internal void Clear()
     {
-        Consume();
         _availableUntil = float.NegativeInfinity;
     }
 }

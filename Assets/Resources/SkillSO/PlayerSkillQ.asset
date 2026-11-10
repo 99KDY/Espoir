@@ -64,7 +64,6 @@ MonoBehaviour:
   _fullHitFlow: 0
   _crownStatus: {fileID: 0}
   _crownWindow: 2
-  _empowerDuration: 8
   _empoweredAttacks: []
   _crownEffects: []
   _crownEffectYaw: 225

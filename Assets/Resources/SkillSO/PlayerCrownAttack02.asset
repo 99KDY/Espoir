@@ -62,7 +62,6 @@ MonoBehaviour:
   _fullHitFlow: 0
   _crownStatus: {fileID: 0}
   _crownWindow: 2
-  _empowerDuration: 8
   _empoweredAttacks: []
   _crownEffects: []
   _crownEffectYaw: 225
@@ -3381,35 +3380,35 @@ MonoBehaviour:
       m_RotationOrder: 4
     hits:
     - time: 0.07450331
-      damageRatio: 1.2
+      damageRatio: 1
       hitStopDuration: 0.045
       offset: {x: 0, y: 0, z: 1}
       size: {x: 2, y: 2, z: 2}
       appliesMark: 0
       opensCrownWindow: 0
     - time: 0.22075056
-      damageRatio: 1.44
+      damageRatio: 1.2
       hitStopDuration: 0.065
       offset: {x: 0, y: 0, z: 1}
       size: {x: 2, y: 2, z: 2}
       appliesMark: 0
       opensCrownWindow: 0
     - time: 0.35596028
-      damageRatio: 1.44
+      damageRatio: 1.2
       hitStopDuration: 0.035
       offset: {x: 0, y: 0, z: 1}
       size: {x: 2, y: 2, z: 2}
       appliesMark: 0
       opensCrownWindow: 1
     - time: 0.3807947
-      damageRatio: 1.44
+      damageRatio: 1.2
       hitStopDuration: 0.05
       offset: {x: 0, y: 0, z: 1}
       size: {x: 2, y: 2, z: 2}
       appliesMark: 0
       opensCrownWindow: 1
     - time: 0.40562916
-      damageRatio: 1.44
+      damageRatio: 1.2
       hitStopDuration: 0.065
       offset: {x: 0, y: 0, z: 1}
       size: {x: 2, y: 2, z: 2}

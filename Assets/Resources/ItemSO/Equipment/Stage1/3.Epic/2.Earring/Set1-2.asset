@@ -19,5 +19,13 @@ MonoBehaviour:
   _description: 
   _slot: 1
   _setNumber: 102
-  _action: []
+  _action:
+  - action: 1
+    param: 30
+  - action: 3
+    param: 3
+  - action: 5
+    param: 3
+  - action: 7
+    param: 0.0375
   _equipmentStatus: []
