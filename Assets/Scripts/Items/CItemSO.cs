@@ -131,6 +131,10 @@ public class CItemSO : ScriptableObject
     public static CItemSO MakeRandomEquipment(int stage, EItemRarity rarity)
     {
         if (!_isBuilded) Build();
+        if (stage < 0)
+        {
+            return MakeRandomEquipment(rarity);
+        }
         if (!_stageRarityPools.ContainsKey((stage, rarity)))
         {
             CLogger.Warn($"CItemSO : 해당 스테이지({stage})와 희귀도({rarity})의 아이템이 존재하지 않습니다.");
@@ -142,6 +146,10 @@ public class CItemSO : ScriptableObject
     public static CItemSO MakeRandomEquipment(int stage)
     {
         if (!_isBuilded) Build();
+        if (stage < 0)
+        {
+            return Find(_equipmentPools[Random.Range(0, _equipmentPools.Count)]);
+        }
         if (!_stagePools.ContainsKey(stage))
         {
             CLogger.Warn($"CItemSO : 해당 스테이지({stage})의 아이템이 존재하지 않습니다.");
