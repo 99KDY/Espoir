@@ -324,21 +324,20 @@ public class CTestEnemy_Build : CEnemy
             {
                 _isMove = false;
 
-                CLogger.Log("원래 위치로");
-                Vector3 direction = _startPos - transform.position;
-                direction.y = 0f;
+                Vector3 direction = _startPos - this.transform.position;
+                direction.y = _startPos.y;
 
-                if (direction.sqrMagnitude > 0.001f)
+                if (direction.sqrMagnitude > 0.01f)
                 {
                     _isMove = true;
                     _isReturn = true;
 
                     _movePos = direction.normalized;
 
-                    Quaternion targetRotation = Quaternion.LookRotation(direction);
+                    Quaternion returnRotation = Quaternion.LookRotation(direction);
                     transform.rotation = Quaternion.RotateTowards(
                         transform.rotation,
-                        targetRotation,
+                        returnRotation,
                         3600f * Time.deltaTime
                     );
                 }
