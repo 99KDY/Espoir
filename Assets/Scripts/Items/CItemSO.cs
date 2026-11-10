@@ -44,7 +44,6 @@ public class CItemSO : ScriptableObject
 
     private static void BuildInternal()
     {
-        _isBuilded = true;
         _idToItem.Clear();
         _stringToItem.Clear();
         _equipmentPools.Clear();
@@ -102,22 +101,25 @@ public class CItemSO : ScriptableObject
         CLogger.Success($"CItemSO : 아이템 풀 : {_idToItem.Count}개");
         CLogger.Success($"CItemSO : 장비 풀 : {_equipmentPools.Count}개");
         CLogger.Success($"CItemSO : 소모품 풀 : {_consumablePools.Count}개");
-
+        _isBuilded = true;
         return;
     }
 
     public static CItemSO Find(int id)
     {
+        if (!_isBuilded) Build();
         return _idToItem[id];
     }
 
     public static CItemSO Find(string name)
     {
+        if (!_isBuilded) Build();
         return _stringToItem[name];
     }
 
     public static CItemSO MakeRandomConsumable()
     {
+        if (!_isBuilded) Build();
         if (_consumablePools.Count == 0)
         {
             CLogger.Warn($"CItemSO : 소모품이 존재하지 않습니다.");
@@ -128,6 +130,11 @@ public class CItemSO : ScriptableObject
 
     public static CItemSO MakeRandomEquipment(int stage, EItemRarity rarity)
     {
+        if (!_isBuilded) Build();
+        if (stage < 0)
+        {
+            return MakeRandomEquipment(rarity);
+        }
         if (!_stageRarityPools.ContainsKey((stage, rarity)))
         {
             CLogger.Warn($"CItemSO : 해당 스테이지({stage})와 희귀도({rarity})의 아이템이 존재하지 않습니다.");
@@ -138,6 +145,11 @@ public class CItemSO : ScriptableObject
 
     public static CItemSO MakeRandomEquipment(int stage)
     {
+        if (!_isBuilded) Build();
+        if (stage < 0)
+        {
+            return Find(_equipmentPools[Random.Range(0, _equipmentPools.Count)]);
+        }
         if (!_stagePools.ContainsKey(stage))
         {
             CLogger.Warn($"CItemSO : 해당 스테이지({stage})의 아이템이 존재하지 않습니다.");
@@ -148,6 +160,7 @@ public class CItemSO : ScriptableObject
 
     public static CItemSO MakeRandomEquipment(EItemRarity rarity)
     {
+        if (!_isBuilded) Build();
         if (!_rarityPools.ContainsKey(rarity))
         {
             CLogger.Warn($"CItemSO : 해당 희귀도({rarity})의 아이템이 존재하지 않습니다.");
@@ -158,6 +171,7 @@ public class CItemSO : ScriptableObject
 
     public static CItemSO MakeRandomEquipment()
     {
+        if (!_isBuilded) Build();
         if (_equipmentPools.Count == 0)
         {
             CLogger.Warn($"CItemSO : 장비가 존재하지 않습니다.");

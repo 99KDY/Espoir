@@ -44,6 +44,7 @@ public partial class CStatus
         _description = targetSO.Description;
         _tooltip = targetSO.Tooltip;
         _image = targetSO.Icon;
+        _effectPrefab = targetSO.EffectPrefab;
         _stack = stack > 0 ? stack : 1;
         _initialRemoveStack = targetSO.InitialRemoveStack > 0 ? targetSO.InitialRemoveStack : 1;
         _removeStack = targetSO.RemoveStack > 0 ? targetSO.RemoveStack : 1;

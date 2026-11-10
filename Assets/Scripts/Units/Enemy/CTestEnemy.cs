@@ -382,13 +382,13 @@ public class CTestEnemy : CEnemy
         {
             float speed = _isReturn ? 1.5f * _moveSpeed : _moveSpeed;
 
-            _rb.velocity = new Vector3(_movePos.x * speed , 0f , _movePos.z * speed);
+            _rb.velocity = new Vector3(_movePos.x * speed , _rb.velocity.y , _movePos.z * speed);
 
         }
 
         else
         {
-            _rb.velocity = new Vector3(0f, 0f, 0f);
+            _rb.velocity = new Vector3(0f, _rb.velocity.y, 0f);
         }
 
     }

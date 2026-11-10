@@ -60,6 +60,7 @@ public class CPlayer : CUnit
     public float MovementSpeedMultiplier => _movementMultiply;
     public float AttackSpeedMultiplier => _attackSpeedMultiply;
     public float MaxMp => _maxMp;
+    public CInventory Inventory => _inventory;
     public CPlayerPassive Passive => _passive;
     public IReadOnlyList<CSkillSO> Skills => _skill.RegisteredSkills;
 
