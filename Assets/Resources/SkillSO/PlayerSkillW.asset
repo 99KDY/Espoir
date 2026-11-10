@@ -61,7 +61,7 @@ MonoBehaviour:
   _fullHitFlow: 0
   _crownStatus: {fileID: 11400000, guid: 078eceb1d4f206447aa6a202a71a3d1f, type: 2}
   _crownWindow: 2
-  _empowerDuration: 8
+  _empoweredDamageMultiplier: 1.2
   _empoweredAttacks:
   - {fileID: 11400000, guid: d4f5f463114c5614694927ae7ee15a69, type: 2}
   - {fileID: 11400000, guid: 763b37739926f9b4daf2ee8099af84df, type: 2}

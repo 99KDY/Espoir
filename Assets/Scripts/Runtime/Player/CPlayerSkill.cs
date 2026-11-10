@@ -364,11 +364,6 @@ public class CPlayerSkill : MonoBehaviour
             {
                 transform.rotation = Quaternion.LookRotation(_direction);
             }
-
-            if (!canContinue)
-            {
-                _CROWN.Consume();
-            }
         }
 
         if (isCanceling)
@@ -602,6 +597,11 @@ public class CPlayerSkill : MonoBehaviour
             _nextHitIndex++;
 
             bool isBasicAttack = skill.Type == ESkillType.Melee;
+            if (isBasicAttack)
+            {
+                hit.damageRatio *= _CROWN.GetDamageMultiplier(_owner);
+            }
+
             SPlayerHitResult result = _playerAttack.Attack(_owner, hit, hit.appliesMark);
 
             if (!result.hasHit)
@@ -770,7 +770,8 @@ public class CPlayerSkill : MonoBehaviour
             if (skill.CrownStatus == null || skill.CrownStatus.MaxStack <= 0 ||
                 skill.EmpoweredAttacks == null || skill.EmpoweredAttacks.Length != skill.CrownStatus.MaxStack ||
                 skill.CrownEffects == null || skill.CrownEffects.Length != skill.CrownStatus.MaxStack ||
-                skill.CrownWindow <= 0f || skill.EmpowerDuration <= 0f || skill.Cooldown < 0f || skill.MpCost < 0)
+                skill.CrownWindow <= 0f || skill.EmpoweredDamageMultiplier < 1f ||
+                skill.Cooldown < 0f || skill.MpCost < 0)
             {
                 return false;
             }
