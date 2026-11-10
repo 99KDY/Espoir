@@ -254,7 +254,7 @@ public class CTestEnemy_Build : CEnemy
 
 
 
-        Vector3 target = new Vector3(_target.position.x, 0, _target.position.z);
+        Vector3 target = new Vector3(_target.position.x, this.transform.position.y, _target.position.z);
                
         Vector3 toTarget = target - transform.position;
 
@@ -401,9 +401,11 @@ public class CTestEnemy_Build : CEnemy
             return;
         }
 
-        Vector3 toTarget = _player.transform.position - this.transform.position;
-        
-        if(toTarget.magnitude <= 2.0f)
+        Vector3 toPlayer = new Vector3(_player.transform.position.x, this.transform.position.y, _player.transform.position.z);
+
+        Vector3 toTarget = toPlayer - this.transform.position;
+
+        if (toTarget.magnitude <= 2.0f)
         {
             _isAttack = true;
             if (_isAttack)
