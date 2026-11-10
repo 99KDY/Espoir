@@ -20,7 +20,7 @@ MonoBehaviour:
   _tooltip: "5% \uD655\uB960\uB85C 2\uBC30\uC758 \uD53C\uD574\uB97C \uC90D\uB2C8\uB2E4.\n\uCE58\uBA85\uD0C0\uC640
     \uBCC4\uAC1C\uC774\uBA70 \uCE58\uBA85\uD0C0\uC640 \uACB9\uCE60 \uC218 \uC788\uC2B5\uB2C8\uB2E4."
   _duration: 0
-  _stack: 0
+  _stack: 1
   _maxStack: 0
   _remove: 0
   _initialRemoveStack: 0
