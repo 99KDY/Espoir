@@ -149,6 +149,13 @@ public partial class CStatus
     private float _timerParam = 0f;
     private bool _boolParam = false;
 
+    private GameObject _effectPrefab;
+    public GameObject EffectPrefab
+    {
+        get { return _effectPrefab; }
+        set { _effectPrefab = value; }
+    }
+
     public int Id => _id;
     public float Duration => _duration;
     public string Name => _name;

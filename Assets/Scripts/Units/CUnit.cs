@@ -62,6 +62,10 @@ public abstract class CUnit : MonoBehaviour
     [SerializeField] protected float _baseAttack;
     [SerializeField] protected float _baseDefence;
     [SerializeField] protected bool _debugLog = false;
+
+    [Header("상태이상 이펙트 기준점")]
+    [SerializeField] protected Transform _statusEffectAnchor;
+    [SerializeField] protected float _radius = 1f;
     protected float _baseCritRate = 0.05f;
     protected float _baseCritDmg = 1.5f;
     #endregion
@@ -79,6 +83,8 @@ public abstract class CUnit : MonoBehaviour
     protected float _attackSpeedMultiply = 1;
 
     protected List<CStatus> _status;
+    protected readonly Dictionary<int, GameObject> _statusEffectInstances = new Dictionary<int, GameObject>();
+    protected virtual IReadOnlyList<CStatus> EquipmentStatusForEffects => null;
     #endregion
 
     #region 프로퍼티
@@ -113,6 +119,11 @@ public abstract class CUnit : MonoBehaviour
         _attack = _baseAttack;
         _defence = _baseDefence;
         _status = new List<CStatus>();
+        if (_statusEffectAnchor == null)
+        {
+            _statusEffectAnchor = new GameObject("StatusEffectAnchor").transform;
+            _statusEffectAnchor.SetParent(transform, false);
+        }
     }
 
     protected virtual void Update()

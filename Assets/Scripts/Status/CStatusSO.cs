@@ -36,6 +36,9 @@ public class CStatusSO : ScriptableObject
     [Tooltip("커스텀 상태이상 (0이면 없음)")]
     [SerializeField] private int _customStatus = 0;
 
+    [Tooltip("이펙트")]
+    [SerializeField] private GameObject _customEffect = null;
+
     #region Member Property
     public int Id => _id;
     public string Name => _name;
@@ -51,6 +54,8 @@ public class CStatusSO : ScriptableObject
     public float StackDuration => _stackDuration;
     public IReadOnlyList<SStatusAction> ActionList => _actionList;
     public int CustomStatus => _customStatus;
+
+    public GameObject EffectPrefab => _customEffect;
     #endregion
 
     private static Dictionary<int, CStatusSO> _idToStatus = new Dictionary<int, CStatusSO>();
