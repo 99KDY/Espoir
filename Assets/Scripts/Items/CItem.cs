@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 
 public enum EItemRarity
@@ -75,11 +76,10 @@ public abstract class CItem
     public static CItem GetRandomEquipment(int stage, EItemRarity rarity)
     {
         if (!CItemSO.IsBuilded) CItemSO.Build();
-        CItemSO targetSO = CItemSO.MakeRandomEquipment(stage, rarity);
-        if (targetSO is CItemEquipmentSO targetEquipment) return new CItemEquipment(targetEquipment);
+        if (CItemSO.MakeRandomEquipment(stage, rarity) is CItemEquipmentSO equipmentSO) return new CItemEquipment(equipmentSO);
         else
         {
-            CLogger.Error($"CItem.GetRandomEquipment에서 오류남 : {targetSO.Id}");
+            CLogger.Error($"CItem.GetRandomEquipment에서 오류남 : stage {stage} rarity {rarity}");
             return null;
         }
     }
@@ -87,11 +87,10 @@ public abstract class CItem
     public static CItem GetRandomEquipment(int stage)
     {
         if (!CItemSO.IsBuilded) CItemSO.Build();
-        CItemSO targetSO = CItemSO.MakeRandomEquipment(stage);
-        if (targetSO is CItemEquipmentSO targetEquipment) return new CItemEquipment(targetEquipment);
+        if (CItemSO.MakeRandomEquipment(stage) is CItemEquipmentSO equipmentSO) return new CItemEquipment(equipmentSO);
         else
         {
-            CLogger.Error($"CItem.GetRandomEquipment에서 오류남 : {targetSO.Id}");
+            CLogger.Error($"CItem.GetRandomEquipment에서 오류남 : stage {stage}");
             return null;
         }
     }
@@ -99,11 +98,10 @@ public abstract class CItem
     public static CItem GetRandomEquipment(EItemRarity rarity)
     {
         if (!CItemSO.IsBuilded) CItemSO.Build();
-        CItemSO targetSO = CItemSO.MakeRandomEquipment(rarity);
-        if (targetSO is CItemEquipmentSO targetEquipment) return new CItemEquipment(targetEquipment);
+        if (CItemSO.MakeRandomEquipment(rarity) is CItemEquipmentSO equipmentSO) return new CItemEquipment(equipmentSO);
         else
         {
-            CLogger.Error($"CItem.GetRandomEquipment에서 오류남 : {targetSO.Id}");
+            CLogger.Error($"CItem.GetRandomEquipment에서 오류남 : rarity {rarity}");
             return null;
         }
     }
@@ -111,11 +109,10 @@ public abstract class CItem
     public static CItem GetRandomEquipment()
     {
         if (!CItemSO.IsBuilded) CItemSO.Build();
-        CItemSO targetSO = CItemSO.MakeRandomEquipment();
-        if (targetSO is CItemEquipmentSO targetEquipment) return new CItemEquipment(targetEquipment);
+        if (CItemSO.MakeRandomEquipment() is CItemEquipmentSO equipmentSO) return new CItemEquipment(equipmentSO);
         else
         {
-            CLogger.Error($"CItem.GetRandomEquipment에서 오류남 : {targetSO.Id}");
+            CLogger.Error($"CItem.GetRandomEquipment에서 오류남");
             return null;
         }
     }
@@ -123,11 +120,10 @@ public abstract class CItem
     public static CItem GetRandomConsumable()
     {
         if (!CItemSO.IsBuilded) CItemSO.Build();
-        CItemSO targetSO = CItemSO.MakeRandomConsumable();
-        if (targetSO is CItemConsumableSO targetEquipment) return new CItemConsumable(targetEquipment);
+        if (CItemSO.MakeRandomEquipment() is CItemConsumableSO consumableSO) return new CItemConsumable(consumableSO);
         else
         {
-            CLogger.Error($"CItem.GetRandomConsumable에서 오류남 : {targetSO.Id}");
+            CLogger.Error($"CItem.GetRandomConsumable에서 오류남");
             return null;
         }
     }
