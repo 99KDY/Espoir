@@ -683,12 +683,12 @@ public class CSlothBoss : CEnemy
         _onAttack = true;
         if (_previewPattern != null)
         {
-            _previewPattern.ShowMultiArcPattern(6, 15f, 30f, 0f);
+            _previewPattern.ShowMultiArcPattern(6, 15f, 60f, 0f);
         }
 
         else
         {
-            CLogger.Error("PatternView ºñ¾îÀÖÀ½");
+            CLogger.Error("PatternView ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½");
         }
 
         await UniTask.Delay(1500);
@@ -700,12 +700,12 @@ public class CSlothBoss : CEnemy
 
         if (_previewPattern != null)
         {
-            _previewPattern.ShowMultiArcPattern(6, 15f, 30f, 30f);
+            _previewPattern.ShowMultiArcPattern(6, 15f, 60f, 30f);
         }
 
         else
         {
-            CLogger.Error("PatternView ºñ¾îÀÖÀ½");
+            CLogger.Error("PatternView ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½");
         }
 
         await UniTask.Delay(1500); ;

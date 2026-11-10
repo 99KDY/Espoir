@@ -2277,8 +2277,6 @@ MonoBehaviour:
     loop: 1
   _effectSounds: []
   _audioMixer: {fileID: 24100000, guid: 2b4ec46212f673044bd291e3a223d03f, type: 2}
-  _bgmSlider: {fileID: 1086258307}
-  _seSlider: {fileID: 996503424}
 --- !u!82 &483654819
 AudioSource:
   m_ObjectHideFlags: 0
@@ -2901,7 +2899,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7859016858234974315, guid: fc44008c7d95e394abbb953b8b53d960, type: 3}
       propertyPath: m_Radius
-      value: 2.5
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 7859016858234974315, guid: fc44008c7d95e394abbb953b8b53d960, type: 3}
       propertyPath: m_Center.x
