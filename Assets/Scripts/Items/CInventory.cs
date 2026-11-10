@@ -104,13 +104,15 @@ public class CInventory : MonoBehaviour
 
     // 아이템 획득
 
+    
     public int Debugitemcode;
 
     [ContextMenu("아이템 추가")]
 
     public void Debugadditem()
     {
-        AddItem(Debugitemcode);
+        int added = AddItem(Debugitemcode);
+        Debug.Log($"아이템 추가 : {added}개");
     }
 
     // 실제로 추가한 수량을 반환
@@ -232,6 +234,26 @@ public class CInventory : MonoBehaviour
 
         OnInventoryChanged?.Invoke();
         return addedQuantity;
+    }
+
+    public bool TryMoveItem(int fromIndex, int toIndex)
+    {
+        if (!IsValidSlot(fromIndex) || !IsValidSlot(toIndex))
+        {
+            return false;
+        }
+
+        if (fromIndex == toIndex || _items[fromIndex] == null)
+        {
+            return false;
+        }
+        CItem temp = _items[toIndex];
+
+        _items[toIndex] = _items[fromIndex];
+        _items[fromIndex] = temp;
+
+        OnInventoryChanged?.Invoke();
+        return true;
     }
 
     // 아이템 버리기
