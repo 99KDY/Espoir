@@ -44,10 +44,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4049213b40cc9244299bf3cd170a68d0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _elements:
+  - objectIndex: 1
+    isGroup: 1
+    group: 0
+    hidden: 0
+    rotation: 90
+    scale: 1.2
+    keepAfterAttack: 0
+    offset: {x: 0, y: 0, z: 0}
+    overrideRadius: 0
+    overrideDuration: 0
+    duration: 2.15
+    innerRadius: 1.2
+    outerRadius: 8.5
   data: {fileID: 4900000, guid: 11ef61adb0954864a9b39482df9d9478, type: 3}
   library: {fileID: 11400000, guid: e02f754b02f8a4f4eab42a91e4d87d37, type: 2}
   stageScale: 1
   screenEffects: 1
   effectLights: 0
   speed: 1
+  holdTime: 0
+  holdDuration: 0
   inkRenderers: []

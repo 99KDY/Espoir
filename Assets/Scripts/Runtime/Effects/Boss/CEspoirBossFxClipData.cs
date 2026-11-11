@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Text;
 using UnityEngine;
@@ -100,6 +100,67 @@ public class CEspoirBossFxClipData
         public int queue,
             first;
         public CFrameKey[] keys;
+    }
+
+    /// <summary>요소의 표시 구간과 가장 선명한 유지 시점을 반환합니다.</summary>
+    public void GetElementTiming(int index, out float start, out float end, out float hold)
+    {
+        CEffectObject element = objs[index];
+        start = G(element.first, G_T);
+        end = start;
+        float segmentStart = start;
+        bool active = false;
+        foreach (CFrameKey key in element.keys)
+        {
+            bool gone = (key.flags & F_GONE) != 0;
+            if ((key.flags & F_VIS) == 0 && !gone)
+                continue;
+            bool next = !gone && key.vis;
+            float time = G(key.frame, G_T);
+            if (next && !active)
+                segmentStart = time;
+            if (!next && active && time - segmentStart > end - start)
+            {
+                start = segmentStart;
+                end = time;
+            }
+            active = next;
+        }
+        if (active && G(frames - 1, G_T) - segmentStart > end - start)
+        {
+            start = segmentStart;
+            end = G(frames - 1, G_T);
+        }
+        hold = start;
+        float alpha = 1f;
+        float fade = 0f;
+        float best = -1f;
+        bool visible = false;
+        foreach (CFrameKey key in element.keys)
+        {
+            if ((key.flags & F_GONE) != 0)
+                break;
+            if ((key.flags & F_VIS) != 0)
+                visible = key.vis;
+
+            if (key.uni != null)
+            {
+                foreach (SUniformValue value in key.uni)
+                {
+                    string name = shaders[element.shader].uniforms[value.index].name;
+                    if (name == "uAlpha") alpha = value.v[0];
+
+                    else if (name == "uFade") fade = value.v[0];
+                }
+            }
+
+            float strength = alpha * (1f - Mathf.Clamp01(fade));
+            if (visible && G(key.frame, G_T) >= start && G(key.frame, G_T) < end && strength >= best)
+            {
+                best = strength;
+                hold = G(key.frame, G_T);
+            }
+        }
     }
 
     public static CEspoirBossFxClipData Parse(byte[] bytes)

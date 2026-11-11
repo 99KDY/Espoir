@@ -1,10 +1,75 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 [DisallowMultipleComponent]
 public class CEspoirBossFxPlayer : MonoBehaviour
 {
+    public enum EEffectGroup
+    {
+        Ground,
+        Trail,
+        Flash,
+        Debris,
+        Shockwave,
+        Orb,
+        Whirlwind,
+        Beam,
+        Shield
+    }
+
+    [Serializable]
+    public class CElementSetting
+    {
+        public int objectIndex;
+        public bool isGroup;
+        public EEffectGroup group;
+        public bool hidden;
+        public float rotation;
+        [Min(0.01f)] public float scale = 1f;
+        public bool keepAfterAttack;
+        public Vector3 offset;
+        public bool overrideRadius;
+        public bool overrideDuration;
+        [Min(0.05f)] public float duration = 1f;
+        [Min(0f)] public float innerRadius;
+        [Min(0.01f)] public float outerRadius = 1f;
+    }
+
+    [SerializeField] private CElementSetting[] _elements;
+
+    /// <summary>선택한 요소의 위치와 도넛 반지름 설정을 적용합니다.</summary>
+    public void SetElements(CElementSetting[] elements)
+    {
+        if (elements != null && elements.Length > 0)
+        {
+            _elements = elements;
+        }
+    }
+
+    public int PreviewGroup { get; set; } = -1;
+    private bool _retainedGround;
+    private readonly Dictionary<CElementSetting, Transform> _groupRoots = new Dictionary<CElementSetting, Transform>();
+
+    /// <summary>같은 시각 효과를 구성하는 메시를 하나의 조절 묶음으로 분류합니다.</summary>
+    public static EEffectGroup GetGroup(string shader)
+    {
+        switch (shader)
+        {
+            case "RearField": case "RingField": case "SafeField": case "SafeRing":
+            case "SealField": case "SubBurstField": case "Trench": return EEffectGroup.Ground;
+            case "Hook": return EEffectGroup.Trail;
+            case "PunchFlash": return EEffectGroup.Flash;
+            case "Rock": case "RockLine": return EEffectGroup.Debris;
+            case "OrbCore": case "OrbHalo": return EEffectGroup.Orb;
+            case "CylWall": case "CylRibbon": return EEffectGroup.Whirlwind;
+            case "LbPillar": case "LbGlow": case "LbRing": case "Bolt":
+            case "Basic": case "Beam": case "BeamDistort": return EEffectGroup.Beam;
+            case "Shield": return EEffectGroup.Shield;
+            default: return EEffectGroup.Shockwave;
+        }
+    }
+
     public TextAsset data;
     public CEspoirBossFxLibrary library;
     public float stageScale = 1f;
@@ -86,6 +151,23 @@ public class CEspoirBossFxPlayer : MonoBehaviour
         public int bb;
         public float boltW;
         public float[] boltPts;
+        public CElementSetting setting;
+        public EEffectGroup group;
+        public Transform adjustment;
+        public bool supportsRadius;
+        public float originalOuterRadius;
+        public float originalInnerRadius;
+        public Mesh sourceMesh;
+        public Mesh adjustedMesh;
+        public Vector3[] vertices;
+        public Vector3[] sourceVertices;
+        public float radiusScale = -1f;
+        public bool customDuration;
+        public float startTime;
+        public float endTime;
+        public float holdAt;
+        public float duration;
+        public float timeOffset;
     }
 
     void Awake()
@@ -156,6 +238,7 @@ public class CEspoirBossFxPlayer : MonoBehaviour
         var tri = new int[Mathf.Max(0, count - count % 3)];
         if (g.idx != null)
             Array.Copy(g.idx, start, tri, 0, tri.Length);
+
         else
             for (int i = 0; i < tri.Length; i++)
                 tri[i] = start + i;
@@ -170,6 +253,8 @@ public class CEspoirBossFxPlayer : MonoBehaviour
 
     void Spawn(int oi)
     {
+        if (_retainedGround)
+            return;
         var o = _clip.objs[oi];
         var sdef = _clip.shaders[o.shader];
         var sh = library.Get(sdef.name);
@@ -178,12 +263,48 @@ public class CEspoirBossFxPlayer : MonoBehaviour
         var r = new CEffectInstance
         {
             src = o,
+            group = GetGroup(sdef.name),
             key = 0,
             ink = sdef.name == "Beam",
         };
         r.go = new GameObject("fx" + oi + "_" + sdef.name);
         r.go.layer = gameObject.layer;
         r.go.transform.SetParent(_stage, false);
+        if (_elements != null)
+        {
+            foreach (CElementSetting setting in _elements)
+            {
+                if (setting != null && (setting.isGroup ? setting.group == r.group : setting.objectIndex == oi))
+                {
+                    r.setting = setting;
+                    r.supportsRadius = Array.Exists(sdef.uniforms, u => u.name == "uR0");
+                    if (setting.isGroup)
+                    {
+                        if (!_groupRoots.TryGetValue(setting, out r.adjustment))
+                        {
+                            r.adjustment = new GameObject(setting.group.ToString()).transform;
+                            r.adjustment.SetParent(_stage, false);
+                            _groupRoots.Add(setting, r.adjustment);
+                        }
+                    }
+
+                    else
+                    {
+                        r.adjustment = new GameObject("ElementOffset").transform;
+                        r.adjustment.SetParent(_stage, false);
+                    }
+                    r.go.transform.SetParent(r.adjustment, false);
+                    _owned.Add(r.adjustment.gameObject);
+                    break;
+                }
+            }
+        }
+        if (r.setting != null && r.setting.overrideDuration && r.supportsRadius)
+        {
+            _clip.GetElementTiming(oi, out r.startTime, out r.endTime, out r.holdAt);
+            r.duration = Mathf.Max(0.05f, r.setting.duration);
+            r.customDuration = true;
+        }
         r.mf = r.go.AddComponent<MeshFilter>();
         r.mr = r.go.AddComponent<MeshRenderer>();
         r.mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
@@ -205,6 +326,7 @@ public class CEspoirBossFxPlayer : MonoBehaviour
         r.mr.sharedMaterial = r.mat;
         if (o.geom >= 0)
             r.mf.sharedMesh = GeomMesh(o.geom);
+
         else
         {
             r.boltMesh = new Mesh { name = "EspoirBossFx_bolt" + oi };
@@ -254,8 +376,18 @@ public class CEspoirBossFxPlayer : MonoBehaviour
             {
                 var un = sh.uniforms[u.index];
                 var v = u.v;
+                if (r.setting != null && un.name == "uR")
+                {
+                    r.originalOuterRadius = v[0];
+                }
+
+                else if (r.setting != null && un.name == "uR0")
+                {
+                    r.originalInnerRadius = v[0];
+                }
                 if (un.kind == CEspoirBossFxClipData.U_FLOAT)
                     r.mat.SetFloat(un.id, v[0]);
+
                 else if (un.kind == CEspoirBossFxClipData.U_VEC)
                     r.mat.SetVector(
                         un.id,
@@ -266,6 +398,7 @@ public class CEspoirBossFxPlayer : MonoBehaviour
                             v.Length > 3 ? v[3] : 0
                         )
                     );
+
                 else
                 {
                     int c = Mathf.Max(1, un.comps),
@@ -302,6 +435,8 @@ public class CEspoirBossFxPlayer : MonoBehaviour
             for (int li = _live.Count - 1; li >= 0; li--)
             {
                 var r = _live[li];
+                if (r.customDuration)
+                    continue;
                 var keys = r.src.keys;
                 while (r.go != null && r.key < keys.Length && keys[r.key].frame <= fi)
                     ApplyKey(r, keys[r.key++]);
@@ -383,16 +518,28 @@ public class CEspoirBossFxPlayer : MonoBehaviour
             StepTo(target);
         HoldNext = _cur < last && IsHold(_cur + 1);
 
+        UpdateElementTimes();
+        foreach (KeyValuePair<CElementSetting, Transform> group in _groupRoots)
+        {
+            CElementSetting setting = group.Key;
+            group.Value.localPosition = new Vector3(-setting.offset.x, setting.offset.y, setting.offset.z);
+            group.Value.localRotation = Quaternion.Euler(0f, -setting.rotation, 0f);
+            group.Value.localScale = Vector3.one * Mathf.Max(0.01f, setting.scale);
+        }
         var s2w = _stage.localToWorldMatrix;
         var cam = Camera.main;
         foreach (var r in _live)
         {
-            bool on = r.vis;
+            bool on = r.vis && (r.setting == null || !r.setting.hidden)
+                && (PreviewGroup < 0 || PreviewGroup == (int)r.group);
             if (r.go.activeSelf != on)
                 r.go.SetActive(on);
             if (!on)
                 continue;
-            r.mat.SetMatrix("_StageToWorld", s2w);
+            ApplyElement(r);
+            if (r.customDuration && r.timeOffset > 0f)
+                r.mat.SetFloat("uT", _t);
+            r.mat.SetMatrix("_StageToWorld", r.adjustment == null ? s2w : r.adjustment.localToWorldMatrix);
             if (cam == null)
                 continue;
             if (r.bb != 0)
@@ -402,8 +549,134 @@ public class CEspoirBossFxPlayer : MonoBehaviour
         }
         if (effectLights)
             UpdateLights();
-        if (_cur >= last && _t >= Duration)
+        if (_cur >= last && _t >= Duration && !HasPendingElements())
             Stop();
+    }
+
+    private void UpdateElementTimes()
+    {
+        for (int i = _live.Count - 1; i >= 0; i--)
+        {
+            CEffectInstance instance = _live[i];
+            if (!instance.customDuration)
+                continue;
+
+            float originalDuration = Mathf.Max(0.05f, instance.endTime - instance.startTime);
+            float time = _t;
+            float extra = instance.duration - originalDuration;
+            if (extra > 0f && time > instance.holdAt)
+            {
+                time = Mathf.Max(instance.holdAt, time - extra);
+            }
+
+            else if (extra < 0f && _t >= instance.startTime)
+            {
+                time = instance.startTime + (_t - instance.startTime) * originalDuration / instance.duration;
+            }
+
+            instance.timeOffset = _t - time;
+            CEspoirBossFxClipData.CFrameKey[] keys = instance.src.keys;
+            while (instance.go != null && instance.key < keys.Length
+                && _clip.G(keys[instance.key].frame, CEspoirBossFxClipData.G_T) <= time)
+            {
+                ApplyKey(instance, keys[instance.key++]);
+            }
+
+            if (instance.go != null && time >= instance.endTime)
+            {
+                Kill(instance.go);
+                instance.go = null;
+            }
+
+            if (instance.go == null)
+                _live.RemoveAt(i);
+        }
+    }
+
+    private bool HasPendingElements()
+    {
+        foreach (CEffectInstance instance in _live)
+        {
+            if (instance.customDuration && instance.go != null)
+                return true;
+        }
+
+        return false;
+    }
+
+    private void ApplyElement(CEffectInstance instance)
+    {
+        CElementSetting setting = instance.setting;
+        if (setting == null)
+        {
+            return;
+        }
+
+        if (!setting.isGroup)
+            instance.adjustment.localPosition = new Vector3(-setting.offset.x, setting.offset.y, setting.offset.z);
+        if (!instance.supportsRadius || instance.originalOuterRadius <= 0f)
+        {
+            return;
+        }
+
+        if (!setting.overrideRadius)
+        {
+            instance.mat.SetFloat("uR", instance.originalOuterRadius);
+            instance.mat.SetFloat("uR0", instance.originalInnerRadius);
+            if (instance.adjustedMesh != null && instance.mf.sharedMesh == instance.adjustedMesh)
+            {
+                instance.mf.sharedMesh = instance.sourceMesh;
+            }
+
+            return;
+        }
+
+        float outerRadius = Mathf.Max(0.01f, setting.outerRadius);
+        float innerRadius = Mathf.Clamp(setting.innerRadius, 0f, outerRadius - 0.01f);
+        instance.mat.SetFloat("uR", outerRadius);
+        instance.mat.SetFloat("uR0", innerRadius);
+        float scale = Mathf.Max(1f, outerRadius / instance.originalOuterRadius);
+        if (scale <= 1f)
+        {
+            if (instance.adjustedMesh != null && instance.mf.sharedMesh == instance.adjustedMesh)
+            {
+                instance.mf.sharedMesh = instance.sourceMesh;
+            }
+
+            return;
+        }
+
+        Mesh mesh = instance.mf.sharedMesh;
+        if (mesh != instance.adjustedMesh)
+        {
+            instance.sourceMesh = mesh;
+            instance.sourceVertices = mesh.vertices;
+            instance.vertices = new Vector3[instance.sourceVertices.Length];
+            if (instance.adjustedMesh != null)
+            {
+                Kill(instance.adjustedMesh);
+            }
+
+            instance.adjustedMesh = Instantiate(mesh);
+            _owned.Add(instance.adjustedMesh);
+            instance.mf.sharedMesh = instance.adjustedMesh;
+            instance.radiusScale = -1f;
+        }
+
+        if (Mathf.Approximately(instance.radiusScale, scale))
+        {
+            return;
+        }
+
+        Vector3[] source = instance.sourceVertices;
+        for (int i = 0; i < source.Length; i++)
+        {
+            instance.vertices[i] = new Vector3(source[i].x * scale, source[i].y * scale, source[i].z);
+        }
+
+        instance.adjustedMesh.vertices = instance.vertices;
+        instance.adjustedMesh.RecalculateBounds();
+        instance.radiusScale = scale;
     }
 
     void UpdateLights()
@@ -456,6 +729,7 @@ public class CEspoirBossFxPlayer : MonoBehaviour
             fwd = -ct.forward;
             up = ct.up;
         }
+
         else
         {
             fwd = ct.position - t.position;
@@ -464,8 +738,8 @@ public class CEspoirBossFxPlayer : MonoBehaviour
                 return;
             up = Vector3.up;
         }
-        var fl = _stage.InverseTransformVector(fwd);
-        var ul = _stage.InverseTransformVector(up);
+        var fl = t.parent.InverseTransformVector(fwd);
+        var ul = t.parent.InverseTransformVector(up);
         if (fl.sqrMagnitude < 1e-10f || ul.sqrMagnitude < 1e-10f)
             return;
         t.localRotation = Quaternion.LookRotation(fl.normalized, ul.normalized);
@@ -483,7 +757,7 @@ public class CEspoirBossFxPlayer : MonoBehaviour
         if (pts == null || pts.Length < 6)
             return;
         int n = pts.Length / 3;
-        var camL = _stage.InverseTransformPoint(cam.transform.position);
+        var camL = r.go.transform.parent.InverseTransformPoint(cam.transform.position);
         _bv.Clear();
         _bu.Clear();
         _bi.Clear();
@@ -526,6 +800,31 @@ public class CEspoirBossFxPlayer : MonoBehaviour
         t.localScale = Vector3.one;
     }
 
+    /// <summary>유지 설정된 장판만 남기고 현재 공격의 나머지 연출을 종료합니다.</summary>
+    public void FinishAttack()
+    {
+        for (int i = _live.Count - 1; i >= 0; i--)
+        {
+            CEffectInstance instance = _live[i];
+            if (instance.group == EEffectGroup.Ground && instance.setting != null
+                && instance.setting.keepAfterAttack && !instance.setting.hidden)
+                continue;
+            Kill(instance.go);
+            _live.RemoveAt(i);
+        }
+        if (_live.Count == 0)
+        {
+            Stop();
+            return;
+        }
+        _retainedGround = true;
+        DetachClock();
+        CEspoirBossFxScreen.Unregister(this);
+        effectLights = false;
+        if (_orbLight != null) _orbLight.enabled = false;
+        if (_fxLight != null) _fxLight.enabled = false;
+    }
+
     public void Stop()
     {
         if (Finished)
@@ -552,6 +851,7 @@ public class CEspoirBossFxPlayer : MonoBehaviour
     {
         if (Application.isPlaying)
             Destroy(o);
+
         else
             DestroyImmediate(o);
     }

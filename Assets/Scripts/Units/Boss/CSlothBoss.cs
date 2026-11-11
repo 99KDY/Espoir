@@ -85,6 +85,7 @@ public class CSlothBoss : CEnemy
 
     private CSoundManager _soundManager;
     private Transform _target;
+    private Vector3 _patternPos;
 
     private float _atkTimer;
 
@@ -131,8 +132,8 @@ public class CSlothBoss : CEnemy
 
         }
 
-      
 
+        _patternPos = _previewPattern.transform.position;
         _target = _player.transform;
         _previewPattern = this.GetComponentInChildren<CPreviewPattern>();
         _animator = this.GetComponent<Animator>();
@@ -223,8 +224,6 @@ public class CSlothBoss : CEnemy
         }
 
         subAtk = Random.Range(1, 4);
-
-        subAtk = 2;
 
         CLogger.Log($"Sub Attack Pattern : {subAtk}");
         switch (subAtk)
@@ -462,7 +461,7 @@ public class CSlothBoss : CEnemy
 
         if(_previewPattern != null)
         {
-            _previewPattern.ShowDonutPattern(20, 15f, 7f);
+            _previewPattern.ShowDonutPattern(20, 15f, 3f);
         }
         else
         {
@@ -507,7 +506,7 @@ public class CSlothBoss : CEnemy
                     new Vector3( player.transform.position.x , 0f, player.transform.position.z)
                 );
 
-            if(distance >= 7f && distance <= _whirlRange)
+            if(distance >= 3f && distance <= _whirlRange)
             {
                 SDamageInfo damagePlayer = new SDamageInfo(this.Attack);
                 
@@ -527,7 +526,7 @@ public class CSlothBoss : CEnemy
     {
         if(_previewPattern != null)
         {
-            _previewPattern.ShowDonutPattern(20, 12f, 7f);
+            _previewPattern.ShowDonutPattern(20, 18f, 10f);
         }
 
         else
@@ -572,7 +571,7 @@ public class CSlothBoss : CEnemy
                 new Vector3(player.transform.position.x, 0f, player.transform.position.z)
             );
 
-            if (distance >= 8f && distance <= 12f)
+            if (distance >= 7f && distance <= 18f)
             {
                 SDamageInfo damagePlayer = new SDamageInfo(this.Attack);
 
@@ -590,7 +589,9 @@ public class CSlothBoss : CEnemy
     {
         if (_previewPattern != null)
         {
-            _previewPattern.ShowDonutPattern(20, 13f, 7f);
+            _previewPattern.transform.position = _player.transform.position;
+            _previewPattern.ShowCirclePattern(20, 8f);
+
         }
 
         else
@@ -604,6 +605,7 @@ public class CSlothBoss : CEnemy
         if (_previewPattern != null)
         {
             _previewPattern.ClearPreview();
+            _previewPattern.transform.position = _patternPos;
         }
 
         _onAttack = false;
@@ -691,7 +693,7 @@ public class CSlothBoss : CEnemy
             CLogger.Error("PatternView �������");
         }
 
-        await UniTask.Delay(1500);
+        await UniTask.Delay(1000);
 
         if (_previewPattern != null)
         {
@@ -708,7 +710,7 @@ public class CSlothBoss : CEnemy
             CLogger.Error("PatternView �������");
         }
 
-        await UniTask.Delay(1500); ;
+        await UniTask.Delay(1000); ;
 
         if (_previewPattern != null)
         {
@@ -723,6 +725,42 @@ public class CSlothBoss : CEnemy
         _onAttack = false;
     }
 
+
+    private void AlternationDamage()
+    {
+        int hit = SubFindPlayer(15f);
+
+        for (int i = 0; i < hit; i++)
+        {
+            if (_hitCollider[i] == null)
+            {
+                continue;
+            }
+
+            CPlayer player = _hitCollider[i].GetComponent<CPlayer>();
+            if (player == null || player.HpCurrent <= 0)
+            {
+                continue;
+            }
+
+            
+
+        }
+
+
+
+    }
+
+    private void AternationArea(float radius, float arc, int areaAmount)
+    {
+        for (int i  = 0; i < areaAmount ; i++)
+        {
+
+
+
+        }
+
+    }
 
     #endregion
 

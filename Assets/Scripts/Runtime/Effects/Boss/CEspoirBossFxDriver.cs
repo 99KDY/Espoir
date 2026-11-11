@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -15,11 +15,9 @@ public class CEspoirBossFxDriver : MonoBehaviour
         public float scale;
         public Vector3 offset;
 
-        [Min(0f)]
-        public float holdTime;
-
-        [Min(0f)]
-        public float holdDuration;
+        [HideInInspector] public float holdTime;
+        [HideInInspector] public float holdDuration;
+        public CEspoirBossFxPlayer.CElementSetting[] elements;
 
         [NonSerialized]
         public int hash;
@@ -54,6 +52,16 @@ public class CEspoirBossFxDriver : MonoBehaviour
     [Header("공격별 설정")]
     [SerializeField]
     private SAttackEffect[] _attacks;
+
+    private int _previewGroup = -1;
+
+    /// <summary>재생 중 선택한 묶음만 표시합니다. 테스트 상태는 저장하지 않습니다.</summary>
+    public void PreviewOnly(int group)
+    {
+        _previewGroup = group;
+        foreach (CEspoirBossFxPlayer effect in _effects)
+            if (effect != null) effect.PreviewGroup = group;
+    }
 
     private readonly List<CEspoirBossFxPlayer> _effects = new List<CEspoirBossFxPlayer>();
     private Renderer[] _renderers;
@@ -189,20 +197,23 @@ public class CEspoirBossFxDriver : MonoBehaviour
     {
         if (_clearOnNextAttack)
         {
-            StopAll();
+            foreach (CEspoirBossFxPlayer previous in _effects)
+                if (previous != null) previous.FinishAttack();
         }
 
         SAttackEffect attack = _attacks[index];
         Quaternion rotation = Quaternion.Euler(0f, _origin.eulerAngles.y, 0f);
         Vector3 position = _origin.position + rotation * (_offset + attack.offset);
         CEspoirBossFxPlayer effect = Instantiate(attack.prefab, position, rotation);
+        effect.SetElements(attack.elements);
+        effect.holdTime = attack.holdTime;
+        effect.holdDuration = attack.holdDuration;
+        effect.PreviewGroup = _previewGroup;
         effect.stageScale *= _scale * attack.scale;
         effect.ApplyStageScale();
         effect.screenEffects = _screenEffects;
         effect.effectLights = _effectLights;
         effect.inkRenderers = _renderers;
-        effect.holdTime = attack.holdTime;
-        effect.holdDuration = attack.holdDuration;
         effect.clock = () => GetTime(layer, attack);
         _effects.Add(effect);
     }
