@@ -26,3 +26,4 @@ MonoBehaviour:
   _stackDuration: 0
   _actionList: []
   _customStatus: 5
+  _customEffect: {fileID: 4844285542829134241, guid: 95dc81e74928f3f4f8133822d3b14e92, type: 3}

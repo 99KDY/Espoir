@@ -30,3 +30,4 @@ MonoBehaviour:
     param: 0
     applyStack: 0
   _customStatus: 7
+  _customEffect: {fileID: 4620256885970334916, guid: 4e2ff612b10cbcc4a9714c4134c07752, type: 3}

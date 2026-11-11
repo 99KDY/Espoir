@@ -3153,7 +3153,8 @@ MonoBehaviour:
   _baseDefence: 15
   _debugLog: 0
   _statusEffectAnchor: {fileID: 0}
-  _radius: 1
+  _statusEffectOffset: {x: 0, y: -1, z: 0}
+  _statusEffectRadius: 2
   _debugSet: 0
   _inventory: {fileID: 1720000003}
   _mainCamera: {fileID: 976528954}
@@ -5112,7 +5113,8 @@ MonoBehaviour:
   _baseDefence: 20
   _debugLog: 1
   _statusEffectAnchor: {fileID: 0}
-  _radius: 1
+  _statusEffectOffset: {x: 0, y: 0, z: 0}
+  _statusEffectRadius: 1
   _targetStatSO: {fileID: 0}
   _drops: []
 --- !u!136 &1023618043
@@ -7718,6 +7720,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 849696862997825102, guid: fc44008c7d95e394abbb953b8b53d960, type: 3}
+      propertyPath: m_Name
+      value: Boss
+      objectReference: {fileID: 0}
     - target: {fileID: 1929441329760321138, guid: fc44008c7d95e394abbb953b8b53d960, type: 3}
       propertyPath: m_LocalPosition.x
       value: 50
@@ -7757,10 +7763,6 @@ PrefabInstance:
     - target: {fileID: 1929441329760321138, guid: fc44008c7d95e394abbb953b8b53d960, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 849696862997825102, guid: fc44008c7d95e394abbb953b8b53d960, type: 3}
-      propertyPath: m_Name
-      value: Boss
       objectReference: {fileID: 0}
     - target: {fileID: 3536428649296106979, guid: fc44008c7d95e394abbb953b8b53d960, type: 3}
       propertyPath: _player
