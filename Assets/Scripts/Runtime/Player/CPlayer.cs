@@ -61,6 +61,7 @@ public class CPlayer : CUnit
     public float AttackSpeedMultiplier => _attackSpeedMultiply;
     public float MaxMp => _maxMp;
     public CInventory Inventory => _inventory;
+    protected override IReadOnlyList<CStatus> EquipmentStatusForEffects => _equipmentStatus;
     public CPlayerPassive Passive => _passive;
     public IReadOnlyList<CSkillSO> Skills => _skill.RegisteredSkills;
 
@@ -232,6 +233,7 @@ public class CPlayer : CUnit
         _attackSpeedMultiply = _attackSpeedBaseline;
 
         ResyncStatus();
+        SyncStatusEffect();
     }
 
     public override void ResyncStatus()
