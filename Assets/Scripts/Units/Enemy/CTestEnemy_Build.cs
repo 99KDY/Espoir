@@ -254,7 +254,7 @@ public class CTestEnemy_Build : CEnemy
 
 
 
-        Vector3 target = new Vector3(_target.position.x, 0, _target.position.z);
+        Vector3 target = new Vector3(_target.position.x, this.transform.position.y, _target.position.z);
                
         Vector3 toTarget = target - transform.position;
 
@@ -324,21 +324,20 @@ public class CTestEnemy_Build : CEnemy
             {
                 _isMove = false;
 
-                CLogger.Log("원래 위치로");
-                Vector3 direction = _startPos - transform.position;
-                direction.y = 0f;
+                Vector3 direction = _startPos - this.transform.position;
+                direction.y = _startPos.y;
 
-                if (direction.sqrMagnitude > 0.001f)
+                if (direction.sqrMagnitude > 0.01f)
                 {
                     _isMove = true;
                     _isReturn = true;
 
                     _movePos = direction.normalized;
 
-                    Quaternion targetRotation = Quaternion.LookRotation(direction);
+                    Quaternion returnRotation = Quaternion.LookRotation(direction);
                     transform.rotation = Quaternion.RotateTowards(
                         transform.rotation,
-                        targetRotation,
+                        returnRotation,
                         3600f * Time.deltaTime
                     );
                 }
@@ -376,7 +375,7 @@ public class CTestEnemy_Build : CEnemy
         {
             float speed = _isReturn ? 1.5f * _moveSpeed : _moveSpeed;
 
-            _rb.velocity = new Vector3(_movePos.x * speed , 0f , _movePos.z * speed);
+            _rb.velocity = new Vector3(_movePos.x * speed , _rb.velocity.y , _movePos.z * speed);
 
         }
 
@@ -401,9 +400,11 @@ public class CTestEnemy_Build : CEnemy
             return;
         }
 
-        Vector3 toTarget = _player.transform.position - this.transform.position;
-        
-        if(toTarget.magnitude <= 2.0f)
+        Vector3 toPlayer = new Vector3(_player.transform.position.x, this.transform.position.y, _player.transform.position.z);
+
+        Vector3 toTarget = toPlayer - this.transform.position;
+
+        if (toTarget.magnitude <= 2.0f)
         {
             _isAttack = true;
             if (_isAttack)
