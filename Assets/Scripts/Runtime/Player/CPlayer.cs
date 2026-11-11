@@ -513,19 +513,34 @@ public class CPlayer : CUnit
             return;
         }
 
-        if (_debugSet != 0)
+        EquipmentResync();
+    }
+
+    [ContextMenu("Equip Debug sets")]
+    public void GetDebugSet()
+    {
+        if (CSetSO.Contains(_debugSet))
         {
+            List<EEquipmentSlot> slots = new List<EEquipmentSlot>(_equipment.Keys);
+            foreach (EEquipmentSlot slot in slots)
+            {
+                if (_equipment[slot] == null) continue;
+                _inventory.TryUnequipItem(slot, false);
+            }
             CItemEquipment[] tempItems = new CItemEquipment[4];
             int firstItemId = _debugSet + (_debugSet % 100 - 1) * 15 + 12;
             for (int i = 0; i < tempItems.Length; i++)
             {
-                tempItems[i] = (CItemEquipment) CItem.MakeItem(firstItemId + i);
+                tempItems[i] = (CItemEquipment)CItem.MakeItem(firstItemId + i);
                 CLogger.Log($"디버그용 아이템 장착 -> {i} -> {tempItems[i].Name}");
                 tempItems[i].OnEquip(this);
             }
+            EquipmentResync();
         }
-
-        EquipmentResync();
+        else
+        {
+            CLogger.Error("CPlayer : _debugSet이 유효하지 않음.");
+        }
     }
 
     protected override void Update()

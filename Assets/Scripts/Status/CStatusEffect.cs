@@ -265,7 +265,7 @@ public partial class CStatus
                 _trigger |= EStatusTrigger.OnDelta;
                 _onDelta.Add((CUnit unit, float deltaTime) =>
                 {
-                    unit.GetHeal(0.05f * deltaTime, ERatioSwitch.ByMax);
+                    unit.GetHeal(0.005f * deltaTime, ERatioSwitch.ByMax);
                 });
                 break;
             // 분노의 잔재

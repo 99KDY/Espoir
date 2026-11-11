@@ -5696,6 +5696,17 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1174403888}
   m_CullTransparentMesh: 1
+--- !u!114 &1243395048 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4716003710051717890, guid: 215ee1af7905ead40a096c6a2fce35be, type: 3}
+  m_PrefabInstance: {fileID: 2076235579}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be2c0dc89e924bd42b9c5a1bad77ed58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1245327738
 GameObject:
   m_ObjectHideFlags: 0
@@ -7720,7 +7731,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1816808535497012195, guid: 215ee1af7905ead40a096c6a2fce35be, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 35.5
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 1816808535497012195, guid: 215ee1af7905ead40a096c6a2fce35be, type: 3}
       propertyPath: m_LocalPosition.y
@@ -7728,7 +7739,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1816808535497012195, guid: 215ee1af7905ead40a096c6a2fce35be, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 105.5
+      value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 1816808535497012195, guid: 215ee1af7905ead40a096c6a2fce35be, type: 3}
       propertyPath: m_LocalRotation.w
@@ -7770,8 +7781,13 @@ PrefabInstance:
       propertyPath: _baseAttack
       value: 50
       objectReference: {fileID: 0}
+    - target: {fileID: 7073360526441210544, guid: 215ee1af7905ead40a096c6a2fce35be, type: 3}
+      propertyPath: _previewPattern
+      value: 
+      objectReference: {fileID: 1243395048}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 1360748116420089391, guid: 215ee1af7905ead40a096c6a2fce35be, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 215ee1af7905ead40a096c6a2fce35be, type: 3}
