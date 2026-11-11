@@ -80,16 +80,19 @@ public class CSetSO : ScriptableObject
 
     public static bool Contains(int id)
     {
+        if (!_isBuilded) Build();
         return _idToSet.ContainsKey(id);
     }
 
     public static CSetSO Find(int id)
     {
+        if (!_isBuilded) Build();
         return _idToSet[id];
     }
 
     public static CSetSO Find(string name)
     {
+        if (!_isBuilded) Build();
         return _stringToSet[name];
     }
 

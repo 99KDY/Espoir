@@ -521,7 +521,8 @@ public class CPlayer : CUnit
     {
         if (CSetSO.Contains(_debugSet))
         {
-            foreach (EEquipmentSlot slot in _equipment.Keys)
+            List<EEquipmentSlot> slots = new List<EEquipmentSlot>(_equipment.Keys);
+            foreach (EEquipmentSlot slot in slots)
             {
                 if (_equipment[slot] == null) continue;
                 _inventory.TryUnequipItem(slot, false);
