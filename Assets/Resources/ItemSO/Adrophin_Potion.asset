@@ -25,4 +25,6 @@ MonoBehaviour:
   _itemStatus:
   - statusId: 2
     duration: 10
+  _effectPrefab: {fileID: 4620256885970334916, guid: 29e1346714c6bd4419533e9d191a7850, type: 3}
+  _effectDuration: 3
   _isThrow: 0
