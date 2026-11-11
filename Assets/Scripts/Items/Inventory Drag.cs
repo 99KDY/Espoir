@@ -7,9 +7,11 @@ public class InventoryDrag : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
 {
     [SerializeField] Transform parent;
     bool _isDragging = false;
+    Vector3 offset;
 
     public void OnPointerDown(PointerEventData eventData)
     {
+        offset = parent.position - Input.mousePosition;
         _isDragging = true;
     }
 
@@ -22,10 +24,10 @@ public class InventoryDrag : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
     {
         if (_isDragging)
         {
-            Vector3 offset = Input.mousePosition - parent.position;
-            parent.position = Input.mousePosition - offset;
+            parent.position = Input.mousePosition + offset;
         }
         
     }
+
 
 }

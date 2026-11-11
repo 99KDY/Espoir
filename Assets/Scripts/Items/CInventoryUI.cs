@@ -21,6 +21,10 @@ public class CInventoryUI : MonoBehaviour
     [SerializeField] private Button _discardButton;
     // 현재 전투 여부. 나중에 실제 게임 상태와 연결.
     [SerializeField] private bool _isBattle;
+    [SerializeField] private Image _necklaceIcon;
+    [SerializeField] private Image _earringIcon;
+    [SerializeField] private Image _braceletIcon;
+    [SerializeField] private Image _ringIcon;
 
     private Image[] _itemIcons;
     private TMP_Text[] _quantityTexts;
@@ -44,6 +48,7 @@ public class CInventoryUI : MonoBehaviour
             else if (_inventory.CanOpenInventory)
             {
                 _InventoryPanel.SetActive(true);
+                RefresgEqipment();
             }
         }
 
@@ -162,6 +167,23 @@ public class CInventoryUI : MonoBehaviour
         }
     }
 
+    private void RefresgEqipment()
+    {
+        RefreshEquipmentIcon(_necklaceIcon, EEquipmentSlot.Necklace);
+        RefreshEquipmentIcon(_earringIcon, EEquipmentSlot.Earring);
+        RefreshEquipmentIcon(_braceletIcon, EEquipmentSlot.Bracelet);
+        RefreshEquipmentIcon(_ringIcon, EEquipmentSlot.Ring);
+    }
+
+    private void RefreshEquipmentIcon(Image icon, EEquipmentSlot slot)
+    {
+        if (icon == null) return;
+
+        CItemEquipment equipment = _inventory.GetEquipment(slot);
+        icon.sprite = equipment?.ItemIcon;
+        icon.enabled = icon.sprite != null;
+    }
+
     private void RefreshInventory()
     {
         for (int i = 0; i < _itemIcons.Length; i++)
@@ -194,6 +216,7 @@ public class CInventoryUI : MonoBehaviour
             }
             RefreshQuickSlots();
         }
+        RefresgEqipment();
     }
 
     private void Start()

@@ -152,8 +152,7 @@ public class CInventory : MonoBehaviour
                     continue;
                 }
 
-                int space = Mathf.Max(
-                    0, _maxItemQuantity - current.Quantity);
+                int space = Mathf.Max(0, _maxItemQuantity - current.Quantity);
 
                 remaining -= Mathf.Min(space, remaining);
             }
@@ -169,18 +168,14 @@ public class CInventory : MonoBehaviour
                 continue;
             }
 
-            CItem item = newItems.Count == 0
-                ? sample
-                : TryMakeItem(id);
+            CItem item = newItems.Count == 0 ? sample : TryMakeItem(id);
 
             if (item == null)
             {
                 return 0;
             }
 
-            int count = stackable
-                ? Mathf.Min(_maxItemQuantity, remaining)
-                : 1;
+            int count = stackable ? Mathf.Min(_maxItemQuantity, remaining) : 1;
 
             item.Quantity = count;
             newItems.Add(item);
@@ -208,8 +203,7 @@ public class CInventory : MonoBehaviour
                     continue;
                 }
 
-                int space = Mathf.Max(
-                    0, _maxItemQuantity - current.Quantity);
+                int space = Mathf.Max(0, _maxItemQuantity - current.Quantity);
 
                 int count = Mathf.Min(space, toAdd);
 
@@ -221,9 +215,7 @@ public class CInventory : MonoBehaviour
         // 가장 앞쪽 빈 슬롯부터 새 객체 배치
         int newItemIndex = 0;
 
-        for (int i = 0;
-             i < _items.Count && newItemIndex < newItems.Count;
-             i++)
+        for (int i = 0; i < _items.Count && newItemIndex < newItems.Count; i++)
         {
             if (_items[i] == null)
             {
@@ -260,9 +252,7 @@ public class CInventory : MonoBehaviour
 
     public bool TryDiscardItem(int slotIndex, int quantity = 1)
     {
-        if (!IsValidSlot(slotIndex) ||
-            quantity <= 0 ||
-            _player == null)
+        if (!IsValidSlot(slotIndex) || quantity <= 0 || _player == null)
         {
             return false;
         }
@@ -316,9 +306,7 @@ public class CInventory : MonoBehaviour
             return false;
         }
 
-        bool available = isBattle
-            ? item.AvailableInBattle()
-            : item.AvailableInLobby();
+        bool available = isBattle ? item.AvailableInBattle() : item.AvailableInLobby();
 
         if (!available)
         {
@@ -328,7 +316,7 @@ public class CInventory : MonoBehaviour
         CItemConsumableSO origin =
             item.OriginItem as CItemConsumableSO;
 
-        // 투척형은 별도 시스템이 준비될 때까지 사용하지 않음
+        // 투척형은 매니저 나오기 전까진 사용 안함
         if (origin == null || origin.IsThrow)
         {
             return false;
@@ -341,7 +329,7 @@ public class CInventory : MonoBehaviour
 
         item.OnUse(_player);
 
-        // OnUse()는 수량을 줄이지 않으므로 직접 차감
+        // OnUse()는 수량을 줄이지 않으니 차감
         item.Quantity -= 1;
 
         if (item.Quantity == 0)
@@ -349,8 +337,7 @@ public class CInventory : MonoBehaviour
             _items[slotIndex] = null;
         }
 
-        _cooldownEndTimes[item.Id] =
-            Time.time + ConsumableCooltime;
+        _cooldownEndTimes[item.Id] = Time.time + ConsumableCooltime;
 
         OnInventoryChanged?.Invoke();
         return true;
@@ -358,8 +345,7 @@ public class CInventory : MonoBehaviour
 
     public float GetCooldownRemaining(int itemId)
     {
-        if (!_cooldownEndTimes.TryGetValue(
-                itemId, out float endTime))
+        if (!_cooldownEndTimes.TryGetValue(itemId, out float endTime))
         {
             return 0f;
         }
@@ -384,49 +370,35 @@ public class CInventory : MonoBehaviour
             return null;
         }
 
-        _player.Equipment.TryGetValue(
-            slot, out CItemEquipment equipment);
+        _player.Equipment.TryGetValue(slot, out CItemEquipment equipment);
 
         return equipment;
     }
 
     public bool TryEquipItem(int bagSlotIndex, bool isBattle)
     {
-        if (!IsValidSlot(bagSlotIndex) ||
-            _player == null ||
-            _player.Equipment == null)
+        if (!IsValidSlot(bagSlotIndex) || _player == null || _player.Equipment == null)
         {
             return false;
         }
 
-        CItemEquipment incoming =
-            _items[bagSlotIndex] as CItemEquipment;
+        CItemEquipment incoming = _items[bagSlotIndex] as CItemEquipment;
 
         if (incoming == null || incoming.IsEquip)
         {
             return false;
         }
 
-        bool available = isBattle
-            ? incoming.AvailableInBattle()
-            : incoming.AvailableInLobby();
+        bool available = isBattle ? incoming.AvailableInBattle() : incoming.AvailableInLobby();
 
         if (!available)
         {
             return false;
         }
 
-        Dictionary<EEquipmentSlot, CItemEquipment> equipped =
-            _player.Equipment;
+        Dictionary<EEquipmentSlot, CItemEquipment> equipped = _player.Equipment;
 
-        // 다른 슬롯의 null 값으로 재계산이 실패하지 않게 확인
-        if (!CanResyncEquipment(incoming.Slot))
-        {
-            return false;
-        }
-
-        bool hadKey = equipped.TryGetValue(
-            incoming.Slot, out CItemEquipment previous);
+        bool hadKey = equipped.TryGetValue(incoming.Slot, out CItemEquipment previous);
 
         if (previous == null)
         {
@@ -484,9 +456,7 @@ public class CInventory : MonoBehaviour
 
     public bool TryUnequipItem(EEquipmentSlot slot, bool isBattle)
     {
-        if (isBattle ||
-            _player == null ||
-            _player.Equipment == null)
+        if (isBattle || _player == null || _player.Equipment == null)
         {
             return false;
         }
@@ -499,14 +469,7 @@ public class CInventory : MonoBehaviour
         }
 
         if (!_player.Equipment.TryGetValue(
-                slot, out CItemEquipment equipment) ||
-            equipment == null ||
-            !equipment.IsEquip)
-        {
-            return false;
-        }
-
-        if (!CanResyncEquipment(slot))
+                slot, out CItemEquipment equipment) || equipment == null || !equipment.IsEquip)
         {
             return false;
         }
@@ -516,29 +479,10 @@ public class CInventory : MonoBehaviour
             return false;
         }
 
-        // 기존 재계산 함수가 null 장비를 읽지 않도록 키 제거
-        _player.Equipment.Remove(slot);
         _items[emptySlot] = equipment;
 
         _player.EquipmentResync();
         OnInventoryChanged?.Invoke();
-        return true;
-    }
-
-    // 조작할 부위를 제외한 장비에 null 값이 있는지 확인
-    private bool CanResyncEquipment(EEquipmentSlot changingSlot)
-    {
-        foreach (var entry in _player.Equipment)
-        {
-            if (entry.Key != changingSlot && entry.Value == null)
-            {
-                CLogger.Error(
-                    "CInventory: 다른 장비 슬롯에 null 값이 남아 있습니다.");
-
-                return false;
-            }
-        }
-
         return true;
     }
 
@@ -633,8 +577,7 @@ public class CInventory : MonoBehaviour
         {
             CItem item = CItem.MakeItem(id);
 
-            if (item is CItemConsumable ||
-                item is CItemEquipment)
+            if (item is CItemConsumable || item is CItemEquipment)
             {
                 return item;
             }
