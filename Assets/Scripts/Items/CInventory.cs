@@ -305,15 +305,7 @@ public class CInventory : MonoBehaviour
             return false;
         }
 
-        bool available = isBattle ? item.AvailableInBattle() : item.AvailableInLobby();
-
-        if (!available)
-        {
-            return false;
-        }
-
-        CItemConsumableSO origin =
-            item.OriginItem as CItemConsumableSO;
+        CItemConsumableSO origin = item.OriginItem as CItemConsumableSO;
 
         // 투척형은 매니저 나오기 전까진 사용 안함
         if (origin == null || origin.IsThrow)
