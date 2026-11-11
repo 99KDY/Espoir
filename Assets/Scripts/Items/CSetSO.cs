@@ -77,6 +77,12 @@ public class CSetSO : ScriptableObject
         }
         return;
     }
+
+    public static bool Contains(int id)
+    {
+        return _idToSet.ContainsKey(id);
+    }
+
     public static CSetSO Find(int id)
     {
         return _idToSet[id];
