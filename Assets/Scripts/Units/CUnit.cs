@@ -227,6 +227,12 @@ public abstract class CUnit : MonoBehaviour
         }
     }
 
+    public void AddConsumableEffect(GameObject effectPrefab, float duration)
+    {
+        GameObject target = Instantiate(effectPrefab, _statusEffectAnchor, false);
+        Destroy(target, duration);
+    }
+
     private void EnsureStatusEffect(IReadOnlyList<CStatus> status, HashSet<int> Ids)
     {
         if (status == null || status.Count == 0) return;

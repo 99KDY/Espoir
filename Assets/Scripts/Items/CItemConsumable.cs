@@ -25,9 +25,11 @@ public class CConsumableAction
 
 public class CItemConsumable : CItem
 {
-    List<Action<CUnit>> _onUse;
-    List<CStatus> _itemStatus;
-    bool _isThrow = false;
+    private List<Action<CUnit>> _onUse;
+    private List<CStatus> _itemStatus;
+    private GameObject _effectPrefab;
+    private float _effectDuration;
+    private bool _isThrow = false;
 
     public override bool AvailableInLobby() => false;
     public override bool AvailableInBattle() => true;
@@ -37,6 +39,8 @@ public class CItemConsumable : CItem
         get { return _quantity; }
         set { _quantity = value; }
     }
+    public GameObject EffectPrefab => _effectPrefab;
+    public float EffectDuration => _effectDuration;
 
     public CItemConsumable(CItemConsumableSO targetItem)
     {
@@ -45,6 +49,10 @@ public class CItemConsumable : CItem
 
     public void OnUse(CUnit unit)
     {
+        if (_effectPrefab != null)
+        {
+            unit.AddConsumableEffect(_effectPrefab, _effectDuration);
+        }
         if (_onUse != null && _onUse.Count != 0)
         {
             for (int i = 0; i < _onUse.Count; i++)
@@ -81,6 +89,8 @@ public class CItemConsumable : CItem
             this._rarity = targetConsumable.Rarity;
             this._isThrow = targetConsumable.IsThrow;
             this._cost = targetConsumable.Cost;
+            this._effectPrefab = targetConsumable.EffectPrefab;
+            this._effectDuration = targetConsumable.EffectDuration;
 
             _onUse = new List<Action<CUnit>>();
             _itemStatus = new List<CStatus>();
