@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: Set2-1
   m_EditorClassIdentifier: 
   _id: 216
-  _name: "\uBC29\uB791\uC790\uC758 \uD314\uCC0C(\uC720\uB2C8\uD06C)"
+  _name: "<color=#FFD16B>\ubc29\ub791\uc790\uc758 \ud314\ucc0c(U)</color>"
   _rarity: 3
   _itemIcon: {fileID: 453043098, guid: 801be1b47c317df4da6019d5de71a7c1, type: 3}
-  _description: 
+  _description: "<i>\ubaa8\ub2e5\ubd88\uc744 \ub044\uace0\ub3c4 \ubc1c\uac78\uc74c\uc740 \uba4e\uc9c0 \uc54a\uc558\ub2e4.</i>\nHP +30, ATK +4, DEF +8\n\uc138\ud2b8 \ud6a8\uacfc \ubc29\ub791\uc790\uc758 \ubc1c\uac78\uc74c\n(2) \uc774\ub3d9\uc18d\ub3c4 +10%\n(3) \uce58\uba85\ud0c0\uc728 +25%p\n(4) \uc801\uc911\ud558\uc9c0 \uc54a\uc740 2\ucd08\ub9c8\ub2e4 \ub2e4\uc74c \uc801\uc911 \ud53c\ud574 +10%(\ucd5c\ub300 +50%, \uc801\uc911 \uc2dc \ucd08\uae30\ud654)"
   _slot: 2
   _setNumber: 201
   _action:

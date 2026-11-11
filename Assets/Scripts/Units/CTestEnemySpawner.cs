@@ -5,6 +5,7 @@ using UnityEngine;
 public class CTestEnemySpawner : MonoBehaviour
 {
     [SerializeField] private List<GameObject> _targetEnemy;
+    [SerializeField] private int _dropStage = 0;
     [SerializeField] private float _spawnRadius = 3.0f;
     [SerializeField] private float _minDistance = 1.0f;
     [SerializeField] private int _maxCount = 5;
@@ -75,6 +76,7 @@ public class CTestEnemySpawner : MonoBehaviour
         }
 
         GameObject target = _targetEnemy[Random.Range(0, _targetEnemy.Count)];
+        if (target.TryGetComponent<CEnemy>(out CEnemy targetScript)) targetScript.DropStage = _dropStage;
         Quaternion targetRot = Quaternion.Euler
             (
                 0f,

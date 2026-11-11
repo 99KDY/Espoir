@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.EventSystems;
@@ -19,7 +19,7 @@ public class CInventoryUI : MonoBehaviour
     [SerializeField] private Transform _quickSlotContent;
     [SerializeField] private Button _moveButton;
     [SerializeField] private Button _discardButton;
-    // ÇöÀç ÀüÅõ ¿©ºÎ. ³ªÁß¿¡ ½ÇÁ¦ °ÔÀÓ »óÅÂ¿Í ¿¬°á.
+    // í˜„ì¬ ì „íˆ¬ ì—¬ë¶€. ë‚˜ì¤‘ì— ì‹¤ì œ ê²Œì„ ìƒíƒœì™€ ì—°ê²°.
     [SerializeField] private bool _isBattle;
     [SerializeField] private Image _necklaceIcon;
     [SerializeField] private Image _earringIcon;
@@ -35,7 +35,7 @@ public class CInventoryUI : MonoBehaviour
     private TMP_Text[] _quickSlotQuantityTexts;
     private Sprite[] _quickSlotSavedIcons;
 
-    private void Update()// ÀÎº¥Åä¸® ¿©´Â Å° IÅ°
+    private void Update()// ì¸ë²¤í† ë¦¬ ì—¬ëŠ” í‚¤ Ií‚¤
     {
         if (Input.GetKeyUp(KeyCode.I))
         {
@@ -44,12 +44,22 @@ public class CInventoryUI : MonoBehaviour
                 _InventoryPanel.SetActive(false);
                 _itemTooltip.SetActive(false);
                 _itemContextMenu.SetActive(false);
+                CGameManager.Instance.SetGameState(EGameState.Idle);
             }
-            else if (_inventory.CanOpenInventory)
+            else if (_inventory.CanOpenInventory && CGameManager.Instance.GameState == EGameState.Idle)
             {
                 _InventoryPanel.SetActive(true);
                 RefresgEqipment();
+                CGameManager.Instance.SetGameState(EGameState.UI);
             }
+        }
+
+        if (_InventoryPanel.activeSelf && CGameManager.Instance.BattleState != EBattleState.None)
+        {
+            _InventoryPanel.SetActive(false);
+            _itemTooltip.SetActive(false);
+            _itemContextMenu.SetActive(false);
+            CGameManager.Instance.SetGameState(EGameState.Idle);
         }
 
         if (_itemContextMenu.activeSelf && Input.GetMouseButtonDown(0))
@@ -190,7 +200,7 @@ public class CInventoryUI : MonoBehaviour
         {
             CItem item = _inventory.GetItem(i);
             
-            if (i == 0) Debug.Log($"Ã¹ ½½·Ô ¾ÆÀÌÅÛ: {item?.Name ?? "¾øÀ½"}");
+            if (i == 0) Debug.Log($"ì²« ìŠ¬ë¡¯ ì•„ì´í…œ: {item?.Name ?? "ì—†ìŒ"}");
 
             if (item == null)
             {
@@ -222,6 +232,9 @@ public class CInventoryUI : MonoBehaviour
     private void Start()
     {
         RefreshInventory();
+        _InventoryPanel.SetActive(false);
+        _itemTooltip.SetActive(false);
+        _itemContextMenu.SetActive(false);
     }
 
     private void OnEnable()
@@ -293,7 +306,7 @@ public class CInventoryUI : MonoBehaviour
 
         if (!success)
         {
-            Debug.LogWarning("¾ÆÀÌÅÛ »ç¿ë ¶Ç´Â ÀåÂø¿¡ ½ÇÆĞÇß½À´Ï´Ù.");
+            Debug.LogWarning("ì•„ì´í…œ ì‚¬ìš© ë˜ëŠ” ì¥ì°©ì— ì‹¤íŒ¨í–ˆìŠµë‹ˆë‹¤.");
         }
 
         CloseContextMenu();
@@ -321,7 +334,7 @@ public class CInventoryUI : MonoBehaviour
 
         if (!success)
         {
-            Debug.LogWarning("¾ÆÀÌÅÛ ÀÌµ¿ ½ÇÆĞ");
+            Debug.LogWarning("ì•„ì´í…œ ì´ë™ ì‹¤íŒ¨");
         }
 
         _isMoving = false;
@@ -335,7 +348,7 @@ public class CInventoryUI : MonoBehaviour
 
         if (!success)
         {
-            Debug.LogWarning("¾ÆÀÌÅÛ ¹ö¸®±â ½ÇÆĞ");
+            Debug.LogWarning("ì•„ì´í…œ ë²„ë¦¬ê¸° ì‹¤íŒ¨");
         }
 
         CloseContextMenu();
@@ -361,7 +374,7 @@ public class CInventoryUI : MonoBehaviour
 
             if (success)
             {
-                Debug.Log($"{quickIndex + 1}¹ø Äü½½·Ô µî·Ï");
+                Debug.Log($"{quickIndex + 1}ë²ˆ í€µìŠ¬ë¡¯ ë“±ë¡");
             }
         }
 

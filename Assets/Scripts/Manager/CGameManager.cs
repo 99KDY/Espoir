@@ -153,10 +153,10 @@ public class CGameManager : MonoBehaviour
         {
             if (_gameState == EGameState.Idle)
             {
-                SetGameState(EGameState.UI);
+                SetGameState(EGameState.Setting);
                 SetMenuState(ESettingState.BaseMenu);
             }
-            else if (_gameState == EGameState.UI)
+            else if (_gameState == EGameState.Setting)
             {
                 SetGameState(EGameState.Idle);
                 SetMenuState(ESettingState.None);
@@ -217,12 +217,12 @@ public class CGameManager : MonoBehaviour
             case EGameState.Story:
                 break;
             case EGameState.UI:
+                break;
+            case EGameState.Setting:
                 _menuBackground.alpha = 0;
                 _menuBackground.interactable = false;
                 _menuBackground.blocksRaycasts = false;
                 SetPaused(false);
-                break;
-            case EGameState.Setting:
                 break;
             case EGameState.ForcePause:
                 _forcePauseSet.SetActive(false);
@@ -237,12 +237,12 @@ public class CGameManager : MonoBehaviour
             case EGameState.Story:
                 break;
             case EGameState.UI:
+                break;
+            case EGameState.Setting:
                 _menuBackground.alpha = 1;
                 _menuBackground.interactable = true;
                 _menuBackground.blocksRaycasts = true;
                 SetPaused(true);
-                break;
-            case EGameState.Setting:
                 break;
             case EGameState.ForcePause:
                 _forcePauseSet.SetActive(true);
