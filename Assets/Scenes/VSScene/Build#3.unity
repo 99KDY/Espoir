@@ -411,7 +411,39 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _targetEnemy:
   - {fileID: 5445629871151430336, guid: 67776269c8f1439478910e9f43f235ba, type: 3}
-  _dropStage: 1
+  _drops:
+  - stage: 1
+    isEquipment: 0
+    rarity: 0
+    chance: 0.125
+  - stage: 1
+    isEquipment: 0
+    rarity: 1
+    chance: 0.125
+  - stage: 1
+    isEquipment: 0
+    rarity: 2
+    chance: 0.125
+  - stage: 1
+    isEquipment: 0
+    rarity: 3
+    chance: 0.125
+  - stage: 1
+    isEquipment: 1
+    rarity: 0
+    chance: 0.125
+  - stage: 1
+    isEquipment: 1
+    rarity: 1
+    chance: 0.125
+  - stage: 1
+    isEquipment: 1
+    rarity: 2
+    chance: 0.125
+  - stage: 1
+    isEquipment: 1
+    rarity: 3
+    chance: 0.125
   _spawnRadius: 3
   _minDistance: 1
   _maxCount: 5
@@ -5082,7 +5114,7 @@ MonoBehaviour:
   _statusEffectAnchor: {fileID: 0}
   _radius: 1
   _targetStatSO: {fileID: 0}
-  _dropStage: 1
+  _drops: []
 --- !u!136 &1023618043
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -5695,7 +5727,39 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _targetEnemy:
   - {fileID: 5445629871151430336, guid: 67776269c8f1439478910e9f43f235ba, type: 3}
-  _dropStage: 1
+  _drops:
+  - stage: 1
+    isEquipment: 0
+    rarity: 0
+    chance: 0.125
+  - stage: 1
+    isEquipment: 0
+    rarity: 1
+    chance: 0.125
+  - stage: 1
+    isEquipment: 0
+    rarity: 2
+    chance: 0.125
+  - stage: 1
+    isEquipment: 0
+    rarity: 3
+    chance: 0.125
+  - stage: 1
+    isEquipment: 1
+    rarity: 0
+    chance: 0.125
+  - stage: 1
+    isEquipment: 1
+    rarity: 1
+    chance: 0.125
+  - stage: 1
+    isEquipment: 1
+    rarity: 2
+    chance: 0.125
+  - stage: 1
+    isEquipment: 1
+    rarity: 3
+    chance: 0.125
   _spawnRadius: 2
   _minDistance: 1
   _maxCount: 5
