@@ -14,8 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: 402
   _name: "\uACE0\uAE09 \uD3EC\uC158"
+  _rarity: 1
   _itemIcon: {fileID: 2101685304, guid: 3c38a022703b20145b12d05f01f10e62, type: 3}
   _description: "\uCCB4\uB825\uC744 30% \uD68C\uBCF5\uD55C\uB2E4."
+  _cost: 0
   _action:
   - effect: 3
     value: 0.3

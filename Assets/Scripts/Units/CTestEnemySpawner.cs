@@ -1,11 +1,12 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class CTestEnemySpawner : MonoBehaviour
 {
     [SerializeField] private List<GameObject> _targetEnemy;
-    [SerializeField] private int _dropStage = 0;
+    [SerializeField] private List<SDropTable> _drops;
     [SerializeField] private float _spawnRadius = 3.0f;
     [SerializeField] private float _minDistance = 1.0f;
     [SerializeField] private int _maxCount = 5;
@@ -75,12 +76,12 @@ public class CTestEnemySpawner : MonoBehaviour
             return;
         }
 
-        GameObject target = _targetEnemy[Random.Range(0, _targetEnemy.Count)];
-        if (target.TryGetComponent<CEnemy>(out CEnemy targetScript)) targetScript.DropStage = _dropStage;
+        GameObject target = _targetEnemy[UnityEngine.Random.Range(0, _targetEnemy.Count)];
+        if (target.TryGetComponent<CEnemy>(out CEnemy targetScript)) targetScript.Drops = _drops;
         Quaternion targetRot = Quaternion.Euler
             (
                 0f,
-                Random.Range(0f, 360f),
+                UnityEngine.Random.Range(0f, 360f),
                 0f
             );
 
@@ -93,7 +94,7 @@ public class CTestEnemySpawner : MonoBehaviour
         float minDistanceSqr = _minDistance * _minDistance;
         for (int i = 0; i < 30; i++)
         {
-            Vector2 offset = Random.insideUnitCircle * _spawnRadius;
+            Vector2 offset = UnityEngine.Random.insideUnitCircle * _spawnRadius;
             Vector3 targetPos = transform.position + new Vector3
                 (
                     offset.x,

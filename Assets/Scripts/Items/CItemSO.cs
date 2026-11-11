@@ -1,7 +1,26 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
+public struct SDropTable
+{
+    [Tooltip("스테이지 정보 (소모품은 무시)")]
+    public int stage;
+    [Tooltip("장비유무 (체크시 장비, 해제시 소모품)")]
+    public bool isEquipment;
+    [Tooltip("레어도")]
+    public EItemRarity rarity;
+    [Tooltip("확률")]
+    public float chance;
 
+    public SDropTable(int stage, bool isEquipment, EItemRarity rarity, float chance)
+    {
+        this.stage = stage;
+        this.isEquipment = isEquipment;
+        this.rarity = rarity;
+        this.chance = chance;
+    }
+}
 public class CItemSO : ScriptableObject
 {
     [Tooltip("아이템 id")]
@@ -24,9 +43,10 @@ public class CItemSO : ScriptableObject
     //Debug
     private static List<int> _equipmentPools = new List<int>();
     private static List<int> _consumablePools = new List<int>();
-    private static Dictionary<int, List<int>> _stagePools = new Dictionary<int, List<int>>();
-    private static Dictionary<EItemRarity, List<int>> _rarityPools = new Dictionary<EItemRarity, List<int>>();
-    private static Dictionary<(int stage, EItemRarity rarity), List<int>> _stageRarityPools = new Dictionary<(int stage, EItemRarity rarity), List<int>>();
+    private static Dictionary<int, List<int>> _stageEquipmentPools = new Dictionary<int, List<int>>();
+    private static Dictionary<EItemRarity, List<int>> _rarityEquipmentPools = new Dictionary<EItemRarity, List<int>>();
+    private static Dictionary<(int stage, EItemRarity rarity), List<int>> _stageRarityEquipmentPools = new Dictionary<(int stage, EItemRarity rarity), List<int>>();
+    private static Dictionary<EItemRarity, List<int>> _rarityConsumablePools = new Dictionary<EItemRarity, List<int>>();
 
     public static bool IsBuilded => _isBuilded;
 
@@ -48,9 +68,10 @@ public class CItemSO : ScriptableObject
         _stringToItem.Clear();
         _equipmentPools.Clear();
         _consumablePools.Clear();
-        _stagePools.Clear();
-        _rarityPools.Clear();
-        _stageRarityPools.Clear();
+        _stageEquipmentPools.Clear();
+        _rarityEquipmentPools.Clear();
+        _stageRarityEquipmentPools.Clear();
+        _rarityConsumablePools.Clear();
         CItemSO[] targetItem = Resources.LoadAll<CItemSO>("ItemSO");
         if (targetItem == null || targetItem.Length == 0)
         {
@@ -72,26 +93,34 @@ public class CItemSO : ScriptableObject
                 if (targetItem[i] is CItemEquipmentSO)
                 {
                     _equipmentPools.Add(targetItem[i]._id);
-                    if (!_stagePools.ContainsKey(targetItem[i]._id / 100))
+                    if (!_stageEquipmentPools.ContainsKey(targetItem[i]._id / 100))
                     {
-                        _stagePools.Add(targetItem[i]._id / 100, new List<int>());
+                        _stageEquipmentPools.Add(targetItem[i]._id / 100, new List<int>());
                     }
-                    _stagePools[targetItem[i]._id / 100].Add(targetItem[i]._id);
-                    if (!_rarityPools.ContainsKey(targetItem[i]._rarity))
+                    _stageEquipmentPools[targetItem[i]._id / 100].Add(targetItem[i]._id);
+                    if (!_rarityEquipmentPools.ContainsKey(targetItem[i]._rarity))
                     {
-                        _rarityPools.Add(targetItem[i]._rarity, new List<int>());
+                        _rarityEquipmentPools.Add(targetItem[i]._rarity, new List<int>());
                     }
-                    _rarityPools[targetItem[i]._rarity].Add(targetItem[i]._id);
-                    if (!_stageRarityPools.ContainsKey((targetItem[i]._id / 100, targetItem[i]._rarity)))
+                    _rarityEquipmentPools[targetItem[i]._rarity].Add(targetItem[i]._id);
+                    if (!_stageRarityEquipmentPools.ContainsKey((targetItem[i]._id / 100, targetItem[i]._rarity)))
                     {
-                        _stageRarityPools.Add((targetItem[i]._id / 100, targetItem[i]._rarity), new List<int>());
+                        _stageRarityEquipmentPools.Add((targetItem[i]._id / 100, targetItem[i]._rarity), new List<int>());
                     }
-                    _stageRarityPools[(targetItem[i]._id / 100, targetItem[i]._rarity)].Add(targetItem[i]._id);
+                    _stageRarityEquipmentPools[(targetItem[i]._id / 100, targetItem[i]._rarity)].Add(targetItem[i]._id);
                     
                 }
                 else if (targetItem[i] is CItemConsumableSO targetConsumable)
                 {
-                    if (!targetConsumable.IsThrow) _consumablePools.Add(targetItem[i]._id);
+                    if (!targetConsumable.IsThrow)
+                    {
+                        _consumablePools.Add(targetItem[i]._id);
+                        if (!_rarityConsumablePools.ContainsKey(targetItem[i]._rarity))
+                        {
+                            _rarityConsumablePools.Add(targetItem[i]._rarity, new List<int>());
+                        }
+                        _rarityConsumablePools[targetItem[i]._rarity].Add(targetItem[i]._id);
+                    }
                 }
                 #endregion
             }
@@ -127,6 +156,16 @@ public class CItemSO : ScriptableObject
         }
         return Find(_consumablePools[Random.Range(0, _consumablePools.Count)]);
     }
+    public static CItemSO MakeRandomConsumable(EItemRarity rarity)
+    {
+        if (!_isBuilded) Build();
+        if (!_rarityConsumablePools.ContainsKey((rarity)))
+        {
+            CLogger.Warn($"CItemSO : 해당 희귀도({rarity})의 소모품이 존재하지 않습니다.");
+            return null;
+        }
+        return Find(_rarityConsumablePools[rarity][Random.Range(0, _rarityConsumablePools[rarity].Count)]);
+    }
 
     public static CItemSO MakeRandomEquipment(int stage, EItemRarity rarity)
     {
@@ -135,12 +174,12 @@ public class CItemSO : ScriptableObject
         {
             return MakeRandomEquipment(rarity);
         }
-        if (!_stageRarityPools.ContainsKey((stage, rarity)))
+        if (!_stageRarityEquipmentPools.ContainsKey((stage, rarity)))
         {
             CLogger.Warn($"CItemSO : 해당 스테이지({stage})와 희귀도({rarity})의 아이템이 존재하지 않습니다.");
             return null;
         }
-        return Find(_stageRarityPools[(stage, rarity)][Random.Range(0, _stageRarityPools[(stage, rarity)].Count)]);
+        return Find(_stageRarityEquipmentPools[(stage, rarity)][Random.Range(0, _stageRarityEquipmentPools[(stage, rarity)].Count)]);
     }
 
     public static CItemSO MakeRandomEquipment(int stage)
@@ -150,23 +189,23 @@ public class CItemSO : ScriptableObject
         {
             return Find(_equipmentPools[Random.Range(0, _equipmentPools.Count)]);
         }
-        if (!_stagePools.ContainsKey(stage))
+        if (!_stageEquipmentPools.ContainsKey(stage))
         {
             CLogger.Warn($"CItemSO : 해당 스테이지({stage})의 아이템이 존재하지 않습니다.");
             return null;
         }
-        return Find(_stagePools[stage][Random.Range(0, _stagePools[stage].Count)]);
+        return Find(_stageEquipmentPools[stage][Random.Range(0, _stageEquipmentPools[stage].Count)]);
     }
 
     public static CItemSO MakeRandomEquipment(EItemRarity rarity)
     {
         if (!_isBuilded) Build();
-        if (!_rarityPools.ContainsKey(rarity))
+        if (!_rarityEquipmentPools.ContainsKey(rarity))
         {
             CLogger.Warn($"CItemSO : 해당 희귀도({rarity})의 아이템이 존재하지 않습니다.");
             return null;
         }
-        return Find(_rarityPools[rarity][Random.Range(0, _rarityPools[rarity].Count)]);
+        return Find(_rarityEquipmentPools[rarity][Random.Range(0, _rarityEquipmentPools[rarity].Count)]);
     }
 
     public static CItemSO MakeRandomEquipment()
@@ -178,5 +217,35 @@ public class CItemSO : ScriptableObject
             return null;
         }
         return Find(_equipmentPools[Random.Range(0, _equipmentPools.Count)]);
+    }
+    public static bool TryMakeDropItem(List<SDropTable> dropTable, out CItemSO targetItem)
+    {
+        targetItem = null;
+        if (!_isBuilded) Build();
+        if (dropTable == null || dropTable.Count == 0) return false;
+
+        float targetChance = UnityEngine.Random.Range(0f, 1f);
+        foreach(SDropTable target in dropTable)
+        {
+            if (targetChance > target.chance)
+            {
+                targetChance -= target.chance;
+                continue;
+            }
+            if (target.isEquipment)
+            {
+                targetItem = MakeRandomEquipment(target.stage, target.rarity);
+                if (targetItem == null) return false;
+                else return true;
+            }
+            else
+            {
+                targetItem = MakeRandomConsumable(target.rarity);
+                if (targetItem == null) return false;
+                else return true;
+            }
+        }
+        
+        return false;
     }
 }
