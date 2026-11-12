@@ -186,7 +186,7 @@ public class CSlothBoss : CEnemy
         _onAttack = true;
 
         normalAtk = Random.Range(0, 4);
-
+        
         CLogger.Log($"Normal Attack Pattern : {normalAtk}");
 
         switch (normalAtk)
@@ -225,8 +225,6 @@ public class CSlothBoss : CEnemy
         }
 
         subAtk = Random.Range(1, 4);
-
-        subAtk = 2;
 
         CLogger.Log($"Sub Attack Pattern : {subAtk}");
         switch (subAtk)
@@ -423,12 +421,22 @@ public class CSlothBoss : CEnemy
 
             Vector3 damageDir = player.transform.position - this.transform.position;
 
+            damageDir.y = 0f;
 
-            SDamageInfo damagePlayer = new SDamageInfo(0.2f, ERatioSwitch.ByMax);
-           
-            player.OnHit(this, damagePlayer);
+            float damageAngle = Vector3.SignedAngle(this.transform.forward, damageDir, Vector3.up);
 
-            CLogger.Log($"{player.name}의 현재 체력 : {player.HpCurrent}");
+            if(damageAngle >= 180f && damageAngle <=360f)
+            {
+
+                SDamageInfo damagePlayer = new SDamageInfo(0.2f, ERatioSwitch.ByMax);
+
+                player.OnHit(this, damagePlayer);
+
+                CLogger.Log($"{player.name}의 현재 체력 : {player.HpCurrent}");
+
+            }
+            
+
         }
 
     }
