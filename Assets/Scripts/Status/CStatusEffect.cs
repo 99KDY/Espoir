@@ -176,6 +176,9 @@ public partial class CStatus
                             unit.RemoveStatus(this);
                         });
                         break;
+                    case EStatusAction.Invincible:
+                        _trigger |= EStatusTrigger.IsInvincible;
+                        break;
                 }
             }
         }        

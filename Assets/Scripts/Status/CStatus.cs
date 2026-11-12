@@ -67,7 +67,8 @@ public enum EStatusTrigger
     OnBattleStart = 1 << 8, // 전투가 끝날 때 적용되는 효과가 있는 경우 (그냥 상태이상 해제용)
     OnBattleEnd = 1 << 9, // 전투가 끝날 때 적용되는 효과가 있는 경우 (그냥 상태이상 해제용)
     // 효과 플래그
-    IsStun = 1 << 16    // 기절 계열
+    IsStun = 1 << 16,    // 기절 계열
+    IsInvincible = 1 << 17, // 무적 계열
 }
 
 public enum EStatusAction
@@ -101,6 +102,8 @@ public enum EStatusAction
     MultiplyAttackSpeed,
     [InspectorName("전투 종료시 제거")]
     RemoveWhenBattleOver,
+    [InspectorName("무적상태")]
+    Invincible,
 }
 
 [Serializable]
