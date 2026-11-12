@@ -13,6 +13,7 @@ public class CTestEnemySpawner : MonoBehaviour
     [SerializeField] private float _regenInterval = 2f;
 
     private float _timer = 0;
+    private bool _isBattleActive;
 
     private void Awake()
     {
@@ -33,10 +34,6 @@ public class CTestEnemySpawner : MonoBehaviour
             }
         }
     }
-    void Start()
-    {
-        
-    }
 
     void Update()
     {
@@ -53,6 +50,11 @@ public class CTestEnemySpawner : MonoBehaviour
             _timer = _timer - _regenInterval;
             SpawnEnemy();
         }
+    }
+
+    private void LateUpdate()
+    {
+        SetBattleActive(HasChasingEnemy());
     }
 
     private bool ResetWhenMax()
@@ -132,5 +134,34 @@ public class CTestEnemySpawner : MonoBehaviour
 
         spawnPos = Vector3.zero;
         return false;
+    }
+
+    private bool HasChasingEnemy()
+    {
+        for (int i = 0; i < transform.childCount; i++)
+        {
+            Transform child = transform.GetChild(i);
+
+            if (child.TryGetComponent<CEnemy>(out CEnemy enemy) && enemy.isActiveAndEnabled
+                && enemy.HpCurrent > 0f && enemy.IsChasingPlayer)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+    private void SetBattleActive(bool isActive)
+    {
+        if (_isBattleActive == isActive) return;
+        if (CGameManager.Instance == null) return;
+
+        _isBattleActive = isActive;
+        CGameManager.Instance.InvokeSpawnerActivation(isActive);
+    }
+
+    private void OnDisable()
+    {
+        SetBattleActive(false);
     }
 }

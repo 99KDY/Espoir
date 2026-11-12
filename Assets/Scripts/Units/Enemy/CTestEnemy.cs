@@ -54,8 +54,6 @@ public class CTestEnemy : CEnemy
     private Vector3 _movePos;
     private Rigidbody _rb;
 
-
-
     #region Animator
     [SerializeField] private Animator _animator;
     
@@ -99,6 +97,7 @@ public class CTestEnemy : CEnemy
         base.Update();
         if (_hpCurrent <= 0)
         {
+            _isChasingPlayer = false;
             _isDie = true;
             _animator.SetBool(_hashDie, true);
             Destroy(this.gameObject, 3f);
@@ -271,7 +270,8 @@ public class CTestEnemy : CEnemy
         if (_OnTarget == true)
         {
             // CLogger.Log("타겟이 들어왔다.");
-            
+            _isChasingPlayer = true;
+
             _forgetTimer = 0.0f;
 
             _isReturn = false;
@@ -329,7 +329,7 @@ public class CTestEnemy : CEnemy
             else
             {
                 _isMove = false;
-
+                _isChasingPlayer = false;
                 CLogger.Log("원래 위치로");
                 Vector3 direction = _startPos - transform.position;
                 direction.y = 0f;

@@ -11,6 +11,8 @@ public class CEnemy : CUnit
     [SerializeField] private List<SDropTable> _drops;
 
     private bool _isDropped = false;
+    protected bool _isChasingPlayer = false;
+    public virtual bool IsChasingPlayer => _isChasingPlayer;
 
     public List<SDropTable> Drops
     {
