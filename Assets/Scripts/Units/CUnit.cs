@@ -102,12 +102,23 @@ public abstract class CUnit : MonoBehaviour
     {
         get
         {
-            bool temp = false;
             for(int i = 0; i < _status.Count; i++)
             {
-                if (_status[i].Trigger.HasFlag(EStatusTrigger.IsStun)) temp = true;
+                if (_status[i].Trigger.HasFlag(EStatusTrigger.IsStun)) return true;
             }
-            return temp;
+            return false;
+        }
+    }
+
+    public bool IsInvincible
+    {
+        get
+        {
+            for (int i = 0; i < _status.Count; i++)
+            {
+                if (_status[i].Trigger.HasFlag(EStatusTrigger.IsInvincible)) return true;
+            }
+            return false;
         }
     }
 
@@ -304,6 +315,12 @@ public abstract class CUnit : MonoBehaviour
     /// <param name="damage"></param>
     public virtual void OnHit(CUnit attacker, CUnit defender, SDamageInfo damage)
     {
+        if (defender.IsInvincible)
+        {
+            // 무적상태라는 메시지 띄우기
+            CLogger.Log($"{defender.gameObject.name} - 무적상태임");
+            return;
+        }
         float finalDamage = DamageCalculate(attacker, defender, damage, out bool isCritical);
         defender.GetDamage(finalDamage);
         if (_debugLog) CLogger.Log($"Enemy : 피해 {finalDamage} / 방어력 {defender.Defence}, 크리여부 {isCritical} ({attacker.CriticalRate * 100}% - {attacker.CriticalDamage * 100}%)");
