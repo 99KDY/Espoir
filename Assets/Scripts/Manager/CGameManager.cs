@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -30,6 +31,20 @@ public enum EBattleState
     BossBattle = 2,
 }
 
+[Flags]
+public enum EBossClear
+{
+    None = 0,
+    Invidia     = 1 << 0,
+    Avaritia    = 1 << 1,
+    Pigritia    = 1 << 2,
+    Gula        = 1 << 3,
+    Luxuria     = 1 << 4,
+    Ira         = 1 << 5,
+    Superbia    = 1 << 6,
+    Pradona     = 1 << 7,
+}
+
 public class CGameManager : MonoBehaviour
 {
     [SerializeField] private AudioMixer _audioMixer;
@@ -57,6 +72,7 @@ public class CGameManager : MonoBehaviour
     private EGameState _gameState;
     private EBattleState _battleState;
     private ESettingState _settingState;
+    private EBossClear _bossClearState;
     private bool _isInLobby = false;
     private bool _isPaused = false;
     private float _timeScaleBeforePause = 1f;
@@ -70,6 +86,7 @@ public class CGameManager : MonoBehaviour
 
     public EGameState GameState => _gameState;
     public EBattleState BattleState => _battleState;
+    public EBossClear BossClearState => _bossClearState;
     public bool IsInLobby => _isInLobby;
     public bool IsPaused => _isPaused;
 
@@ -413,5 +430,19 @@ public class CGameManager : MonoBehaviour
         {
             _instance = null;
         }
+    }
+
+    public int GetAvailableStage()
+    {
+        int count = 0;
+        if (_bossClearState.HasFlag(EBossClear.Invidia)) count += 1;
+        if (_bossClearState.HasFlag(EBossClear.Pigritia)) count += 1;
+        if (_bossClearState.HasFlag(EBossClear.Luxuria)) count += 1;
+        return count;
+    }
+
+    public void SetBossCleared(EBossClear target)
+    {
+        _bossClearState |= target;
     }
 }
