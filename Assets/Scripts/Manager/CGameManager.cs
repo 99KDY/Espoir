@@ -66,6 +66,8 @@ public class CGameManager : MonoBehaviour
 
     private CPlayer _player;
 
+    private int _currentActiveSpawner = 0;
+
     public EGameState GameState => _gameState;
     public EBattleState BattleState => _battleState;
     public bool IsInLobby => _isInLobby;
@@ -88,13 +90,13 @@ public class CGameManager : MonoBehaviour
 
     void Start()
     {
-        _gameState = EGameState.Idle;
-        _battleState = EBattleState.None;
-        _settingState = ESettingState.None;
         CSoundManager.Instance.PlayBGM(EBackgroundSound.OasisOfGold);
         _gameShutdown.onClick.AddListener(() => OnGameShutdown());
         _screenChange.onClick.AddListener(() => OnGameResolutionChange());
         _player = FindFirstObjectByType<CPlayer>();
+        SetGameState(EGameState.Idle);
+        SetBattleState(EBattleState.None);
+        _settingState = ESettingState.None;
         _tempWidth = Screen.width;
         _tempHeight = Screen.height;
 
@@ -217,6 +219,7 @@ public class CGameManager : MonoBehaviour
             case EGameState.Story:
                 break;
             case EGameState.UI:
+                SetPaused(false);
                 break;
             case EGameState.Setting:
                 _menuBackground.alpha = 0;
@@ -237,6 +240,7 @@ public class CGameManager : MonoBehaviour
             case EGameState.Story:
                 break;
             case EGameState.UI:
+                SetPaused(true);
                 break;
             case EGameState.Setting:
                 _menuBackground.alpha = 1;
@@ -247,6 +251,35 @@ public class CGameManager : MonoBehaviour
             case EGameState.ForcePause:
                 _forcePauseSet.SetActive(true);
                 SetPaused(true);
+                break;
+        }
+    }
+
+    public void SetBattleState(EBattleState battleState)
+    {
+        switch (_battleState)
+        {
+            case EBattleState.None:
+                _player.RemoveStatus(27);
+                break;
+            case EBattleState.NormalBattle:
+                _player.InvokeOnBattleEnd(false);
+                break;
+            case EBattleState.BossBattle:
+                _player.InvokeOnBattleEnd(true);
+                break;
+        }
+        _battleState = battleState;
+        switch (_battleState)
+        {
+            case EBattleState.None:
+                _player.AddStatus(27);
+                break;
+            case EBattleState.NormalBattle:
+                _player.InvokeOnBattleStart(false);
+                break;
+            case EBattleState.BossBattle:
+                _player.InvokeOnBattleStart(true);
                 break;
         }
     }
@@ -345,6 +378,33 @@ public class CGameManager : MonoBehaviour
     private void SyncSoundBySlider(TMP_InputField input, Slider slider)
     {
         input.SetTextWithoutNotify(Mathf.RoundToInt(slider.value * 100f).ToString());
+    }
+
+    public void InvokeSpawnerActivation(bool isActive)
+    {
+        if (isActive)
+        {
+            if (_currentActiveSpawner == 0 && _battleState == EBattleState.None) SetBattleState(EBattleState.NormalBattle);
+            _currentActiveSpawner += 1;
+        }
+        else
+        {
+            _currentActiveSpawner -= 1;
+            if (_currentActiveSpawner == 0 && _battleState == EBattleState.NormalBattle) SetBattleState(EBattleState.None);
+        }
+    }
+
+    public void InvokeBossBattleActivation(bool isActive)
+    {
+        if (isActive)
+        {
+            SetBattleState(EBattleState.BossBattle);
+        }
+        else
+        {
+            if (_currentActiveSpawner != 0) SetBattleState(EBattleState.NormalBattle);
+            else SetBattleState(EBattleState.None);
+        }
     }
 
     private void OnDestroy()
