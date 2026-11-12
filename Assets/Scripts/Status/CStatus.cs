@@ -102,6 +102,8 @@ public enum EStatusAction
     MultiplyAttackSpeed,
     [InspectorName("전투 종료시 제거")]
     RemoveWhenBattleOver,
+    [InspectorName("무적상태")]
+    Invincible,
 }
 
 [Serializable]
