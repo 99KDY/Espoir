@@ -8,6 +8,7 @@ public class CPreviewPattern : MonoBehaviour
 {
 
     [Header("패턴 범위 설정")]
+    [SerializeField] private GameObject _player; 
     [SerializeField] private Vector3[] _polygonPoint;
     [SerializeField] private int[] _polygonTriangles;
 
@@ -26,6 +27,7 @@ public class CPreviewPattern : MonoBehaviour
 
     private Vector3 _startVec;
     private Vector3 _endVec;
+
 
     private Mesh _mesh;
 
@@ -300,7 +302,7 @@ public class CPreviewPattern : MonoBehaviour
         {
             float standardAngle = offsetAngle + (i * angleStep);
             float startDeg = standardAngle - (arcAngle * 0.5f);
-            float endDeg = startDeg + (arcAngle * 0.5f);
+            float endDeg = startDeg + arcAngle;
 
             List<Vector3> dividedPoints = DrawCustomArcPoints(radius, startDeg, endDeg, 100);
             
