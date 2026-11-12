@@ -33,6 +33,9 @@ public class CPlayerUI_Build : MonoBehaviour
     [SerializeField] private CSkillUI _skillR = null;
     [SerializeField] private CSkillUI _skillD = null;
     [SerializeField] private Image _crownRemaining = null;
+
+    [SerializeField] private TMP_Text _jealousStack = null;
+    [SerializeField] private List<GameObject> _crownStack = new List<GameObject>();
     #endregion
 
     #region 내부변수
@@ -71,7 +74,8 @@ public class CPlayerUI_Build : MonoBehaviour
 
         if(_hpText != null)
         {
-            _hpText.text = $"{((_player.HpCurrent <= 0f) ? 0 : _player.HpCurrent):F0} / {_player.HpMax:F0}";
+            _hpText.text = 
+                $"<size=50%>HP</size> {((_player.HpCurrent <= 0f) ? 0 : _player.HpCurrent):F0} <size=50%>/ {_player.HpMax:F0}</size>";
         }
 
         _hpFill.fillAmount = ratio;
@@ -89,7 +93,8 @@ public class CPlayerUI_Build : MonoBehaviour
 
         if (_mpText != null)
         {
-            _mpText.text = $"{((_player.CurrentMp<= 0f) ? 0 : _player.CurrentMp):F0} / {_player.MaxMp:F0}";
+            _mpText.text =
+                $"<size=50%>MP</size> {((_player.CurrentMp <= 0f) ? 0 : _player.CurrentMp):F0} <size=50%>/ {_player.MaxMp:F0}</size>";
         }
 
         _mpFill.fillAmount = ratio;
@@ -168,7 +173,14 @@ public class CPlayerUI_Build : MonoBehaviour
         float ratio;
         float remainCooldown;
 
-        //_skillQ.Refresh();
+        int jealousStack = _player.FindStatusStack(10);
+        int crownStack = _player.FindStatusStack(25);
+        _jealousStack.text = jealousStack == 0 ? "" : jealousStack.ToString();
+        for (int i = 0; i < _crownStack.Count; i++)
+        {
+            if (crownStack > i) _crownStack[i].SetActive(true);
+            else _crownStack[i].SetActive(false);
+        }
         _crownRemaining.fillAmount = _player.CrownWindowRemaining / 2;
         _player.GetSkillCooldown(ESkillType.Strike, out ratio, out remainCooldown);
         _skillQ.Refresh(ratio, remainCooldown, _player.GetSkillAvailable(ESkillType.Strike));
