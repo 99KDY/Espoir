@@ -75,7 +75,7 @@ public class CPlayerUI_Build : MonoBehaviour
         if(_hpText != null)
         {
             _hpText.text = 
-                $"<size=50%>HP</size> {((_player.HpCurrent <= 0f) ? 0 : _player.HpCurrent):F0} <size=50%>/ {_player.HpMax:F0}</size>";
+                $"<size=75%>HP</size> {((_player.HpCurrent <= 0f) ? 0 : _player.HpCurrent):F0} <size=65%>/ {_player.HpMax:F0}</size>";
         }
 
         _hpFill.fillAmount = ratio;
@@ -94,7 +94,7 @@ public class CPlayerUI_Build : MonoBehaviour
         if (_mpText != null)
         {
             _mpText.text =
-                $"<size=50%>MP</size> {((_player.CurrentMp <= 0f) ? 0 : _player.CurrentMp):F0} <size=50%>/ {_player.MaxMp:F0}</size>";
+                $"<size=75%>MP</size> {((_player.CurrentMp <= 0f) ? 0 : _player.CurrentMp):F0} <size=65%>/ {_player.MaxMp:F0}</size>";
         }
 
         _mpFill.fillAmount = ratio;
