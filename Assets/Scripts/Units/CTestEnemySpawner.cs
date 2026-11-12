@@ -11,8 +11,10 @@ public class CTestEnemySpawner : MonoBehaviour
     [SerializeField] private float _minDistance = 1.0f;
     [SerializeField] private int _maxCount = 5;
     [SerializeField] private float _regenInterval = 2f;
+    [SerializeField] private float _peaceTimerMax = 3f;
 
     private float _timer = 0;
+    private float _peaceTimer = 0f;
     private bool _isBattleActive;
 
     private void Awake()
