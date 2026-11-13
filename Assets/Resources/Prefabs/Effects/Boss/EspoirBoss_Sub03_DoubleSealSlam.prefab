@@ -57,7 +57,7 @@ MonoBehaviour:
     overrideDuration: 0
     duration: 1.6667
     innerRadius: 2
-    outerRadius: 18
+    outerRadius: 15
   data: {fileID: 4900000, guid: bcef7274c1fe0d84cb1db2a16b24240c, type: 3}
   library: {fileID: 11400000, guid: e02f754b02f8a4f4eab42a91e4d87d37, type: 2}
   stageScale: 1

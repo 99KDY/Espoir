@@ -282,7 +282,10 @@ MonoBehaviour:
   _baseAttack: 0
   _baseDefence: 0
   _debugLog: 0
+  _statusEffectAnchor: {fileID: 0}
+  _radius: 1
   _targetStatSO: {fileID: 0}
+  _drops: []
   _player: {fileID: 472875770}
   _tartgetMask:
     serializedVersion: 2
@@ -299,12 +302,14 @@ MonoBehaviour:
   _animator: {fileID: 89927479}
   _rotateSpeed: 1000
   _atkTime: 5
-  _normalAtkRange: 6
-  _detectedRange: 12
+  _normalAtkRange: 7
+  _detectedRange: 20
   _whirlRange: 14
   _whirlInner: 7
   _donutRange: 12
   _donutInner: 8
+  _areaAngle: 30
+  _divideArea: 6
 --- !u!54 &89927484
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1962,6 +1967,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: be2c0dc89e924bd42b9c5a1bad77ed58, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _player: {fileID: 472875765}
   _polygonPoint: []
   _polygonTriangles: 
   _polygonSides: 10
@@ -2224,6 +2230,10 @@ MonoBehaviour:
   _baseAttack: 20
   _baseDefence: 0
   _debugLog: 0
+  _statusEffectAnchor: {fileID: 0}
+  _radius: 1
+  _debugSet: 0
+  _inventory: {fileID: 0}
   _mainCamera: {fileID: 976528954}
   _testCamera: {fileID: 976528958}
   _groundLayer:
@@ -2929,7 +2939,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1929441329760321138, guid: fc44008c7d95e394abbb953b8b53d960, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 36
+      value: 50.11
       objectReference: {fileID: 0}
     - target: {fileID: 1929441329760321138, guid: fc44008c7d95e394abbb953b8b53d960, type: 3}
       propertyPath: m_LocalPosition.y
@@ -2937,7 +2947,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1929441329760321138, guid: fc44008c7d95e394abbb953b8b53d960, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 105.98
+      value: 99.2
       objectReference: {fileID: 0}
     - target: {fileID: 1929441329760321138, guid: fc44008c7d95e394abbb953b8b53d960, type: 3}
       propertyPath: m_LocalRotation.w
@@ -2992,10 +3002,10 @@ PrefabInstance:
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 1929441329760321138, guid: fc44008c7d95e394abbb953b8b53d960, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 261985957}
+      addedObject: {fileID: 723468386}
     - targetCorrespondingSourceObject: {fileID: 1929441329760321138, guid: fc44008c7d95e394abbb953b8b53d960, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 723468386}
+      addedObject: {fileID: 261985957}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 849696862997825102, guid: fc44008c7d95e394abbb953b8b53d960, type: 3}
       insertIndex: -1
@@ -3028,7 +3038,10 @@ MonoBehaviour:
   _baseAttack: 0
   _baseDefence: 0
   _debugLog: 0
+  _statusEffectAnchor: {fileID: 0}
+  _radius: 1
   _targetStatSO: {fileID: 0}
+  _drops: []
   _name: Skeleton
   _tartgetMask:
     serializedVersion: 2
@@ -3292,13 +3305,14 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1551322194}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f5450cb9e8eb8904c8a6687bd2317cfe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _targetEnemy:
   - {fileID: 1057309893}
+  _drops: []
   _spawnRadius: 4
   _minDistance: 1
   _maxCount: 5

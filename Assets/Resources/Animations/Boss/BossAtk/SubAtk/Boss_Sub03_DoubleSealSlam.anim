@@ -653947,14 +653947,14 @@ AnimationClip:
   m_HasMotionFloatCurves: 0
   m_Events:
   - time: 1.2666667
-    functionName: 
+    functionName: AlternationDamage_First
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
     intParameter: 0
     messageOptions: 0
   - time: 2.5
-    functionName: 
+    functionName: AlternationDamage_Second
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
