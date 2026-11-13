@@ -41,7 +41,7 @@ public class CSlothBoss : CEnemy
     [SerializeField] private float _atkTime = 5.0f;
     [SerializeField] private float _normalAtkRange = 7.0f;
     [SerializeField] private float _detectedRange = 15.0f;
-
+    [SerializeField] private float _returnDelayTime = 2f;
 
 
     [Header("Pattern Range")]
@@ -90,6 +90,7 @@ public class CSlothBoss : CEnemy
     private Vector3 _patternPos;
 
     private float _atkTimer;
+    private float _delayTimer;
 
 
     private int normalAtk;
@@ -176,6 +177,81 @@ public class CSlothBoss : CEnemy
     }
 
 
+    private void LookAtPlayer()
+    {
+        Vector3 targer = new Vector3(_target.position.x, this.transform.position.y, _target.position.z);
+
+        Vector3 lookPlayer = targer - this.transform.position;
+
+        float distance = lookPlayer.magnitude;
+
+        if (distance <= _detectedRange)
+        {
+            if (_onAttack == false)
+            {
+                Vector3 dir = lookPlayer.normalized;
+                Quaternion lookRotation = Quaternion.LookRotation(dir);
+                transform.rotation = Quaternion.RotateTowards(transform.rotation, lookRotation, _rotateSpeed * Time.deltaTime);
+
+                if (distance <= _normalAtkRange)
+                {
+                    _isSub = false;
+                    _isMain = false;
+                 
+                    if(_delayTimer > _returnDelayTime)
+                    {
+                        _isNormal = true;
+
+                        _currentState = ESlothBossState.NormalAttack;
+                        _delayTimer = 0;
+
+                    }
+
+                    else
+                    {
+                        _delayTimer += Time.deltaTime;
+                    }
+                    
+                }
+
+                else
+                {
+
+                    if(_delayTimer > _returnDelayTime)
+                    {
+                        _isSub = true;
+                        _currentState = ESlothBossState.SubAttack;
+                        _delayTimer = 0;
+                    }
+
+                    else
+                    {
+                        _isNormal = false;
+                        _isMain = false;
+                        _delayTimer += Time.deltaTime;
+                    }
+
+
+
+                }
+            }
+
+            else
+            {
+                CLogger.Log("Boss Animator Moving");
+            }
+
+        }
+
+
+
+
+
+    }
+
+
+
+
     private void NormalAttackPattern()
     {
         if(_isNormal == false)
@@ -187,6 +263,9 @@ public class CSlothBoss : CEnemy
         _isMain = false;
 
         normalAtk = Random.Range(0, 4);
+        _onAttack = true;
+
+        normalAtk = 1;
         
         CLogger.Log($"Normal Attack Pattern : {normalAtk}");
 
@@ -209,7 +288,6 @@ public class CSlothBoss : CEnemy
                 break;
 
             case 3:
-                _animator.SetTrigger(_firstSub);
                 TwiceAttack().Forget();
 
                 break;
@@ -227,7 +305,10 @@ public class CSlothBoss : CEnemy
 
         _isMain = false;
         _isNormal = false;
+
         subAtk = Random.Range(1, 4);
+
+        _onAttack = true;
 
         CLogger.Log($"Sub Attack Pattern : {subAtk}");
         switch (subAtk)
@@ -260,6 +341,7 @@ public class CSlothBoss : CEnemy
         _isSub = false;
 
         mainAtk = Random.Range(0, 3);
+        _onAttack = true;
 
         CLogger.Log($"Main Attack Pattern : {mainAtk}");
 
@@ -320,56 +402,13 @@ public class CSlothBoss : CEnemy
 
     }
 
-    private void LookAtPlayer()
-    {
-        Vector3 targer = new Vector3(_target.position.x, this.transform.position.y, _target.position.z);
 
-        Vector3 lookPlayer = targer - this.transform.position;
-
-        float distance = lookPlayer.magnitude;
-                
-        if (distance <= _detectedRange)
-        {
-            if (_onAttack == false)
-            {
-                Vector3 dir = lookPlayer.normalized;
-                Quaternion lookRotation = Quaternion.LookRotation(dir);
-                transform.rotation = Quaternion.RotateTowards(transform.rotation, lookRotation, _rotateSpeed * Time.deltaTime);
-
-                if (distance <= _normalAtkRange)
-                {
-                    _isNormal = true;
-
-                    _currentState = ESlothBossState.NormalAttack;
-                }
-
-                else
-                {
-                    _isNormal = false;
-                    _isSub = true;
-
-                    _currentState = ESlothBossState.SubAttack;
-                }
-            }
-
-            else
-            {
-                CLogger.Log("Boss Animator Moving");
-            }
-        
-        }
-        
-
-     
-
-
-    }
 
     #region NormalAttack Patterns
     private async UniTask NormalAttackDelay()
     {
 
-        await UniTask.Delay(2500, DelayType.UnscaledDeltaTime);
+        await UniTask.Delay(3000);
         _atkTime = 0;
 
         _onAttack = false;
@@ -501,6 +540,9 @@ public class CSlothBoss : CEnemy
         
         _animator.SetTrigger(_secondSub);
 
+        await UniTask.Delay(2500);
+
+        _onAttack = false;
 
     }
 
@@ -622,7 +664,6 @@ public class CSlothBoss : CEnemy
             CLogger.Error("PatternView 비어있음");
         }
 
-        _onAttack = true;
         await UniTask.Delay(1500);
         _atkTimer = 0;
 
@@ -631,8 +672,9 @@ public class CSlothBoss : CEnemy
             _previewPattern.ClearPreview();
             _previewPattern.transform.position = _patternPos;
         }
+        _animator.SetTrigger(_firstSub);
 
-        await UniTask.Delay(1600);
+        await UniTask.Delay(3000);
         _onAttack = false;
     }
 
@@ -832,7 +874,7 @@ public class CSlothBoss : CEnemy
 
     private int NormalFindPlayer(float radius)
     {
-        Vector3 offset = this.transform.up * 1.0f + this.transform.forward * 2f;
+        Vector3 offset = this.transform.forward * 2f;
                      
         int hit = Physics.OverlapSphereNonAlloc(this.transform.position + offset, radius, _hitCollider, _tartgetMask);
 
