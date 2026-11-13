@@ -32,6 +32,20 @@ public enum EBattleState
 }
 
 [Flags]
+public enum EQuestList
+{
+    None = 0,
+    [InspectorName("질투의 부활")] Invidia = 1 << 0,
+    [InspectorName("탐욕의 부탁")] Avaritia = 1 << 1,
+    [InspectorName("나태의 몰락")] Pigritia = 1 << 2,
+    [InspectorName("폭식의 부탁")] Gula = 1 << 3,
+    [InspectorName("색욕의 몰락")] Luxuria = 1 << 4,
+    [InspectorName("분노의 부탁")] Ira = 1 << 5,
+    [InspectorName("오만의 몰락")] Superbia = 1 << 6,
+    [InspectorName("악의 그릇")] Pradona = 1 << 7,
+}
+
+[Flags]
 public enum EBossClear
 {
     None = 0,
@@ -45,9 +59,24 @@ public enum EBossClear
     Pradona     = 1 << 7,
 }
 
+[Flags]
+public enum EPradonaPower
+{
+    None        = 0,
+    Invidia     = 1 << 0,
+    Avaritia    = 1 << 1,
+    Pigritia    = 1 << 2,
+    Gula        = 1 << 3,
+    Luxuria     = 1 << 4,
+    Ira         = 1 << 5,
+    Superbia    = 1 << 6,
+}
+
 public class CGameManager : MonoBehaviour
 {
     [SerializeField] private AudioMixer _audioMixer;
+    [Tooltip("반드시 작성!!!")]
+    [SerializeField] private int _currentStage;
 
     [SerializeField] Button _gameShutdown;
     [SerializeField] Button _screenChange;
@@ -66,13 +95,16 @@ public class CGameManager : MonoBehaviour
     [Header("디버그용")]
     [SerializeField] TMP_Text _zoneText;
 
-
-
+    private const string BgmVolumeKey = "Espoir.Settings.BgmVolume";
+    private const string SeVolumeKey = "Espoir.Settings.SeVolume";
 
     private EGameState _gameState;
     private EBattleState _battleState;
     private ESettingState _settingState;
     private EBossClear _bossClearState;
+    private EQuestList _availableQuest;
+    private EQuestList _actingQuest;
+    private EQuestList _completedQuest;
     private bool _isInLobby = false;
     private bool _isPaused = false;
     private float _timeScaleBeforePause = 1f;
@@ -87,6 +119,9 @@ public class CGameManager : MonoBehaviour
     public EGameState GameState => _gameState;
     public EBattleState BattleState => _battleState;
     public EBossClear BossClearState => _bossClearState;
+    public EQuestList AvailableQuest => _availableQuest;
+    public EQuestList ActingQuest => _actingQuest;
+    public EQuestList CompletedQuest => _completedQuest;
     public bool IsInLobby => _isInLobby;
     public bool IsPaused => _isPaused;
 
@@ -107,7 +142,6 @@ public class CGameManager : MonoBehaviour
 
     void Start()
     {
-        CSoundManager.Instance.PlayBGM(EBackgroundSound.OasisOfGold);
         _gameShutdown.onClick.AddListener(() => OnGameShutdown());
         _screenChange.onClick.AddListener(() => OnGameResolutionChange());
         _player = FindFirstObjectByType<CPlayer>();
@@ -127,24 +161,26 @@ public class CGameManager : MonoBehaviour
         {
             SyncSoundBySlider(_bgmInput, _bgmSlider);
             SetVolume();
+            StoreVolumeSettings();
         });
         _seSlider.onValueChanged.AddListener((float _) =>
         {
             SyncSoundBySlider(_seInput, _seSlider);
             SetVolume();
+            StoreVolumeSettings();
         });
         _bgmInput.onValueChanged.AddListener((string _) =>
         {
             SyncSoundByText(_bgmInput, _bgmSlider);
             SetVolume();
+            StoreVolumeSettings();
         });
         _seInput.onValueChanged.AddListener((string _) =>
         {
             SyncSoundByText(_seInput, _seSlider);
             SetVolume();
+            StoreVolumeSettings();
         });
-        _bgmSlider.onValueChanged.Invoke(_bgmSlider.value);
-        _seSlider.onValueChanged.Invoke(_seSlider.value);
 
         _menuBackground.alpha = 0;
         _menuBackground.interactable = false;
@@ -152,6 +188,9 @@ public class CGameManager : MonoBehaviour
         _menuBase.alpha = 0;
         _menuBase.interactable = false;
         _menuBase.blocksRaycasts = false;
+
+        LoadVolumeSettings();
+        CSoundManager.Instance.PlayBGM(EBackgroundSound.OasisOfGold);
     }
 
     void Update()
@@ -186,6 +225,24 @@ public class CGameManager : MonoBehaviour
         {
             _zoneText.text = $"Game: {_gameState}\nBattle: {_battleState}\nLobby: {_isInLobby}";
         }
+    }
+
+    private void LoadVolumeSettings()
+    {
+        float bgm = PlayerPrefs.GetFloat(BgmVolumeKey, _bgmSlider.value);
+        float se = PlayerPrefs.GetFloat(SeVolumeKey, _seSlider.value);
+
+        _bgmSlider.SetValueWithoutNotify(Mathf.Clamp01(bgm));
+        _seSlider.SetValueWithoutNotify(Mathf.Clamp01(se));
+
+        SyncSoundBySlider(_bgmInput, _bgmSlider);
+        SyncSoundBySlider(_seInput, _seSlider);
+    }
+
+    private void StoreVolumeSettings()
+    {
+        PlayerPrefs.SetFloat(BgmVolumeKey, _bgmSlider.value);
+        PlayerPrefs.SetFloat(SeVolumeKey, _seSlider.value);
     }
 
     private void SetPaused(bool paused)
@@ -243,6 +300,7 @@ public class CGameManager : MonoBehaviour
                 _menuBackground.interactable = false;
                 _menuBackground.blocksRaycasts = false;
                 SetPaused(false);
+                PlayerPrefs.Save();
                 break;
             case EGameState.ForcePause:
                 _forcePauseSet.SetActive(false);
