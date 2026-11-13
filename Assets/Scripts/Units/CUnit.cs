@@ -65,7 +65,8 @@ public abstract class CUnit : MonoBehaviour
 
     [Header("상태이상 이펙트 기준점")]
     [SerializeField] protected Transform _statusEffectAnchor;
-    [SerializeField] protected float _radius = 1f;
+    [SerializeField] protected Vector3 _statusEffectOffset;
+    [SerializeField] protected float _statusEffectRadius = 1f;
     protected float _baseCritRate = 0.05f;
     protected float _baseCritDmg = 1.5f;
     #endregion
@@ -84,6 +85,7 @@ public abstract class CUnit : MonoBehaviour
 
     protected List<CStatus> _status;
     protected readonly Dictionary<int, GameObject> _statusEffectInstances = new Dictionary<int, GameObject>();
+    
     protected virtual IReadOnlyList<CStatus> EquipmentStatusForEffects => null;
     #endregion
 
@@ -100,12 +102,23 @@ public abstract class CUnit : MonoBehaviour
     {
         get
         {
-            bool temp = false;
             for(int i = 0; i < _status.Count; i++)
             {
-                if (_status[i].Trigger.HasFlag(EStatusTrigger.IsStun)) temp = true;
+                if (_status[i].Trigger.HasFlag(EStatusTrigger.IsStun)) return true;
             }
-            return temp;
+            return false;
+        }
+    }
+
+    public bool IsInvincible
+    {
+        get
+        {
+            for (int i = 0; i < _status.Count; i++)
+            {
+                if (_status[i].Trigger.HasFlag(EStatusTrigger.IsInvincible)) return true;
+            }
+            return false;
         }
     }
 
@@ -123,6 +136,7 @@ public abstract class CUnit : MonoBehaviour
         {
             _statusEffectAnchor = new GameObject("StatusEffectAnchor").transform;
             _statusEffectAnchor.SetParent(transform, false);
+            _statusEffectAnchor.localPosition = _statusEffectOffset;
         }
     }
 
@@ -201,6 +215,51 @@ public abstract class CUnit : MonoBehaviour
             * statMultiple[EStatusStats.AttackSpeed] * statDivide[EStatusStats.AttackSpeed];
     }
 
+    protected virtual void SyncStatusEffect()
+    {
+        HashSet<int> activeStatusEffectIds = new HashSet<int>();
+        List<int> statusEffectIdsToRemove = new List<int>();
+
+        EnsureStatusEffect(_status, activeStatusEffectIds);
+        EnsureStatusEffect(EquipmentStatusForEffects, activeStatusEffectIds);
+
+        foreach(int id in _statusEffectInstances.Keys)
+        {
+            if (!activeStatusEffectIds.Contains(id))
+            {
+                statusEffectIdsToRemove.Add(id);
+            }
+        }
+
+        for (int i = 0; i < statusEffectIdsToRemove.Count; i++)
+        {
+            Destroy(_statusEffectInstances[statusEffectIdsToRemove[i]]);
+            _statusEffectInstances.Remove(statusEffectIdsToRemove[i]);
+        }
+    }
+
+    public void AddConsumableEffect(GameObject effectPrefab, float duration)
+    {
+        GameObject target = Instantiate(effectPrefab, _statusEffectAnchor, false);
+        Destroy(target, duration);
+    }
+
+    private void EnsureStatusEffect(IReadOnlyList<CStatus> status, HashSet<int> Ids)
+    {
+        if (status == null || status.Count == 0) return;
+        for(int n = 0; n < status.Count; n++)
+        {
+            if (status[n] == null || status[n].EffectPrefab == null) continue;
+            if (!Ids.Add(status[n].Id)) continue;
+            if (_statusEffectInstances.TryGetValue(status[n].Id, out GameObject instance) && instance != null)
+            {
+                continue;
+            }
+            _statusEffectInstances[status[n].Id] = Instantiate(status[n].EffectPrefab, _statusEffectAnchor, false);
+            _statusEffectInstances[status[n].Id].transform.localScale = Vector3.one * _statusEffectRadius;
+        }
+    }
+
     public virtual void InvokeOnDelta(float t)
     {
         if (_status == null || _status.Count == 0) return;
@@ -256,6 +315,12 @@ public abstract class CUnit : MonoBehaviour
     /// <param name="damage"></param>
     public virtual void OnHit(CUnit attacker, CUnit defender, SDamageInfo damage)
     {
+        if (defender.IsInvincible)
+        {
+            // 무적상태라는 메시지 띄우기
+            CLogger.Log($"{defender.gameObject.name} - 무적상태임");
+            return;
+        }
         float finalDamage = DamageCalculate(attacker, defender, damage, out bool isCritical);
         defender.GetDamage(finalDamage);
         if (_debugLog) CLogger.Log($"Enemy : 피해 {finalDamage} / 방어력 {defender.Defence}, 크리여부 {isCritical} ({attacker.CriticalRate * 100}% - {attacker.CriticalDamage * 100}%)");
@@ -298,7 +363,7 @@ public abstract class CUnit : MonoBehaviour
         }
         if (damage.isFixed)
         {   
-            return damage.damage;
+            return finalDamage;
         }
 
         finalDamage = finalDamage * (100f / (100f + Mathf.Max((defender.Defence * (1 - damage.armorPenetration)), -99.9f)));
@@ -479,6 +544,8 @@ public abstract class CUnit : MonoBehaviour
             {
                 ResyncStatus();
             }
+
+            SyncStatusEffect();
             return;
         }
         CStatus currentStatus = FindStatus(id);
@@ -503,6 +570,7 @@ public abstract class CUnit : MonoBehaviour
                 {
                     ResyncStatus();
                 }
+                SyncStatusEffect();
                 break;
             case EStatusStack.Refresh:
                 currentStatus.ResetTimer(duration);
@@ -568,8 +636,13 @@ public abstract class CUnit : MonoBehaviour
                 //        _status[i].OnRemove[j](this);
                 //    }
                 //}
+                bool onApply = _status[i].Trigger.HasFlag(EStatusTrigger.OnApply);
                 _status.Remove(_status[i]);
-                ResyncStatus();
+                if (onApply)
+                {
+                    ResyncStatus();
+                }
+                SyncStatusEffect();
                 if (!removeAll) return temp;
             }
         }
@@ -593,8 +666,13 @@ public abstract class CUnit : MonoBehaviour
         //        status.OnRemove[i](this);
         //    }
         //}
+        bool onApply = status.Trigger.HasFlag(EStatusTrigger.OnApply);
         _status.Remove(status);
-        ResyncStatus();
+        if (onApply)
+        {
+            ResyncStatus();
+        }
+        SyncStatusEffect();
         return temp;
     }
 }

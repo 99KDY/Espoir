@@ -176,6 +176,9 @@ public partial class CStatus
                             unit.RemoveStatus(this);
                         });
                         break;
+                    case EStatusAction.Invincible:
+                        _trigger |= EStatusTrigger.IsInvincible;
+                        break;
                 }
             }
         }        
@@ -265,7 +268,7 @@ public partial class CStatus
                 _trigger |= EStatusTrigger.OnDelta;
                 _onDelta.Add((CUnit unit, float deltaTime) =>
                 {
-                    unit.GetHeal(0.05f * deltaTime, ERatioSwitch.ByMax);
+                    unit.GetHeal(0.005f * deltaTime, ERatioSwitch.ByMax);
                 });
                 break;
             // 분노의 잔재
@@ -280,12 +283,21 @@ public partial class CStatus
                 });
                 break;
             // 마을 회복
-            // 매 초 최대체력의 20%만큼 체력을 회복합니다.
+            // 매 초 최대체력의 22.5%만큼 체력을 회복합니다.
             case 7:
                 _trigger |= EStatusTrigger.OnDelta;
                 _onDelta.Add((CUnit unit, float deltaTime) =>
                 {
-                    unit.GetHeal(0.2f * deltaTime, ERatioSwitch.ByMax);
+                    unit.GetHeal(0.225f * deltaTime, ERatioSwitch.ByMax);
+                });
+                break;
+            // 평화상태
+            // 매 초 최대체력의 2.5%만큼 체력을 회복합니다.
+            case 8:
+                _trigger |= EStatusTrigger.OnDelta;
+                _onDelta.Add((CUnit unit, float deltaTime) =>
+                {
+                    unit.GetHeal(0.025f * deltaTime, ERatioSwitch.ByMax);
                 });
                 break;
             default:

@@ -8,12 +8,16 @@ public class CEnemy : CUnit
     [SerializeField] private CEnemyStatSO _targetStatSO;
 
     [Header("드롭하는 아이템 범위")]
-    [SerializeField] private int _dropStage = 1;
+    [SerializeField] private List<SDropTable> _drops;
 
-    public int DropStage
+    private bool _isDropped = false;
+    protected bool _isChasingPlayer = false;
+    public virtual bool IsChasingPlayer => _isChasingPlayer;
+
+    public List<SDropTable> Drops
     {
-        get { return _dropStage; }
-        set { _dropStage = value; }
+        get { return _drops; }
+        set { _drops = value; }
     }
 
     protected override void Awake()
@@ -57,9 +61,13 @@ public class CEnemy : CUnit
     {
         base.Die();
         CPlayer player = FindFirstObjectByType<CPlayer>();
-        if (player != null && player.Inventory != null && _dropStage != 0)
+        if (!_isDropped)
         {
-            player.Inventory.AddItem(CItemSO.MakeRandomEquipment(_dropStage).Id);
+            _isDropped = true;
+            if (player != null && player.Inventory != null)
+            {
+                if (CItemSO.TryMakeDropItem(_drops, out CItemSO targetItem)) player.Inventory.AddItem(targetItem.Id);
+            }
         }
     }
 }

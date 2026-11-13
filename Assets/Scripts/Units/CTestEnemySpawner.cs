@@ -1,17 +1,21 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class CTestEnemySpawner : MonoBehaviour
 {
     [SerializeField] private List<GameObject> _targetEnemy;
-    [SerializeField] private int _dropStage = 0;
+    [SerializeField] private List<SDropTable> _drops;
     [SerializeField] private float _spawnRadius = 3.0f;
     [SerializeField] private float _minDistance = 1.0f;
     [SerializeField] private int _maxCount = 5;
     [SerializeField] private float _regenInterval = 2f;
+    [SerializeField] private float _peaceTimerMax = 3f;
 
     private float _timer = 0;
+    private float _peaceTimer = 0f;
+    private bool _isBattleActive;
 
     private void Awake()
     {
@@ -32,10 +36,6 @@ public class CTestEnemySpawner : MonoBehaviour
             }
         }
     }
-    void Start()
-    {
-        
-    }
 
     void Update()
     {
@@ -52,6 +52,11 @@ public class CTestEnemySpawner : MonoBehaviour
             _timer = _timer - _regenInterval;
             SpawnEnemy();
         }
+    }
+
+    private void LateUpdate()
+    {
+        SetBattleActive(HasChasingEnemy());
     }
 
     private bool ResetWhenMax()
@@ -75,12 +80,12 @@ public class CTestEnemySpawner : MonoBehaviour
             return;
         }
 
-        GameObject target = _targetEnemy[Random.Range(0, _targetEnemy.Count)];
-        if (target.TryGetComponent<CEnemy>(out CEnemy targetScript)) targetScript.DropStage = _dropStage;
+        GameObject target = _targetEnemy[UnityEngine.Random.Range(0, _targetEnemy.Count)];
+        if (target.TryGetComponent<CEnemy>(out CEnemy targetScript)) targetScript.Drops = _drops;
         Quaternion targetRot = Quaternion.Euler
             (
                 0f,
-                Random.Range(0f, 360f),
+                UnityEngine.Random.Range(0f, 360f),
                 0f
             );
 
@@ -93,7 +98,7 @@ public class CTestEnemySpawner : MonoBehaviour
         float minDistanceSqr = _minDistance * _minDistance;
         for (int i = 0; i < 30; i++)
         {
-            Vector2 offset = Random.insideUnitCircle * _spawnRadius;
+            Vector2 offset = UnityEngine.Random.insideUnitCircle * _spawnRadius;
             Vector3 targetPos = transform.position + new Vector3
                 (
                     offset.x,
@@ -131,5 +136,34 @@ public class CTestEnemySpawner : MonoBehaviour
 
         spawnPos = Vector3.zero;
         return false;
+    }
+
+    private bool HasChasingEnemy()
+    {
+        for (int i = 0; i < transform.childCount; i++)
+        {
+            Transform child = transform.GetChild(i);
+
+            if (child.TryGetComponent<CEnemy>(out CEnemy enemy) && enemy.isActiveAndEnabled
+                && enemy.HpCurrent > 0f && enemy.IsChasingPlayer)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+    private void SetBattleActive(bool isActive)
+    {
+        if (_isBattleActive == isActive) return;
+        if (CGameManager.Instance == null) return;
+
+        _isBattleActive = isActive;
+        CGameManager.Instance.InvokeSpawnerActivation(isActive);
+    }
+
+    private void OnDisable()
+    {
+        SetBattleActive(false);
     }
 }

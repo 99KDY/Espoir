@@ -14,6 +14,9 @@ public class CPlayerUI_Build : MonoBehaviour
     [SerializeField] private Image _hpFill = null;
     [SerializeField] private Image _mpFill = null;
 
+    [SerializeField] private Image _hpFillEffect = null;
+    [SerializeField] private float _hpEffectDelayField = 0.2f;
+
     [SerializeField] private TMP_Text _hpText = null;
     [SerializeField] private TMP_Text _mpText = null;
 
@@ -33,12 +36,18 @@ public class CPlayerUI_Build : MonoBehaviour
     [SerializeField] private CSkillUI _skillR = null;
     [SerializeField] private CSkillUI _skillD = null;
     [SerializeField] private Image _crownRemaining = null;
+
+    [SerializeField] private TMP_Text _jealousStack = null;
+    [SerializeField] private List<GameObject> _crownStack = new List<GameObject>();
     #endregion
 
     #region 내부변수
     private readonly Dictionary<CStatus, CStatusUI> _statusViews = new();
     private readonly HashSet<CStatus> _currentStatus = new();
     private readonly List<CStatus> _removedStatus = new();
+
+    private bool _hpEffectInitialized = false;
+    private float _hpEffectDelay = 0f;
     #endregion
 
 
@@ -68,13 +77,48 @@ public class CPlayerUI_Build : MonoBehaviour
         }
 
         float ratio = _player.HpMax > 0 ? _player.HpCurrent / _player.HpMax : 0f;
+        float previousRatio = _hpFill.fillAmount;
+        _hpFill.fillAmount = ratio;
 
-        if(_hpText != null)
+        if (_hpText != null)
         {
-            _hpText.text = $"{((_player.HpCurrent <= 0f) ? 0 : _player.HpCurrent):F0} / {_player.HpMax:F0}";
+            _hpText.text = 
+                $"<size=75%>HP</size> {((_player.HpCurrent <= 0f) ? 0 : _player.HpCurrent):F0} <size=65%>/ {_player.HpMax:F0}</size>";
         }
 
-        _hpFill.fillAmount = ratio;
+        if (!_hpEffectInitialized)
+        {
+            _hpEffectInitialized = true;
+            _hpFillEffect.fillAmount = ratio;
+            _hpEffectDelay = 0f;
+            return;
+        }
+
+        if (ratio > previousRatio)
+        {
+            _hpFillEffect.fillAmount = Mathf.Max(_hpFillEffect.fillAmount, ratio);
+        }
+
+        if (ratio < previousRatio)
+        {
+            _hpEffectDelay = _hpEffectDelayField;
+            return;
+        }
+        else if (_hpEffectDelay > 0)
+        {
+            _hpEffectDelay -= Time.deltaTime;
+            return;
+        }
+
+        if ((_hpFillEffect.fillAmount - _hpFill.fillAmount) < 0.001)
+        {
+            _hpFillEffect.fillAmount = _hpFill.fillAmount;
+            return;
+        }
+        else
+        {
+            _hpFillEffect.fillAmount = Mathf.Lerp(_hpFillEffect.fillAmount, ratio, 8f * Time.deltaTime);
+        }
     }
 
 
@@ -89,7 +133,8 @@ public class CPlayerUI_Build : MonoBehaviour
 
         if (_mpText != null)
         {
-            _mpText.text = $"{((_player.CurrentMp<= 0f) ? 0 : _player.CurrentMp):F0} / {_player.MaxMp:F0}";
+            _mpText.text =
+                $"<size=75%>MP</size> {((_player.CurrentMp <= 0f) ? 0 : _player.CurrentMp):F0} <size=65%>/ {_player.MaxMp:F0}</size>";
         }
 
         _mpFill.fillAmount = ratio;
@@ -168,7 +213,14 @@ public class CPlayerUI_Build : MonoBehaviour
         float ratio;
         float remainCooldown;
 
-        //_skillQ.Refresh();
+        int jealousStack = _player.FindStatusStack(10);
+        int crownStack = _player.FindStatusStack(25);
+        _jealousStack.text = jealousStack == 0 ? "" : jealousStack.ToString();
+        for (int i = 0; i < _crownStack.Count; i++)
+        {
+            if (crownStack > i) _crownStack[i].SetActive(true);
+            else _crownStack[i].SetActive(false);
+        }
         _crownRemaining.fillAmount = _player.CrownWindowRemaining / 2;
         _player.GetSkillCooldown(ESkillType.Strike, out ratio, out remainCooldown);
         _skillQ.Refresh(ratio, remainCooldown, _player.GetSkillAvailable(ESkillType.Strike));

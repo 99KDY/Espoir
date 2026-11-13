@@ -17,7 +17,7 @@ MonoBehaviour:
   _icon: {fileID: 21300000, guid: 6459c865c4ce5b04b9fcece3cb3283c3, type: 3}
   _description: 
   _tooltip: "\uB9C8\uC744\uC5D0\uC11C \uD734\uC2DD\uD558\uACE0 \uC788\uC2B5\uB2C8\uB2E4.\n\uB9E4
-    \uCD08 \uCD5C\uB300\uCCB4\uB825\uC758 20%\uB97C \uD68C\uBCF5\uD569\uB2C8\uB2E4."
+    \uCD08 \uCD5C\uB300\uCCB4\uB825\uC758 22.5%\uB97C \uD68C\uBCF5\uD569\uB2C8\uB2E4."
   _duration: 0
   _stack: 3
   _maxStack: 0
@@ -25,8 +25,6 @@ MonoBehaviour:
   _initialRemoveStack: 0
   _removeStack: 0
   _stackDuration: 0
-  _actionList:
-  - action: 0
-    param: 0
-    applyStack: 0
+  _actionList: []
   _customStatus: 7
+  _customEffect: {fileID: 4620256885970334916, guid: 4e2ff612b10cbcc4a9714c4134c07752, type: 3}

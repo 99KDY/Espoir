@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: 408
   _name: "\uD30C\uC6CC\uC5D8\uB9AD\uC11C"
-  _rarity: 0
+  _rarity: 3
   _itemIcon: {fileID: -760285444, guid: 3c38a022703b20145b12d05f01f10e62, type: 3}
   _description: "\uCCB4\uB825\uC744 100%\uD68C\uBCF5\uD55C\uB2E4."
   _cost: 0
@@ -22,4 +22,6 @@ MonoBehaviour:
   - effect: 3
     value: 1
   _itemStatus: []
+  _effectPrefab: {fileID: 4620256885970334916, guid: 29e1346714c6bd4419533e9d191a7850, type: 3}
+  _effectDuration: 3
   _isThrow: 0

@@ -16,7 +16,7 @@ MonoBehaviour:
   _name: "<color=#C396FF>\ud3ed\uc2dd\uc758 \ubaa9\uac78\uc774(E)</color>"
   _rarity: 2
   _itemIcon: {fileID: 438659254, guid: f90234778b743ff46bf6d8063eb54a53, type: 3}
-  _description: "<i>\uc790\uac04\uc758 \uc5f0\ud68c\ub294 \ud55c \ubc88\ub3c4 \ub05d\ub098\uc9c0 \uc54a\uc558\ub2e4.</i>\nHP +82.5, ATK +3\n\uc138\ud2b8 \ud6a8\uacfc \ud3ed\uc2dd\uc758 \uc544\uadc0\n(2) \ucd5c\ub300 HP +15%\n(3) \ubc29\uc5b4\ub825 +25%\n(4) \ub9e4\ucd08 \ucd5c\ub300 HP\uc758 5% \ud68c\ubcf5"
+  _description: "<i>\uc790\uac04\uc758 \uc5f0\ud68c\ub294 \ud55c \ubc88\ub3c4 \ub05d\ub098\uc9c0 \uc54a\uc558\ub2e4.</i>\nHP +82.5, ATK +3\n\uc138\ud2b8 \ud6a8\uacfc \ud3ed\uc2dd\uc758 \uc544\uadc0\n(2) \ucd5c\ub300 HP +15%\n(3) \ubc29\uc5b4\ub825 +25%\n(4) \ub9e4\ucd08 \ucd5c\ub300 HP\uc758 0.5% \ud68c\ubcf5"
   _slot: 0
   _setNumber: 203
   _action:
