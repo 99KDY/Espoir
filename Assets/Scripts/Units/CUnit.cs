@@ -363,7 +363,7 @@ public abstract class CUnit : MonoBehaviour
         }
         if (damage.isFixed)
         {   
-            return damage.damage;
+            return finalDamage;
         }
 
         finalDamage = finalDamage * (100f / (100f + Mathf.Max((defender.Defence * (1 - damage.armorPenetration)), -99.9f)));

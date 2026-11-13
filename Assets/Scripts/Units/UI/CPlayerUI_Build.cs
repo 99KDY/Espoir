@@ -14,6 +14,9 @@ public class CPlayerUI_Build : MonoBehaviour
     [SerializeField] private Image _hpFill = null;
     [SerializeField] private Image _mpFill = null;
 
+    [SerializeField] private Image _hpFillEffect = null;
+    [SerializeField] private float _hpEffectDelayField = 0.2f;
+
     [SerializeField] private TMP_Text _hpText = null;
     [SerializeField] private TMP_Text _mpText = null;
 
@@ -42,6 +45,9 @@ public class CPlayerUI_Build : MonoBehaviour
     private readonly Dictionary<CStatus, CStatusUI> _statusViews = new();
     private readonly HashSet<CStatus> _currentStatus = new();
     private readonly List<CStatus> _removedStatus = new();
+
+    private bool _hpEffectInitialized = false;
+    private float _hpEffectDelay = 0f;
     #endregion
 
 
@@ -71,14 +77,48 @@ public class CPlayerUI_Build : MonoBehaviour
         }
 
         float ratio = _player.HpMax > 0 ? _player.HpCurrent / _player.HpMax : 0f;
+        float previousRatio = _hpFill.fillAmount;
+        _hpFill.fillAmount = ratio;
 
-        if(_hpText != null)
+        if (_hpText != null)
         {
             _hpText.text = 
                 $"<size=75%>HP</size> {((_player.HpCurrent <= 0f) ? 0 : _player.HpCurrent):F0} <size=65%>/ {_player.HpMax:F0}</size>";
         }
 
-        _hpFill.fillAmount = ratio;
+        if (!_hpEffectInitialized)
+        {
+            _hpEffectInitialized = true;
+            _hpFillEffect.fillAmount = ratio;
+            _hpEffectDelay = 0f;
+            return;
+        }
+
+        if (ratio > previousRatio)
+        {
+            _hpFillEffect.fillAmount = Mathf.Max(_hpFillEffect.fillAmount, ratio);
+        }
+
+        if (ratio < previousRatio)
+        {
+            _hpEffectDelay = _hpEffectDelayField;
+            return;
+        }
+        else if (_hpEffectDelay > 0)
+        {
+            _hpEffectDelay -= Time.deltaTime;
+            return;
+        }
+
+        if ((_hpFillEffect.fillAmount - _hpFill.fillAmount) < 0.001)
+        {
+            _hpFillEffect.fillAmount = _hpFill.fillAmount;
+            return;
+        }
+        else
+        {
+            _hpFillEffect.fillAmount = Mathf.Lerp(_hpFillEffect.fillAmount, ratio, 8f * Time.deltaTime);
+        }
     }
 
 
