@@ -30,6 +30,7 @@ public class CPlayer : CUnit
     [SerializeField] private InputActionReference _attackInput;
     [SerializeField] private InputActionReference _dashInput;
     [SerializeField] private SSkillSlot[] _skillSlots;
+    [SerializeField] private InputActionReference[] _quickslotInputs = new InputActionReference[4];
 
     [Header("MP 설정")]
     [SerializeField, Min(1)] private int _maxMp = 150;
@@ -456,6 +457,14 @@ public class CPlayer : CUnit
         {
             slot.input?.action?.Enable();
         }
+
+        if (_quickslotInputs != null)
+        {
+            foreach (InputActionReference input in _quickslotInputs)
+            {
+                input?.action?.Enable();
+            }
+        }
     }
 
     private void OnDisable()
@@ -483,6 +492,13 @@ public class CPlayer : CUnit
         foreach (SSkillSlot slot in _skillSlots)
         {
             slot.input?.action?.Disable();
+        }
+        if (_quickslotInputs != null)
+        {
+            foreach (InputActionReference input in _quickslotInputs)
+            {
+                input?.action?.Disable();
+            }
         }
     }
 
@@ -563,6 +579,8 @@ public class CPlayer : CUnit
 
         _actionsBlocked = false;
 
+        UpdateQuickslotInput();
+
         if (_dashInput.action.WasPressedThisFrame() && _skill.TryDash(GetPointerDirection()))
         {
             return;
@@ -633,5 +651,22 @@ public class CPlayer : CUnit
 
         position = default;
         return false;
+    }
+
+    private void UpdateQuickslotInput()
+    {
+        if (_inventory == null || _quickslotInputs == null || Time.timeScale <= 0f) return;
+
+        bool isBattle = CGameManager.Instance.BattleState != EBattleState.None;
+        int count = Mathf.Min(_quickslotInputs.Length, _inventory.QuickSlotLength);
+
+        for (int i = 0; i < count; i++)
+        {
+            InputAction action = _quickslotInputs[i]?.action;
+            if (action != null && action.WasPressedThisFrame())
+            {
+                _inventory.TryUseQuickSlot(i, isBattle);
+            }
+        }
     }
 }
