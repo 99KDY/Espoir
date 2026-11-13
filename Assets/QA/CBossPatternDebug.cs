@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -17,8 +18,7 @@ public class CBossPatternDebug : MonoBehaviour
     [SerializeField] private Transform _buttonRoot;
     [SerializeField] private Button _buttonPrefab;
     [SerializeField] private SPattern[] _patterns;
-    [SerializeField] private float _repeatInterval = 5f;
-    [SerializeField] private Transform _player;
+    [SerializeField] private float _repeatInterval = 7f;
 
     private Coroutine _repeat;
 
@@ -64,58 +64,68 @@ public class CBossPatternDebug : MonoBehaviour
 
     private IEnumerator RepeatPattern(int index)
     {
-        CPreviewPattern preview = _bossAnimator.GetComponentInChildren<CPreviewPattern>();
-
         while (true)
         {
-            for (int i = 0; i < _patterns.Length; i++)
-            {
-                _bossAnimator.ResetTrigger(_patterns[i].triggerName);
-            }
-
             string trigger = _patterns[index].triggerName;
 
-            if (trigger == "bAttack02")
+            if (trigger == "bAttack01")
             {
-                preview.ShowDonutPattern(20, 15f, 3f);
-                yield return new WaitForSeconds(2.3f);
-                preview.ClearPreview();
+                PlayBossPattern("TwiceAttack");
             }
 
-            if (trigger == "bAttack04")
+            else if (trigger == "bAttack02")
             {
-                preview.ShowDonutPattern(20, 18f, 10f);
-                yield return new WaitForSeconds(2f);
-                preview.ClearPreview();
+                PlayBossPattern("WhirlWindAttack");
             }
 
-            if (trigger == "bAttack03")
+            else if (trigger == "bAttack03")
             {
-                preview.ShowMultiArcPattern(6, 15f, 60f, 0f);
-                yield return new WaitForSeconds(1f);
-                preview.ClearPreview();
-                preview.ShowMultiArcPattern(6, 15f, 60f, 30f);
-                yield return new WaitForSeconds(1f);
-                preview.ClearPreview();
-            }
+                SetOnAttack(true);
 
-            else if (trigger == "bAttack01")
-            {
-                _bossAnimator.SetTrigger(trigger);
-
-                Vector3 origin = preview.transform.position;
-                preview.transform.position = _player.position;
-                preview.ShowCirclePattern(20, 8f);
+                CPreviewPattern preview = _bossAnimator.GetComponentInChildren<CPreviewPattern>();
+                preview.ShowCirclePattern(20, 15f);
                 yield return new WaitForSeconds(1.5f);
                 preview.ClearPreview();
-                preview.transform.position = origin;
 
-                yield return new WaitForSeconds(_repeatInterval);
+                _bossAnimator.SetTrigger(trigger);
+                yield return new WaitForSeconds(3.1f);
+                SetOnAttack(false);
+                yield return new WaitForSeconds(Mathf.Max(0f, _repeatInterval - 4.6f));
                 continue;
             }
 
-            _bossAnimator.SetTrigger(trigger);
+            else if (trigger == "bAttack04")
+            {
+                PlayBossPattern("DonutAttack");
+            }
+
+            else
+            {
+                SetOnAttack(true);
+                _bossAnimator.SetTrigger(trigger);
+                yield return new WaitForSeconds(3f);
+                SetOnAttack(false);
+                yield return new WaitForSeconds(Mathf.Max(0f, _repeatInterval - 3f));
+                continue;
+            }
+
             yield return new WaitForSeconds(_repeatInterval);
         }
+    }
+
+    private void PlayBossPattern(string methodName)
+    {
+        CSlothBoss boss = _bossAnimator.GetComponent<CSlothBoss>();
+        SetOnAttack(true);
+
+        MethodInfo method = typeof(CSlothBoss).GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Instance);
+        method.Invoke(boss, null);
+    }
+
+    private void SetOnAttack(bool attacking)
+    {
+        CSlothBoss boss = _bossAnimator.GetComponent<CSlothBoss>();
+        FieldInfo onAttack = typeof(CSlothBoss).GetField("_onAttack", BindingFlags.NonPublic | BindingFlags.Instance);
+        onAttack.SetValue(boss, attacking);
     }
 }
