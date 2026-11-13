@@ -146,6 +146,13 @@ public class CItemSO : ScriptableObject
         return _stringToItem[name];
     }
 
+    // 저장데이터 검토용
+    public static bool TryFind(int id, out CItemSO item)
+    {
+        if (!_isBuilded) Build();
+        return _idToItem.TryGetValue(id, out item) && item != null;
+    }
+
     public static CItemSO MakeRandomConsumable()
     {
         if (!_isBuilded) Build();

@@ -30,6 +30,8 @@ public class CInventory : MonoBehaviour
     public event Action OnInventoryChanged;
     public int MaxItemSlot => _maxItemSlot;
     public int QuickSlotLength => QuickSlot;
+    public static int MaxSlot => _maxItemSlot;
+    public static int MaxQuantity => _maxItemQuantity;
 
     // 게임 매니저가 설정하고 UI가 확인
     public bool CanOpenInventory
