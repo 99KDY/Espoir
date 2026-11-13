@@ -536,6 +536,12 @@ public class CInventory : MonoBehaviour
         return _quickSlotIds[quickIndex];
     }
 
+    public void GetItemCooldown(int itemId, out float ratio, out float remainCooldown)
+    {
+        remainCooldown = GetCooldownRemaining(itemId);
+        ratio = Mathf.Clamp01(remainCooldown / ConsumableCooltime);
+    }
+
     public bool TryUseQuickSlot(int quickIndex, bool isBattle)
     {
         int itemId = GetQuickSlotId(quickIndex);

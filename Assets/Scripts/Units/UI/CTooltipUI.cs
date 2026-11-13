@@ -9,6 +9,7 @@ public class CTooltipUI : MonoBehaviour
 
     private CStatusUI _targetStatus;
     private CSkillUI _targetSkill;
+    private CQuickslotUI _targetQuickslot;
 
     public CStatusUI TargetStatus => _targetStatus;
 
@@ -88,6 +89,7 @@ public class CTooltipUI : MonoBehaviour
         _isOn = true;
         _targetStatus = target;
         _targetSkill = null;
+        _targetQuickslot = null;
         _tooltip.gameObject.SetActive(true);
         _tooltip.text = target.Tooltip;
     }
@@ -96,6 +98,16 @@ public class CTooltipUI : MonoBehaviour
     {
         _isOn = true;
         _targetSkill = target;
+        _targetStatus = null;
+        _targetQuickslot = null;
+        _tooltip.gameObject.SetActive(true);
+        _tooltip.text = target.Tooltip;
+    }
+    public void Enable(CQuickslotUI target)
+    {
+        _isOn = true;
+        _targetQuickslot = target;
+        _targetSkill = null;
         _targetStatus = null;
         _tooltip.gameObject.SetActive(true);
         _tooltip.text = target.Tooltip;
@@ -106,6 +118,7 @@ public class CTooltipUI : MonoBehaviour
         _isOn = false;
         _targetStatus = null;
         _targetSkill = null;
+        _targetQuickslot = null;
         _tooltip.gameObject.SetActive(false);
     }
 }

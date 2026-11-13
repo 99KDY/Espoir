@@ -37,6 +37,8 @@ public class CPlayerUI_Build : MonoBehaviour
     [SerializeField] private CSkillUI _skillD = null;
     [SerializeField] private Image _crownRemaining = null;
 
+    [SerializeField] private List<CQuickslotUI> _quickslot = null;
+
     [SerializeField] private TMP_Text _jealousStack = null;
     [SerializeField] private List<GameObject> _crownStack = new List<GameObject>();
     #endregion
@@ -48,6 +50,7 @@ public class CPlayerUI_Build : MonoBehaviour
 
     private bool _hpEffectInitialized = false;
     private float _hpEffectDelay = 0f;
+    private bool _quickslotDirty;
     #endregion
 
 
@@ -60,14 +63,28 @@ public class CPlayerUI_Build : MonoBehaviour
         }
     }
 
+    private void OnEnable()
+    {
+        _player.Inventory.OnInventoryChanged += MarkQuickslotDirty;
+        _quickslotDirty = true;
+    }
+
+    private void OnDisable()
+    {
+        _player.Inventory.OnInventoryChanged -= MarkQuickslotDirty;
+    }
+
     private void LateUpdate()
     {
         UpdateHp();
         UpdateMp();
         if (_debugText != null) UpdateDebug();
         UpdateSkill();
+        UpdateQuickslot();
         UpdateStatus();
     }
+
+    private void MarkQuickslotDirty() => _quickslotDirty = true;
 
     public void UpdateHp()
     {
@@ -232,5 +249,24 @@ public class CPlayerUI_Build : MonoBehaviour
         _skillR.Refresh(ratio, remainCooldown, _player.GetSkillAvailable(ESkillType.Slam));
         _player.GetSkillCooldown(ESkillType.Dash, out ratio, out remainCooldown);
         _skillD.Refresh(ratio, remainCooldown, _player.GetSkillAvailable(ESkillType.Dash));
+    }
+
+    public void UpdateQuickslot()
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            int id = _player.Inventory.GetQuickSlotId(i);
+
+            if (_quickslotDirty)
+            {
+                int quantity = (id == -1) ? 0 : _player.Inventory.GetTotalQuantity(id);
+                _quickslot[i].RefreshIteminfo(id, quantity);
+            }
+
+            _player.Inventory.GetItemCooldown(id, out float ratio, out float remainCooldown);
+            _quickslot[i].RefreshCooldown(ratio, remainCooldown);
+        }
+
+        _quickslotDirty = false;
     }
 }
