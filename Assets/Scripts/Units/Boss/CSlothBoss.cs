@@ -183,7 +183,8 @@ public class CSlothBoss : CEnemy
             return;
         }
 
-        _onAttack = true;
+        _isSub = false;
+        _isMain = false;
 
         normalAtk = Random.Range(0, 4);
         
@@ -224,6 +225,8 @@ public class CSlothBoss : CEnemy
             return;
         }
 
+        _isMain = false;
+        _isNormal = false;
         subAtk = Random.Range(1, 4);
 
         CLogger.Log($"Sub Attack Pattern : {subAtk}");
@@ -252,6 +255,9 @@ public class CSlothBoss : CEnemy
         {
             return;
         }
+
+        _isNormal = false;
+        _isSub = false;
 
         mainAtk = Random.Range(0, 3);
 
@@ -364,7 +370,7 @@ public class CSlothBoss : CEnemy
     {
 
         await UniTask.Delay(2500, DelayType.UnscaledDeltaTime);
-        
+        _atkTime = 0;
 
         _onAttack = false;
 
