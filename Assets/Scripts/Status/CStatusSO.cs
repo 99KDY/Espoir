@@ -16,7 +16,8 @@ public class CStatusSO : ScriptableObject
     [SerializeField][TextArea(1, 5)] private string _description;
     [Tooltip("상태이상 툴팁")]
     [SerializeField][TextArea(1, 5)] private string _tooltip;
-
+    [Tooltip("디버프 여부")]
+    [SerializeField] private bool _isDebuff;
     [Tooltip("상태이상 기본 지속시간")]
     [SerializeField] private float _duration;
     [Tooltip("상태이상 갱신 스타일")]
@@ -45,6 +46,7 @@ public class CStatusSO : ScriptableObject
     public string Description => _description;
     public string Tooltip => _tooltip;
     public Sprite Icon => _icon;
+    public bool IsDebuff => _isDebuff;
     public float Duration => _duration;
     public EStatusStack Stack => _stack;
     public int MaxStack => _maxStack;

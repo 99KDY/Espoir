@@ -135,6 +135,7 @@ public partial class CStatus
     private string _description;
     private string _tooltip;
     private Sprite _image;
+    private bool _isDebuff;
     private int _stack;
     private int _maxStack;
     private EStatusStack _stackSwitch;
@@ -166,6 +167,7 @@ public partial class CStatus
     public string Description => _description;
     public string Tooltip => _tooltip;
     public Sprite Image => _image;
+    public bool IsDebuff => _isDebuff;
     public int Stack
     {
         get { return _stack; }
