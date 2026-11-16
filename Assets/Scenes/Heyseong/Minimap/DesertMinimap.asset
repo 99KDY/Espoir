@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49d2f6600e20ece4691ba6728a4b64fb, type: 3}
+  m_Name: DesertMinimap
+  m_EditorClassIdentifier: 
+  _useBakedImage: 0
+  _mapTexture: {fileID: 0}
+  _worldCenter: {x: 15.202797, y: 20.152542}
+  _worldSize: {x: 384.00006, y: 384.00006}
+  _bakeRootName: DesertMap
+  _bakeResolution: 3072
+  _bakeTiles: 1
+  _bakeMargin: 72
+  _bakeIgnoreLargerThan: 300

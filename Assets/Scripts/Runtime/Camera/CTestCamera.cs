@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Camera))]
@@ -101,7 +102,7 @@ public class CTestCamera : MonoBehaviour
 
         UpdateRotation();
 
-        if (_hasFocus)
+        if (_hasFocus && !IsPointerOverUi())
         {
             float scroll = _zoom.ReadValue<float>();
             _desiredDistance *= Mathf.Exp(-scroll * _zoomSensitivity);
@@ -148,6 +149,12 @@ public class CTestCamera : MonoBehaviour
         Vector2 delta = _look.ReadValue<Vector2>() * _rotationSensitivity;
         _yaw = Mathf.Repeat(_yaw + delta.x, 360f);
         _pitchOffset -= delta.y;
+    }
+
+    // 미니맵 등 UI 위에서 굴린 휠은 UI 가 쓰므로 카메라 확대에 쓰지 않는다
+    private static bool IsPointerOverUi()
+    {
+        return EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
     }
 
     private void StopRotation()

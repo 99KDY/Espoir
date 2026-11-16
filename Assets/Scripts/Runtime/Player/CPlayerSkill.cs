@@ -27,6 +27,7 @@ public class CPlayerSkill : MonoBehaviour
     private readonly CPlayerDashTrail _DASH_TRAIL = new CPlayerDashTrail();
     private readonly CPlayerSpellCast _SPELL = new CPlayerSpellCast();
     private readonly CPlayerCrown _CROWN = new CPlayerCrown();
+    private readonly CPlayerLeviathan _LEVIATHAN = new CPlayerLeviathan();
 
     private CPlayer _owner;
     private CPlayerMovement _movement;
@@ -53,6 +54,49 @@ public class CPlayerSkill : MonoBehaviour
 
     public bool IsBusy => _currentSkill != null;
     public float CrownWindowRemaining => _CROWN.RemainingTime;
+    public CPlayerLeviathan Leviathan => _LEVIATHAN;
+
+    /// <summary>
+    /// W(왕관)를 쓴 직후 호출됩니다. 인자 = 사용 뒤 왕관 중첩 수.
+    /// </summary>
+    public event System.Action<int> CrownUsed;
+
+    /// <summary>
+    /// 스킬 쿨타임이 줄어든 순간 호출됩니다(E 가 낙인 가득 대상에 적중). 인자 = 스킬, 줄어든 초.
+    /// </summary>
+    public event System.Action<CSkillSO, float> CooldownReduced;
+
+    /// <summary>
+    /// 지금 Q(Strike)를 쓰면 막타 연계(MP · 선딜 감소)가 되는지 알려 줍니다. Q 가 쿨타임이면 거짓입니다.
+    /// </summary>
+    public bool IsStrikeLinkOpen
+    {
+        get
+        {
+            if (_owner == null || _animator == null)
+            {
+                return false;
+            }
+
+            foreach (CSkillRuntime runtime in _SKILLS.Values)
+            {
+                if (runtime.data.Type != ESkillType.Strike)
+                {
+                    continue;
+                }
+
+                if (Time.time < runtime.readyTime)
+                {
+                    return false;
+                }
+
+                return Time.time <= _lastFinisherTime + runtime.data.FinisherWindow ||
+                    (IsBusy && _currentSkill.data.Type == ESkillType.Melee && CanCancelInto(ESkillType.Strike));
+            }
+
+            return false;
+        }
+    }
 
     private void OnDisable()
     {
@@ -119,6 +163,12 @@ public class CPlayerSkill : MonoBehaviour
                     break;
                 }
             }
+        }
+
+        // 활성 R(레비아탄 버프)의 재사용은 쿨타임과 MP 를 보지 않는다.
+        if (runtime != null && runtime.data is CLeviathanSkillSO && !_LEVIATHAN.IsIdle)
+        {
+            return _LEVIATHAN.IsBuffActive && (!IsBusy || CanCancelInto(type));
         }
 
         if (runtime == null || Time.time < runtime.readyTime)
@@ -193,6 +243,16 @@ public class CPlayerSkill : MonoBehaviour
             _CROWN.Initialize(skill);
         }
 
+        if (skill is CLeviathanSkillSO leviathan)
+        {
+            if (!CPlayerLeviathan.HasValidSettings(leviathan))
+            {
+                return false;
+            }
+
+            _LEVIATHAN.Initialize(leviathan);
+        }
+
         int stepCount = skill.Steps != null ? skill.Steps.Length : 0;
         CSkillRuntime runtime = new CSkillRuntime
         {
@@ -230,6 +290,39 @@ public class CPlayerSkill : MonoBehaviour
         {
             runtime.readyTime = 0f;
         }
+    }
+
+    /// <summary>
+    /// 맵 이동용: 스킬(SO)별 재사용 가능 시각을 꺼내고, W 사용 기회 종료 시각을 돌려줍니다 (Time.time 기준).
+    /// </summary>
+    public float ExportTimers(Dictionary<CSkillSO, float> readyTimes)
+    {
+        readyTimes.Clear();
+        foreach (KeyValuePair<CSkillSO, CSkillRuntime> pair in _SKILLS)
+        {
+            readyTimes[pair.Key] = pair.Value.readyTime;
+        }
+
+        return _CROWN.WindowEnd;
+    }
+
+    /// <summary>
+    /// 맵 이동용: ExportTimers 로 꺼낸 시각을 같은 스킬(SO)에 그대로 넣습니다. 넣은 스킬 수를 돌려줍니다.
+    /// </summary>
+    public int ImportTimers(IReadOnlyDictionary<CSkillSO, float> readyTimes, float crownWindowEnd)
+    {
+        int restored = 0;
+        foreach (KeyValuePair<CSkillSO, float> pair in readyTimes)
+        {
+            if (_SKILLS.TryGetValue(pair.Key, out CSkillRuntime runtime))
+            {
+                runtime.readyTime = pair.Value;
+                restored++;
+            }
+        }
+
+        _CROWN.WindowEnd = crownWindowEnd;
+        return restored;
     }
 
     /// <summary>
@@ -278,9 +371,20 @@ public class CPlayerSkill : MonoBehaviour
             return QueueCombo(direction);
         }
 
+        if (skill is CLeviathanSkillSO && !_LEVIATHAN.IsIdle)
+        {
+            return _LEVIATHAN.IsBuffActive && TryStartLeviathanFinisher(runtime, direction);
+        }
+
         if (Time.time < runtime.readyTime)
         {
             return false;
+        }
+
+        // R 레비아탄 시전은 모션 · 이펙트 없이 버프만 건다. 내려찍기 모션은 피니쉬 때 한 번만 나온다.
+        if (skill is CLeviathanSkillSO)
+        {
+            return TryBeginLeviathanBuff(runtime);
         }
 
         if (skill.Type == ESkillType.Crown)
@@ -293,6 +397,7 @@ public class CPlayerSkill : MonoBehaviour
 
             _CROWN.Use(_owner);
             runtime.readyTime = Time.time + skill.Cooldown;
+            CrownUsed?.Invoke(_owner.FindStatusStack(skill.CrownStatus.Id));
             return true;
         }
 
@@ -385,6 +490,8 @@ public class CPlayerSkill : MonoBehaviour
 
     public void UpdateSkill()
     {
+        UpdateLeviathan();
+
         if (!IsBusy)
         {
             return;
@@ -432,11 +539,71 @@ public class CPlayerSkill : MonoBehaviour
     {
         bool wasBusy = IsBusy;
         FinishSkill(true);
+        _LEVIATHAN.Clear(_owner);
 
         if (wasBusy && _animator != null && _animator.isActiveAndEnabled)
         {
             _animator.CrossFadeInFixedTime(_IDLE_HASH, _cancelTransitionDuration);
         }
+    }
+
+    private void UpdateLeviathan()
+    {
+        if (!_LEVIATHAN.IsBuffActive)
+        {
+            return;
+        }
+
+        _LEVIATHAN.CheckExpired(_owner);
+
+        // 버프가 끝났는데 다른 행동 중이면 그 행동이 끝난 뒤 피니쉬를 시작한다.
+        if (_LEVIATHAN.IsFinisherPending && !IsBusy && !_owner.IsInputLocked &&
+            _SKILLS.TryGetValue(_LEVIATHAN.Settings, out CSkillRuntime runtime))
+        {
+            TryStartLeviathanFinisher(runtime, transform.forward);
+        }
+    }
+
+    private bool TryBeginLeviathanBuff(CSkillRuntime runtime)
+    {
+        // 하던 행동 · 이동 목표는 그대로 둔다(_currentSkill 을 바꾸지 않음). 다른 행동 중 시전 가능 여부는 기존 R 과 같다.
+        if ((IsBusy && !CanCancelInto(runtime.data.Type)) || !_owner.TrySpendMp(runtime.data.MpCost))
+        {
+            return false;
+        }
+
+        runtime.readyTime = Time.time + runtime.data.Cooldown;
+        _LEVIATHAN.BeginBuff(_owner);
+        return true;
+    }
+
+    private bool TryStartLeviathanFinisher(CSkillRuntime runtime, Vector3 direction)
+    {
+        bool isCanceling = IsBusy;
+        if (isCanceling && !CanCancelInto(runtime.data.Type))
+        {
+            return false;
+        }
+
+        FinishSkill(isCanceling);
+        _currentSkill = runtime;
+        _stateCheckFrame = Time.frameCount + 1;
+        _direction = direction.sqrMagnitude > 0.0001f ? direction.normalized : transform.forward;
+        _SPELL.Begin(_owner, _direction, runtime.data, _EFFECTS);
+        _DASH_TRAIL.Reset(transform.position, runtime.data.DashTrail.firstDistance);
+        _LEVIATHAN.BeginFinisher(_owner);
+
+        if (isCanceling)
+        {
+            _animator.CrossFadeInFixedTime(runtime.stateHashes[0], _cancelTransitionDuration);
+        }
+
+        else
+        {
+            _animator.SetTrigger(runtime.startTriggerHash);
+        }
+
+        return true;
     }
 
     private bool CanCancelInto(ESkillType type)
@@ -538,6 +705,7 @@ public class CPlayerSkill : MonoBehaviour
             if (_SPELL.UpdateRush(_owner, _playerAttack, _movement, skill, state.normalizedTime))
             {
                 _currentSkill.readyTime -= skill.MarkedCooldownReduction;
+                CooldownReduced?.Invoke(skill, skill.MarkedCooldownReduction);
             }
 
             _DASH_TRAIL.UpdateRush(skill.DashTrail, transform, _animator, _direction,
@@ -547,7 +715,16 @@ public class CPlayerSkill : MonoBehaviour
 
         if (skill.Type == ESkillType.Slam)
         {
-            _SPELL.UpdateSlam(_owner, _playerAttack, skill, state.normalizedTime);
+            if (skill is CLeviathanSkillSO)
+            {
+                _LEVIATHAN.UpdateFinisher(_owner, _playerAttack, state.normalizedTime);
+            }
+
+            else
+            {
+                _SPELL.UpdateSlam(_owner, _playerAttack, skill, state.normalizedTime);
+            }
+
             return;
         }
 
@@ -615,6 +792,12 @@ public class CPlayerSkill : MonoBehaviour
                 if (hit.opensCrownWindow)
                 {
                     _CROWN.OpenWindow();
+                }
+
+                // 콤보 마지막 단계의 마지막 피해(일반·W1 3타, W2·W3 4타)만 막타로 센다. 광역이어도 한 번이다.
+                if (_stepIndex == skill.Steps.Length - 1 && _nextHitIndex == step.hits.Length)
+                {
+                    _LEVIATHAN.AddStack();
                 }
             }
 
@@ -710,6 +893,7 @@ public class CPlayerSkill : MonoBehaviour
         }
 
         _SPELL.End();
+        _LEVIATHAN.End();
 
         if (_currentSkill != null)
         {

@@ -1285,4 +1285,28 @@ public class CSlothBoss : CEnemy
                 
     }
 
+    private float _initialAtkTime = -1f;
+
+    /// <summary>
+    /// 다시 소환할 때 AI · 공격 상태를 처음(Start 직후)과 같게 되돌립니다. 체력 · 상태이상은 부르는 쪽(CBossSummoner)이 되돌립니다.
+    /// </summary>
+    public void ResetBattleState()
+    {
+        // 공격 대기 시간(_atkTime)은 공격 중에 0 으로 바뀌므로 첫 소환 때(전투 전) 값을 기억해 두고 되돌림
+        if (_initialAtkTime < 0f) _initialAtkTime = _atkTime;
+        _atkTime = _initialAtkTime;
+
+        _currentState = _bossState;
+        _atkTimer = 0f;
+        _delayTimer = 0f;
+        _onAttack = false;
+        _isNormal = false;
+        _isSub = false;
+        _isMain = false;
+        normalAtk = 0;
+        subAtk = 0;
+        mainAtk = 0;
+        if (_player != null) _target = _player.transform;
+    }
+
 }
