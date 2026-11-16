@@ -1708,6 +1708,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _audioMixer: {fileID: 24100000, guid: 2b4ec46212f673044bd291e3a223d03f, type: 2}
+  _currentStage: 0
   _gameShutdown: {fileID: 906784629}
   _screenChange: {fileID: 121787884}
   _screenChangeText: {fileID: 1971422318}
@@ -4916,6 +4917,11 @@ MonoBehaviour:
     skill: {fileID: 11400000, guid: e8a6e0fcc0e57044cb72a765948d7b1d, type: 2}
   - input: {fileID: 7580534641416888525, guid: 9614690e9b07cd14abd0a8014fcfd61d, type: 3}
     skill: {fileID: 11400000, guid: fda9d9446fd1afc4b9e2d2709d28f43d, type: 2}
+  _quickslotInputs:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   _maxMp: 150
   _mpPerBasicHit: 5
   _passive:
@@ -9076,7 +9082,13 @@ MonoBehaviour:
     triggerName: bAttack03
   - patternName: "\uB3C4\uB11B"
     triggerName: bAttack04
-  _repeatInterval: 7
+  - patternName: "\uC77C\uC815\uB300\uBBF8\uC9C0\uB123\uAE30"
+    triggerName: pAttack01
+  - patternName: "\uC548\uC804\uC790\uB9AC"
+    triggerName: pAttack02
+  - patternName: "\uC804\uAE30\uAE30\uB465\uB808\uC774\uC800"
+    triggerName: pAttack03
+  _repeatInterval: 10
 --- !u!4 &2060200724
 Transform:
   m_ObjectHideFlags: 0

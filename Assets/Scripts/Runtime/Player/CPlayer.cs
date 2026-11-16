@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(CPlayerMovement), typeof(CPlayerSkill))]
@@ -45,6 +46,7 @@ public class CPlayer : CUnit
     private List<CStatus> _equipmentStatus = new List<CStatus>();
     private bool _actionsBlocked;
     private bool _isInvincible;
+    private bool _isInputLocked;
 
     protected float _hpMaxBaseline = 1;
     protected float _attackBaseline = 0;
@@ -65,6 +67,7 @@ public class CPlayer : CUnit
     protected override IReadOnlyList<CStatus> EquipmentStatusForEffects => _equipmentStatus;
     public CPlayerPassive Passive => _passive;
     public IReadOnlyList<CSkillSO> Skills => _skill.RegisteredSkills;
+    public bool IsInputLocked => _isInputLocked;
 
     public Dictionary<EEquipmentSlot, CItemEquipment> Equipment
     {
@@ -393,6 +396,19 @@ public class CPlayer : CUnit
     }
 
     /// <summary>
+    /// 대화·연출 중 공격, 스킬, 대쉬, 이동, 퀵슬롯 입력을 잠그거나 풉니다. 잠글 때 이동 목표를 멈춥니다.
+    /// </summary>
+    public void SetInputLocked(bool isLocked)
+    {
+        _isInputLocked = isLocked;
+
+        if (isLocked && _movement != null)
+        {
+            _movement.Stop();
+        }
+    }
+
+    /// <summary>
     /// 무적 상태가 아닐 때 체력 피해를 적용합니다.
     /// </summary>
 
@@ -413,6 +429,14 @@ public class CPlayer : CUnit
     public void RecoverBasicAttackMp()
     {
         CurrentMp = Mathf.Min(CurrentMp + _mpPerBasicHit, _maxMp);
+    }
+
+    /// <summary>
+    /// 이어 받은 현재 MP 를 그대로 넣습니다 (맵 이동). 0 ~ 최대 MP 로 자릅니다.
+    /// </summary>
+    public void RestoreMp(int value)
+    {
+        CurrentMp = Mathf.Clamp(value, 0, _maxMp);
     }
 
     internal bool TrySpendMp(int cost)
@@ -581,16 +605,19 @@ public class CPlayer : CUnit
 
         UpdateQuickslotInput();
 
-        if (_dashInput.action.WasPressedThisFrame() && _skill.TryDash(GetPointerDirection()))
+        if (!_isInputLocked && _dashInput.action.WasPressedThisFrame() && _skill.TryDash(GetPointerDirection()))
         {
             return;
         }
 
         bool isCameraBlocked = _testCamera != null && _testCamera.IsInputBlocked;
+        bool canAct = !_isInputLocked && !isCameraBlocked;
+        // UI 위에서 누른 마우스 입력만 막는다. 같은 액션의 키보드 입력(C)은 그대로 둔다.
+        bool isPointerOverUi = EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
 
-        if (!isCameraBlocked)
+        if (canAct)
         {
-            if (_attackInput.action.WasPressedThisFrame())
+            if (_attackInput.action.WasPressedThisFrame() && !(isPointerOverUi && IsPointerControl(_attackInput.action)))
             {
                 _skill.TryAttack(GetPointerDirection());
             }
@@ -614,12 +641,18 @@ public class CPlayer : CUnit
             return;
         }
 
-        if (!isCameraBlocked && _moveClick.action.IsPressed() && TryGetPointerGroundPosition(out Vector3 position))
+        if (canAct && !isPointerOverUi && _moveClick.action.IsPressed() &&
+            TryGetPointerGroundPosition(out Vector3 position))
         {
             _movement.SetMoveTarget(position);
         }
 
         _movement.Move(_movementMultiply);
+    }
+
+    private static bool IsPointerControl(InputAction action)
+    {
+        return action.activeControl != null && action.activeControl.device is Pointer;
     }
 
     private Vector3 GetPointerDirection()
@@ -655,7 +688,7 @@ public class CPlayer : CUnit
 
     private void UpdateQuickslotInput()
     {
-        if (_inventory == null || _quickslotInputs == null || Time.timeScale <= 0f) return;
+        if (_isInputLocked || _inventory == null || _quickslotInputs == null || Time.timeScale <= 0f) return;
 
         bool isBattle = CGameManager.Instance.BattleState != EBattleState.None;
         int count = Mathf.Min(_quickslotInputs.Length, _inventory.QuickSlotLength);

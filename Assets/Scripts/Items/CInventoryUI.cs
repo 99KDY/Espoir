@@ -24,6 +24,8 @@ public class CInventoryUI : MonoBehaviour
     [SerializeField] private Image _braceletIcon;
     [SerializeField] private Image _ringIcon;
     [SerializeField] private bool _isBattle;
+    [Tooltip("CPlayer 의 Input System 퀵슬롯 입력을 쓰는 씬에서는 꺼서 1~4 키가 두 번 처리되지 않게 한다.")]
+    [SerializeField] private bool _useLegacyQuickSlotKeys = true;
     [SerializeField] private Image[] _hudQuickSlotIcons = new Image[4];
     [SerializeField] private TMP_Text[] _hudQuickSlotQuantities = new TMP_Text[4];
     [SerializeField] private TMP_Text[] _hudQuickSlotCooldownTexts = new TMP_Text[4];
@@ -52,6 +54,9 @@ public class CInventoryUI : MonoBehaviour
     private TMP_Text[] _cooldownTexts;
     private Image[] _quickCooldownFills;
     private TMP_Text[] _quickCooldownTexts;
+
+    /// <summary>인벤토리 창이 화면에 열려 있는지 확인합니다.</summary>
+    public bool IsOpen => _InventoryPanel.activeInHierarchy;
 
     private void Awake()
     {
@@ -134,7 +139,7 @@ public class CInventoryUI : MonoBehaviour
 
     private void Update()
     {
-        HandleQuickSlotKeys();
+        if (_useLegacyQuickSlotKeys) HandleQuickSlotKeys();
         RefreshCooldownDisplays();
 
         if (Input.GetKeyUp(KeyCode.I))

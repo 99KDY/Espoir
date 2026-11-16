@@ -564,6 +564,47 @@ public class CInventory : MonoBehaviour
         return false;
     }
 
+    // 맵 이동
+
+    /// <summary>
+    /// 맵 이동용: 가방 칸(아이템 객체 그대로) · 퀵슬롯 · 소모품 쿨타임 종료 시각(Time.time 기준) · 골드를 꺼냅니다.
+    /// </summary>
+    public void ExportState(List<CItem> items, int[] quickSlotIds, Dictionary<int, float> cooldownEndTimes, out int gold)
+    {
+        items.Clear();
+        items.AddRange(_items);
+        Array.Copy(_quickSlotIds, quickSlotIds, Mathf.Min(_quickSlotIds.Length, quickSlotIds.Length));
+        cooldownEndTimes.Clear();
+        foreach (KeyValuePair<int, float> pair in _cooldownEndTimes)
+        {
+            cooldownEndTimes[pair.Key] = pair.Value;
+        }
+
+        gold = _gold;
+    }
+
+    /// <summary>
+    /// 맵 이동용: ExportState 로 꺼낸 상태를 그대로 넣고 UI 에 알립니다.
+    /// </summary>
+    public void ImportState(IReadOnlyList<CItem> items, int[] quickSlotIds, Dictionary<int, float> cooldownEndTimes, int gold)
+    {
+        for (int i = 0; i < _items.Count; i++)
+        {
+            _items[i] = i < items.Count ? items[i] : null;
+        }
+
+        Array.Copy(quickSlotIds, _quickSlotIds, Mathf.Min(_quickSlotIds.Length, quickSlotIds.Length));
+        _cooldownEndTimes.Clear();
+        foreach (KeyValuePair<int, float> pair in cooldownEndTimes)
+        {
+            _cooldownEndTimes[pair.Key] = pair.Value;
+        }
+
+        _gold = gold;
+        OnInventoryChanged?.Invoke();
+        OnGoldChanged?.Invoke();
+    }
+
     // 내부 검사
 
     private bool IsValidSlot(int slotIndex)

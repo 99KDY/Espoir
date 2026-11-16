@@ -13,7 +13,11 @@ public enum ESceneId
     // 10 ~ 19 : 마을
     Lobby = 10,
     // 20 ~ 29 : 전투
-    BattlePigritia = 20
+    BattlePigritia = 20,
+    // 30 ~ 39 : 월드 맵 (사막 · 달빛 장미 정원 · 천공의 탑)
+    Desert = 30,
+    Chapter2 = 31,
+    Chapter3 = 32
 }
 
 [Serializable]
@@ -158,11 +162,20 @@ public partial class CSceneFlowManager : MonoBehaviour
         {
             yield return null;
         }
+        CaptureLeavingPlayer();
         op.allowSceneActivation = true;
+        while (op.isDone == false)
+        {
+            yield return null;
+        }
 
         yield return null;
-        // StartCoroutine(Co_FadeTo(0f, _fadeDuration));
         SyncCursorToCurrentScene();
+        if (_isTraveling)
+        {
+            PlaceArrivedPlayer(id);
+            yield return StartCoroutine(Co_FadeTo(0f, _fadeDuration));
+        }
 
         CLogger.Success($"씬 로드 -> {sceneName}");
     }
