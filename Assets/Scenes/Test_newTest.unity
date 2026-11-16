@@ -283,13 +283,14 @@ MonoBehaviour:
   _baseDefence: 0
   _debugLog: 0
   _statusEffectAnchor: {fileID: 0}
-  _radius: 1
+  _statusEffectOffset: {x: 0, y: 0, z: 0}
+  _statusEffectRadius: 1
   _targetStatSO: {fileID: 0}
   _drops: []
   _player: {fileID: 472875770}
-  _tartgetMask:
+  _targetMask:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 0
   _sightCheck: 1
   _obtacleMask:
     serializedVersion: 2
@@ -2233,7 +2234,8 @@ MonoBehaviour:
   _baseDefence: 0
   _debugLog: 0
   _statusEffectAnchor: {fileID: 0}
-  _radius: 1
+  _statusEffectOffset: {x: 0, y: 0, z: 0}
+  _statusEffectRadius: 1
   _debugSet: 0
   _inventory: {fileID: 0}
   _mainCamera: {fileID: 976528954}
@@ -2246,6 +2248,11 @@ MonoBehaviour:
   _attackInput: {fileID: -7463943481848816300, guid: 9614690e9b07cd14abd0a8014fcfd61d, type: 3}
   _dashInput: {fileID: 4067803648963240158, guid: 9614690e9b07cd14abd0a8014fcfd61d, type: 3}
   _skillSlots: []
+  _quickslotInputs:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   _maxMp: 150
   _mpPerBasicHit: 5
   _passive:
@@ -3051,6 +3058,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 10
       objectReference: {fileID: 0}
+    - target: {fileID: 3536428649296106979, guid: fc44008c7d95e394abbb953b8b53d960, type: 3}
+      propertyPath: _animator
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 3639876103687620025, guid: fc44008c7d95e394abbb953b8b53d960, type: 3}
       propertyPath: m_Layer
       value: 10
@@ -3199,7 +3210,8 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 10
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 3536428649296106979, guid: fc44008c7d95e394abbb953b8b53d960, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 1929441329760321138, guid: fc44008c7d95e394abbb953b8b53d960, type: 3}
@@ -3241,7 +3253,8 @@ MonoBehaviour:
   _baseDefence: 0
   _debugLog: 0
   _statusEffectAnchor: {fileID: 0}
-  _radius: 1
+  _statusEffectOffset: {x: 0, y: 0, z: 0}
+  _statusEffectRadius: 1
   _targetStatSO: {fileID: 0}
   _drops: []
   _name: Skeleton
@@ -3523,6 +3536,7 @@ MonoBehaviour:
   _minDistance: 1
   _maxCount: 5
   _regenInterval: 3
+  _peaceTimerMax: 3
 --- !u!4 &1551322196
 Transform:
   m_ObjectHideFlags: 0

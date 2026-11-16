@@ -77,7 +77,7 @@ public class CSlothBoss : CEnemy
     private int _firstMain = Animator.StringToHash("pAttack01");
     private int _secondMain = Animator.StringToHash("pAttack02");
     private int _thirdMain = Animator.StringToHash("pAttack03");
-
+    private int _finalMain = Animator.StringToHash("pAttack04");
 
 
     #endregion
@@ -95,6 +95,8 @@ public class CSlothBoss : CEnemy
     private Vector3 _patternPos;
     private Vector3 _savePos;
 
+
+    private float _grogiDamage;
     private float _atkTimer;
     private float _delayTimer;
 
@@ -111,6 +113,7 @@ public class CSlothBoss : CEnemy
     private bool _isMain;
     private bool _isDead;
 
+    private CancellationTokenSource _cts;
 
 
     #endregion
@@ -147,6 +150,13 @@ public class CSlothBoss : CEnemy
         _previewPattern = this.GetComponentInChildren<CPreviewPattern>();
         _animator = this.GetComponent<Animator>();
 
+    }
+
+    private void OnDestroy()
+    {
+        _cts?.Cancel();
+        _cts?.Dispose();
+        
     }
 
     protected override void Start()
@@ -201,7 +211,7 @@ public class CSlothBoss : CEnemy
 
                 float currentHP = this.HpCurrent;
 
-                if(currentHP < this.HpMax * 0.7f && _mainCount == 0)
+                if(currentHP < this.HpMax * 0.8f && _mainCount == 0)
                 {
                     _isSub = false;
                     _isMain = false;
@@ -217,8 +227,22 @@ public class CSlothBoss : CEnemy
 
                 }
 
+                else if (currentHP < this.HpMax * 0.6f && _mainCount == 1)
+                {
+                    if (_delayTimer > _returnDelayTime)
+                    {
+                        _isMain = true;
+                        mainAtk = 0;
+                        _currentState = ESlothBossState.MainAttack;
+                        _delayTimer = 0;
 
-                else if(currentHP < this.HpMax * 0.4f && _mainCount == 1)
+                    }
+
+                }
+
+
+
+                else if (currentHP < this.HpMax * 0.4f && _mainCount == 2)
                 {
                     _isSub = false;
                     _isMain = false;
@@ -233,7 +257,7 @@ public class CSlothBoss : CEnemy
 
                 }
 
-                else if(currentHP < this.HpMax * 0.2f && _mainCount == 2)
+                else if (currentHP < this.HpMax * 0.2f && _mainCount == 3)
                 {
                     if (_delayTimer > _returnDelayTime)
                     {
@@ -245,6 +269,7 @@ public class CSlothBoss : CEnemy
                     }
 
                 }
+
 
                 else
                 {
@@ -419,6 +444,10 @@ public class CSlothBoss : CEnemy
                 _animator.SetTrigger(_thirdMain);
                 LightningBeamAttack().Forget();
                 break;
+
+            case 3:
+                _animator.SetTrigger(_finalMain);
+                break;
         }
 
 
@@ -543,8 +572,6 @@ public class CSlothBoss : CEnemy
                 CLogger.Log($"{player.name}의 현재 체력 : {player.HpCurrent}");
 
             }
-
-
 
 
         }
@@ -930,7 +957,7 @@ public class CSlothBoss : CEnemy
 
         if (_previewPattern != null)
         {
-            _previewPattern.ShowCirclePattern(100, 40f);
+            _previewPattern.ShowCirclePattern(100, 30f);
         }
 
 
@@ -973,6 +1000,61 @@ public class CSlothBoss : CEnemy
 
         }
 
+
+    }
+
+    private void FreezeAnime()
+    {
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
+
+        FreezeAnimation(6f,_cts.Token).Forget();
+
+    }
+
+    private async UniTaskVoid FreezeAnimation(float duration, CancellationToken cancelAnima)
+    {
+        _animator.speed = 0f;
+
+        CPlayer player = GetComponent<CPlayer>();
+
+        SDamageInfo recieveDamage = new SDamageInfo(player.Attack);
+
+        float bossLastHP = this.HpCurrent;
+
+        
+        try
+        {
+            this.OnHit(player, recieveDamage);
+
+            await UniTask.Delay
+                (
+                    TimeSpan.FromSeconds(6),
+                    ignoreTimeScale: true,
+                    cancellationToken: this.GetCancellationTokenOnDestroy()
+                );
+
+            float bossCurrentHP = this.HpCurrent;
+
+            if((bossLastHP - bossCurrentHP) >= bossLastHP * 0.05)
+            {
+                _animator.SetTrigger(_fisrtNorm);
+            }
+        }
+
+        catch(OperationCanceledException)
+        {
+            return;
+        }
+
+        finally
+        {
+            if(this != null )
+            {
+                _animator.speed = 1f;
+            }
+
+        }
 
     }
 
@@ -1041,8 +1123,10 @@ public class CSlothBoss : CEnemy
 
             if (isHit == true)
             {
-                SDamageInfo damageToPlayer = new SDamageInfo(0.8f, true, ERatioSwitch.ByCurrent);
+                SDamageInfo damageToPlayer = new SDamageInfo(1f, true, ERatioSwitch.ByMax);
                 float lastHp = player.HpCurrent;
+
+                player.OnHit(this, damageToPlayer);
 
                 CLogger.Log($"{player.name}의 현재 체력 : {player.HpCurrent}");
             }    
@@ -1130,6 +1214,8 @@ public class CSlothBoss : CEnemy
             {
                 SDamageInfo damageToPlayer = new SDamageInfo(0.3f, true, ERatioSwitch.ByCurrent);
                 float lastHp = player.HpCurrent;
+
+                player.OnHit(this, damageToPlayer);
 
                 CLogger.Log($"{player.name}의 현재 체력 : {player.HpCurrent}");
             }
