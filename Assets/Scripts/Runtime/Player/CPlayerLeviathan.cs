@@ -134,11 +134,11 @@ public class CPlayerLeviathan
         }
     }
 
-    internal void End()
+    internal void End(bool canceled = false)
     {
         if (_state != ELeviathanState.Finisher) return;
 
-        if (_nextHit < _finisherHitCount)
+        if (!canceled && _nextHit < _finisherHitCount)
         {
             CLogger.Warn($"레비아탄 피니쉬가 {_nextHit}/{_finisherHitCount}타에서 끊겼습니다.");
         }
