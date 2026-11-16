@@ -161,6 +161,7 @@ public partial class CStatus
 
     public int Id => _id;
     public float Duration => _duration;
+    public float BaseTimer => _baseTimer;
     public string Name => _name;
     public string Description => _description;
     public string Tooltip => _tooltip;
@@ -312,6 +313,14 @@ public partial class CStatus
     {
         CStatus status = new CStatus(id, duration, stack);
         return status;
+    }
+
+    /// <summary>남은 시간과 시간 표시의 기준을 복원합니다.</summary>
+    public void RestoreTimer(float duration, float baseTimer)
+    {
+        _duration = duration;
+        _baseTimer = baseTimer;
+        _isPermanent = baseTimer <= 0f;
     }
 
     public void ResetTimer(float t = -1)

@@ -5,7 +5,7 @@ using UnityEngine.InputSystem.Controls;
 
 /// <summary>
 /// NPC 선택, 대사와 선택지 진행, 대화 종료 후 이동 및 소환을 처리합니다.
-/// 대화 중에는 플레이어 입력과 기본 메뉴를 막고 HUD와 카메라를 전환합니다.
+/// 대화 중에는 플레이어 입력, 인벤토리와 기본 메뉴를 막고 HUD와 카메라를 전환합니다.
 /// 입력이 중복되지 않도록 CDialogueManager와 함께 사용하지 않습니다.
 /// </summary>
 [DefaultExecutionOrder(50)]
@@ -68,6 +68,9 @@ public class CTalkPresenter : MonoBehaviour
     private bool _isPicking;
     private string _pendingChoice;
     private bool _wasLocked;
+    private CInventory _talkInventory;
+    private CInventoryUI _inventoryUI;
+    private bool _couldOpenInventory;
     private bool _changedGameState;
     private float _travelTime = -1f;
     private string _travelDestination;
@@ -257,6 +260,9 @@ public class CTalkPresenter : MonoBehaviour
         CGameManager manager = CGameManager.Instance;
         if (manager != null && manager.GameState != EGameState.Idle) return false;
 
+        if (_inventoryUI == null) _inventoryUI = FindFirstObjectByType<CInventoryUI>();
+        if (_inventoryUI != null && _inventoryUI.IsOpen) return false;
+
         _isOpen = true;
         _HISTORY.Clear();
         _HISTORY_IS_MINE.Clear();
@@ -267,6 +273,13 @@ public class CTalkPresenter : MonoBehaviour
         {
             _wasLocked = _player.IsInputLocked;
             _player.SetInputLocked(true);
+            _talkInventory = _player.Inventory;
+
+            if (_talkInventory != null)
+            {
+                _couldOpenInventory = _talkInventory.CanOpenInventory;
+                _talkInventory.CanOpenInventory = false;
+            }
         }
 
         if (manager != null)
@@ -301,6 +314,8 @@ public class CTalkPresenter : MonoBehaviour
         if (_talkCamera != null) _talkCamera.EndTalk();
         if (_current != null) _current.SetTalker(null);
         if (_player != null) _player.SetInputLocked(_wasLocked);
+        if (_talkInventory != null) _talkInventory.CanOpenInventory = _couldOpenInventory;
+        _talkInventory = null;
 
         CGameManager manager = CGameManager.Instance;
 

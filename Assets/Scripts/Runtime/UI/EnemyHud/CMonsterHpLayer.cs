@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -16,17 +16,17 @@ public class CMonsterHpLayer : MonoBehaviour
     [SerializeField] private int _poolSize = 12;
 
     [Header("표시")]
-    [Tooltip("몬스터 이름 (게임 데이터에 몬스터 이름이 없어 웹과 같은 이름을 씀)")]
+    [Tooltip("체력 표시 위에 출력할 몬스터 이름")]
     [SerializeField] private string _monsterName = "모래 떠돌이";
-    [Tooltip("콜라이더 꼭대기에서 위로 (m, 웹 캡슐 꼭대기 + 0.3)")]
+    [Tooltip("콜라이더 꼭대기에서 체력 표시까지의 높이 (m)")]
     [SerializeField] private float _heightAboveTop = 0.3f;
     [SerializeField] private float _defaultHeight = 2f;
-    [Tooltip("화면 밖 판정 (웹: NDC 1.15 밖이면 숨김)")]
+    [Tooltip("화면 가장자리를 1로 보는 표시 범위")]
     [SerializeField] private float _screenMargin = 1.15f;
     [Tooltip("새 몬스터를 찾는 간격 (s)")]
     [SerializeField] private float _scanInterval = 0.25f;
 
-    [Header("맞음 효과 (웹 hitFx)")]
+    [Header("피격 효과")]
     [SerializeField] private Vector3 _sparkColor = new Vector3(1.3f, 1.02f, 0.74f);
 
     private readonly List<CMonsterHpView> _ACTIVE = new List<CMonsterHpView>();

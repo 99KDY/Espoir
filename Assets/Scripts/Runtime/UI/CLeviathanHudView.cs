@@ -15,7 +15,7 @@ public class CLeviathanHudView : MonoBehaviour
     {
         public float start;
         public float duration;
-        public readonly List<float> hits = new List<float>();
+        public readonly List<float> HITS = new List<float>();
         public float caAmp;
         public bool isCaHit;
         public bool isCaRed;
@@ -172,7 +172,7 @@ public class CLeviathanHudView : MonoBehaviour
         {
             // 강화 상태가 시작될 때 섬광과 색 변화를 재생한다.
             CTrack cast = AddTrack(now, 1.4f);
-            cast.hits.Add(0.05f);
+            cast.HITS.Add(0.05f);
             cast.glitch = 0.6f;
             cast.caAmp = 10f;
             cast.isCaHit = true;
@@ -208,7 +208,7 @@ public class CLeviathanHudView : MonoBehaviour
             EndGrow();
             HideCount();
             CTrack back = AddTrack(now, 0.5f);
-            back.hits.Add(0.05f);
+            back.HITS.Add(0.05f);
             back.glitch = 1f;
             back.caAmp = 10f;
             _stateOffAt = now + 0.35f;
@@ -346,16 +346,16 @@ public class CLeviathanHudView : MonoBehaviour
             // 중첩이 늘면 숫자 확대와 섬광을 함께 재생한다.
             SetCount(stack.ToString(CultureInfo.InvariantCulture), stack >= _leviathan.MaxStack, _countSize, true, now);
             CTrack hit = AddTrack(now, 0.34f);
-            hit.hits.Add(0.01f);
+            hit.HITS.Add(0.01f);
             hit.caAmp = 6f;
             hit.isCaHit = true;
             hit.isCaRed = true;
             hit.shake = 4f;
             CTrack flash = AddTrack(now, 0.25f);
-            flash.hits.Add(0f);
+            flash.HITS.Add(0f);
             flash.white = 1f;
             CTrack ghost = AddTrack(now, 0.45f);
-            ghost.hits.Add(0f);
+            ghost.HITS.Add(0f);
             ghost.ghost = 1f;
 
             if (_leviathan.IsEnhanced)
@@ -394,7 +394,7 @@ public class CLeviathanHudView : MonoBehaviour
 
         for (int i = _shownHits; i < done; i++)
         {
-            if (_growTrack != null) _growTrack.hits.Add(now - _growTrack.start);
+            if (_growTrack != null) _growTrack.HITS.Add(now - _growTrack.start);
         }
 
         _shownHits = done;
@@ -403,9 +403,9 @@ public class CLeviathanHudView : MonoBehaviour
         SetCount((total - done + 1).ToString(CultureInfo.InvariantCulture), isLast, _finisherCountSize, false, now);
         if (isLast)
         {
-            CTrack z8 = AddTrack(now, 0.5f);
-            z8.hits.Add(0f);
-            z8.white = 2.5f;
+            CTrack lastHitFlash = AddTrack(now, 0.5f);
+            lastHitFlash.HITS.Add(0f);
+            lastHitFlash.white = 2.5f;
         }
     }
 
@@ -639,11 +639,11 @@ public class CLeviathanHudView : MonoBehaviour
             float e = Env(tt, tr.duration);
             float h = 0f;
             int k = 0;
-            for (int j = 0; j < tr.hits.Count; j++)
+            for (int j = 0; j < tr.HITS.Count; j++)
             {
-                if (tt < tr.hits[j]) continue;
+                if (tt < tr.HITS[j]) continue;
 
-                h += Mathf.Exp(-(tt - tr.hits[j]) * _HIT_DECAY);
+                h += Mathf.Exp(-(tt - tr.HITS[j]) * _HIT_DECAY);
                 k++;
             }
 
@@ -684,9 +684,9 @@ public class CLeviathanHudView : MonoBehaviour
         s.brightness = 1f + white;
         s.ca = ca;
         s.isRed = isRed;
-            s.shake = shake > 0.05f
-                ? new Vector2(Random.Range(-1f, 1f) * shake, Random.Range(-1f, 1f) * shake * 0.7f)
-                : Vector2.zero;
+        s.shake = shake > 0.05f
+            ? new Vector2(Random.Range(-1f, 1f) * shake, Random.Range(-1f, 1f) * shake * 0.7f)
+            : Vector2.zero;
         if (hasGhost)
         {
             // R 슬롯을 중심으로 잔상 세 장의 크기와 투명도를 달리한다.

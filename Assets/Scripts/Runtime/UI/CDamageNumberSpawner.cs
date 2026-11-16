@@ -25,13 +25,13 @@ public class CDamageNumberSpawner : MonoBehaviour
     {
         [Tooltip("글자 크기 (1080 기준 px)")]
         public float fontSize;
-        [Tooltip("면 위 색 c0 (웹 셰이더에 들어간 값 그대로 = 화면 sRGB 값)")]
+        [Tooltip("글자 위쪽 색상 (sRGB)")]
         public Vector4 faceTop;
-        [Tooltip("면 아래 색 c1")]
+        [Tooltip("글자 아래쪽 색상")]
         public Vector4 faceBottom;
-        [Tooltip("그늘 rgb + 세기 (웹 P57L 셋째 값)")]
+        [Tooltip("음영 색상 (RGB)과 세기 (W)")]
         public Vector4 shade;
-        [Tooltip("훑는 빛 색 c2 (HDR)")]
+        [Tooltip("훑는 빛 색상 (HDR)")]
         public Vector4 sweep;
     }
 
@@ -54,7 +54,7 @@ public class CDamageNumberSpawner : MonoBehaviour
         public RectTransform moteRect;
         public Image mote;
         public RenderTexture glyph;
-        public readonly char[] chars = new char[_MAX_CHARS];
+        public readonly char[] CHARS = new char[_MAX_CHARS];
         public Transform follow;
         public Vector3 anchor;
         public float height;
@@ -87,27 +87,27 @@ public class CDamageNumberSpawner : MonoBehaviour
     [SerializeField] private Material _flatMaterial;
     [SerializeField] private Material _moteMaterial;
 
-    [Header("단계별 모양 (웹 dmg2.js P57L · H)")]
+    [Header("피해 종류별 모양")]
     [SerializeField] private STierStyle _normal;
     [SerializeField] private STierStyle _critical;
     [SerializeField] private STierStyle _taken;
     [SerializeField] private float _takenCriticalSizeBonus = 4f;
 
-    [Header("글자 그림 (웹 gl.js glyphTex)")]
-    [Tooltip("글자 둘레 여백 = 크기 배수 (웹 0.55)")]
+    [Header("글자 마스크")]
+    [Tooltip("글자 둘레 여백 (글자 크기 배수)")]
     [SerializeField] private float _padding = 0.55f;
-    [Tooltip("글자 줄 높이 = 크기 배수 (웹 1.35)")]
+    [Tooltip("글자 줄 높이 (글자 크기 배수)")]
     [SerializeField] private float _lineHeight = 1.35f;
-    [Tooltip("조금 흐린 글자 σ = max(최소, 크기 배수) (웹 1.2 · 0.06)")]
+    [Tooltip("작은 흐림 반경: X는 최소 픽셀, Y는 글자 크기 배수. 둘 중 큰 값을 사용")]
     [SerializeField] private Vector2 _blurSmall = new Vector2(1.2f, 0.06f);
-    [Tooltip("많이 흐린 글자 σ = max(최소, 크기 배수) (웹 3 · 0.22)")]
+    [Tooltip("큰 흐림 반경: X는 최소 픽셀, Y는 글자 크기 배수. 둘 중 큰 값을 사용")]
     [SerializeField] private Vector2 _blurLarge = new Vector2(3f, 0.22f);
-    [Tooltip("굽는 해상도 배수 (웹 2)")]
+    [Tooltip("글자 마스크 해상도 배수")]
     [SerializeField] private float _bakeScale = 2f;
-    [Tooltip("글자를 줄 가운데에서 아래로 (크기 배수, 웹 0.05)")]
+    [Tooltip("글자를 줄 가운데에서 아래로 옮기는 거리 (글자 크기 배수)")]
     [SerializeField] private float _baselineShift = 0.05f;
 
-    [Header("움직임 (웹 spawn57)")]
+    [Header("숫자 움직임")]
     [SerializeField] private float _life = 1.25f;
     [SerializeField] private float _riseFast = 14f;
     [SerializeField] private float _riseFastTime = 0.25f;
@@ -118,7 +118,7 @@ public class CDamageNumberSpawner : MonoBehaviour
     [SerializeField, Range(0f, 1f)] private float _fadeOutFrom = 0.74f;
     [SerializeField] private float _sweepTime = 0.18f;
 
-    [Header("치명 반짝 한 점 (웹 glint: mote)")]
+    [Header("치명타 섬광")]
     [SerializeField] private float _moteDelay = 0.12f;
     [SerializeField] private float _moteLife = 0.42f;
     [SerializeField] private float _moteSize = 4.5f;
@@ -160,8 +160,8 @@ public class CDamageNumberSpawner : MonoBehaviour
         if (hidden == null) hidden = _template.gameObject.AddComponent<Canvas>();
         hidden.enabled = false;
         // 가장 긴 숫자로 한 번 만들어 TMP 내부 버퍼를 미리 키워 둔다.
-        int length = FormatNumber(_items[0].chars, int.MaxValue, true);
-        _template.SetCharArray(_items[0].chars, 0, length);
+        int length = FormatNumber(_items[0].CHARS, int.MaxValue, true);
+        _template.SetCharArray(_items[0].CHARS, 0, length);
         _template.ForceMeshUpdate(false, true);
     }
 
@@ -271,11 +271,11 @@ public class CDamageNumberSpawner : MonoBehaviour
     {
         STierStyle style = GetStyle(item.tier);
         float size = style.fontSize + (isTaken && isCritical ? _takenCriticalSizeBonus : 0f);
-        int length = FormatNumber(item.chars, value, isTaken);
+        int length = FormatNumber(item.CHARS, value, isTaken);
 
         // 글자 메쉬 (TMP, 화면에는 안 그림)
         _template.fontSize = size;
-        _template.SetCharArray(item.chars, 0, length);
+        _template.SetCharArray(item.CHARS, 0, length);
         _template.ForceMeshUpdate(false, true);
         Mesh mesh = _template.mesh;
         float textWidth = _template.preferredWidth;
@@ -366,7 +366,7 @@ public class CDamageNumberSpawner : MonoBehaviour
         bool isVisible = _camera != null && screen.z > 0f;
         Vector2 basePos = new Vector2(screen.x / scaleFactor + item.offset.x, screen.y / scaleFactor + item.offset.y);
 
-        // spawn57: y = 14·easeOut(t/0.25) + 10·k (주는 피해는 위로, 받는 피해는 아래로), 크기 0.9 + 0.1·easeOutBack(t/0.22)
+        // 초반 상승과 남은 수명의 이동량을 합친다. 주는 피해는 위로, 받는 피해는 아래로 움직인다.
         float direction = item.tier == ETier.Taken ? -1f : 1f;
         float rise = _riseFast * EaseOut(t / _riseFastTime) + _riseSlow * k;
         item.rect.anchoredPosition = basePos + new Vector2(0f, direction * rise);

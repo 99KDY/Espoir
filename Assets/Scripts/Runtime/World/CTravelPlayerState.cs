@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using UnityEngine;
 
 /// <summary>
 /// 맵 이동 동안 플레이어 상태를 들고 가는 데이터입니다. 떠나는 씬의 플레이어에서 읽고(Capture) 새 씬의 플레이어에 넣습니다(Apply).
@@ -12,6 +11,7 @@ public class CTravelPlayerState
     {
         public int id;
         public float duration;
+        public float baseTimer;
         public int stack;
         public bool isPermanent;
         public bool isStackRemoving;
@@ -74,8 +74,15 @@ public class CTravelPlayerState
                 continue;
             }
 
-            _STATUSES.Add(new SStatusState { id = status.Id, duration = status.Duration, stack = status.Stack,
-                isPermanent = status.IsPermanent, isStackRemoving = status.IsStackRemoving });
+            _STATUSES.Add(new SStatusState
+            {
+                id = status.Id,
+                duration = status.Duration,
+                baseTimer = status.BaseTimer,
+                stack = status.Stack,
+                isPermanent = status.IsPermanent,
+                isStackRemoving = status.IsStackRemoving
+            });
         }
 
         CPlayerSkill skill = player.GetComponent<CPlayerSkill>();
@@ -98,7 +105,7 @@ public class CTravelPlayerState
 
         player.EquipmentResync();
 
-        // 상태이상: SO 기본 시간으로 만든 뒤(중첩이 줄어드는 주기 유지) 남은 시간 · 중첩 · 줄어드는 중인지를 그대로
+        // SO의 감소 주기를 유지하고, 남은 시간과 표시 기준은 이동 전 값으로 복원한다.
         foreach (SStatusState s in _STATUSES)
         {
             int before = player.Status.Count;
@@ -108,7 +115,7 @@ public class CTravelPlayerState
             if (added == null) continue;
             added.Stack = s.stack;
             added.IsStackRemoving = s.isStackRemoving;
-            if (!s.isPermanent) added.ResetTimer(Mathf.Max(s.duration, 0.01f));
+            added.RestoreTimer(s.duration, s.baseTimer);
         }
 
         player.ResyncStatus();

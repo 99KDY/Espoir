@@ -46,7 +46,7 @@ public class CBossHpView : MonoBehaviour
     [SerializeField] private float _hideRange = 22f;
     [Tooltip("보스가 맞은 뒤 거리와 상관없이 보이는 시간 (s)")]
     [SerializeField] private float _engageHold = 10f;
-    [Tooltip("보스 HP 0 뒤 사망 표시를 유지하는 시간 (s, 웹 시연의 다시 나옴 4.2초)")]
+    [Tooltip("보스 HP가 0이 된 뒤 사망 표시를 유지하는 시간 (초)")]
     [SerializeField] private float _deadHold = 4.2f;
 
     [Header("요소")]
@@ -64,10 +64,10 @@ public class CBossHpView : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _tagText;
     [SerializeField] private CHudGlowFx _fx;
 
-    [Header("짜임 (웹 U35 실측)")]
+    [Header("요소 배치")]
     [SerializeField] private SBossLayout _layout;
 
-    [Header("글자 투명도 (웹 opacity)")]
+    [Header("글자 투명도")]
     [SerializeField] private float _titleAlpha = 0.8f;
     [SerializeField] private float _labelAlpha = 0.8f;
     [SerializeField] private float _lowThreshold = 0.25f;
