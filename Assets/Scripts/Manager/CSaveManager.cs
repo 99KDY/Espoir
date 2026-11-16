@@ -5,7 +5,7 @@ using UnityEngine;
 using static UnityEngine.Rendering.PostProcessing.SubpixelMorphologicalAntialiasing;
 
 [Flags]
-public enum SaveSlot
+public enum ESaveSlot
 {
     None = 0,
     Save01 = 1 << 0,
@@ -213,14 +213,31 @@ public class CSaveData
         this.BossClear = bossClear;
         this.PradonaPower = pradonaPower;
     }
+
+    public CSaveData
+    (
+        int version,
+        int currentStage,
+        int money,
+        List<CItem> inventory,
+        Dictionary<EEquipmentSlot, CItemEquipment> equipment,
+        int[] quickslot,
+        EQuestList availableQuest,
+        EQuestList actingQuest,
+        EQuestList completedQuest,
+        EBossClear bossClear,
+        EPradonaPower pradonaPower
+    ) : this(version, currentStage, money, inventory, equipment,
+        new List<int>(quickslot), availableQuest,actingQuest, completedQuest,
+        bossClear, pradonaPower) { }
 }
 
 public static class CSaveManager 
 {
-    private static int _maxSaveSlot = System.Enum.GetValues(typeof(SaveSlot)).Length - 1;
+    private static int _maxSaveSlot = System.Enum.GetValues(typeof(ESaveSlot)).Length - 1;
     private static CSaveData[] _saveData = new CSaveData[_maxSaveSlot];
     private static int[] _saveDataErrorCode = new int[_maxSaveSlot];
-    private static SaveSlot _saveFlag = SaveSlot.None;
+    private static ESaveSlot _saveFlag = ESaveSlot.None;
 
 #if UNITY_EDITOR
     private readonly static bool _isPersist = false;
@@ -235,7 +252,7 @@ public static class CSaveManager
         private set { _maxSaveSlot = value; }
     }
 
-    public static SaveSlot SaveFlag
+    public static ESaveSlot SaveFlag
     {
         get { return _saveFlag; }
         private set { _saveFlag = value; }
@@ -272,29 +289,29 @@ public static class CSaveManager
 
         // 파일을 다시 읽어야해서 캐시 지워두기
         _saveData[index] = null;
-        _saveFlag &= ~(SaveSlot)(1 << index);
+        _saveFlag &= ~(ESaveSlot)(1 << index);
 
         if (LoadData(index))
         {
             CLogger.Success($"{index} : 저장데이터 불러옴");
-            _saveFlag |= (SaveSlot)(1 << index);
+            _saveFlag |= (ESaveSlot)(1 << index);
             return;
         }
 
         if (_saveDataErrorCode[index] == -10 || _saveDataErrorCode[index] == -11)
         {
             CLogger.Log($"{index} : 저장데이터 새로고침 - 데이터 없음");
-            _saveFlag &= ~(SaveSlot)(1 << index);
+            _saveFlag &= ~(ESaveSlot)(1 << index);
             return;
         }
         else
         {
             CLogger.Error($"{index} : 저장데이터 새로고침 - 데이터 오류있지만, UI에서 처리하도록.");
-            _saveFlag |= (SaveSlot)(1 << index);
+            _saveFlag |= (ESaveSlot)(1 << index);
             return;
         }
     }
-    public static SaveSlot FindAvailableData()
+    public static ESaveSlot FindAvailableData()
     {
         for (int i = 0; i < _maxSaveSlot; i++)
         {
@@ -338,7 +355,7 @@ public static class CSaveManager
 
             _saveData[index] = data;
             _saveDataErrorCode[index] = 0;
-            _saveFlag |= (SaveSlot)(1 << index);
+            _saveFlag |= (ESaveSlot)(1 << index);
 
             CLogger.Success($"{index} : 저장 성공, 데이터 저장함");
             return true;
@@ -555,7 +572,7 @@ public static class CSaveManager
 
             _saveData[index] = null;
             _saveDataErrorCode[index] = -10;
-            _saveFlag &= ~(SaveSlot)(1 << index);
+            _saveFlag &= ~(ESaveSlot)(1 << index);
             return true;
         }
         catch (Exception ex)
@@ -572,8 +589,8 @@ public static class CSaveManager
             CLogger.Error($"{index} : 잘못된 슬롯 번호");
             return false;
         }
-        SaveSlot targetFlag = (SaveSlot)(1 << index);
-        if ((_saveFlag & targetFlag) != SaveSlot.None) return true;
+        ESaveSlot targetFlag = (ESaveSlot)(1 << index);
+        if ((_saveFlag & targetFlag) != ESaveSlot.None) return true;
         else return false;
     }
 
