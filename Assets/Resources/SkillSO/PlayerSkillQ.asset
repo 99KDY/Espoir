@@ -1060,12 +1060,44 @@ MonoBehaviour:
       m_RotationOrder: 4
     hits:
     - time: 0.22369511
-      damageRatio: 3.2
+      damageRatio: 0.64
       markedDamageRatio: 1.2
       hitStopDuration: 0
       offset: {x: 0, y: 1, z: 4}
       size: {x: 6, y: 4, z: 8}
       appliesMark: 1
+      opensCrownWindow: 0
+    - time: 0.24869511
+      damageRatio: 0.64
+      markedDamageRatio: 0
+      hitStopDuration: 0
+      offset: {x: 0, y: 1, z: 4}
+      size: {x: 6, y: 4, z: 8}
+      appliesMark: 0
+      opensCrownWindow: 0
+    - time: 0.27369511
+      damageRatio: 0.64
+      markedDamageRatio: 0
+      hitStopDuration: 0
+      offset: {x: 0, y: 1, z: 4}
+      size: {x: 6, y: 4, z: 8}
+      appliesMark: 0
+      opensCrownWindow: 0
+    - time: 0.29869511
+      damageRatio: 0.64
+      markedDamageRatio: 0
+      hitStopDuration: 0
+      offset: {x: 0, y: 1, z: 4}
+      size: {x: 6, y: 4, z: 8}
+      appliesMark: 0
+      opensCrownWindow: 0
+    - time: 0.32369511
+      damageRatio: 0.64
+      markedDamageRatio: 0
+      hitStopDuration: 0
+      offset: {x: 0, y: 1, z: 4}
+      size: {x: 6, y: 4, z: 8}
+      appliesMark: 0
       opensCrownWindow: 0
     effectPrefab: {fileID: 6702907012077593405, guid: 36ba073d507710a44ae0bb7c4afd54e3, type: 3}
     effectTime: 0

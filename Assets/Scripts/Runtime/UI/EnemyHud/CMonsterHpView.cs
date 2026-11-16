@@ -13,7 +13,7 @@ public class CMonsterHpView : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _name;
     [SerializeField] private TextMeshProUGUI _pct;
 
-    [Header("짜임 (웹 X24 실측, 기준점 위로 +)")]
+    [Header("요소 배치 (기준점 위쪽이 양수)")]
     [SerializeField] private float _barWidth = 92f;
     [SerializeField] private float _barHeight = 7f;
     [SerializeField] private float _barBottom = 8f;
@@ -153,6 +153,8 @@ public class CMonsterHpView : MonoBehaviour
         else if (_hd < _h) _hd = _h;
 
         _low.Set(!_isDead && _h < _lowThreshold ? 1f : 0f, now, 0.4f, 0f, CCssEasing.EASE);
+
+        if (!gameObject.activeInHierarchy) return;
 
         float pct = (float)System.Math.Ceiling((double)_target.HpCurrent / _target.HpMax * 100.0);
         if (!Mathf.Approximately(pct, _lastPct))

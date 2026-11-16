@@ -55,6 +55,9 @@ public class CInventoryUI : MonoBehaviour
     private Image[] _quickCooldownFills;
     private TMP_Text[] _quickCooldownTexts;
 
+    /// <summary>인벤토리 창이 화면에 열려 있는지 확인합니다.</summary>
+    public bool IsOpen => _InventoryPanel.activeInHierarchy;
+
     private void Awake()
     {
         _itemIcons = new Image[_inventory.MaxItemSlot];
