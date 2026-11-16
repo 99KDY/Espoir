@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -78,6 +78,7 @@ public partial class CSceneFlowManager
             if (leaving != null) leaving.SetInputLocked(wasLeavingInputLocked);
             _arrivingPlayer = null;
             _isTraveling = false;
+            if (_firstLoadFromTitle) _firstLoadFromTitle = false;
         }
     }
 
@@ -125,5 +126,21 @@ public partial class CSceneFlowManager
         }
 
         OnTravelArrived?.Invoke(id);
+
+        if (_firstLoadFromTitle)
+        {
+            _firstLoadFromTitle = false;
+
+            int slot = _targetSaveData;
+            bool useSaveData = _loadSavedData;
+            _loadSavedData = false;
+
+            CGameManager game = CGameManager.Instance;
+            if (game == null || !game.InitializeSaveslot(slot, useSaveData))
+            {
+                _targetSaveData = -1;
+                CLogger.Error($"{slot + 1}번 슬롯의 첫 저장 또는 불러오기에 실패했습니다.");
+            }
+        }
     }
 }

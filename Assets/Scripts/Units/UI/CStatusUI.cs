@@ -8,9 +8,13 @@ using UnityEngine.UI;
 public class CStatusUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     [SerializeField] private Image _iconImage;
+    [SerializeField] private Image _backgroundImage;
     [SerializeField] private TMP_Text _stackText;
     [SerializeField] private Image _durationFill;
     [SerializeField] private CTooltipUI _tooltip;
+
+    private readonly Color _normalBackgroundColor = new Color32(32, 32, 32, 255);
+    private readonly Color _debuffBackgroundColor = new Color32(104, 30, 41, 255);
 
     private CStatus _targetStatus;
     public string Tooltip => $"{_targetStatus.Name}\n<size=75%>{_targetStatus.Tooltip}</size>";
@@ -22,6 +26,9 @@ public class CStatusUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
         _stackText.text = "";
         _durationFill.fillAmount = 0f;
         _tooltip = tooltip;
+        _backgroundImage.color = status.IsDebuff
+                ? _debuffBackgroundColor
+                : _normalBackgroundColor;
         Refresh();
     }
 
