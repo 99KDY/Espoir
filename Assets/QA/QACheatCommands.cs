@@ -1,11 +1,23 @@
-﻿using UnityEngine;
-using IngameDebugConsole;
+﻿using IngameDebugConsole;
+using System.Reflection;
+using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class QACheatCommands : MonoBehaviour
 {
+    private static QACheatCommands _instance;
+
     private void Awake()
     {
+        if (_instance != null && _instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        _instance = this;
+        DontDestroyOnLoad(gameObject);
+
         // 실행 명령어
         DebugLogConsole.AddCommand("god", "플레이어를 무적 상태로 만듭니다.", GodMode);
         DebugLogConsole.AddCommand("killall", "화면의 모든 적을 처치합니다.", KillAllEnemies);
@@ -79,6 +91,55 @@ public class QACheatCommands : MonoBehaviour
         {
             _playerMap.Enable();
         }
+    }
+
+    // P,I 키입력 막기
+    private bool _inventoryWasOpen;
+    private void LateUpdate()
+    {
+        bool cheatOpen = DebugLogManager.Instance != null && DebugLogManager.Instance.IsLogWindowVisible;
+        GameObject panel = FindInventoryPanel();
+
+        if (cheatOpen && Input.GetKeyDown(KeyCode.P))
+        {
+            CGameManager game = CGameManager.Instance;
+
+            if (game != null)
+            {
+                if (game.GameState == EGameState.ForcePause)
+                {
+                    game.SetGameState(EGameState.Idle);
+                }
+
+                else if (game.GameState == EGameState.Idle)
+                {
+                    game.SetGameState(EGameState.ForcePause);
+                }
+            }
+        }
+
+        if (cheatOpen && Input.GetKeyUp(KeyCode.I) && panel != null)
+        {
+            panel.SetActive(_inventoryWasOpen);
+        }
+
+        if (panel != null)
+        {
+            _inventoryWasOpen = panel.activeSelf;
+        }
+    }
+
+    private GameObject FindInventoryPanel()
+    {
+        CInventoryUI inventoryUi = FindObjectOfType<CInventoryUI>();
+
+        if (inventoryUi == null)
+        {
+            return null;
+        }
+
+        FieldInfo panelField = typeof(CInventoryUI).GetField("_InventoryPanel", BindingFlags.NonPublic | BindingFlags.Instance);
+        return panelField.GetValue(inventoryUi) as GameObject;
     }
 
     /// <summary>
