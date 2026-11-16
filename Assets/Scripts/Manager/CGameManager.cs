@@ -209,16 +209,7 @@ public class CGameManager : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            if (_gameState == EGameState.Idle)
-            {
-                SetGameState(EGameState.Setting);
-                SetMenuState(ESettingState.BaseMenu);
-            }
-            else if (_gameState == EGameState.Setting)
-            {
-                SetGameState(EGameState.Idle);
-                SetMenuState(ESettingState.None);
-            }
+            ToggleBaseMenu();
         }
 
         if (_zoneText != null)
@@ -356,6 +347,23 @@ public class CGameManager : MonoBehaviour
             case EBattleState.BossBattle:
                 _player.InvokeOnBattleStart(true);
                 break;
+        }
+    }
+
+    /// <summary>
+    /// ESC 와 같은 규칙으로 기본 메뉴를 열거나 닫습니다. HUD 메뉴 버튼도 이 메서드를 씁니다.
+    /// </summary>
+    public void ToggleBaseMenu()
+    {
+        if (_gameState == EGameState.Idle)
+        {
+            SetGameState(EGameState.Setting);
+            SetMenuState(ESettingState.BaseMenu);
+        }
+        else if (_gameState == EGameState.Setting)
+        {
+            SetGameState(EGameState.Idle);
+            SetMenuState(ESettingState.None);
         }
     }
 

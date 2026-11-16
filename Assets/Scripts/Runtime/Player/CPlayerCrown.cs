@@ -7,6 +7,13 @@ public class CPlayerCrown
 
     internal float RemainingTime => Mathf.Max(0f, _availableUntil - Time.time);
 
+    // 맵 이동: 사용 기회 종료 시각(Time.time 기준)을 그대로 옮긴다
+    internal float WindowEnd
+    {
+        get => _availableUntil;
+        set => _availableUntil = value;
+    }
+
     internal void Initialize(CSkillSO settings)
     {
         _settings = settings;

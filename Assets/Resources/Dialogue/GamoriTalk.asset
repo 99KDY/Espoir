@@ -1,0 +1,75 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f2a9cfc51bb93f24eab9de60c80fcaf6, type: 3}
+  m_Name: GamoriTalk
+  m_EditorClassIdentifier: 
+  _startNode: hello
+  _summonedStartNode: 
+  _nodes:
+  - id: hello
+    lines:
+    - "\uC5B4\uBA38, \uC9C8\uD22C\uC758 \uAD70\uC8FC\uAC00 \uB0B4 \uC815\uC6D0\uAE4C\uC9C0
+      \uC624\uB2E4\uB2C8. \uB2EC\uBE5B\uC774 \uC624\uB298\uB530\uB77C \uB354 \uACF1\uB2E4
+      \uD588\uB354\uB2C8."
+    - "\uB098\uB294 \uAC00\uBAA8\uB9AC. \uB2E4\uB4E4 \uC0C9\uC695\uC758 \uAD70\uC8FC\uB77C
+      \uBD80\uB974\uC9C0. \uC774 \uC7A5\uBBF8 \uC815\uC6D0\uB3C4, \uBB34\uB300\uB3C4,
+      \uBC15\uC218\uB3C4\u2026 \uC804\uBD80 \uC0AC\uB791\uBC1B\uAE30 \uC704\uD574
+      \uC788\uB294 \uAC70\uB780\uB2E4."
+    ask: 
+    choices: []
+    next: menu
+    end: 0
+    dest: 
+  - id: menu
+    lines: []
+    ask: "\uC790, \uBB34\uC2A8 \uC774\uC57C\uAE30\uB97C \uB4E3\uACE0 \uC2F6\uB2C8?"
+    choices:
+    - text: "\uC774 \uC815\uC6D0\uC740 \uC5B4\uB5A4 \uACF3\uC774\uC9C0?"
+      to: garden
+    - text: "\uC65C \uBB34\uB300 \uC704\uC5D0 \uC549\uC544 \uC788\uC9C0?"
+      to: stage
+    - text: "\uC774\uB9CC \uAC00 \uBCFC\uAC8C"
+      to: bye
+    next: 
+    end: 0
+    dest: 
+  - id: garden
+    lines:
+    - "\uB2EC\uBE5B \uC7A5\uBBF8 \uC815\uC6D0. \uAF43\uC740 \uC2DC\uB4E4\uC9C0 \uC54A\uACE0,
+      \uD5A5\uAE30\uB294 \uC0AC\uB77C\uC9C0\uC9C0 \uC54A\uC9C0. \uB300\uC2E0 \uD55C
+      \uBC88 \uB4E4\uC5B4\uC628 \uC774\uB294 \uC27D\uAC8C \uB5A0\uB098\uC9C0 \uBABB\uD574."
+    ask: 
+    choices: []
+    next: menu
+    end: 0
+    dest: 
+  - id: stage
+    lines:
+    - "\uBCF4\uB294 \uC774\uAC00 \uC5C6\uC73C\uBA74 \uC544\uB984\uB2E4\uC6C0\uB3C4
+      \uC758\uBBF8\uAC00 \uC5C6\uC796\uB2C8? \uB098\uB294 \uB298 \uB204\uAD70\uAC00\uC758
+      \uC2DC\uC120 \uD55C\uAC00\uC6B4\uB370 \uC788\uC5B4\uC57C \uD574."
+    - "\u2026\uADF8\uB300\uB3C4 \uC9C0\uAE08 \uB098\uB97C \uBCF4\uACE0 \uC788\uC9C0.
+      \uADF8\uAC70\uBA74 \uB410\uC5B4."
+    ask: 
+    choices: []
+    next: menu
+    end: 0
+    dest: 
+  - id: bye
+    lines:
+    - "\uBC8C\uC368? \uC544\uC27D\uB124. \uB2E4\uC74C\uC5D4 \uAF43 \uD55C \uC1A1\uC774\uCBE4
+      \uB4E4\uACE0 \uC624\uB834, \uC9C8\uD22C\uC758 \uAD70\uC8FC."
+    ask: 
+    choices: []
+    next: 
+    end: 1
+    dest: 

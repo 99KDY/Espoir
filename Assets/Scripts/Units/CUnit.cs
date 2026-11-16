@@ -89,6 +89,11 @@ public abstract class CUnit : MonoBehaviour
     protected virtual IReadOnlyList<CStatus> EquipmentStatusForEffects => null;
     #endregion
 
+    /// <summary>
+    /// OnHit 에서 피해 계산과 HP 적용이 끝난 직후 결과를 알립니다. (데미지 숫자 등 표시용, 무적 상태로 막힌 공격은 알리지 않음)
+    /// </summary>
+    public static event Action<SDamageResult> OnDamageResolved;
+
     #region 프로퍼티
     public float HpCurrent => _hpCurrent;
     public float HpMax => _hpMax;
@@ -321,8 +326,11 @@ public abstract class CUnit : MonoBehaviour
             CLogger.Log($"{defender.gameObject.name} - 무적상태임");
             return;
         }
+        float hpBefore = defender.HpCurrent;
         float finalDamage = DamageCalculate(attacker, defender, damage, out bool isCritical);
         defender.GetDamage(finalDamage);
+        OnDamageResolved?.Invoke(new SDamageResult(attacker, defender, finalDamage, hpBefore - defender.HpCurrent,
+            isCritical, defender.transform.position));
         if (_debugLog) CLogger.Log($"Enemy : 피해 {finalDamage} / 방어력 {defender.Defence}, 크리여부 {isCritical} ({attacker.CriticalRate * 100}% - {attacker.CriticalDamage * 100}%)");
         if (damage.stateOnHit != null && damage.stateOnHit.Count > 0 && (finalDamage > 0 || damage.damage == 0))
         {
@@ -528,6 +536,14 @@ public abstract class CUnit : MonoBehaviour
         {
             Die();
         }
+    }
+
+    /// <summary>
+    /// 이어 받은 현재 체력을 그대로 넣습니다 (맵 이동). 0 ~ 최대 체력으로 자릅니다.
+    /// </summary>
+    public void RestoreHp(float value)
+    {
+        _hpCurrent = Mathf.Clamp(value, 0f, _hpMax);
     }
 
     /// <summary>
