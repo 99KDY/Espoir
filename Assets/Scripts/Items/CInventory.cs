@@ -632,6 +632,27 @@ public class CInventory : MonoBehaviour
         return true;
     }
 
+    public List<int> GetQuickSlotSaveDate()
+    {
+        return new List<int>(_quickSlotIds);
+    }
+
+    public bool TryLoadQuickSlotSaveData(List<int> itemIds)
+    {
+        if (itemIds == null || itemIds.Count != _quickSlotIds.Length)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < _quickSlotIds.Length; i++)
+        {
+            _quickSlotIds[i] = itemIds[i];
+        }
+
+        OnInventoryChanged?.Invoke();
+        return true;
+    }
+
     /*
     private bool TryMakeItem(int id, out CItem item)
     {
