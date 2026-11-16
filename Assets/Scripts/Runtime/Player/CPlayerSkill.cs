@@ -47,6 +47,7 @@ public class CPlayerSkill : MonoBehaviour
     private float _dashElapsed;
     private float _dashDistance;
     private bool _hasSpawnedEffect;
+    private bool _hasAddedStrikeStack;
     private float _baseAttackSpeed;
 
     private readonly List<CSkillSO> _registeredSkills = new();
@@ -168,7 +169,7 @@ public class CPlayerSkill : MonoBehaviour
         // 활성 R(레비아탄 버프)의 재사용은 쿨타임과 MP 를 보지 않는다.
         if (runtime != null && runtime.data is CLeviathanSkillSO && !_LEVIATHAN.IsIdle)
         {
-            return _LEVIATHAN.IsBuffActive && (!IsBusy || CanCancelInto(type));
+            return _LEVIATHAN.IsBuffActive;
         }
 
         if (runtime == null || Time.time < runtime.readyTime)
@@ -177,6 +178,11 @@ public class CPlayerSkill : MonoBehaviour
         }
 
         CSkillSO skill = runtime.data;
+        if (skill is CLeviathanSkillSO)
+        {
+            return _owner.CurrentMp >= skill.MpCost;
+        }
+
         if (type == ESkillType.Crown)
         {
             return _CROWN.CanUse() && (!IsBusy || _currentSkill.data.Type == ESkillType.Melee) &&
@@ -556,18 +562,18 @@ public class CPlayerSkill : MonoBehaviour
 
         _LEVIATHAN.CheckExpired(_owner);
 
-        // 버프가 끝났는데 다른 행동 중이면 그 행동이 끝난 뒤 피니쉬를 시작한다.
-        if (_LEVIATHAN.IsFinisherPending && !IsBusy && !_owner.IsInputLocked &&
+        // 버프가 끝나면 현재 행동을 취소하고 마우스 방향으로 피니쉬를 시작한다.
+        if (_LEVIATHAN.IsFinisherPending && !_owner.IsInputLocked &&
             _SKILLS.TryGetValue(_LEVIATHAN.Settings, out CSkillRuntime runtime))
         {
-            TryStartLeviathanFinisher(runtime, transform.forward);
+            TryStartLeviathanFinisher(runtime, _owner.GetPointerDirection());
         }
     }
 
     private bool TryBeginLeviathanBuff(CSkillRuntime runtime)
     {
-        // 하던 행동 · 이동 목표는 그대로 둔다(_currentSkill 을 바꾸지 않음). 다른 행동 중 시전 가능 여부는 기존 R 과 같다.
-        if ((IsBusy && !CanCancelInto(runtime.data.Type)) || !_owner.TrySpendMp(runtime.data.MpCost))
+        // 버프만 켜므로 진행 중인 행동과 이동 목표는 유지한다.
+        if (!_owner.TrySpendMp(runtime.data.MpCost))
         {
             return false;
         }
@@ -580,11 +586,6 @@ public class CPlayerSkill : MonoBehaviour
     private bool TryStartLeviathanFinisher(CSkillRuntime runtime, Vector3 direction)
     {
         bool isCanceling = IsBusy;
-        if (isCanceling && !CanCancelInto(runtime.data.Type))
-        {
-            return false;
-        }
-
         FinishSkill(isCanceling);
         _currentSkill = runtime;
         _stateCheckFrame = Time.frameCount + 1;
@@ -609,6 +610,11 @@ public class CPlayerSkill : MonoBehaviour
     private bool CanCancelInto(ESkillType type)
     {
         CSkillSO current = _currentSkill.data;
+        if (type == ESkillType.Rush)
+        {
+            return current.Type != ESkillType.Rush;
+        }
+
         float cancelTime;
 
         if (type == ESkillType.Dash && current.Type != ESkillType.Dash)
@@ -753,7 +759,9 @@ public class CPlayerSkill : MonoBehaviour
             time = Mathf.Clamp01(time);
             float side = step.sideMoveCurve != null ? step.sideMoveCurve.Evaluate(time) : 0f;
             Vector3 motion = new Vector3(side, 0f, step.moveCurve.Evaluate(time));
-            _movement.MoveOnGround(transform.rotation * (motion - _stepMovement));
+            Vector3 delta = motion - _stepMovement;
+            delta.z *= 1f - step.forwardMoveReduction;
+            _movement.MoveOnGround(transform.rotation * delta);
             _stepMovement = motion;
         }
 
@@ -799,6 +807,12 @@ public class CPlayerSkill : MonoBehaviour
                 {
                     _LEVIATHAN.AddStack();
                 }
+            }
+
+            if (skill.Type == ESkillType.Strike && !_hasAddedStrikeStack)
+            {
+                _LEVIATHAN.AddStack();
+                _hasAddedStrikeStack = true;
             }
 
             _owner.Passive.GainFlow(_owner, _owner.Passive.FlowPerHit(result.hitFullyMarkedTarget));
@@ -856,6 +870,7 @@ public class CPlayerSkill : MonoBehaviour
         _hasQueuedCombo = false;
         _stepIndex = index;
         _nextHitIndex = 0;
+        _hasAddedStrikeStack = false;
         _moveProgress = 0f;
         _stepMovement = Vector3.zero;
         _stepPosition = transform.position;
@@ -893,7 +908,7 @@ public class CPlayerSkill : MonoBehaviour
         }
 
         _SPELL.End();
-        _LEVIATHAN.End();
+        _LEVIATHAN.End(canceled);
 
         if (_currentSkill != null)
         {
@@ -922,6 +937,7 @@ public class CPlayerSkill : MonoBehaviour
         _stepIndex = -1;
         _stateCheckFrame = 0;
         _nextHitIndex = 0;
+        _hasAddedStrikeStack = false;
         _hasQueuedCombo = false;
         _moveProgress = 0f;
         _stepMovement = Vector3.zero;

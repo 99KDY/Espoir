@@ -138,8 +138,7 @@ Shader "Hidden/Espoir/Player/Effects/Composite"
                 float3 hdr = REFERENCE_GROUND * (1.0 - l.cover) + l.light + glow;
                 float3 ink = Aces(hdr);
                 float3 mark = Aces(REFERENCE_GROUND * (1.0 - l.cover) + l.light);
-                float contrast = Peak(abs(LinearToGammaSpace(mark) - LinearToGammaSpace(base)));
-                float through = pow(1.0 - l.cover, 4.0) * (1.0 - smoothstep(0.0, 0.12, contrast));
+                float through = 1.0 - l.cover;
                 float halo = saturate((ink.r - mark.r) / max(1.0 - mark.r, 0.001));
                 float3 scene = ink + (l.map - base) * through * (1.0 - halo);
                 if (_Impact <= 0.0 && _White <= 0.0) return float4(max(scene, 0), 1);

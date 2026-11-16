@@ -88,8 +88,8 @@ MonoBehaviour:
     - time: 0.5
       damageRatio: 1
       hitStopDuration: 0.045
-      offset: {x: 0, y: 0, z: 1}
-      size: {x: 2, y: 2, z: 2}
+      offset: {x: 0, y: 0, z: 1.2}
+      size: {x: 2, y: 2, z: 2.4}
       appliesMark: 0
       opensCrownWindow: 0
     effectPrefab: {fileID: 304632146862748227, guid: 0503de6a173431f4081c4ce81249a897, type: 3}
@@ -115,8 +115,8 @@ MonoBehaviour:
     - time: 0.45
       damageRatio: 1.2
       hitStopDuration: 0.065
-      offset: {x: 0, y: 0, z: 1}
-      size: {x: 2, y: 2, z: 2}
+      offset: {x: 0, y: 0, z: 1.2}
+      size: {x: 2, y: 2, z: 2.4}
       appliesMark: 0
       opensCrownWindow: 0
     effectPrefab: {fileID: 3107306218669551119, guid: 34771da9dcea7f24592c2261e344f1f7, type: 3}
@@ -142,22 +142,22 @@ MonoBehaviour:
     - time: 0.3
       damageRatio: 1.2
       hitStopDuration: 0.035
-      offset: {x: 0, y: 0, z: 1}
-      size: {x: 2, y: 2, z: 2}
+      offset: {x: 0, y: 0, z: 1.2}
+      size: {x: 2, y: 2, z: 2.4}
       appliesMark: 0
       opensCrownWindow: 1
     - time: 0.33
       damageRatio: 1.2
       hitStopDuration: 0.05
-      offset: {x: 0, y: 0, z: 1}
-      size: {x: 2, y: 2, z: 2}
+      offset: {x: 0, y: 0, z: 1.2}
+      size: {x: 2, y: 2, z: 2.4}
       appliesMark: 0
       opensCrownWindow: 1
     - time: 0.36
       damageRatio: 1.2
       hitStopDuration: 0.12
-      offset: {x: 0, y: 0, z: 1}
-      size: {x: 2, y: 2, z: 2}
+      offset: {x: 0, y: 0, z: 1.2}
+      size: {x: 2, y: 2, z: 2.4}
       appliesMark: 1
       opensCrownWindow: 1
     effectPrefab: {fileID: 4349060216969175534, guid: 4e3b31f8adaa8b547b015f4a976c2a9b, type: 3}

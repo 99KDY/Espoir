@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: NotoSerifKR-SemiBold SDF Minimap Shadow
-  m_Shader: {fileID: 4800000, guid: fe393ace9b354375a9cb14cdbbc28be4, type: 3}
+  m_Shader: {fileID: 4800000, guid: 460cc698232c4f228743876e95bac904, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
@@ -41,7 +41,7 @@ Material:
     - _PerspectiveFilter: 0.875
     - _ScaleRatioA: 0.94736844
     - _ScaleRatioB: 1
-    - _ScaleRatioC: 0.64144737
+    - _ScaleRatioC: 0.69976074
     - _ScaleX: 1
     - _ScaleY: 1
     - _ShaderFlags: 0
@@ -53,15 +53,19 @@ Material:
     - _StencilWriteMask: 255
     - _TextureHeight: 512
     - _TextureWidth: 512
-    - _UnderlayDilate: 0.25
+    - _UnderlayDilate: 0
     - _UnderlayOffsetX: 0
     - _UnderlayOffsetY: -0.1
-    - _UnderlaySoftness: 0.85
+    - _UnderlaySoftness: 1
     - _VertexOffsetX: 0
     - _VertexOffsetY: 0
     - _WeightBold: 0.75
     - _WeightNormal: 0
     m_Colors:
+    - _ShadowNear: {r: 0, g: 0, b: 2, a: 0.9}
+    - _ShadowWide: {r: 0, g: 0, b: 6, a: 0.7}
+    - _ShadowDrop: {r: 0, g: 1, b: 3, a: 0.8}
+    - _ShadowTint: {r: 0.02352941, g: 0.03137255, b: 0.05490196, a: 1}
     - _ClipRect: {r: -32767, g: -32767, b: 32767, a: 32767}
     - _FaceColor: {r: 1, g: 1, b: 1, a: 1}
     - _OutlineColor: {r: 0, g: 0, b: 0, a: 1}

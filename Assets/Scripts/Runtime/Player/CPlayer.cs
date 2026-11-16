@@ -655,7 +655,7 @@ public class CPlayer : CUnit
         return action.activeControl != null && action.activeControl.device is Pointer;
     }
 
-    private Vector3 GetPointerDirection()
+    internal Vector3 GetPointerDirection()
     {
         if (TryGetPointerGroundPosition(out Vector3 position))
         {
