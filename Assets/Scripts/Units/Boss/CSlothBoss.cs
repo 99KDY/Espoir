@@ -27,7 +27,7 @@ public class CSlothBoss : CEnemy
     [SerializeField] private CPlayer _player;
 
     [Header("Attack Player")]
-    [SerializeField] private LayerMask _tartgetMask;
+    [SerializeField] private LayerMask _targetMask;
     [SerializeField] private bool _sightCheck = false;
     [SerializeField] private LayerMask _obtacleMask;
     [SerializeField] private Collider[] _hitCollider = new Collider[2];
@@ -50,8 +50,10 @@ public class CSlothBoss : CEnemy
     [Header("Pattern Range")]
     [SerializeField] private float _whirlRange = 15f;
     [SerializeField] private float _whirlInner = 7f;
-    [SerializeField] private float _donutRange = 12f;
-    [SerializeField] private float _donutInner = 7f;
+    [SerializeField] private float _donutRange = 18f;
+    [SerializeField] private float _donutInner = 10f;
+
+    [Header("AlternationAttack")]
     [SerializeField] private float _areaAngle = 30f;
     [SerializeField] private int _divideArea = 6;
 
@@ -91,6 +93,7 @@ public class CSlothBoss : CEnemy
     private CSoundManager _soundManager;
     private Transform _target;
     private Vector3 _patternPos;
+    private Vector3 _savePos;
 
     private float _atkTimer;
     private float _delayTimer;
@@ -205,7 +208,7 @@ public class CSlothBoss : CEnemy
                     if (_delayTimer > _returnDelayTime)
                     {
                         _isMain = true;
-                        mainAtk = 1;
+                        mainAtk = 2;
                         _currentState = ESlothBossState.MainAttack;
                         _delayTimer = 0;
 
@@ -222,7 +225,7 @@ public class CSlothBoss : CEnemy
                     if (_delayTimer > _returnDelayTime)
                     {
                         _isMain = true;
-                        mainAtk = 2;
+                        mainAtk = 1;
                         _currentState = ESlothBossState.MainAttack;
                         _delayTimer = 0;
 
@@ -322,8 +325,6 @@ public class CSlothBoss : CEnemy
         normalAtk = Random.Range(0, 4);
         _onAttack = true;
 
-        normalAtk = 1;
-        
         CLogger.Log($"Normal Attack Pattern : {normalAtk}");
 
         switch (normalAtk)
@@ -345,6 +346,7 @@ public class CSlothBoss : CEnemy
                 break;
 
             case 3:
+                _animator.SetTrigger(_firstSub);
                 TwiceAttack().Forget();
 
                 break;
@@ -364,6 +366,7 @@ public class CSlothBoss : CEnemy
 
         subAtk = UnityEngine.Random.Range(1, 4);
 
+        subAtk = 1;
         _onAttack = true;
 
         CLogger.Log($"Sub Attack Pattern : {subAtk}");
@@ -404,14 +407,17 @@ public class CSlothBoss : CEnemy
         {
             case 0:
                 _animator.SetTrigger(_firstMain);
+                LikeOneShotAttack().Forget();
                 break;
 
             case 1:
                 _animator.SetTrigger(_secondMain);
+                FindSafeZoneAttack().Forget();
                 break;
 
             case 2:
                 _animator.SetTrigger(_thirdMain);
+                LightningBeamAttack().Forget();
                 break;
         }
 
@@ -490,10 +496,10 @@ public class CSlothBoss : CEnemy
             }
 
            
-            SDamageInfo damagePlayer = new SDamageInfo(0.1f, ERatioSwitch.ByMax);
+            SDamageInfo damageToPlayer = new SDamageInfo(0.1f, ERatioSwitch.ByMax);
             float lastHp = player.HpCurrent;
 
-            player.OnHit(this, damagePlayer);
+            player.OnHit(this, damageToPlayer);
             
             CLogger.Log($"{player.name}의 현재 체력 : {player.HpCurrent}");
 
@@ -505,7 +511,7 @@ public class CSlothBoss : CEnemy
 
     private void BackSpinAttack()
     {
-        int hit = NormalFindPlayer(4f);
+        int hit = NormalFindPlayer(6f);
 
         Vector3 spinAreaDir = -this.transform.right;
 
@@ -529,10 +535,10 @@ public class CSlothBoss : CEnemy
 
             if(area >= 0f)
             {
-                SDamageInfo damagePlayer = new SDamageInfo(0.2f, ERatioSwitch.ByMax);
+                SDamageInfo damageToPlayer = new SDamageInfo(0.2f, ERatioSwitch.ByMax);
                 float lastHp = player.HpCurrent;
 
-                player.OnHit(this, damagePlayer);
+                player.OnHit(this, damageToPlayer);
 
                 CLogger.Log($"{player.name}의 현재 체력 : {player.HpCurrent}");
 
@@ -548,7 +554,7 @@ public class CSlothBoss : CEnemy
     private void SlamUpperAttack()
     {
 
-        int hit = NormalFindPlayer(4f);
+        int hit = NormalFindPlayer(5f);
 
         for (int i = 0; i < hit; i++)
         {
@@ -564,9 +570,9 @@ public class CSlothBoss : CEnemy
                 continue;
             }
 
-            SDamageInfo damagePlayer = new SDamageInfo(0.15f, ERatioSwitch.ByMax);
+            SDamageInfo damageToPlayer = new SDamageInfo(0.15f, ERatioSwitch.ByMax);
            
-            player.OnHit(this, damagePlayer);
+            player.OnHit(this, damageToPlayer);
 
             CLogger.Log($"{player.name}의 현재 체력 : {player.HpCurrent}");
         }
@@ -608,7 +614,7 @@ public class CSlothBoss : CEnemy
     private void WhirlWindDamage()
     {
 
-        int hit = SubFindPlayer(_whirlRange);
+        int hit = FindPlayer(_whirlRange);
 
         for (int i = 0; i < hit; i++)
         {
@@ -631,9 +637,9 @@ public class CSlothBoss : CEnemy
 
             if(distance >= 3f && distance <= _whirlRange)
             {
-                SDamageInfo damagePlayer = new SDamageInfo(0.1f, true, ERatioSwitch.ByMax);
+                SDamageInfo damageToPlayer = new SDamageInfo(0.1f, true, ERatioSwitch.ByMax);
                 
-                player.OnHit(this, damagePlayer);
+                player.OnHit(this, damageToPlayer);
 
 
                 CLogger.Log($"{player.name}의 현재 체력 : {player.HpCurrent}");
@@ -672,7 +678,7 @@ public class CSlothBoss : CEnemy
 
     private void DonutDamage()
     {
-        int hit = SubFindPlayer(_donutRange);
+        int hit = FindPlayer(_donutRange);
 
         for (int i = 0; i < hit; i++)
         {
@@ -688,15 +694,15 @@ public class CSlothBoss : CEnemy
 
             float distance = Vector3.Distance
             (
-                new Vector3(this.transform.position.x, 0f, this.transform.position.z),
-                new Vector3(player.transform.position.x, 0f, player.transform.position.z)
+                new Vector3(this.transform.position.x, this.transform.position.y, this.transform.position.z),
+                new Vector3(player.transform.position.x, this.transform.position.y, player.transform.position.z)
             );
 
             if (distance >= 10f && distance <= 18f)
             {
-                SDamageInfo damagePlayer = new SDamageInfo(0.25f, true, ERatioSwitch.ByMax);
+                SDamageInfo damageToPlayer = new SDamageInfo(0.25f, true, ERatioSwitch.ByMax);
 
-                player.OnHit(this, damagePlayer);
+                player.OnHit(this, damageToPlayer);
 
                 CLogger.Log($"{player.name}의 현재 체력 : {player.HpCurrent}");
             }
@@ -708,8 +714,8 @@ public class CSlothBoss : CEnemy
         if (_previewPattern != null)
         {
             _previewPattern.transform.position = _player.transform.position;
-            _previewPattern.ShowCirclePattern(20, 8f);
-
+            _previewPattern.ShowCirclePattern(20, 8.5f);
+            _savePos = _previewPattern.transform.position;
         }
 
         else
@@ -725,9 +731,9 @@ public class CSlothBoss : CEnemy
             _previewPattern.ClearPreview();
             _previewPattern.transform.position = _patternPos;
         }
-        _animator.SetTrigger(_firstSub);
 
-        await UniTask.Delay(3000);
+
+        await UniTask.Delay(3200);
         _onAttack = false;
     }
 
@@ -750,10 +756,10 @@ public class CSlothBoss : CEnemy
                 continue;
             }
 
-            SDamageInfo damagePlayer = new SDamageInfo(0.1f, ERatioSwitch.ByMax);
+            SDamageInfo damageToPlayer = new SDamageInfo(0.15f, ERatioSwitch.ByMax);
             float lastHp = player.HpCurrent;
 
-            player.OnHit(this, damagePlayer);
+            player.OnHit(this, damageToPlayer);
 
             CLogger.Log($"{player.name}의 현재 체력 : {player.HpCurrent}");
         }
@@ -762,10 +768,10 @@ public class CSlothBoss : CEnemy
 
     }
 
-    private void OuterExplosionDamage()
+    private void DoubleHandStampDamage()
     {
-        int hit = SubFindPlayer(13f);
-
+        int hit = FindPlayer(13f);
+                
         for (int i = 0; i < hit; i++)
         {
             if (_hitCollider[i] == null)
@@ -778,20 +784,20 @@ public class CSlothBoss : CEnemy
                 continue;
             }
 
-            float distance = Vector3.Distance
-            (
-                new Vector3(this.transform.position.x, 0f, this.transform.position.z),
-                new Vector3(player.transform.position.x, 0f, player.transform.position.z)
-            );
+            
+            float atkRange = Vector3.Distance(_savePos, player.transform.position);
 
-            if (distance >= 7f && distance <= 13f)
+            if (atkRange <= 8.0f)
             {
                 SDamageInfo damagePlayer = new SDamageInfo(0.30f, true, ERatioSwitch.ByMax);
 
                 player.OnHit(this, damagePlayer);
 
                 CLogger.Log($"{player.name}의 현재 체력 : {player.HpCurrent}");
+
             }
+
+
         }
     }
 
@@ -842,7 +848,7 @@ public class CSlothBoss : CEnemy
 
     private void AlternationDamage(float offsetAngle)
     {
-        int hit = SubFindPlayer(15f);
+        int hit = FindPlayer(15f);
  
         for (int i = 0; i < hit; i++)
         {
@@ -916,12 +922,320 @@ public class CSlothBoss : CEnemy
 
     #endregion
 
+    #region MainPattern
+
+    private async UniTask LikeOneShotAttack()
+    {
+        _onAttack = true;
+
+        if (_previewPattern != null)
+        {
+            _previewPattern.ShowCirclePattern(100, 40f);
+        }
+
+
+        await UniTask.Delay(4000);
+        if(_previewPattern != null)
+        {
+            _previewPattern.ClearPreview();
+        }
+
+        _atkTimer = 0;
+
+        _mainCount++;
+        _onAttack = false;
+
+    }
+
+    private void LikeOneShotDamage()
+    {
+        int hits = FindPlayer(20);
+
+        for(int i = 0; i < hits; i++)
+        {
+            if (_hitCollider[i] == null)
+            {
+                continue;
+            }
+
+            CPlayer player = _hitCollider[i].GetComponent<CPlayer>();
+            if (player == null || player.HpCurrent <= 0)
+            {
+                continue;
+            }
+
+            SDamageInfo damageToPlayer= new SDamageInfo(0.99f, true ,ERatioSwitch.ByCurrent);
+            float lastHp = player.HpCurrent;
+            
+            player.OnHit(this, damageToPlayer);
+
+            CLogger.Log($"{player.name}의 현재 체력 : {player.HpCurrent}");
+
+        }
+
+
+    }
+
+
+    private async UniTask FindSafeZoneAttack()
+    {
+        _onAttack = true;
+
+
+        _atkTimer = 0;
+
+        await UniTask.Delay(4300);
+        _atkTimer = 0;
+
+        await UniTask.Delay(3000);
+
+        _mainCount++;
+        _onAttack = false;
+
+    }
+
+
+    private void FindSafeZone()
+    {
+        int hit = FindPlayer(20);
+
+        for (int i = 0; i < hit; i++)
+        {
+            if (_hitCollider[i] == null)
+            {
+                continue;
+            }
+
+            CPlayer player = _hitCollider[i].GetComponent<CPlayer>();
+            if (player == null || player.HpCurrent <= 0)
+            {
+                continue;
+            }
+
+            Vector3 playerPos = player.transform.position - this.transform.position;
+
+            playerPos.y = 0;
+
+            float dis = Vector3.Dot(this.transform.forward.normalized , playerPos.normalized);
+           
+            bool isHit = false;
+            
+            for (int j = 0 ; j < 2 ; j++ )
+            {
+                if (Mathf.Abs(dis) == 45f + (j * 180f))
+                {
+                    Vector3 safeZone = playerPos * 20f;
+
+                    float safeCircle = Vector3.Distance(safeZone, player.transform.position);
+
+                    if(safeCircle >= 5.0f)
+                    {
+                        isHit = true;
+
+                        break;
+                    }
+                }
+
+
+            }
+
+            if (isHit == true)
+            {
+                SDamageInfo damageToPlayer = new SDamageInfo(0.8f, true, ERatioSwitch.ByCurrent);
+                float lastHp = player.HpCurrent;
+
+                CLogger.Log($"{player.name}의 현재 체력 : {player.HpCurrent}");
+            }    
+
+
+
+        }
+
+
+    }
+
+
+    private async UniTask LightningBeamAttack()
+    {
+        _onAttack = true;
+        if(_previewPattern != null)
+        {
+            _previewPattern.ShowDonutPattern(50, 19f, 14f);
+        }
+
+        _atkTimer = 0;
+
+        await UniTask.Delay(4300);
+        _atkTimer = 0;
+
+        if(_previewPattern != null)
+        {
+            _previewPattern.ClearPreview();
+        }
+
+
+        await UniTask.Delay(3000);
+
+        _mainCount++; 
+        _onAttack = false;
+
+    }
+
+
+    private void EarthShaker()
+    {
+        int hit = FindPlayer(20);
+
+        for (int i = 0; i < hit; i++)
+        {
+            if (_hitCollider[i] == null)
+            {
+                continue;
+            }
+
+            CPlayer player = _hitCollider[i].GetComponent<CPlayer>();
+            if (player == null || player.HpCurrent <= 0)
+            {
+                continue;
+            }
+
+            Vector3 playerPos = player.transform.position - this.transform.position;
+
+            playerPos.y = 0;
+
+            float dis = Vector3.Dot(this.transform.forward.normalized, playerPos.normalized);
+
+            bool isHit = false;
+
+            for (int j = 0; j < 2; j++)
+            {
+                if (Mathf.Abs(dis) == 45f + (j * 180f))
+                {
+                    Vector3 hitZone = playerPos * 11f;
+
+                    float safeCircle = Vector3.Distance(hitZone, player.transform.position);
+
+                    if (safeCircle <= 5.0f)
+                    {
+                        isHit = true;
+
+                        break;
+                    }
+
+                }
+
+            }
+
+            if(isHit == true)
+            {
+                SDamageInfo damageToPlayer = new SDamageInfo(0.3f, true, ERatioSwitch.ByCurrent);
+                float lastHp = player.HpCurrent;
+
+                CLogger.Log($"{player.name}의 현재 체력 : {player.HpCurrent}");
+            }
+
+
+        }
+
+    }
+
+
+    private void ThunderVoltage()
+    {
+        int hit = FindPlayer(20);
+
+        for (int i = 0; i < hit; i++)
+        {
+            if (_hitCollider[i] == null)
+            {
+                continue;
+            }
+
+            CPlayer player = _hitCollider[i].GetComponent<CPlayer>();
+            if (player == null || player.HpCurrent <= 0)
+            {
+                continue;
+            }
+
+            float playerToPos = Vector3.Angle(this.transform.forward, player.transform.position);
+           
+
+            bool isHit = false;
+
+            for (int j = 0; j < 4; j++)
+            {
+                if (playerToPos == 45f + (j * 90f))
+                {
+                    isHit = true;
+                }
+
+            }
+
+            if (isHit == true)
+            {
+                SDamageInfo damageToPlayer = new SDamageInfo(0.2f, true, ERatioSwitch.ByCurrent);
+                float lastHp = player.HpCurrent;
+
+                CLogger.Log($"{player.name}의 현재 체력 : {player.HpCurrent}");
+            }
+
+
+
+        }
+
+
+    }
+
+    private void ShootLightningBeam()
+    {
+        int hit = FindPlayer(25);
+
+        for(int i = 0; i < hit; i++)
+        {
+            if (_hitCollider[i] == null)
+            {
+                continue;
+            }
+
+            CPlayer player = _hitCollider[i].GetComponent<CPlayer>();
+            if (player == null || player.HpCurrent <= 0)
+            {
+                continue;
+            }
+
+            Vector3 playerPos = player.transform.position - this.transform.position;
+            playerPos.y = 0;
+
+            float damageDis = Vector3.Distance(this.transform.forward, playerPos);
+
+            if(Mathf.Abs(damageDis) <= 5f)
+            {
+                SDamageInfo damageToPlayer = new SDamageInfo(0.8f, true, ERatioSwitch.ByCurrent);
+                float lastHp = player.HpCurrent;
+
+                CLogger.Log($"{player.name}의 현재 체력 : {player.HpCurrent}");
+            }
+
+        }
+
+
+
+    }
+    
+
+
+
+
+    #endregion
+
+
+
 
     private int NormalFindPlayer(float radius)
     {
         Vector3 offset = this.transform.forward * 3f;
                      
-        int hit = Physics.OverlapSphereNonAlloc(this.transform.position + offset, radius, _hitCollider, _tartgetMask);
+        int hit = Physics.OverlapSphereNonAlloc(this.transform.position + offset, radius, _hitCollider, _targetMask);
 
         for (int i = 0; i < _hitCollider.Length; i++)
         {
@@ -940,11 +1254,9 @@ public class CSlothBoss : CEnemy
     }
 
 
-    private int SubFindPlayer(float radius)
+    private int FindPlayer(float radius)
     {
-        
-
-        int hit = Physics.OverlapSphereNonAlloc(this.transform.position, radius, _hitCollider, _tartgetMask);
+        int hit = Physics.OverlapSphereNonAlloc(this.transform.position, radius, _hitCollider, _targetMask);
 
         for (int i = 0; i < _hitCollider.Length; i++)
         {
