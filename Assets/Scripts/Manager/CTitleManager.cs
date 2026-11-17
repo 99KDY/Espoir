@@ -279,6 +279,7 @@ public class CTitleManager : MonoBehaviour
 
     private void CallGameScene(int slot, bool useSaveData)
     {
+        _soundManager?.PlaySE(EEffectSound.QuestionAppear);
         if (_isStarting) return;
 
         CSaveManager.RefreshData(slot);

@@ -2,9 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Audio;
-using UnityEngine.Rendering;
 using UnityEngine.UI;
 
 public enum EGameState
@@ -23,6 +23,7 @@ public enum ESettingState
     //Save = 1,
     //Load = 2,
     //Sound = 3,
+    Confirm = 9
 }
 
 public enum EBattleState
@@ -82,6 +83,9 @@ public class CGameManager : MonoBehaviour
     [SerializeField] Button _gameShutdown;
     [SerializeField] Button _screenChange;
     [SerializeField] TMP_Text _screenChangeText;
+    [SerializeField] Button _gameGotoTitle;
+    [SerializeField] Button _gameSave;
+    [SerializeField] Toggle _gameAutosave;
 
     [SerializeField] GameObject _forcePauseSet;
     [SerializeField] CanvasGroup _menuBackground;
@@ -93,6 +97,12 @@ public class CGameManager : MonoBehaviour
     [SerializeField] TMP_InputField _bgmInput;
     [SerializeField] TMP_InputField _seInput;
 
+    [SerializeField] CanvasGroup _menuConfirm;
+    [SerializeField] TMP_Text _confirmTitle;
+    [SerializeField] TMP_Text _confirmDescription;
+    [SerializeField] Button _confirmYes;
+    [SerializeField] Button _confirmNo;
+
     [Header("디버그용")]
     [SerializeField] TMP_Text _zoneText;
 
@@ -102,6 +112,8 @@ public class CGameManager : MonoBehaviour
     private EGameState _gameState;
     private EBattleState _battleState;
     private ESettingState _settingState;
+    private ESettingState _lastSettingState;
+    private bool _settingQuestion;
     private EBossClear _bossClearState;
     private EQuestList _availableQuest;
     private EQuestList _actingQuest;
@@ -113,7 +125,9 @@ public class CGameManager : MonoBehaviour
     private int _tempWidth;
     private int _tempHeight;
 
+    private CSoundManager _soundManager;
     private CPlayer _player;
+    private Action _confirmAction;
 
     private int _currentActiveSpawner = 0;
 
@@ -143,9 +157,52 @@ public class CGameManager : MonoBehaviour
 
     void Start()
     {
-        _gameShutdown.onClick.AddListener(() => OnGameShutdown());
+        _gameShutdown.onClick.AddListener(() =>
+            ShowQuestion(
+                "게임 종료",
+                "게임을 종료합니까?",
+                () =>
+                {
+                    _soundManager.PlaySE(EEffectSound.Success);
+                    _soundManager.PlaySE(EEffectSound.Success);
+                    #if UNITY_EDITOR
+                    UnityEditor.EditorApplication.isPlaying = false;
+                    #else
+                    Application.Quit();
+                    #endif
+                }));
+        _gameGotoTitle.onClick.AddListener(() =>
+            ShowQuestion(
+                "타이틀로",
+                "타이틀로 돌아갑니까?",
+                () =>
+                {
+                    _soundManager.PlaySE(EEffectSound.Success);
+                    CSceneFlowManager.Instance.LoadScene(ESceneId.Title);
+                }));
+        _gameSave.onClick.AddListener(() =>
+            ShowQuestion(
+                "저장",
+                "게임을 저장합니까?",
+                () =>
+                {
+                    _soundManager.PlaySE(EEffectSound.Success);
+                    SaveData();
+                }));
+        _confirmYes.onClick.AddListener(() =>
+            {
+                _confirmAction();
+                HideQuestion();
+            });
+        _confirmNo.onClick.AddListener(() => 
+            {
+                _soundManager.PlaySE(EEffectSound.Beep);
+                HideQuestion();
+            });
+
         _screenChange.onClick.AddListener(() => OnGameResolutionChange());
         _player = FindFirstObjectByType<CPlayer>();
+        _soundManager = FindFirstObjectByType<CSoundManager>();
         SetGameState(EGameState.Idle);
         SetBattleState(EBattleState.None);
         _settingState = ESettingState.None;
@@ -273,15 +330,6 @@ public class CGameManager : MonoBehaviour
         }
     }
 
-    private void OnGameShutdown()
-    {
-#if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
-#else
-        Application.Quit();
-#endif
-    }
-
     private void OnGameResolutionChange()
     {
         _isFullscreen = !_isFullscreen;
@@ -400,6 +448,11 @@ public class CGameManager : MonoBehaviour
                 _menuBase.interactable = false;
                 _menuBase.blocksRaycasts = false;
                 break;
+            case ESettingState.Confirm:
+                _menuConfirm.alpha = 0;
+                _menuConfirm.interactable = false;
+                _menuConfirm.blocksRaycasts = false;
+                break;
         }
         _settingState = state;
         switch (_settingState)
@@ -410,6 +463,11 @@ public class CGameManager : MonoBehaviour
                 _menuBase.alpha = 1;
                 _menuBase.interactable = true;
                 _menuBase.blocksRaycasts = true;
+                break;
+            case ESettingState.Confirm:
+                _menuConfirm.alpha = 1;
+                _menuConfirm.interactable = true;
+                _menuConfirm.blocksRaycasts = true;
                 break;
         }
     }
@@ -512,6 +570,13 @@ public class CGameManager : MonoBehaviour
         }
     }
 
+    public void InvokeAutosave()
+    {
+        if (_gameAutosave.isOn)
+        {
+            SaveData();
+        }
+    }
     private void OnDestroy()
     {
         if (_instance == this)
@@ -602,6 +667,25 @@ public class CGameManager : MonoBehaviour
             pair.Value?.OnEquip(_player);
         }
         _player.EquipmentResync();
+    }
+
+    private void ShowQuestion(string shownTitle, string shownText, Action action)
+    {
+        _soundManager?.PlaySE(EEffectSound.QuestionAppear);
+        _confirmTitle.text = shownTitle;
+        _confirmDescription.text = shownText;
+        _confirmAction = action;
+        _lastSettingState = _settingState;
+        SetMenuState(ESettingState.Confirm);
+    }
+
+    private void HideQuestion()
+    {
+        _confirmTitle.text = "";
+        _confirmDescription.text = "";
+        _confirmAction = null;
+        SetMenuState(_lastSettingState);
+        _lastSettingState = ESettingState.None;
     }
 
     public int GetAvailableStage()
