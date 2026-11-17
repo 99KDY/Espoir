@@ -128,6 +128,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _iconImage: {fileID: 182069265800070764}
+  _backgroundImage: {fileID: 1487713496291769818}
   _stackText: {fileID: 1527084801101058419}
   _durationFill: {fileID: 6314460350614678911}
   _tooltip: {fileID: 0}

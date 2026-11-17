@@ -122370,8 +122370,8 @@ MonoBehaviour:
     shake: 0.26
   _screens:
   - time: 0.45
-    duration: 0.22
-    strength: 0.72
+    duration: 0.12
+    strength: 0.18
     mode: 0
 --- !u!1 &7013096128121855715
 GameObject:

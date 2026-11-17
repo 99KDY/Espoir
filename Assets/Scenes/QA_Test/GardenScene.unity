@@ -8407,10 +8407,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: MinimapHud
       objectReference: {fileID: 0}
-    - target: {fileID: 1518303028159272502, guid: 59f4ea80d301bc5439be1f5c92fdcfa0, type: 3}
-      propertyPath: m_AdditionalShaderChannelsFlag
-      value: 25
-      objectReference: {fileID: 0}
     - target: {fileID: 5634875254776144392, guid: 59f4ea80d301bc5439be1f5c92fdcfa0, type: 3}
       propertyPath: m_Pivot.x
       value: 0

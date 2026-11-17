@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using static UnityEngine.GraphicsBuffer;
 
 
 public class CPlayerUI_Build : MonoBehaviour
@@ -47,6 +48,7 @@ public class CPlayerUI_Build : MonoBehaviour
     private readonly Dictionary<CStatus, CStatusUI> _statusViews = new();
     private readonly HashSet<CStatus> _currentStatus = new();
     private readonly List<CStatus> _removedStatus = new();
+    private int _debuffViewCount;
 
     private bool _hpEffectInitialized = false;
     private float _hpEffectDelay = 0f;
@@ -171,6 +173,8 @@ public class CPlayerUI_Build : MonoBehaviour
 
         _currentStatus.Clear();
         _removedStatus.Clear();
+
+
         if (_player.EquipmentStatus != null)
         {
             for (int i = 0; i < _player.EquipmentStatus.Count; i++)
@@ -181,6 +185,11 @@ public class CPlayerUI_Build : MonoBehaviour
                 if (_statusViews.ContainsKey(target)) continue;
                 CStatusUI view = Instantiate(_statusPrefab, _statusRoot);
                 view.Bind(target, _tooltip);
+                if (target.IsDebuff)
+                {
+                    view.transform.SetSiblingIndex(_debuffViewCount);
+                    _debuffViewCount++;
+                }
 
                 _statusViews.Add(target, view);
             }
@@ -196,6 +205,11 @@ public class CPlayerUI_Build : MonoBehaviour
                 if (_statusViews.ContainsKey(target)) continue;
                 CStatusUI view = Instantiate(_statusPrefab, _statusRoot);
                 view.Bind(target, _tooltip);
+                if (target.IsDebuff)
+                {
+                    view.transform.SetSiblingIndex(_debuffViewCount);
+                    _debuffViewCount++;
+                }
 
                 _statusViews.Add(target, view);
             }
@@ -217,10 +231,15 @@ public class CPlayerUI_Build : MonoBehaviour
         {
             for (int i = 0; i < _removedStatus.Count; i++)
             {
-                CStatusUI target = _statusViews[_removedStatus[i]];
+                CStatus targetStatus = _removedStatus[i];
+                CStatusUI targetUi = _statusViews[_removedStatus[i]];
                 _statusViews.Remove(_removedStatus[i]);
-                target.gameObject.SetActive(false);
-                Destroy(target.gameObject);
+
+                if (targetStatus.IsDebuff) _debuffViewCount--;
+
+                targetUi.gameObject.SetActive(false);
+                targetUi.transform.SetAsLastSibling();
+                Destroy(targetUi.gameObject);
             }
         }
     }

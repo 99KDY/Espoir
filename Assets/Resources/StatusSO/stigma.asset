@@ -23,6 +23,7 @@ MonoBehaviour:
     \uC9C0\uC18D\uB418\uBA70, \uCD5C\uB3005\uBC88 \uC313\uC744 \uC218 \uC788\uC2B5\uB2C8\uB2E4.\n5\uC911\uCCA9
     \uB300\uC0C1 \uACF5\uACA9\uC2DC \uC804\uD22C\uC758 \uD750\uB984 \uD68D\uB4DD\uB7C9\uC774
     2\uBC30\uAC00 \uB429\uB2C8\uB2E4."
+  _isDebuff: 1
   _duration: 6
   _stack: 0
   _maxStack: 5
@@ -35,3 +36,4 @@ MonoBehaviour:
     param: 0.95
     applyStack: 1
   _customStatus: 0
+  _customEffect: {fileID: 0}

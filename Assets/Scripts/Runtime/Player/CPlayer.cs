@@ -47,6 +47,7 @@ public class CPlayer : CUnit
     private bool _actionsBlocked;
     private bool _isInvincible;
     private bool _isInputLocked;
+    private EPradonaPower _pradonaPower;
 
     protected float _hpMaxBaseline = 1;
     protected float _attackBaseline = 0;
@@ -110,6 +111,13 @@ public class CPlayer : CUnit
         get { return _critDmgBaseline; }
         set { _critDmgBaseline = value; }
     }
+
+    public EPradonaPower PradonaPower
+    {
+        get { return _pradonaPower; }
+        set { _pradonaPower = value; }
+    }
+
     public void EquipmentResync()
     {
         float hpRatio = HpCurrent / HpMax;
@@ -655,7 +663,7 @@ public class CPlayer : CUnit
         return action.activeControl != null && action.activeControl.device is Pointer;
     }
 
-    private Vector3 GetPointerDirection()
+    internal Vector3 GetPointerDirection()
     {
         if (TryGetPointerGroundPosition(out Vector3 position))
         {

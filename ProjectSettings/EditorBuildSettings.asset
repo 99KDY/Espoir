@@ -18,12 +18,15 @@ EditorBuildSettings:
     path: Assets/Scenes/Heyseong/TowerScene.unity
     guid: a3f5e4c5f931d8e47a91fb38da4eccfa
   - enabled: 1
+    path: Assets/Scenes/IngameScene/TitleScreen.unity
+    guid: 61945f486fd83d24799c7b5f8b108f21
+  - enabled: 1
     path: Assets/Scenes/QA_Test/DesertScene.unity
-    guid: 02f010042f023f24caf6900ae15b9cbe
+    guid: 2bf92b101a5bf2d4a9af6c8d4a73c741
   - enabled: 1
     path: Assets/Scenes/QA_Test/GardenScene.unity
-    guid: 9d87e7fcb5aa2eb43ba74b1b90a691bf
+    guid: 52afca78745128444bdeb2715a124ed5
   - enabled: 1
     path: Assets/Scenes/QA_Test/TowerScene.unity
-    guid: c42ef58fb96b0cf40ac582a9b7d742a3
+    guid: 61119f93911897940ad76bccd493acf6
   m_configObjects: {}

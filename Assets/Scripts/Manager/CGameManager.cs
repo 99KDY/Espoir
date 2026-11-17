@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.UI;
@@ -22,6 +23,7 @@ public enum ESettingState
     //Save = 1,
     //Load = 2,
     //Sound = 3,
+    Confirm = 9
 }
 
 public enum EBattleState
@@ -81,6 +83,9 @@ public class CGameManager : MonoBehaviour
     [SerializeField] Button _gameShutdown;
     [SerializeField] Button _screenChange;
     [SerializeField] TMP_Text _screenChangeText;
+    [SerializeField] Button _gameGotoTitle;
+    [SerializeField] Button _gameSave;
+    [SerializeField] Toggle _gameAutosave;
 
     [SerializeField] GameObject _forcePauseSet;
     [SerializeField] CanvasGroup _menuBackground;
@@ -92,6 +97,12 @@ public class CGameManager : MonoBehaviour
     [SerializeField] TMP_InputField _bgmInput;
     [SerializeField] TMP_InputField _seInput;
 
+    [SerializeField] CanvasGroup _menuConfirm;
+    [SerializeField] TMP_Text _confirmTitle;
+    [SerializeField] TMP_Text _confirmDescription;
+    [SerializeField] Button _confirmYes;
+    [SerializeField] Button _confirmNo;
+
     [Header("디버그용")]
     [SerializeField] TMP_Text _zoneText;
 
@@ -101,6 +112,8 @@ public class CGameManager : MonoBehaviour
     private EGameState _gameState;
     private EBattleState _battleState;
     private ESettingState _settingState;
+    private ESettingState _lastSettingState;
+    private bool _settingQuestion;
     private EBossClear _bossClearState;
     private EQuestList _availableQuest;
     private EQuestList _actingQuest;
@@ -112,7 +125,9 @@ public class CGameManager : MonoBehaviour
     private int _tempWidth;
     private int _tempHeight;
 
+    private CSoundManager _soundManager;
     private CPlayer _player;
+    private Action _confirmAction;
 
     private int _currentActiveSpawner = 0;
 
@@ -142,14 +157,78 @@ public class CGameManager : MonoBehaviour
 
     void Start()
     {
-        _gameShutdown.onClick.AddListener(() => OnGameShutdown());
+        _gameShutdown.onClick.AddListener(() =>
+            ShowQuestion(
+                "게임 종료",
+                "게임을 종료합니까?",
+                () =>
+                {
+                    _soundManager.PlaySE(EEffectSound.Success);
+                    #if UNITY_EDITOR
+                    UnityEditor.EditorApplication.isPlaying = false;
+                    #else
+                    Application.Quit();
+                    #endif
+                }));
+        _gameGotoTitle.onClick.AddListener(() =>
+            ShowQuestion(
+                "타이틀로",
+                "타이틀로 돌아갑니까?",
+                () =>
+                {
+                    _soundManager.PlaySE(EEffectSound.Success);
+                    CSceneFlowManager.Instance.LoadScene(ESceneId.Title);
+                }));
+        _gameSave.onClick.AddListener(() =>
+            ShowQuestion(
+                "저장",
+                "게임을 저장합니까?",
+                () =>
+                {
+                    _soundManager.PlaySE(EEffectSound.Success);
+                    SaveData();
+                }));
+        _confirmYes.onClick.AddListener(() =>
+            {
+                _confirmAction();
+                HideQuestion();
+            });
+        _confirmNo.onClick.AddListener(() => 
+            {
+                _soundManager.PlaySE(EEffectSound.Beep);
+                HideQuestion();
+            });
+
         _screenChange.onClick.AddListener(() => OnGameResolutionChange());
         _player = FindFirstObjectByType<CPlayer>();
+        _soundManager = FindFirstObjectByType<CSoundManager>();
+        _soundManager.PlayBGM(EBackgroundSound.BaseBGM);
         SetGameState(EGameState.Idle);
         SetBattleState(EBattleState.None);
         _settingState = ESettingState.None;
         _tempWidth = Screen.width;
         _tempHeight = Screen.height;
+
+        if (CMapInfo.Current == null)
+        {
+            CLogger.Error("현재 맵 정보를 찾을 수 없어 저장하지 못했습니다.");
+            return;
+        }
+
+        _currentStage = CMapInfo.Current.SceneId switch
+        {
+            ESceneId.PradonaCamp => 0,
+            ESceneId.Desert => 1,
+            ESceneId.Garden => 2,
+            ESceneId.Tower => 3,
+            _ => -1
+        };
+
+        if (_currentStage < 0)
+        {
+            CLogger.Error($"맵 정보가 잘못되어있습니다.");
+            return;
+        }
 
         for (int i = 0; i < _quilitySetting.Count; i++)
         {
@@ -251,15 +330,6 @@ public class CGameManager : MonoBehaviour
         }
     }
 
-    private void OnGameShutdown()
-    {
-#if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
-#else
-        Application.Quit();
-#endif
-    }
-
     private void OnGameResolutionChange()
     {
         _isFullscreen = !_isFullscreen;
@@ -282,6 +352,7 @@ public class CGameManager : MonoBehaviour
             case EGameState.Idle:
                 break;
             case EGameState.Story:
+                _soundManager.PlayBGM(EBackgroundSound.BaseBGM);
                 break;
             case EGameState.UI:
                 SetPaused(false);
@@ -304,6 +375,7 @@ public class CGameManager : MonoBehaviour
             case EGameState.Idle:
                 break;
             case EGameState.Story:
+                _soundManager.PlayBGM(EBackgroundSound.DialogueBGM);
                 break;
             case EGameState.UI:
                 SetPaused(true);
@@ -340,12 +412,15 @@ public class CGameManager : MonoBehaviour
         {
             case EBattleState.None:
                 _player.AddStatus(27);
+                _soundManager.PlayBGM(EBackgroundSound.BaseBGM);
                 break;
             case EBattleState.NormalBattle:
                 _player.InvokeOnBattleStart(false);
+                _soundManager.PlayBGM(EBackgroundSound.BattleBGM);
                 break;
             case EBattleState.BossBattle:
                 _player.InvokeOnBattleStart(true);
+                _soundManager.PlayBGM(EBackgroundSound.BossBGM);
                 break;
         }
     }
@@ -378,6 +453,11 @@ public class CGameManager : MonoBehaviour
                 _menuBase.interactable = false;
                 _menuBase.blocksRaycasts = false;
                 break;
+            case ESettingState.Confirm:
+                _menuConfirm.alpha = 0;
+                _menuConfirm.interactable = false;
+                _menuConfirm.blocksRaycasts = false;
+                break;
         }
         _settingState = state;
         switch (_settingState)
@@ -388,6 +468,11 @@ public class CGameManager : MonoBehaviour
                 _menuBase.alpha = 1;
                 _menuBase.interactable = true;
                 _menuBase.blocksRaycasts = true;
+                break;
+            case ESettingState.Confirm:
+                _menuConfirm.alpha = 1;
+                _menuConfirm.interactable = true;
+                _menuConfirm.blocksRaycasts = true;
                 break;
         }
     }
@@ -490,12 +575,122 @@ public class CGameManager : MonoBehaviour
         }
     }
 
+    public void InvokeAutosave()
+    {
+        if (_gameAutosave.isOn)
+        {
+            SaveData();
+        }
+    }
     private void OnDestroy()
     {
         if (_instance == this)
         {
             _instance = null;
         }
+    }
+
+    public bool InitializeSaveslot(int slot, bool useSaveData)
+    {
+        if (_player == null ||
+            _player.Inventory == null ||
+            slot < 0 || slot >= CSaveManager.MaxSaveSlot) return false;
+
+        CSaveManager.RefreshData(slot);
+        if (useSaveData)
+        {
+            if (!CSaveManager.GetData(slot, out CSaveData data)) return false;
+            LoadData(data);
+            return true;
+        }
+        
+        // 새 시작인데 데이터가 이미 있을경우
+        if (CSaveManager.Available(slot)) return false;
+
+        return SaveData(slot);
+    }
+
+    public bool SaveData()
+    {
+        return SaveData(CSceneFlowManager.Instance.TargetSaveData);
+    }
+
+    private bool SaveData(int slot)
+    {
+        if (_player == null || _player.Inventory == null) return false;
+        
+        List<CItem> items = new List<CItem>(_player.Inventory.MaxItemSlot);
+        int[] quickSlots = new int[_player.Inventory.QuickSlotLength];
+
+        _player.Inventory.ExportState(items, quickSlots, new Dictionary<int, float>(), out int gold);
+
+        CSaveData data = new CSaveData
+            (
+                CSaveManager.Version,
+                _currentStage,
+                gold,
+                items,
+                _player.Equipment,
+                quickSlots,
+                _availableQuest,
+                _actingQuest,
+                _completedQuest,
+                _bossClearState,
+                _player.PradonaPower);
+
+        return CSaveManager.SaveData(slot, data);
+    }
+
+    public void LoadData()
+    {
+        LoadData(CSceneFlowManager.Instance.TargetSaveData);
+    }
+
+    private void LoadData(int slot)
+    {
+        CSaveManager.GetData(slot, out CSaveData data);
+        LoadData(data);
+    }
+
+    private void LoadData(CSaveData data)
+    {
+        _player.Inventory.ImportState(data.Inventory, data.Quickslot.ToArray(), new Dictionary<int, float>(), data.Money);
+        _availableQuest = data.AvailableQuest;
+        _actingQuest = data.ActingQuest;
+        _completedQuest = data.CompletedQuest;
+        _bossClearState = data.BossClear;
+        _player.PradonaPower = data.PradonaPower;
+        foreach (KeyValuePair<EEquipmentSlot, CItemEquipment> pair in data.Equipment)
+        {
+            if (_player.Equipment.TryGetValue(pair.Key, out CItemEquipment previous) &&
+                previous != null)
+            {
+                previous.OnUnequip(_player);
+            }
+
+            _player.Equipment[pair.Key] = null;
+            pair.Value?.OnEquip(_player);
+        }
+        _player.EquipmentResync();
+    }
+
+    private void ShowQuestion(string shownTitle, string shownText, Action action)
+    {
+        _soundManager?.PlaySE(EEffectSound.QuestionAppear);
+        _confirmTitle.text = shownTitle;
+        _confirmDescription.text = shownText;
+        _confirmAction = action;
+        _lastSettingState = _settingState;
+        SetMenuState(ESettingState.Confirm);
+    }
+
+    private void HideQuestion()
+    {
+        _confirmTitle.text = "";
+        _confirmDescription.text = "";
+        _confirmAction = null;
+        SetMenuState(_lastSettingState);
+        _lastSettingState = ESettingState.None;
     }
 
     public int GetAvailableStage()
@@ -505,6 +700,44 @@ public class CGameManager : MonoBehaviour
         if (_bossClearState.HasFlag(EBossClear.Pigritia)) count += 1;
         if (_bossClearState.HasFlag(EBossClear.Luxuria)) count += 1;
         return count;
+    }
+
+    public int GetCompleteNumber()
+    {
+        int count = 0;
+        if (_bossClearState.HasFlag(EBossClear.Invidia)) count += 1;
+        if (_bossClearState.HasFlag(EBossClear.Avaritia)) count += 1;
+        if (_bossClearState.HasFlag(EBossClear.Pigritia)) count += 1;
+        if (_bossClearState.HasFlag(EBossClear.Gula)) count += 1;
+        if (_bossClearState.HasFlag(EBossClear.Luxuria)) count += 1;
+        if (_bossClearState.HasFlag(EBossClear.Ira)) count += 1;
+        if (_bossClearState.HasFlag(EBossClear.Superbia)) count += 1;
+        if (_bossClearState.HasFlag(EBossClear.Pradona)) count += 1;
+        return count;
+    }
+
+    public static int GetCompleteNumber(EBossClear target)
+    {
+        int count = 0;
+        if (target.HasFlag(EBossClear.Invidia)) count += 1;
+        if (target.HasFlag(EBossClear.Avaritia)) count += 1;
+        if (target.HasFlag(EBossClear.Pigritia)) count += 1;
+        if (target.HasFlag(EBossClear.Gula)) count += 1;
+        if (target.HasFlag(EBossClear.Luxuria)) count += 1;
+        if (target.HasFlag(EBossClear.Ira)) count += 1;
+        if (target.HasFlag(EBossClear.Superbia)) count += 1;
+        if (target.HasFlag(EBossClear.Pradona)) count += 1;
+        return count;
+    }
+
+    public int GetMaxCompleteNumber()
+    {
+        return System.Enum.GetValues(typeof(EBossClear)).Length - 1;
+    }
+
+    public static int GetMaxCompleteNumberStatic()
+    {
+        return System.Enum.GetValues(typeof(EBossClear)).Length - 1;
     }
 
     public void SetBossCleared(EBossClear target)
