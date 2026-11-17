@@ -13,6 +13,7 @@ public class CTestEnemySpawner : MonoBehaviour
     [SerializeField] private float _regenInterval = 2f;
     [SerializeField] private float _peaceTimerMax = 3f;
 
+    private CPlayer _player;
     private float _timer = 0;
     private float _peaceTimer = 0f;
     private bool _isBattleActive;
@@ -37,6 +38,11 @@ public class CTestEnemySpawner : MonoBehaviour
         }
     }
 
+    void Start()
+    {
+        _player = FindFirstObjectByType<CPlayer>();
+    }
+
     void Update()
     {
         // 자식의 수를 확인해서 갯수 파악
@@ -56,7 +62,17 @@ public class CTestEnemySpawner : MonoBehaviour
 
     private void LateUpdate()
     {
-        SetBattleActive(HasChasingEnemy());
+        SetBattleActive(IsPlayerInBattleArea() || HasChasingEnemy());
+    }
+
+    private bool IsPlayerInBattleArea()
+    {
+        if (_player == null) return false;
+
+        Vector3 offset = _player.transform.position - transform.position;
+        offset.y = 0f;
+
+        return offset.sqrMagnitude <= _spawnRadius * _spawnRadius;
     }
 
     private bool ResetWhenMax()
