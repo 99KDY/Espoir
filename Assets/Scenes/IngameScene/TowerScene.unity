@@ -2278,8 +2278,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e4b0a0ed44a7f9f44b0c51fbd432b65c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _baseHpMax: 100
-  _baseAttack: 20
+  _baseHpMax: 1000
+  _baseAttack: 100
   _baseDefence: 0
   _debugLog: 0
   _statusEffectAnchor: {fileID: 0}

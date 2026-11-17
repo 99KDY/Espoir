@@ -295,7 +295,7 @@ public class CInventory : MonoBehaviour
     // 호출하는 쪽에서 현재 전투 여부를 전달
     public bool TryUseItem(int slotIndex, bool isBattle)
     {
-        if (!IsValidSlot(slotIndex) || _player == null)
+        if (!IsValidSlot(slotIndex) || _player == null || _player.HpCurrent <= 0f)
         {
             return false;
         }

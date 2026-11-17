@@ -46,6 +46,9 @@ public class CBossSummoner : MonoBehaviour
     [SerializeField] private float _cineHeight = 4.2f;
     [SerializeField] private float _cineFov = 42f;
 
+    [Header("보스 소환해제 거리")]
+    [SerializeField] private float _unsummonDistance = 25f;
+
     private readonly List<Renderer> _RENDERERS = new List<Renderer>();
     private readonly List<Material[]> _ORIGINAL_MATERIALS = new List<Material[]>();
     private readonly List<Material[]> _FADE_MATERIALS = new List<Material[]>();
@@ -138,6 +141,7 @@ public class CBossSummoner : MonoBehaviour
         if (_isSummoned || _boss == null) return false;
 
         _isSummoned = true;
+        CGameManager.Instance.InvokeBossBattleActivation(true);
         _summonTime = 0f;
         _dismissTime = -1f;
         _cineTime = 0f;
@@ -166,6 +170,7 @@ public class CBossSummoner : MonoBehaviour
         if (!_isSummoned || _boss == null) return false;
 
         _isSummoned = false;
+        CGameManager.Instance.InvokeBossBattleActivation(false);
         _summonTime = -1f;
         _dismissTime = 0f;
 
@@ -233,6 +238,16 @@ public class CBossSummoner : MonoBehaviour
             }
         }
 
+        if (_isSummoned && _player != null)
+        {
+            Vector3 offset = _player.transform.position - _altar.position;
+            offset.y = 0f;
+
+            if (offset.sqrMagnitude > _unsummonDistance * _unsummonDistance)
+            {
+                Unsummon();
+            }
+        }
         // 페이드 인 시작부터 소환 장면이 끝나 플레이어가 움직일 수 있을 때까지, 그리고 잠재우는 동안은 AI 를 대기 상태로 묶음
         // (공격 타이머 · 상태를 매 프레임 처음 값으로). 애니메이터는 그대로 돌아 대기 애니가 재생된다.
         bool isHolding = _summonTime >= 0f || _cineTime >= 0f || _dismissTime >= 0f;
@@ -280,7 +295,7 @@ public class CBossSummoner : MonoBehaviour
             foreach (int id in ids) _boss.RemoveStatus(id, true);
         }
 
-        if (_boss.HpCurrent < _boss.HpMax) _boss.GetHeal(1f, ERatioSwitch.ByMax);
+        if (_boss.HpCurrent < _boss.HpMax) _boss.GetHeal(1f, ERatioSwitch.ByMax, true);
         _boss.ResetBattleState();
     }
 

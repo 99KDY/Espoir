@@ -14,6 +14,7 @@ public enum EGameState
     UI = 2,
     Setting = 3,
     ForcePause = 9,
+    Gameover = 10,
 }
 
 public enum ESettingState
@@ -86,6 +87,9 @@ public class CGameManager : MonoBehaviour
     [SerializeField] Button _gameGotoTitle;
     [SerializeField] Button _gameSave;
     [SerializeField] Toggle _gameAutosave;
+
+    [SerializeField] CanvasGroup _menuGameover;
+    [SerializeField] Button _gameGameoverTitle;
 
     [SerializeField] GameObject _forcePauseSet;
     [SerializeField] CanvasGroup _menuBackground;
@@ -269,7 +273,6 @@ public class CGameManager : MonoBehaviour
         _menuBase.blocksRaycasts = false;
 
         LoadVolumeSettings();
-        CSoundManager.Instance.PlayBGM(EBackgroundSound.OasisOfGold);
     }
 
     void Update()
@@ -368,6 +371,8 @@ public class CGameManager : MonoBehaviour
                 _forcePauseSet.SetActive(false);
                 SetPaused(false);
                 break;
+            default:
+                break;
         }
         _gameState = gameState;
         switch (_gameState)
@@ -392,6 +397,12 @@ public class CGameManager : MonoBehaviour
                 _soundManager.PlaySE(EEffectSound.QuestionAppear);
                 _forcePauseSet.SetActive(true);
                 SetPaused(true);
+                break;
+            case EGameState.Gameover:
+                _soundManager.PlaySE(EEffectSound.Beep);
+                _menuBackground.alpha = 1;
+                _menuBackground.interactable = true;
+                _menuBackground.blocksRaycasts = true;
                 break;
         }
     }
