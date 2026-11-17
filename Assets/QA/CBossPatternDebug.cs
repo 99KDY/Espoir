@@ -101,6 +101,27 @@ public class CBossPatternDebug : MonoBehaviour
                 PlayBossPattern("DonutAttack");
             }
 
+            else if (trigger == "pAttack01")
+            {
+                SetOnAttack(true);
+                _bossAnimator.SetTrigger(trigger);
+                PlayBossPattern("LikeOneShotAttack");
+            }
+
+            else if (trigger == "pAttack02")
+            {
+                SetOnAttack(true);
+                _bossAnimator.SetTrigger(trigger);
+                PlayBossPattern("FindSafeZoneAttack");
+            }
+
+            else if (trigger == "pAttack03")
+            {
+                SetOnAttack(true);
+                _bossAnimator.SetTrigger(trigger);
+                PlayBossPattern("LightningBeamAttack");
+            }
+
             else
             {
                 SetOnAttack(true);
