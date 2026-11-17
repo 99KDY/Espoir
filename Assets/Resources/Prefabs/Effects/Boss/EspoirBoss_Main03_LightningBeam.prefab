@@ -49,13 +49,26 @@ MonoBehaviour:
     isGroup: 1
     group: 7
     hidden: 0
-    rotation: 45
+    rotation: 0
     scale: 1.5
     keepAfterAttack: 0
     offset: {x: 0, y: 0, z: 0}
     overrideRadius: 0
     overrideDuration: 0
     duration: 5.7
+    innerRadius: 0
+    outerRadius: 1
+  - objectIndex: 51
+    isGroup: 1
+    group: 4
+    hidden: 0
+    rotation: 0
+    scale: 1
+    keepAfterAttack: 0
+    offset: {x: 0, y: 0, z: 0}
+    overrideRadius: 0
+    overrideDuration: 0
+    duration: 0.23330009
     innerRadius: 0
     outerRadius: 1
   data: {fileID: 4900000, guid: e8b384bf26ce7e54da53f910406a9c27, type: 3}
