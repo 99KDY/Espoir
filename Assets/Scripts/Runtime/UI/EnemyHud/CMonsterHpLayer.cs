@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -156,8 +156,14 @@ public class CMonsterHpLayer : MonoBehaviour
         {
             height = body.bounds.max.y - enemy.transform.position.y;
         }
-
-        view.Bind(enemy, _monsterName, height + _heightAboveTop, Time.time);
+        if (string.IsNullOrWhiteSpace(enemy.DisplayName))
+        {
+            view.Bind(enemy, _monsterName, height + _heightAboveTop, Time.time);
+        }
+        else
+        {
+            view.Bind(enemy, enemy.DisplayName, height + _heightAboveTop, Time.time);
+        }
         _ACTIVE.Add(view);
         _BY_TARGET.Add(enemy, view);
         return view;

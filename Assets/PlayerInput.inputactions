@@ -43,6 +43,15 @@
                     "initialStateCheck": false
                 },
                 {
+                    "name": "Pradona",
+                    "type": "Button",
+                    "id": "323867fe-fc18-4d43-8d80-36dfe0be0636",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "SkillE",
                     "type": "Button",
                     "id": "875cacf4-fa9e-42d3-8c70-4acc353db30e",
@@ -168,6 +177,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "Dash",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "2ac9372d-69ca-431c-a5b2-9458607302c9",
+                    "path": "<Keyboard>/v",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Pradona",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

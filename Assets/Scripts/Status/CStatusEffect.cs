@@ -301,6 +301,38 @@ public partial class CStatus
                     unit.GetHeal(0.025f * deltaTime, ERatioSwitch.ByMax);
                 });
                 break;
+            // 권능 : 인비디아
+            // 다음 공격 적중 시, 최대 체력의 15% 회복
+            case 9:
+                _trigger |= EStatusTrigger.OnHit;
+                _onHit.Add((CUnit attacker, CUnit defender, float damage) =>
+                {
+                    attacker.GetHeal(0.15f, ERatioSwitch.ByMax);
+                    attacker.RemoveStatus(this);
+                    return damage;
+                });
+                break;
+            // 권능 : 아바리치아
+            // 다음 공격 적중 시, 3초간 적이 받는 피해 20% 증가
+            case 10:
+                _trigger |= EStatusTrigger.OnHit;
+                _onHit.Add((CUnit attacker, CUnit defender, float damage) =>
+                {
+                    attacker.AddStatus(33);
+                    attacker.RemoveStatus(this);
+                    return damage;
+                });
+                break;
+            // 권능 : 아체디아
+            // 다음 자신이 공격받을 때, 피해 99% 감소 (지속시간 1초)
+            case 11:
+                _trigger |= EStatusTrigger.OnDamage;
+                _onDamage.Add((CUnit attacker, CUnit defender, float damage) =>
+                {
+                    attacker.RemoveStatus(this);
+                    return damage * 0.01f;
+                });
+                break;
             default:
                 CLogger.Error($"CStatus : 알 수 없는 커스텀 상태이상 {customStatus}");
                 break;
