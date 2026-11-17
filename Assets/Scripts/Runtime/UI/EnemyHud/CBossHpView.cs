@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 /// <summary>
 /// 화면 상단 중앙에 보스 초상화, 이름, 체력 막대와 남은 체력 비율을 표시합니다.
@@ -80,6 +82,11 @@ public class CBossHpView : MonoBehaviour
     [SerializeField] private Vector3 _sparkColorB = new Vector3(1.3f, 1.02f, 0.62f);
     [SerializeField] private Vector3 _flareColor = new Vector3(1.58f, 1.22f, 0.86f);
 
+    [Header("상태이상 보여주는 부분")]
+    [SerializeField] private RectTransform _statusRoot;
+    [SerializeField] private CStatusUI _statusPrefab;
+    [SerializeField] private CTooltipUI _tooltip;
+
     // 피격과 치명타 흔들림의 정규화 시간별 위치입니다.
     private static readonly float[] _SHAKE_T = { 0f, 0.2f, 0.5f, 0.8f, 1f };
     private static readonly Vector2[] _SHAKE_V = { Vector2.zero, new Vector2(-3f, 1f), new Vector2(2f, -1f),
@@ -140,6 +147,12 @@ public class CBossHpView : MonoBehaviour
     private SCssTransition _portraitShadow;
     private SCssTransition _veilAlpha;
     private SCssTransition _lineAlpha;
+
+    // 상태이상 부분
+    private readonly Dictionary<CStatus, CStatusUI> _statusViews = new();
+    private readonly HashSet<CStatus> _currentStatus = new();
+    private readonly List<CStatus> _removedStatus = new();
+    private int _debuffViewCount;
 
     /// <summary>
     /// 지금 화면에 보이는지 (검증 · 다른 UI 참고용).
@@ -216,6 +229,7 @@ public class CBossHpView : MonoBehaviour
         UpdateTexts();
         Layout();
         Paint(now);
+        UpdateStatus();
     }
 
     private void FindBoss(float now)
@@ -406,6 +420,15 @@ public class CBossHpView : MonoBehaviour
         PlaceText(_hpMax, maxX, l.rowBaseline);
         PlaceText(_hpValue, valueX, l.rowBaseline);
         PlaceText(_hpLabel, valueX - l.valueGap - labelW, l.rowBaseline);
+
+        if (_statusRoot != null)
+        {
+            float barBottom = l.barTop + l.barHeight;
+            float lineBottom = l.top + l.portraitSize + l.lineBelow;
+            float statusTop = Mathf.Max(barBottom, lineBottom) + 6f;
+
+            PlaceBox(_statusRoot, columnX, statusTop, l.barWidth, 30f);
+        }
     }
 
     private void Paint(float now)
@@ -502,5 +525,65 @@ public class CBossHpView : MonoBehaviour
     private static void PlaceText(TMP_Text text, float x, float baseline)
     {
         text.rectTransform.anchoredPosition = new Vector2(x, -baseline);
+    }
+
+    public void UpdateStatus()
+    {
+        if (_statusRoot == null || _statusPrefab == null)
+        {
+            return;
+        }
+
+        _currentStatus.Clear();
+        _removedStatus.Clear();
+
+        if (_boss.Status != null)
+        {
+            for (int i = 0; i < _boss.Status.Count; i++)
+            {
+                CStatus target = _boss.Status[i];
+                if (target == null) continue;
+                _currentStatus.Add(target);
+                if (_statusViews.ContainsKey(target)) continue;
+                CStatusUI view = Instantiate(_statusPrefab, _statusRoot);
+                //((RectTransform)view.transform).sizeDelta = new Vector2(30f, 30f);
+                view.Bind(target, _tooltip);
+                if (target.IsDebuff)
+                {
+                    view.transform.SetSiblingIndex(_debuffViewCount);
+                    _debuffViewCount++;
+                }
+
+                _statusViews.Add(target, view);
+            }
+        }
+
+        foreach (KeyValuePair<CStatus, CStatusUI> pair in _statusViews)
+        {
+            if (_currentStatus.Contains(pair.Key))
+            {
+                pair.Value.Refresh();
+            }
+            else
+            {
+                _removedStatus.Add(pair.Key);
+            }
+        }
+
+        if (_removedStatus.Count > 0)
+        {
+            for (int i = 0; i < _removedStatus.Count; i++)
+            {
+                CStatus targetStatus = _removedStatus[i];
+                CStatusUI targetUi = _statusViews[_removedStatus[i]];
+                _statusViews.Remove(_removedStatus[i]);
+
+                if (targetStatus.IsDebuff) _debuffViewCount--;
+
+                targetUi.gameObject.SetActive(false);
+                targetUi.transform.SetAsLastSibling();
+                Destroy(targetUi.gameObject);
+            }
+        }
     }
 }

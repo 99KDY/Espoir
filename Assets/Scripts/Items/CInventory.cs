@@ -23,9 +23,8 @@ public class CInventory : MonoBehaviour
     private const int EmptyQuickSlotId = -1;
     private const float ConsumableCooltime = 15f;
     private int[] _quickSlotIds = new int[QuickSlot];
-    // 아이템 ID별 쿨타임 종료 시각
-    // !! 아이템 쿨타임을 아이템 클래스가 들고있는 방향으로 
-    private Dictionary<int, float> _cooldownEndTimes = new Dictionary<int, float>();
+    // 그룹 또는 개별 아이템의 쿨타임 종료 시각
+    private readonly Dictionary<(EConsumableCooldownGroup group, int itemId), float> _cooldownEndTimes = new();
     private bool _canOpenInventory = true;
     // UI가 데이터를 다시 읽도록 알리는 이벤트
     public event Action OnInventoryChanged;
@@ -295,7 +294,7 @@ public class CInventory : MonoBehaviour
     // 호출하는 쪽에서 현재 전투 여부를 전달
     public bool TryUseItem(int slotIndex, bool isBattle)
     {
-        if (!IsValidSlot(slotIndex) || _player == null)
+        if (!IsValidSlot(slotIndex) || _player == null || _player.HpCurrent <= 0f)
         {
             return false;
         }
@@ -316,7 +315,8 @@ public class CInventory : MonoBehaviour
             return false;
         }
 
-        if (GetCooldownRemaining(item.Id) > 0f)
+        (EConsumableCooldownGroup, int) cooldownKey = GetCooldownKey(origin);
+        if (GetCooldownRemaining(cooldownKey) > 0f)
         {
             return false;
         }
@@ -331,7 +331,7 @@ public class CInventory : MonoBehaviour
             _items[slotIndex] = null;
         }
 
-        _cooldownEndTimes[item.Id] = Time.time + ConsumableCooltime;
+        _cooldownEndTimes[cooldownKey] = Time.time + ConsumableCooltime;
 
         OnInventoryChanged?.Invoke();
         return true;
@@ -339,7 +339,24 @@ public class CInventory : MonoBehaviour
 
     public float GetCooldownRemaining(int itemId)
     {
-        if (!_cooldownEndTimes.TryGetValue(itemId, out float endTime))
+        if (itemId == EmptyQuickSlotId || !CItemSO.TryFind(itemId, out CItemSO item) ||
+            !(item is CItemConsumableSO consumable))
+        {
+            return 0f;
+        }
+
+        return GetCooldownRemaining(GetCooldownKey(consumable));
+    }
+
+    private static (EConsumableCooldownGroup group, int itemId) GetCooldownKey(CItemConsumableSO item)
+    {
+        EConsumableCooldownGroup group = item.CooldownGroup;
+        return (group, group == EConsumableCooldownGroup.None ? item.Id : 0);
+    }
+
+    private float GetCooldownRemaining((EConsumableCooldownGroup group, int itemId) cooldownKey)
+    {
+        if (!_cooldownEndTimes.TryGetValue(cooldownKey, out float endTime))
         {
             return 0f;
         }
@@ -351,7 +368,7 @@ public class CInventory : MonoBehaviour
             return remaining;
         }
 
-        _cooldownEndTimes.Remove(itemId);
+        _cooldownEndTimes.Remove(cooldownKey);
         return 0f;
     }
 
@@ -569,13 +586,13 @@ public class CInventory : MonoBehaviour
     /// <summary>
     /// 맵 이동용: 가방 칸(아이템 객체 그대로) · 퀵슬롯 · 소모품 쿨타임 종료 시각(Time.time 기준) · 골드를 꺼냅니다.
     /// </summary>
-    public void ExportState(List<CItem> items, int[] quickSlotIds, Dictionary<int, float> cooldownEndTimes, out int gold)
+    public void ExportState(List<CItem> items, int[] quickSlotIds, Dictionary<(EConsumableCooldownGroup group, int itemId), float> cooldownEndTimes, out int gold)
     {
         items.Clear();
         items.AddRange(_items);
         Array.Copy(_quickSlotIds, quickSlotIds, Mathf.Min(_quickSlotIds.Length, quickSlotIds.Length));
         cooldownEndTimes.Clear();
-        foreach (KeyValuePair<int, float> pair in _cooldownEndTimes)
+        foreach (var pair in _cooldownEndTimes)
         {
             cooldownEndTimes[pair.Key] = pair.Value;
         }
@@ -586,7 +603,7 @@ public class CInventory : MonoBehaviour
     /// <summary>
     /// 맵 이동용: ExportState 로 꺼낸 상태를 그대로 넣고 UI 에 알립니다.
     /// </summary>
-    public void ImportState(IReadOnlyList<CItem> items, int[] quickSlotIds, Dictionary<int, float> cooldownEndTimes, int gold)
+    public void ImportState(IReadOnlyList<CItem> items, int[] quickSlotIds, Dictionary<(EConsumableCooldownGroup group, int itemId), float> cooldownEndTimes, int gold)
     {
         for (int i = 0; i < _items.Count; i++)
         {
@@ -595,7 +612,7 @@ public class CInventory : MonoBehaviour
 
         Array.Copy(quickSlotIds, _quickSlotIds, Mathf.Min(_quickSlotIds.Length, quickSlotIds.Length));
         _cooldownEndTimes.Clear();
-        foreach (KeyValuePair<int, float> pair in cooldownEndTimes)
+        foreach (var pair in cooldownEndTimes)
         {
             _cooldownEndTimes[pair.Key] = pair.Value;
         }
