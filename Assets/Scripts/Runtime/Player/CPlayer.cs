@@ -781,4 +781,16 @@ public class CPlayer : CUnit
         remainCooldown = _pradonaCooldown;
         ratio = _pradonaCooldown / _pradonaCooldownSet;
     }
+
+    protected override void Die()
+    {
+        base.Die();
+        if (_actionsBlocked) return;
+
+        _actionsBlocked = true;
+        _movement?.Stop();
+        _skill?.CancelSkill();
+
+        CGameManager.Instance?.SetGameState(EGameState.Gameover);
+    }
 }

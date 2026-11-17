@@ -117,7 +117,6 @@ public class CGameManager : MonoBehaviour
     private EBattleState _battleState;
     private ESettingState _settingState;
     private ESettingState _lastSettingState;
-    private bool _settingQuestion;
     private EBossClear _bossClearState;
     private EQuestList _availableQuest;
     private EQuestList _actingQuest;
@@ -202,7 +201,8 @@ public class CGameManager : MonoBehaviour
                 _soundManager.PlaySE(EEffectSound.Beep);
                 HideQuestion();
             });
-
+        _gameGameoverTitle.onClick.AddListener(() =>
+            CSceneFlowManager.Instance?.LoadScene(ESceneId.Title));
         _screenChange.onClick.AddListener(() => OnGameResolutionChange());
         _player = FindFirstObjectByType<CPlayer>();
         _soundManager = FindFirstObjectByType<CSoundManager>();
@@ -403,6 +403,9 @@ public class CGameManager : MonoBehaviour
                 _menuBackground.alpha = 1;
                 _menuBackground.interactable = true;
                 _menuBackground.blocksRaycasts = true;
+                _menuGameover.alpha = 1;
+                _menuGameover.interactable = true;
+                _menuGameover.blocksRaycasts = true;
                 break;
         }
     }
