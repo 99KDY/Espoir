@@ -156,7 +156,11 @@ public class CSlothBoss : CEnemy
     {
         _cts?.Cancel();
         _cts?.Dispose();
+    }
         
+    private void OnDisable()
+    {
+        _battleVersion++;
     }
 
     protected override void Start()
@@ -497,8 +501,10 @@ public class CSlothBoss : CEnemy
     #region NormalAttack Patterns
     private async UniTask NormalAttackDelay()
     {
+        int battleVersion = _battleVersion;
 
         await UniTask.Delay(3000);
+        if (battleVersion != _battleVersion) return;
         _atkTime = 0;
 
         _onAttack = false;
@@ -611,6 +617,7 @@ public class CSlothBoss : CEnemy
     #region SubPattern
     private async UniTask WhirlWindAttack()
     {
+        int battleVersion = _battleVersion;
 
         if(_previewPattern != null)
         {
@@ -622,6 +629,7 @@ public class CSlothBoss : CEnemy
         }
 
         await UniTask.Delay(2300);
+        if (battleVersion != _battleVersion) return;
         _atkTimer = -0.8f;
 
         if (_previewPattern != null)
@@ -633,6 +641,7 @@ public class CSlothBoss : CEnemy
         _animator.SetTrigger(_secondSub);
 
         await UniTask.Delay(2500);
+        if (battleVersion != _battleVersion) return;
 
         _onAttack = false;
 
@@ -677,6 +686,7 @@ public class CSlothBoss : CEnemy
     
     private async UniTask DonutAttack()
     {
+        int battleVersion = _battleVersion;
         if(_previewPattern != null)
         {
             _previewPattern.ShowDonutPattern(20, 18f, 10f);
@@ -688,6 +698,7 @@ public class CSlothBoss : CEnemy
         }
 
         await UniTask.Delay(2000);
+        if (battleVersion != _battleVersion) return;
         _atkTimer = 0;
 
         if (_previewPattern != null)
@@ -699,6 +710,7 @@ public class CSlothBoss : CEnemy
 
         _onAttack = true;
         await UniTask.Delay(2000);
+        if (battleVersion != _battleVersion) return;
 
         _onAttack = false;
     }
@@ -738,6 +750,7 @@ public class CSlothBoss : CEnemy
 
     private async UniTask TwiceAttack()
     {
+        int battleVersion = _battleVersion;
         if (_previewPattern != null)
         {
             _previewPattern.transform.position = _player.transform.position;
@@ -751,6 +764,7 @@ public class CSlothBoss : CEnemy
         }
 
         await UniTask.Delay(1500);
+        if (battleVersion != _battleVersion) return;
         _atkTimer = 0;
 
         if (_previewPattern != null)
@@ -761,6 +775,7 @@ public class CSlothBoss : CEnemy
 
 
         await UniTask.Delay(3200);
+        if (battleVersion != _battleVersion) return;
         _onAttack = false;
     }
 
@@ -830,6 +845,7 @@ public class CSlothBoss : CEnemy
 
     private async UniTask AlternationAttack()
     {
+        int battleVersion = _battleVersion;
         _onAttack = true;
         if (_previewPattern != null)
         {
@@ -842,6 +858,7 @@ public class CSlothBoss : CEnemy
         }
 
         await UniTask.Delay(1000);
+        if (battleVersion != _battleVersion) return;
 
         if (_previewPattern != null)
         {
@@ -859,6 +876,7 @@ public class CSlothBoss : CEnemy
         }
 
         await UniTask.Delay(1000); ;
+        if (battleVersion != _battleVersion) return;
 
         if (_previewPattern != null)
         {
@@ -870,6 +888,7 @@ public class CSlothBoss : CEnemy
         _animator.SetTrigger(_thirdSub);
 
         await UniTask.Delay(3100);
+        if (battleVersion != _battleVersion) return;
         _onAttack = false;
     }
 
@@ -953,6 +972,7 @@ public class CSlothBoss : CEnemy
 
     private async UniTask LikeOneShotAttack()
     {
+        int battleVersion = _battleVersion;
         _onAttack = true;
 
         if (_previewPattern != null)
@@ -962,6 +982,7 @@ public class CSlothBoss : CEnemy
 
 
         await UniTask.Delay(4000);
+        if (battleVersion != _battleVersion) return;
         if(_previewPattern != null)
         {
             _previewPattern.ClearPreview();
@@ -1061,15 +1082,18 @@ public class CSlothBoss : CEnemy
 
     private async UniTask FindSafeZoneAttack()
     {
+        int battleVersion = _battleVersion;
         _onAttack = true;
 
 
         _atkTimer = 0;
 
         await UniTask.Delay(4300);
+        if (battleVersion != _battleVersion) return;
         _atkTimer = 0;
 
         await UniTask.Delay(3000);
+        if (battleVersion != _battleVersion) return;
 
         _mainCount++;
         _onAttack = false;
@@ -1141,6 +1165,7 @@ public class CSlothBoss : CEnemy
 
     private async UniTask LightningBeamAttack()
     {
+        int battleVersion = _battleVersion;
         _onAttack = true;
         if(_previewPattern != null)
         {
@@ -1150,6 +1175,7 @@ public class CSlothBoss : CEnemy
         _atkTimer = 0;
 
         await UniTask.Delay(4300);
+        if (battleVersion != _battleVersion) return;
         _atkTimer = 0;
 
         if(_previewPattern != null)
@@ -1159,6 +1185,7 @@ public class CSlothBoss : CEnemy
 
 
         await UniTask.Delay(3000);
+        if (battleVersion != _battleVersion) return;
 
         _mainCount++; 
         _onAttack = false;
@@ -1369,6 +1396,39 @@ public class CSlothBoss : CEnemy
 
         distance = Mathf.Max(3.0f, distance);
                 
+    }
+
+    private float _initialAtkTime = -1f;
+    private int _battleVersion;
+
+    /// <summary>
+    /// 다시 소환할 때 AI · 공격 상태를 처음(Start 직후)과 같게 되돌립니다. 체력 · 상태이상은 부르는 쪽(CBossSummoner)이 되돌립니다.
+    /// </summary>
+    public void ResetBattleState()
+    {
+        _battleVersion++;
+
+        // 공격 대기 시간(_atkTime)은 공격 중에 0 으로 바뀌므로 첫 소환 때(전투 전) 값을 기억해 두고 되돌림
+        if (_initialAtkTime < 0f) _initialAtkTime = _atkTime;
+        _atkTime = _initialAtkTime;
+
+        _currentState = _bossState;
+        _atkTimer = 0f;
+        _delayTimer = 0f;
+        if (_onAttack && _previewPattern != null)
+        {
+            _previewPattern.ClearPreview();
+            _previewPattern.transform.position = _patternPos;
+        }
+        _onAttack = false;
+        _isNormal = false;
+        _isSub = false;
+        _isMain = false;
+        normalAtk = 0;
+        subAtk = 0;
+        mainAtk = 0;
+        _mainCount = 0;
+        if (_player != null) _target = _player.transform;
     }
 
 }

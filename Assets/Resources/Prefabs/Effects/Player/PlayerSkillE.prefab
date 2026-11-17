@@ -4922,8 +4922,8 @@ MonoBehaviour:
     shake: 0.3
   _screens:
   - time: 0.50833
-    duration: 0.2
-    strength: 0.68
+    duration: 0.1
+    strength: 0.16
     mode: 0
 --- !u!1 &1748340052338569952
 GameObject:

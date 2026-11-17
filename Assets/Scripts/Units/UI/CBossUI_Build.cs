@@ -22,10 +22,10 @@ public class CBossUI_Build : MonoBehaviour
     #endregion
 
     #region 내부변수
-
     private readonly Dictionary<CStatus, CStatusUI> _statusViews = new();
     private readonly HashSet<CStatus> _currentStatus = new();
     private readonly List<CStatus> _removedStatus = new();
+    private int _debuffViewCount;
     #endregion
 
 
@@ -88,6 +88,11 @@ public class CBossUI_Build : MonoBehaviour
                 if (_statusViews.ContainsKey(target)) continue;
                 CStatusUI view = Instantiate(_statusPrefab, _statusRoot);
                 view.Bind(target, _tooltip);
+                if (target.IsDebuff)
+                {
+                    view.transform.SetSiblingIndex(_debuffViewCount);
+                    _debuffViewCount++;
+                }
 
                 _statusViews.Add(target, view);
             }
@@ -109,10 +114,15 @@ public class CBossUI_Build : MonoBehaviour
         {
             for (int i = 0; i < _removedStatus.Count; i++)
             {
-                CStatusUI target = _statusViews[_removedStatus[i]];
+                CStatus targetStatus = _removedStatus[i];
+                CStatusUI targetUi = _statusViews[_removedStatus[i]];
                 _statusViews.Remove(_removedStatus[i]);
-                target.gameObject.SetActive(false);
-                Destroy(target.gameObject);
+
+                if (targetStatus.IsDebuff) _debuffViewCount--;
+
+                targetUi.gameObject.SetActive(false);
+                targetUi.transform.SetAsLastSibling();
+                Destroy(targetUi.gameObject);
             }
         }
     }

@@ -46,7 +46,7 @@ public class CPlayerAttack : MonoBehaviour
     }
 
     internal SPlayerHitResult Attack(CPlayer attacker, SSkillHit hit, Vector3 position, Quaternion rotation,
-        EHitMark mark, HashSet<CUnit> castTargets = null)
+        EHitMark mark, HashSet<CUnit> castTargets = null, float armorPenetration = 0f, bool forceCritical = false)
     {
         HashSet<CUnit> targets = castTargets;
         if (targets == null)
@@ -84,7 +84,8 @@ public class CPlayerAttack : MonoBehaviour
 
             bool hadFullMark = attacker.Passive.HasFullMark(target);
             float damageRatio = hit.damageRatio + (hadFullMark ? hit.markedDamageRatio : 0f);
-            SDamageInfo damageInfo = new SDamageInfo(attacker.Attack * damageRatio);
+            SDamageInfo damageInfo = new SDamageInfo(attacker.Attack * damageRatio, false, ERatioSwitch.Constant, true,
+                null, armorPenetration, forceCritical);
             float previousHp = target.HpCurrent;
             target.OnHit(attacker, target, damageInfo);
             if (target.HpCurrent < previousHp)

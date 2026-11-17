@@ -72,6 +72,7 @@ MonoBehaviour:
     moveDistance: 0
     moveStart: 0
     moveEnd: 1
+    forwardMoveReduction: 0.3
     moveCurve:
       serializedVersion: 2
       m_Curve:
@@ -3382,43 +3383,43 @@ MonoBehaviour:
     - time: 0.07450331
       damageRatio: 1
       hitStopDuration: 0.045
-      offset: {x: 0, y: 0, z: 1}
-      size: {x: 2, y: 2, z: 2}
+      offset: {x: 0, y: 0, z: 1.2}
+      size: {x: 2, y: 2, z: 2.4}
       appliesMark: 0
       opensCrownWindow: 0
     - time: 0.22075056
       damageRatio: 1.2
       hitStopDuration: 0.065
-      offset: {x: 0, y: 0, z: 1}
-      size: {x: 2, y: 2, z: 2}
+      offset: {x: 0, y: 0, z: 1.2}
+      size: {x: 2, y: 2, z: 2.4}
       appliesMark: 0
       opensCrownWindow: 0
     - time: 0.35596028
       damageRatio: 1.2
       hitStopDuration: 0.035
-      offset: {x: 0, y: 0, z: 1}
-      size: {x: 2, y: 2, z: 2}
+      offset: {x: 0, y: 0, z: 1.2}
+      size: {x: 2, y: 2, z: 2.4}
       appliesMark: 0
       opensCrownWindow: 1
     - time: 0.3807947
       damageRatio: 1.2
       hitStopDuration: 0.05
-      offset: {x: 0, y: 0, z: 1}
-      size: {x: 2, y: 2, z: 2}
+      offset: {x: 0, y: 0, z: 1.2}
+      size: {x: 2, y: 2, z: 2.4}
       appliesMark: 0
       opensCrownWindow: 1
     - time: 0.40562916
       damageRatio: 1.2
       hitStopDuration: 0.065
-      offset: {x: 0, y: 0, z: 1}
-      size: {x: 2, y: 2, z: 2}
+      offset: {x: 0, y: 0, z: 1.2}
+      size: {x: 2, y: 2, z: 2.4}
       appliesMark: 1
       opensCrownWindow: 1
     - time: 0.54635763
       damageRatio: 2.2
       hitStopDuration: 0.12
-      offset: {x: 0, y: 0, z: 1}
-      size: {x: 2, y: 2, z: 2}
+      offset: {x: 0, y: 0, z: 1.2}
+      size: {x: 2, y: 2, z: 2.4}
       appliesMark: 1
       opensCrownWindow: 1
     effectPrefab: {fileID: 5512733844516348013, guid: a4980c21ff7ba604cbbb9315a8491092, type: 3}

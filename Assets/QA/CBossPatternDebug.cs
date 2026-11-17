@@ -70,6 +70,8 @@ public class CBossPatternDebug : MonoBehaviour
 
             if (trigger == "bAttack01")
             {
+                SetOnAttack(true);
+                _bossAnimator.SetTrigger(trigger);
                 PlayBossPattern("TwiceAttack");
             }
 

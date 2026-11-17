@@ -17,6 +17,11 @@ public enum EEffectSound
     MonsterHit,
     PlayerSlash,
     MonsterSlash,
+    QuestionAppear,
+    QuestionChoose,
+    Success,
+    Beep,
+    Suprise
 }
 
 [Serializable]

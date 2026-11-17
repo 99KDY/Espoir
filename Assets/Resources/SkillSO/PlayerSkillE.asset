@@ -15,7 +15,7 @@ MonoBehaviour:
   _strikeCancelTime: 0.38
   _type: 2
   _cooldown: 8
-  _mpCost: 20
+  _mpCost: 40
   _startTrigger: SkillE
   _comboTrigger:
   _rotationSpeed: 1080

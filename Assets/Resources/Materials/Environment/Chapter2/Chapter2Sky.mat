@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Chapter2Sky
+  m_Shader: {fileID: 4800000, guid: d71b12f81a257614a903082efd5cf06f, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs: []
+    m_Ints: []
+    m_Floats: []
+    m_Colors:
+    - _Cloud: {r: 0.27450976, g: 0.22745094, b: 0.47843134, a: 1}
+    - _Horizon: {r: 0.5490196, g: 0.39999995, b: 0.67450976, a: 1}
+    - _SunGlow: {r: 0.7843137, g: 0.6666666, b: 1, a: 1}
+    - _Zenith: {r: 0.14901957, g: 0.1215686, b: 0.33725485, a: 1}
+  m_BuildTextureStacks: []

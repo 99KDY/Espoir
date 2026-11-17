@@ -6,14 +6,11 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 public enum ESceneId
 {
-    // 0 ~ 9 : 코어
     Title = 0,
-    Prologue = 1,
-    Epilogue = 9,
-    // 10 ~ 19 : 마을
-    Lobby = 10,
-    // 20 ~ 29 : 전투
-    BattlePigritia = 20
+    PradonaCamp = 1,
+    Desert = 30,
+    Garden = 31,
+    Tower = 32
 }
 
 [Serializable]
@@ -40,8 +37,7 @@ public partial class CSceneFlowManager : MonoBehaviour
     private static CSceneFlowManager _instance;
     private int _targetSaveData = -1;
     private bool _loadSavedData = false;
-    //private float _bgmLevel = 1f;
-    //private float _seLevel = 1f;
+    private bool _firstLoadFromTitle = false;
     private int _cursorIndex = 0;
     private readonly Dictionary<ESceneId, string> _idToName = new Dictionary<ESceneId, string>();
     private readonly Dictionary<string, ESceneId> _nameToId = new Dictionary<string, ESceneId>();
@@ -61,15 +57,11 @@ public partial class CSceneFlowManager : MonoBehaviour
         set { _loadSavedData = value; }
     }
 
-    //public (float bgmLevel, float seLevel) KeepVolume
-    //{
-    //    get { return (_bgmLevel, _seLevel); }
-    //    set
-    //    {
-    //        _bgmLevel = value.bgmLevel;
-    //        _seLevel = value.seLevel;
-    //    }
-    //}
+    public bool FirstLoadFromTitle
+    {
+        get { return _firstLoadFromTitle; }
+        set { _firstLoadFromTitle = value; }
+    }
 
     public static CSceneFlowManager Instance
     {
@@ -153,16 +145,31 @@ public partial class CSceneFlowManager : MonoBehaviour
         yield return StartCoroutine(Co_FadeTo(1f, _fadeDuration));
 
         AsyncOperation op = SceneManager.LoadSceneAsync(sceneName);
+        _loadingText.gameObject.SetActive(true);
         op.allowSceneActivation = false;
         while (op.progress < 0.9f)
         {
+            int percent = Mathf.FloorToInt(op.progress / 0.9f * 100f);
+            _loadingText.text = $"맵 불러오는 중… {percent}%";
             yield return null;
         }
+        _loadingText.text = "씬 준비 중…";
+        CaptureLeavingPlayer();
         op.allowSceneActivation = true;
+        while (op.isDone == false)
+        {
+            yield return null;
+        }
 
         yield return null;
-        // StartCoroutine(Co_FadeTo(0f, _fadeDuration));
         SyncCursorToCurrentScene();
+        _loadingText.gameObject.SetActive(false);
+        _loadingText.text = "";
+        if (_isTraveling)
+        {
+            PlaceArrivedPlayer(id);
+            yield return StartCoroutine(Co_FadeTo(0f, _fadeDuration));
+        }
 
         CLogger.Success($"씬 로드 -> {sceneName}");
     }

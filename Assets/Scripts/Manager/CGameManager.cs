@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Audio;
+using UnityEngine.Rendering;
 using UnityEngine.UI;
 
 public enum EGameState
@@ -151,6 +152,27 @@ public class CGameManager : MonoBehaviour
         _tempWidth = Screen.width;
         _tempHeight = Screen.height;
 
+        if (CMapInfo.Current == null)
+        {
+            CLogger.Error("현재 맵 정보를 찾을 수 없어 저장하지 못했습니다.");
+            return;
+        }
+
+        _currentStage = CMapInfo.Current.SceneId switch
+        {
+            ESceneId.PradonaCamp => 0,
+            ESceneId.Desert => 1,
+            ESceneId.Garden => 2,
+            ESceneId.Tower => 3,
+            _ => -1
+        };
+
+        if (_currentStage < 0)
+        {
+            CLogger.Error($"맵 정보가 잘못되어있습니다.");
+            return;
+        }
+
         for (int i = 0; i < _quilitySetting.Count; i++)
         {
             int target = i;
@@ -209,16 +231,7 @@ public class CGameManager : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            if (_gameState == EGameState.Idle)
-            {
-                SetGameState(EGameState.Setting);
-                SetMenuState(ESettingState.BaseMenu);
-            }
-            else if (_gameState == EGameState.Setting)
-            {
-                SetGameState(EGameState.Idle);
-                SetMenuState(ESettingState.None);
-            }
+            ToggleBaseMenu();
         }
 
         if (_zoneText != null)
@@ -359,6 +372,23 @@ public class CGameManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// ESC 와 같은 규칙으로 기본 메뉴를 열거나 닫습니다. HUD 메뉴 버튼도 이 메서드를 씁니다.
+    /// </summary>
+    public void ToggleBaseMenu()
+    {
+        if (_gameState == EGameState.Idle)
+        {
+            SetGameState(EGameState.Setting);
+            SetMenuState(ESettingState.BaseMenu);
+        }
+        else if (_gameState == EGameState.Setting)
+        {
+            SetGameState(EGameState.Idle);
+            SetMenuState(ESettingState.None);
+        }
+    }
+
     public void SetMenuState(ESettingState state)
     {
         switch (_settingState)
@@ -490,6 +520,90 @@ public class CGameManager : MonoBehaviour
         }
     }
 
+    public bool InitializeSaveslot(int slot, bool useSaveData)
+    {
+        if (_player == null ||
+            _player.Inventory == null ||
+            slot < 0 || slot >= CSaveManager.MaxSaveSlot) return false;
+
+        CSaveManager.RefreshData(slot);
+        if (useSaveData)
+        {
+            if (!CSaveManager.GetData(slot, out CSaveData data)) return false;
+            LoadData(data);
+            return true;
+        }
+        
+        // 새 시작인데 데이터가 이미 있을경우
+        if (CSaveManager.Available(slot)) return false;
+
+        return SaveData(slot);
+    }
+
+    public bool SaveData()
+    {
+        return SaveData(CSceneFlowManager.Instance.TargetSaveData);
+    }
+
+    private bool SaveData(int slot)
+    {
+        if (_player == null || _player.Inventory == null) return false;
+        
+        List<CItem> items = new List<CItem>(_player.Inventory.MaxItemSlot);
+        int[] quickSlots = new int[_player.Inventory.QuickSlotLength];
+
+        _player.Inventory.ExportState(items, quickSlots, new Dictionary<int, float>(), out int gold);
+
+        CSaveData data = new CSaveData
+            (
+                CSaveManager.Version,
+                _currentStage,
+                gold,
+                items,
+                _player.Equipment,
+                quickSlots,
+                _availableQuest,
+                _actingQuest,
+                _completedQuest,
+                _bossClearState,
+                _player.PradonaPower);
+
+        return CSaveManager.SaveData(slot, data);
+    }
+
+    public void LoadData()
+    {
+        LoadData(CSceneFlowManager.Instance.TargetSaveData);
+    }
+
+    private void LoadData(int slot)
+    {
+        CSaveManager.GetData(slot, out CSaveData data);
+        LoadData(data);
+    }
+
+    private void LoadData(CSaveData data)
+    {
+        _player.Inventory.ImportState(data.Inventory, data.Quickslot.ToArray(), new Dictionary<int, float>(), data.Money);
+        _availableQuest = data.AvailableQuest;
+        _actingQuest = data.ActingQuest;
+        _completedQuest = data.CompletedQuest;
+        _bossClearState = data.BossClear;
+        _player.PradonaPower = data.PradonaPower;
+        foreach (KeyValuePair<EEquipmentSlot, CItemEquipment> pair in data.Equipment)
+        {
+            if (_player.Equipment.TryGetValue(pair.Key, out CItemEquipment previous) &&
+                previous != null)
+            {
+                previous.OnUnequip(_player);
+            }
+
+            _player.Equipment[pair.Key] = null;
+            pair.Value?.OnEquip(_player);
+        }
+        _player.EquipmentResync();
+    }
+
     public int GetAvailableStage()
     {
         int count = 0;
@@ -497,6 +611,44 @@ public class CGameManager : MonoBehaviour
         if (_bossClearState.HasFlag(EBossClear.Pigritia)) count += 1;
         if (_bossClearState.HasFlag(EBossClear.Luxuria)) count += 1;
         return count;
+    }
+
+    public int GetCompleteNumber()
+    {
+        int count = 0;
+        if (_bossClearState.HasFlag(EBossClear.Invidia)) count += 1;
+        if (_bossClearState.HasFlag(EBossClear.Avaritia)) count += 1;
+        if (_bossClearState.HasFlag(EBossClear.Pigritia)) count += 1;
+        if (_bossClearState.HasFlag(EBossClear.Gula)) count += 1;
+        if (_bossClearState.HasFlag(EBossClear.Luxuria)) count += 1;
+        if (_bossClearState.HasFlag(EBossClear.Ira)) count += 1;
+        if (_bossClearState.HasFlag(EBossClear.Superbia)) count += 1;
+        if (_bossClearState.HasFlag(EBossClear.Pradona)) count += 1;
+        return count;
+    }
+
+    public static int GetCompleteNumber(EBossClear target)
+    {
+        int count = 0;
+        if (target.HasFlag(EBossClear.Invidia)) count += 1;
+        if (target.HasFlag(EBossClear.Avaritia)) count += 1;
+        if (target.HasFlag(EBossClear.Pigritia)) count += 1;
+        if (target.HasFlag(EBossClear.Gula)) count += 1;
+        if (target.HasFlag(EBossClear.Luxuria)) count += 1;
+        if (target.HasFlag(EBossClear.Ira)) count += 1;
+        if (target.HasFlag(EBossClear.Superbia)) count += 1;
+        if (target.HasFlag(EBossClear.Pradona)) count += 1;
+        return count;
+    }
+
+    public int GetMaxCompleteNumber()
+    {
+        return System.Enum.GetValues(typeof(EBossClear)).Length - 1;
+    }
+
+    public static int GetMaxCompleteNumberStatic()
+    {
+        return System.Enum.GetValues(typeof(EBossClear)).Length - 1;
     }
 
     public void SetBossCleared(EBossClear target)

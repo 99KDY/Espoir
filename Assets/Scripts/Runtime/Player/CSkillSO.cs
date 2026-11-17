@@ -32,6 +32,8 @@ public struct SSkillStep
     [Min(0f)] public float moveDistance;
     [Range(0f, 1f)] public float moveStart;
     [Range(0f, 1f)] public float moveEnd;
+    [Tooltip("전진 곡선에서 줄일 비율입니다. 이펙트 위치도 줄어든 이동량에 맞춥니다.")]
+    [Range(0f, 1f)] public float forwardMoveReduction;
     public AnimationCurve moveCurve;
     public AnimationCurve sideMoveCurve;
     public SSkillHit[] hits;

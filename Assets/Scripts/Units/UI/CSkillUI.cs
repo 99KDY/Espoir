@@ -15,6 +15,13 @@ public class CSkillUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     [SerializeField][TextArea(1, 5)] private string _tooltipText;
 
     [SerializeField] private bool _showingAvailable;
+    [Tooltip("켜면 사용 불가 아이콘을 붉게 칠하지 않고 투명도만 낮춥니다.")]
+    [SerializeField] private bool _useAlphaForUnavailable = false;
+    [SerializeField, Range(0f, 1f)] private float _unavailableAlpha = 0.5f;
+    [Tooltip("켜면 남은 쿨타임을 1초 이상은 올림 정수, 1초 미만만 소수 1자리로 씁니다.")]
+    [SerializeField] private bool _useWholeSeconds = false;
+    [Tooltip("켜면 마우스를 올려도 설명을 띄우지 않습니다(꾹 누름 등 다른 컴포넌트가 Tooltip UI 로 띄움).")]
+    [SerializeField] private bool _tooltipOnHold = false;
     public string Tooltip => $"{_name}\n<size=75%>{_tooltipText}</size>";
 
     public void Refresh(float ratio, float remainCooldown, bool enableUse = true)
@@ -24,13 +31,19 @@ public class CSkillUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         if (remainCooldown <= 0) _cooldownText.gameObject.SetActive(false);
         else
         {
-            _cooldownText.text = remainCooldown.ToString("F1");
+            _cooldownText.text = _useWholeSeconds && remainCooldown >= 1f
+                ? Mathf.CeilToInt(remainCooldown).ToString()
+                : remainCooldown.ToString("F1");
             _cooldownText.gameObject.SetActive(true);
         }
 
         if (enableUse || !_showingAvailable)
         {
             _skillIcon.color = new Color(1f, 1f, 1f, 1f);
+        }
+        else if (_useAlphaForUnavailable)
+        {
+            _skillIcon.color = new Color(1f, 1f, 1f, _unavailableAlpha);
         }
         else
         {
@@ -40,6 +53,7 @@ public class CSkillUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
     public void OnPointerEnter(PointerEventData eventData)
     {
+        if (_tooltipOnHold) return;
         _tooltipUI.Enable(this);
     }
 
