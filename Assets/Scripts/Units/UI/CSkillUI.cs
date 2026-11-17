@@ -23,6 +23,11 @@ public class CSkillUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     [Tooltip("켜면 마우스를 올려도 설명을 띄우지 않습니다(꾹 누름 등 다른 컴포넌트가 Tooltip UI 로 띄움).")]
     [SerializeField] private bool _tooltipOnHold = false;
     public string Tooltip => $"{_name}\n<size=75%>{_tooltipText}</size>";
+    public string TooltipText
+    {
+        get { return _tooltipText; }
+        set { _tooltipText = value; }
+    }
 
     public void Refresh(float ratio, float remainCooldown, bool enableUse = true)
     {

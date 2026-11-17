@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(CPlayerMovement))]
@@ -1093,5 +1093,30 @@ public class CPlayerSkill : MonoBehaviour
         }
 
         return false;
+    }
+
+    public void ResetCooldowns(bool resetNormal, bool resetDash, bool resetUltimate)
+    {
+        foreach (CSkillRuntime runtime in _SKILLS.Values)
+        {
+            switch (runtime.data.Type)
+            {
+                case ESkillType.Strike: // Q
+                    if (resetNormal) runtime.readyTime = 0f;
+                    break;
+                case ESkillType.Crown:  // W
+                    if (resetNormal) runtime.readyTime = 0f;
+                    break;
+                case ESkillType.Rush:   // E
+                    if (resetNormal) runtime.readyTime = 0f;
+                    break;
+                case ESkillType.Slam:   // R
+                    if (resetUltimate) runtime.readyTime = 0f;
+                    break;
+                case ESkillType.Dash:   // Space
+                    if (resetDash) runtime.readyTime = 0f;
+                    break;
+            }
+        }
     }
 }
