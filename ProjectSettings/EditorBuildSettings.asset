@@ -18,6 +18,9 @@ EditorBuildSettings:
     path: Assets/Scenes/Heyseong/TowerScene.unity
     guid: a3f5e4c5f931d8e47a91fb38da4eccfa
   - enabled: 1
+    path: Assets/Scenes/IngameScene/TitleScreen.unity
+    guid: 61945f486fd83d24799c7b5f8b108f21
+  - enabled: 1
     path: Assets/Scenes/QA_Test/DesertScene.unity
     guid: 02f010042f023f24caf6900ae15b9cbe
   - enabled: 1
