@@ -995,7 +995,7 @@ public class CSlothBoss : CEnemy
 
     }
 
-    private void LikeOneShotDamage()
+    private void LikeOneShotDamage(float damage)
     {
         int hits = FindPlayer(20);
 
@@ -1012,7 +1012,7 @@ public class CSlothBoss : CEnemy
                 continue;
             }
 
-            SDamageInfo damageToPlayer= new SDamageInfo(0.99f, true ,ERatioSwitch.ByCurrent);
+            SDamageInfo damageToPlayer= new SDamageInfo(damage, true ,ERatioSwitch.ByCurrent);
             float lastHp = player.HpCurrent;
             
             player.OnHit(this, damageToPlayer);
@@ -1021,8 +1021,19 @@ public class CSlothBoss : CEnemy
 
         }
 
-
     }
+
+    private void LikeOneShotAttack_First()
+    {
+        LikeOneShotDamage(0.6f);
+    }
+
+    private void LikeOneShotAttack_Second()
+    {
+        LikeOneShotDamage(0.99f);
+    }
+
+
 
     private void FreezeAnime()
     {

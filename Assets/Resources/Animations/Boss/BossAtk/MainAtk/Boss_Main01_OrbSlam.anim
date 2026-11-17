@@ -885521,7 +885521,7 @@ AnimationClip:
     intParameter: 0
     messageOptions: 0
   - time: 3.8333333
-    functionName: LikeOneShotDamage
+    functionName: LikeOneShotAttack_First
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
