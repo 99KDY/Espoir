@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 /// <summary>
 /// 맵 이동 동안 플레이어 상태를 들고 가는 데이터입니다. 떠나는 씬의 플레이어에서 읽고(Capture) 새 씬의 플레이어에 넣습니다(Apply).
@@ -24,7 +24,7 @@ public class CTravelPlayerState
     private float _crownWindowEnd;
     private readonly List<CItem> _ITEMS = new List<CItem>();
     private int[] _quickSlotIds = new int[0];
-    private readonly Dictionary<int, float> _ITEM_COOLDOWN_ENDS = new Dictionary<int, float>();
+    private readonly Dictionary<(EConsumableCooldownGroup group, int itemId), float> _ITEM_COOLDOWN_ENDS = new();
     private readonly Dictionary<EEquipmentSlot, CItemEquipment> _EQUIPMENT =
         new Dictionary<EEquipmentSlot, CItemEquipment>();
     private readonly List<SStatusState> _STATUSES = new List<SStatusState>();

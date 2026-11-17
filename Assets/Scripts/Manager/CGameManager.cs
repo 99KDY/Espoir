@@ -636,7 +636,7 @@ public class CGameManager : MonoBehaviour
         List<CItem> items = new List<CItem>(_player.Inventory.MaxItemSlot);
         int[] quickSlots = new int[_player.Inventory.QuickSlotLength];
 
-        _player.Inventory.ExportState(items, quickSlots, new Dictionary<int, float>(), out int gold);
+        _player.Inventory.ExportState(items, quickSlots, new Dictionary<(EConsumableCooldownGroup group, int itemId), float>(), out int gold);
 
         CSaveData data = new CSaveData
             (
@@ -668,7 +668,7 @@ public class CGameManager : MonoBehaviour
 
     private void LoadData(CSaveData data)
     {
-        _player.Inventory.ImportState(data.Inventory, data.Quickslot.ToArray(), new Dictionary<int, float>(), data.Money);
+        _player.Inventory.ImportState(data.Inventory, data.Quickslot.ToArray(), new Dictionary<(EConsumableCooldownGroup group, int itemId), float>(), data.Money);
         _availableQuest = data.AvailableQuest;
         _actingQuest = data.ActingQuest;
         _completedQuest = data.CompletedQuest;
