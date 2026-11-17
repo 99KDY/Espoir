@@ -23,7 +23,7 @@ public class CItemConsumableSO : CItemSO
     [Tooltip("던지는 아이템인지 유무 (던지는 아이템이면 위의 것들이 맞으면 적용되는거로 처리됨)")]
     [SerializeField] private bool _isThrow = false;
     [Tooltip("쿨타임을 공유할 그룹")]
-    [SerializeField] private EConsumableCooldownGroup _cooldownGroup = EConsumableCooldownGroup.Individual;
+    [SerializeField] private EConsumableCooldownGroup _cooldownGroup = EConsumableCooldownGroup.None;
 
     public IReadOnlyList<CConsumableAction> Action => _action;
     public IReadOnlyList<SStatusApply> ItemStatus => _itemStatus;
