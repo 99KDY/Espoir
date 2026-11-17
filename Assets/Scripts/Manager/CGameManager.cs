@@ -378,15 +378,18 @@ public class CGameManager : MonoBehaviour
                 _soundManager.PlayBGM(EBackgroundSound.DialogueBGM);
                 break;
             case EGameState.UI:
+                _soundManager.PlaySE(EEffectSound.QuestionAppear);
                 SetPaused(true);
                 break;
             case EGameState.Setting:
+                _soundManager.PlaySE(EEffectSound.QuestionAppear);
                 _menuBackground.alpha = 1;
                 _menuBackground.interactable = true;
                 _menuBackground.blocksRaycasts = true;
                 SetPaused(true);
                 break;
             case EGameState.ForcePause:
+                _soundManager.PlaySE(EEffectSound.QuestionAppear);
                 _forcePauseSet.SetActive(true);
                 SetPaused(true);
                 break;
