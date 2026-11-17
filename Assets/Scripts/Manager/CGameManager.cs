@@ -164,7 +164,6 @@ public class CGameManager : MonoBehaviour
                 () =>
                 {
                     _soundManager.PlaySE(EEffectSound.Success);
-                    _soundManager.PlaySE(EEffectSound.Success);
                     #if UNITY_EDITOR
                     UnityEditor.EditorApplication.isPlaying = false;
                     #else
@@ -203,6 +202,7 @@ public class CGameManager : MonoBehaviour
         _screenChange.onClick.AddListener(() => OnGameResolutionChange());
         _player = FindFirstObjectByType<CPlayer>();
         _soundManager = FindFirstObjectByType<CSoundManager>();
+        _soundManager.PlayBGM(EBackgroundSound.BaseBGM);
         SetGameState(EGameState.Idle);
         SetBattleState(EBattleState.None);
         _settingState = ESettingState.None;
@@ -352,6 +352,7 @@ public class CGameManager : MonoBehaviour
             case EGameState.Idle:
                 break;
             case EGameState.Story:
+                _soundManager.PlayBGM(EBackgroundSound.BaseBGM);
                 break;
             case EGameState.UI:
                 SetPaused(false);
@@ -374,6 +375,7 @@ public class CGameManager : MonoBehaviour
             case EGameState.Idle:
                 break;
             case EGameState.Story:
+                _soundManager.PlayBGM(EBackgroundSound.DialogueBGM);
                 break;
             case EGameState.UI:
                 SetPaused(true);
@@ -410,12 +412,15 @@ public class CGameManager : MonoBehaviour
         {
             case EBattleState.None:
                 _player.AddStatus(27);
+                _soundManager.PlayBGM(EBackgroundSound.BaseBGM);
                 break;
             case EBattleState.NormalBattle:
                 _player.InvokeOnBattleStart(false);
+                _soundManager.PlayBGM(EBackgroundSound.BattleBGM);
                 break;
             case EBattleState.BossBattle:
                 _player.InvokeOnBattleStart(true);
+                _soundManager.PlayBGM(EBackgroundSound.BossBGM);
                 break;
         }
     }

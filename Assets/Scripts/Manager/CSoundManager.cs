@@ -7,6 +7,10 @@ public enum EBackgroundSound
 {
     None,
     OasisOfGold,
+    BaseBGM,
+    BattleBGM,
+    BossBGM,
+    DialogueBGM
     // 여기서부터 배경음 리스트 만들기
 }
 
@@ -21,7 +25,6 @@ public enum EEffectSound
     QuestionChoose,
     Success,
     Beep,
-    Suprise
 }
 
 [Serializable]
@@ -73,6 +76,7 @@ public class CSoundManager : MonoBehaviour
         _instance = this;
         _bgmDict = new Dictionary<EBackgroundSound, AudioSource>();
         _seDict = new Dictionary<EEffectSound, AudioSource>();
+        StopBGM();
         ResetDictionary();
     }
 

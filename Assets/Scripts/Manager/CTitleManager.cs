@@ -58,6 +58,7 @@ public class CTitleManager : MonoBehaviour
         _sceneManager = CSceneFlowManager.Instance;
         _titleMenu.gameObject.SetActive(true);
         SetTitleMenu(true);
+        _soundManager.PlayBGM(EBackgroundSound.BaseBGM);
 
         _saveCanvas.gameObject.SetActive(false);
         _settingCanvas.SetActive(false);
@@ -75,7 +76,11 @@ public class CTitleManager : MonoBehaviour
             HideQuestion();
             action?.Invoke();
         });
-        _confirmNo.onClick.AddListener(HideQuestion);
+        _confirmNo.onClick.AddListener( () =>
+        {
+            _soundManager.PlaySE(EEffectSound.Beep);
+            HideQuestion();
+        });
 
         if (_saveSlots == null || _saveSlots.Length != CSaveManager.MaxSaveSlot)
         {
