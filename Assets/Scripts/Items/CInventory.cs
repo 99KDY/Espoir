@@ -6,6 +6,7 @@
  *    - CItemShown은 인벤토리를 띄웠을 때 보여주는 용도로 사용하기
  */
 
+using JetBrains.Annotations;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -106,7 +107,7 @@ public class CInventory : MonoBehaviour
 
     // 아이템 획득
 
-    
+
     public int Debugitemcode;
 
     [ContextMenu("아이템 추가")]
@@ -120,10 +121,16 @@ public class CInventory : MonoBehaviour
     // 실제로 추가한 수량을 반환
     public int AddItem(int id, int quantity = 1)
     {
+        return AddItemInternal(id, quantity, true);
+    }
+
+    private int AddItemInternal(int id, int quantity, bool notify)
+    {
         if (quantity <= 0)
         {
             return 0;
         }
+
 
         /*
         !! if(TryMakeItem(id, out CItem item))
@@ -226,9 +233,13 @@ public class CInventory : MonoBehaviour
             }
         }
 
-        OnInventoryChanged?.Invoke();
+        if (notify)
+        {
+            OnInventoryChanged?.Invoke();
+        }
         return addedQuantity;
     }
+
 
     public bool TryMoveItem(int fromIndex, int toIndex)
     {
@@ -555,7 +566,7 @@ public class CInventory : MonoBehaviour
         {
             CItem item = _items[i];
 
-            if (item is CItemConsumable &&  item.Id == itemId && item.Quantity > 0)
+            if (item is CItemConsumable && item.Id == itemId && item.Quantity > 0)
             {
                 return TryUseItem(i, isBattle);
             }
@@ -691,6 +702,29 @@ public class CInventory : MonoBehaviour
         }
 
         OnInventoryChanged?.Invoke();
+        return true;
+    }
+
+    public bool TrybuyOneItem(int itemId, int price)
+    {
+        if (price < 0 || Gold < price)
+        {
+            return false;
+        }
+
+        if (AddItemInternal(itemId, 1, false) != 1)
+        {
+            return false;
+        }
+
+        _gold -= price;
+        OnInventoryChanged?.Invoke();
+
+        if (price > 0)
+        {
+            OnGoldChanged?.Invoke();
+        }
+
         return true;
     }
 
