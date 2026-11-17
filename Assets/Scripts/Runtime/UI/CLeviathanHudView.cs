@@ -191,7 +191,8 @@ public class CLeviathanHudView : MonoBehaviour
             _shownHits = 0;
             _bonusAt = -1f;
             _thirtyAt = -1f;
-            HideCount();
+            SetCount(_leviathan.FinisherHitCount.ToString(CultureInfo.InvariantCulture),
+                _leviathan.IsEnhanced, _finisherCountSize, false, now);
             EndGrow();
             _growTrack = AddTrack(now, float.MaxValue);
             _growTrack.isGrow = true;
