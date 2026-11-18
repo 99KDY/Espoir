@@ -108,6 +108,11 @@ public class CLeviathanHudView : MonoBehaviour
     private Image _iconImage;
     private CTrack _growTrack;
 
+    /// <summary>
+    /// 궁극기 HUD 색상 전환의 목표가 활성 상태인지 반환합니다.
+    /// </summary>
+    public bool IsUltStateOn => _stateTo > 0.5f;
+
     private void Awake()
     {
         _waveBase = new Vector2[_waveSlots.Length];
