@@ -50,7 +50,7 @@ MonoBehaviour:
     group: 7
     hidden: 0
     rotation: 0
-    scale: 1.5
+    scale: 1
     keepAfterAttack: 0
     offset: {x: 0, y: 0, z: 0}
     overrideRadius: 0
@@ -69,6 +69,32 @@ MonoBehaviour:
     overrideRadius: 0
     overrideDuration: 0
     duration: 0.23330009
+    innerRadius: 0
+    outerRadius: 1
+  - objectIndex: 56
+    isGroup: 1
+    group: 2
+    hidden: 0
+    rotation: 0
+    scale: 1
+    keepAfterAttack: 0
+    offset: {x: 0, y: 0, z: 0}
+    overrideRadius: 0
+    overrideDuration: 0
+    duration: 0.11670005
+    innerRadius: 0
+    outerRadius: 1
+  - objectIndex: 172
+    isGroup: 1
+    group: 0
+    hidden: 0
+    rotation: 0
+    scale: 1
+    keepAfterAttack: 0
+    offset: {x: 0, y: 0, z: 0}
+    overrideRadius: 0
+    overrideDuration: 0
+    duration: 0.05
     innerRadius: 0
     outerRadius: 1
   data: {fileID: 4900000, guid: e8b384bf26ce7e54da53f910406a9c27, type: 3}
