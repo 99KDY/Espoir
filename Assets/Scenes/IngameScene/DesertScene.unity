@@ -2895,7 +2895,7 @@ PrefabInstance:
     - target: {fileID: 4535814836221742356, guid: 96eeb1dcd2671444bb4f41bf169d7951, type: 3}
       propertyPath: _targetEnemy.Array.data[0]
       value: 
-      objectReference: {fileID: 5445629871151430336, guid: cba6c99a6203b5145880f290e7ad4571, type: 3}
+      objectReference: {fileID: 5445629871151430336, guid: 67776269c8f1439478910e9f43f235ba, type: 3}
     - target: {fileID: 4535814836221742356, guid: 96eeb1dcd2671444bb4f41bf169d7951, type: 3}
       propertyPath: _drops.Array.data[0].chance
       value: 0.2
