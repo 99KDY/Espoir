@@ -500,10 +500,26 @@ public class CInventoryUI : MonoBehaviour
 
     private void OnClickMoveButton()
     {
-        if (_menuTarget != MenuTarget.Bag || _selectedSlotIndex < 0) return;
+        if (_menuTarget != MenuTarget.Bag || _selectedSlotIndex < 0)
+        {
+            return;
+        }
 
         _isMoving = true;
+        _isRegisteringQuickSlot = false;
         _itemContextMenu.SetActive(false);
+        HideTooltip();
+
+        if (_quickSlotHintText != null)
+        {
+            _quickSlotHintText.text = "이동할 가방 슬롯을 클릭하세요.";
+            _quickSlotHintText.gameObject.SetActive(true);
+        }
+
+        if(_quickSlotHintPanel != null)
+        {
+            _quickSlotHintPanel.SetActive(true);
+        }
     }
 
     private void SelectMoveDestination(int index)
