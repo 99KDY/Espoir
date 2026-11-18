@@ -4743,6 +4743,10 @@ PrefabInstance:
       propertyPath: _inventoryUI
       value: 
       objectReference: {fileID: 1831947247}
+    - target: {fileID: 4158990758681781178, guid: 99aa7cff8daf82a4f8bc3a9ff9bcb213, type: 3}
+      propertyPath: _sellButtonText
+      value: 
+      objectReference: {fileID: 2113607116}
     - target: {fileID: 4225241378692308302, guid: 99aa7cff8daf82a4f8bc3a9ff9bcb213, type: 3}
       propertyPath: m_Name
       value: ShopCanvas
@@ -6994,6 +6998,17 @@ MonoBehaviour:
   m_IgnoreFromBuild: 0
   m_ApplyToChildren: 1
   m_AffectedAgents: ffffffff
+--- !u!114 &2113607116 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2061513987294913825, guid: 99aa7cff8daf82a4f8bc3a9ff9bcb213, type: 3}
+  m_PrefabInstance: {fileID: 1315336374}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &2967234607334244237
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -12,6 +12,7 @@ public class CShopUI : MonoBehaviour
     [SerializeField] private GameObject _productRow;
     [SerializeField] private TMP_Text _goldText;
     [SerializeField] private TMP_Text _resultText;
+    [SerializeField] private TMP_Text _sellButtonText;
     [SerializeField, Min(0.1f)] private float _closeDistance = 4f;
     [SerializeField] private CInventoryUI _inventoryUI;
 
@@ -258,11 +259,15 @@ public class CShopUI : MonoBehaviour
 
         if (_isSelling)
         {
-            _inventoryUI.SetShopSellMode(true);
+            CancelSell();
             return;
         }
 
         _isSelling = true;
+        if (_sellButtonText != null)
+        {
+            _sellButtonText.text = "구매";
+        }
         _inventoryUI.SellItemSelected += SelectSellItem;
         _inventoryUI.SetShopSellMode(true);
         if (_purchaseScroll != null)
@@ -518,6 +523,10 @@ public class CShopUI : MonoBehaviour
         }
 
         _isSelling = false;
+        if (_sellButtonText != null)
+        {
+            _sellButtonText.text = "판매";
+        }
         System.Array.Clear(_sellEntries, 0, _sellEntries.Length);
         CancelQuantity();
         if (_sellPanel != null) _sellPanel.SetActive(false);
