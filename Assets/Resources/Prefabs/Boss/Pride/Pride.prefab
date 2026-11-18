@@ -3615,6 +3615,7 @@ GameObject:
   - component: {fileID: 3329361238931335757}
   - component: {fileID: 2939164998460646643}
   - component: {fileID: 65200291872114364}
+  - component: {fileID: 3880031084610216823}
   m_Layer: 0
   m_Name: Pride
   m_TagString: Untagged
@@ -4590,3 +4591,24 @@ Transform:
   - {fileID: 6221120300934456129}
   m_Father: {fileID: 3228265056796300005}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!95 &3880031084610216823
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7120219774043122305}
+  m_Enabled: 1
+  m_Avatar: {fileID: 9000000, guid: 0d8c9b05f52b9464b807f1a5f59441b1, type: 2}
+  m_Controller: {fileID: 9100000, guid: f424c2bdf6a031a4588d3f6053dcfd11, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
