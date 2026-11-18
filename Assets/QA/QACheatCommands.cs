@@ -224,8 +224,25 @@ public class QACheatCommands : MonoBehaviour
     /// </summary>
     public void AddGold(int amount)
     {
-        CLogger.Log($"[QA] 골드가 {amount}만큼 추가되었습니다. (기능 연결 필요)");
-        // TODO : 재화 매니저 완성하면 데이터 연동예정
+        CPlayer player = FindPlayer();
+        if (player == null)
+        {
+            return;
+        }
+
+        if (player.Inventory == null)
+        {
+            CLogger.Log("[QA] 플레이어 인벤토리를 찾지 못했습니다.");
+            return;
+        }
+
+        if (player.Inventory.TryAddGold(amount) == false)
+        {
+            CLogger.Log("[QA] 골드를 추가하지 못했습니다. 1 이상의 값을 입력하세요.");
+            return;
+        }
+
+        CLogger.Log($"[QA] 골드가 {amount}만큼 추가되었습니다. 현재 골드: {player.Inventory.Gold}");
     }
 
     /// <summary>
