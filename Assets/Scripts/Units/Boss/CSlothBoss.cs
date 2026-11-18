@@ -8,7 +8,7 @@ using UnityEngine;
 using static UnityEngine.GraphicsBuffer;
 using Random = UnityEngine.Random;
 
-public class CSlothBoss : CEnemy
+public class CSlothBoss : CEnemy, IBoss
 {
 
 

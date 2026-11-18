@@ -2123,6 +2123,8 @@ MonoBehaviour:
   _drops: []
   _player: {fileID: 0}
   _attackRange: 20
+  _previewPattern: {fileID: 373438578}
+  _attackRadius: 3
 --- !u!1001 &317141593
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2764,11 +2766,19 @@ PrefabInstance:
     - target: {fileID: 8077093514111060032, guid: 5ae5fa340ec63cc498710ac69fb338b8, type: 3}
       propertyPath: _boss
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 296554355}
     - target: {fileID: 8077093514111060032, guid: 5ae5fa340ec63cc498710ac69fb338b8, type: 3}
       propertyPath: _player
       value: 
       objectReference: {fileID: 472875770}
+    - target: {fileID: 8077093514111060032, guid: 5ae5fa340ec63cc498710ac69fb338b8, type: 3}
+      propertyPath: _bossName
+      value: "\uBCA8\uB9AC"
+      objectReference: {fileID: 0}
+    - target: {fileID: 8077093514111060032, guid: 5ae5fa340ec63cc498710ac69fb338b8, type: 3}
+      propertyPath: _bossTitle
+      value: "\uC624\uB9CC\uC758 \uAD70\uC8FC"
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

@@ -6,7 +6,7 @@ using System.Threading;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-public class CPrideBoss : CEnemy
+public class CPrideBoss : CEnemy, IBoss
 {
 
     public enum EPrideBossState
