@@ -13,6 +13,7 @@ public class CEnemy : CUnit
     private bool _isDropped = false;
     protected bool _isChasingPlayer = false;
     public virtual bool IsChasingPlayer => _isChasingPlayer;
+    public virtual string DisplayName => string.Empty;
 
     public List<SDropTable> Drops
     {

@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 /// <summary>
 /// 맵 이동 동안 플레이어 상태를 들고 가는 데이터입니다. 떠나는 씬의 플레이어에서 읽고(Capture) 새 씬의 플레이어에 넣습니다(Apply).
@@ -22,9 +22,10 @@ public class CTravelPlayerState
     private int _mp;
     private int _gold;
     private float _crownWindowEnd;
+    private float _dashCooldownDuration;
     private readonly List<CItem> _ITEMS = new List<CItem>();
     private int[] _quickSlotIds = new int[0];
-    private readonly Dictionary<int, float> _ITEM_COOLDOWN_ENDS = new Dictionary<int, float>();
+    private readonly Dictionary<(EConsumableCooldownGroup group, int itemId), float> _ITEM_COOLDOWN_ENDS = new();
     private readonly Dictionary<EEquipmentSlot, CItemEquipment> _EQUIPMENT =
         new Dictionary<EEquipmentSlot, CItemEquipment>();
     private readonly List<SStatusState> _STATUSES = new List<SStatusState>();
@@ -50,7 +51,6 @@ public class CTravelPlayerState
     {
         _hp = player.HpCurrent;
         _mp = player.CurrentMp;
-
         CInventory inventory = player.Inventory;
         if (inventory != null)
         {
@@ -87,6 +87,7 @@ public class CTravelPlayerState
 
         CPlayerSkill skill = player.GetComponent<CPlayerSkill>();
         _crownWindowEnd = skill != null ? skill.ExportTimers(_SKILL_READY_TIMES) : float.NegativeInfinity;
+        _dashCooldownDuration = skill != null ? skill.DashCooldownDuration : 0f;
         _hasData = true;
     }
 
@@ -126,6 +127,10 @@ public class CTravelPlayerState
 
         CPlayerSkill skill = player.GetComponent<CPlayerSkill>();
         int restored = skill != null ? skill.ImportTimers(_SKILL_READY_TIMES, _crownWindowEnd) : 0;
+        if (skill != null)
+        {
+            skill.DashCooldownDuration = _dashCooldownDuration;
+        }
         Clear();
         return restored;
     }

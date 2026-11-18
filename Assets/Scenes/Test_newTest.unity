@@ -290,11 +290,11 @@ MonoBehaviour:
   _player: {fileID: 472875770}
   _targetMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 64
   _sightCheck: 1
   _obtacleMask:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 0
   _hitCollider:
   - {fileID: 0}
   - {fileID: 0}
@@ -2752,6 +2752,12 @@ MonoBehaviour:
   m_BeforeTransparentBundles: []
   m_BeforeStackBundles:
   - assemblyQualifiedName: CToonPost, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+  - assemblyQualifiedName: CChapter2Bloom, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+  - assemblyQualifiedName: CChapter3CloudSea, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+  - assemblyQualifiedName: CChapter2Edge, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
       PublicKeyToken=null
   m_AfterStackBundles:
   - assemblyQualifiedName: CEnvironmentGrade, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,

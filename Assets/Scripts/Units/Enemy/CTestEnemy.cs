@@ -46,6 +46,7 @@ public class CTestEnemy : CEnemy
     #endregion 
 
     private CPlayer Player => _player;
+    public override string DisplayName => _name;
 
     private CSoundManager _soundManager;
     private Transform _target;

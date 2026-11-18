@@ -14,6 +14,7 @@ public enum EGameState
     UI = 2,
     Setting = 3,
     ForcePause = 9,
+    Gameover = 10,
 }
 
 public enum ESettingState
@@ -87,6 +88,9 @@ public class CGameManager : MonoBehaviour
     [SerializeField] Button _gameSave;
     [SerializeField] Toggle _gameAutosave;
 
+    [SerializeField] CanvasGroup _menuGameover;
+    [SerializeField] Button _gameGameoverTitle;
+
     [SerializeField] GameObject _forcePauseSet;
     [SerializeField] CanvasGroup _menuBackground;
     [SerializeField] CanvasGroup _menuBase;
@@ -113,7 +117,6 @@ public class CGameManager : MonoBehaviour
     private EBattleState _battleState;
     private ESettingState _settingState;
     private ESettingState _lastSettingState;
-    private bool _settingQuestion;
     private EBossClear _bossClearState;
     private EQuestList _availableQuest;
     private EQuestList _actingQuest;
@@ -198,7 +201,8 @@ public class CGameManager : MonoBehaviour
                 _soundManager.PlaySE(EEffectSound.Beep);
                 HideQuestion();
             });
-
+        _gameGameoverTitle.onClick.AddListener(() =>
+            CSceneFlowManager.Instance?.LoadScene(ESceneId.Title));
         _screenChange.onClick.AddListener(() => OnGameResolutionChange());
         _player = FindFirstObjectByType<CPlayer>();
         _soundManager = FindFirstObjectByType<CSoundManager>();
@@ -269,7 +273,6 @@ public class CGameManager : MonoBehaviour
         _menuBase.blocksRaycasts = false;
 
         LoadVolumeSettings();
-        CSoundManager.Instance.PlayBGM(EBackgroundSound.OasisOfGold);
     }
 
     void Update()
@@ -368,6 +371,8 @@ public class CGameManager : MonoBehaviour
                 _forcePauseSet.SetActive(false);
                 SetPaused(false);
                 break;
+            default:
+                break;
         }
         _gameState = gameState;
         switch (_gameState)
@@ -378,17 +383,29 @@ public class CGameManager : MonoBehaviour
                 _soundManager.PlayBGM(EBackgroundSound.DialogueBGM);
                 break;
             case EGameState.UI:
+                _soundManager.PlaySE(EEffectSound.QuestionAppear);
                 SetPaused(true);
                 break;
             case EGameState.Setting:
+                _soundManager.PlaySE(EEffectSound.QuestionAppear);
                 _menuBackground.alpha = 1;
                 _menuBackground.interactable = true;
                 _menuBackground.blocksRaycasts = true;
                 SetPaused(true);
                 break;
             case EGameState.ForcePause:
+                _soundManager.PlaySE(EEffectSound.QuestionAppear);
                 _forcePauseSet.SetActive(true);
                 SetPaused(true);
+                break;
+            case EGameState.Gameover:
+                _soundManager.PlaySE(EEffectSound.Beep);
+                _menuBackground.alpha = 1;
+                _menuBackground.interactable = true;
+                _menuBackground.blocksRaycasts = true;
+                _menuGameover.alpha = 1;
+                _menuGameover.interactable = true;
+                _menuGameover.blocksRaycasts = true;
                 break;
         }
     }
@@ -622,7 +639,7 @@ public class CGameManager : MonoBehaviour
         List<CItem> items = new List<CItem>(_player.Inventory.MaxItemSlot);
         int[] quickSlots = new int[_player.Inventory.QuickSlotLength];
 
-        _player.Inventory.ExportState(items, quickSlots, new Dictionary<int, float>(), out int gold);
+        _player.Inventory.ExportState(items, quickSlots, new Dictionary<(EConsumableCooldownGroup group, int itemId), float>(), out int gold);
 
         CSaveData data = new CSaveData
             (
@@ -654,7 +671,7 @@ public class CGameManager : MonoBehaviour
 
     private void LoadData(CSaveData data)
     {
-        _player.Inventory.ImportState(data.Inventory, data.Quickslot.ToArray(), new Dictionary<int, float>(), data.Money);
+        _player.Inventory.ImportState(data.Inventory, data.Quickslot.ToArray(), new Dictionary<(EConsumableCooldownGroup group, int itemId), float>(), data.Money);
         _availableQuest = data.AvailableQuest;
         _actingQuest = data.ActingQuest;
         _completedQuest = data.CompletedQuest;

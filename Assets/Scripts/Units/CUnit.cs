@@ -318,9 +318,9 @@ public abstract class CUnit : MonoBehaviour
     /// <param name="attacker"></param>
     /// <param name="defender"></param>
     /// <param name="damage"></param>
-    public virtual void OnHit(CUnit attacker, CUnit defender, SDamageInfo damage)
+    public virtual void OnHit(CUnit attacker, CUnit defender, SDamageInfo damage, bool penetrateInvincible = false)
     {
-        if (defender.IsInvincible)
+        if (defender.IsInvincible && !penetrateInvincible)
         {
             // 무적상태라는 메시지 띄우기
             CLogger.Log($"{defender.gameObject.name} - 무적상태임");
@@ -328,7 +328,7 @@ public abstract class CUnit : MonoBehaviour
         }
         float hpBefore = defender.HpCurrent;
         float finalDamage = DamageCalculate(attacker, defender, damage, out bool isCritical);
-        defender.GetDamage(finalDamage);
+        defender.GetDamage(finalDamage, ERatioSwitch.Constant, penetrateInvincible);
         OnDamageResolved?.Invoke(new SDamageResult(attacker, defender, finalDamage, hpBefore - defender.HpCurrent,
             isCritical, defender.transform.position));
         if (_debugLog) CLogger.Log($"Enemy : 피해 {finalDamage} / 방어력 {defender.Defence}, 크리여부 {isCritical} ({attacker.CriticalRate * 100}% - {attacker.CriticalDamage * 100}%)");
@@ -348,9 +348,9 @@ public abstract class CUnit : MonoBehaviour
     /// <param name="attacker"></param>
     /// <param name="defender"></param>
     /// <param name="damage"></param>
-    public virtual void OnHit(CUnit attacker, SDamageInfo damage)
+    public virtual void OnHit(CUnit attacker, SDamageInfo damage, bool PenetrateInvincible = false)
     {
-        OnHit(attacker, this, damage);
+        OnHit(attacker, this, damage, PenetrateInvincible);
     }
 
     protected virtual float DamageCalculate(CUnit attacker, CUnit defender, SDamageInfo damage, out bool isCritical)
@@ -481,8 +481,12 @@ public abstract class CUnit : MonoBehaviour
 
     }
 
-    public virtual void GetDamage(float value, ERatioSwitch ratioSwitch = ERatioSwitch.Constant)
+    public virtual void GetDamage(float value, ERatioSwitch ratioSwitch = ERatioSwitch.Constant, bool PenetrateInvincible = false)
     {
+        if (IsInvincible && !PenetrateInvincible)
+        {
+            return;
+        }
         switch (ratioSwitch)
         {
             case ERatioSwitch.Constant:
@@ -512,8 +516,12 @@ public abstract class CUnit : MonoBehaviour
 
     }
 
-    public virtual void GetHeal(float value, ERatioSwitch ratioSwitch = ERatioSwitch.Constant)
+    public virtual void GetHeal(float value, ERatioSwitch ratioSwitch = ERatioSwitch.Constant, bool forceHeal = false)
     {
+        if (_hpCurrent <= 0f)
+        {
+            return;
+        }
         switch (ratioSwitch)
         {
             case ERatioSwitch.Constant:

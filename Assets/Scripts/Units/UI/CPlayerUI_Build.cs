@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using static UnityEngine.GraphicsBuffer;
 
 
 public class CPlayerUI_Build : MonoBehaviour
@@ -36,12 +35,15 @@ public class CPlayerUI_Build : MonoBehaviour
     [SerializeField] private CSkillUI _skillE = null;
     [SerializeField] private CSkillUI _skillR = null;
     [SerializeField] private CSkillUI _skillD = null;
+    [SerializeField] private CSkillUI _skillPradona = null;
     [SerializeField] private Image _crownRemaining = null;
+    [SerializeField] private CanvasGroup _skillDCanvas = null;
 
     [SerializeField] private List<CQuickslotUI> _quickslot = null;
 
     [SerializeField] private TMP_Text _jealousStack = null;
-    [SerializeField] private List<GameObject> _crownStack = new List<GameObject>();
+    [SerializeField] private List<Image> _crownStack = new List<Image>();
+    [SerializeField] private List<Image> _pradonaStack = new List<Image>();
     #endregion
 
     #region 내부변수
@@ -63,6 +65,7 @@ public class CPlayerUI_Build : MonoBehaviour
             CLogger.Warn("CPlayerUI의 인스팩터에 플레이어 연결이 안되어 있음");
             return;
         }
+        InvokePradonaChanged(_player.PradonaPower);
     }
 
     private void OnEnable()
@@ -254,8 +257,8 @@ public class CPlayerUI_Build : MonoBehaviour
         _jealousStack.text = jealousStack == 0 ? "" : jealousStack.ToString();
         for (int i = 0; i < _crownStack.Count; i++)
         {
-            if (crownStack > i) _crownStack[i].SetActive(true);
-            else _crownStack[i].SetActive(false);
+            if (crownStack > i) _crownStack[i].enabled = true;
+            else _crownStack[i].enabled = false;
         }
         _crownRemaining.fillAmount = _player.CrownWindowRemaining / 2;
         _player.GetSkillCooldown(ESkillType.Strike, out ratio, out remainCooldown);
@@ -268,6 +271,17 @@ public class CPlayerUI_Build : MonoBehaviour
         _skillR.Refresh(ratio, remainCooldown, _player.GetSkillAvailable(ESkillType.Slam));
         _player.GetSkillCooldown(ESkillType.Dash, out ratio, out remainCooldown);
         _skillD.Refresh(ratio, remainCooldown, _player.GetSkillAvailable(ESkillType.Dash));
+
+        if (_skillDCanvas != null)
+        {
+            bool isCooldown = remainCooldown > 0f;
+            _skillDCanvas.alpha = isCooldown ? 1f : 0f;
+            _skillDCanvas.interactable = isCooldown;
+            _skillDCanvas.blocksRaycasts = isCooldown;
+        }
+
+        _player.GetPradonaCooldown(out ratio, out remainCooldown);
+        _skillPradona.Refresh(ratio, remainCooldown, _player.PradonaPower != EPradonaPower.None && remainCooldown <= 0f);
     }
 
     public void UpdateQuickslot()
@@ -287,5 +301,106 @@ public class CPlayerUI_Build : MonoBehaviour
         }
 
         _quickslotDirty = false;
+    }
+
+    public void InvokePradonaChanged(EPradonaPower pradonaPower)
+    {
+        for (int i = 0; i < _pradonaStack.Count; i++)
+        {
+            _pradonaStack[i].enabled = false;
+        }
+        int index = 0;
+        string temp = "";
+        if (pradonaPower.HasFlag(EPradonaPower.Invidia))
+        {
+            if (index < _pradonaStack.Count)
+            {
+                if (ColorUtility.TryParseHtmlString("#B61834", out Color color))
+                {
+                    _pradonaStack[index].color = color;
+                }
+                _pradonaStack[index].enabled = true;
+                index++;
+            }
+            temp += "질투 : 적중 시 체력 회복\n";
+        }
+        if (pradonaPower.HasFlag(EPradonaPower.Avaritia))
+        {
+            if (index < _pradonaStack.Count)
+            {
+                if (ColorUtility.TryParseHtmlString("#FFD65A", out Color color))
+                {
+                    _pradonaStack[index].color = color;
+                }
+                _pradonaStack[index].enabled = true;
+                index++;
+            }
+            temp += "탐욕 : 적중 시 적이 받는 피해 증가\n";
+        }
+        if (pradonaPower.HasFlag(EPradonaPower.Pigritia))
+        {
+            if (index < _pradonaStack.Count)
+            {
+                if (ColorUtility.TryParseHtmlString("#BBA1DA", out Color color))
+                {
+                    _pradonaStack[index].color = color;
+                }
+                _pradonaStack[index].enabled = true;
+                index++;
+            }
+            temp += "나태 : 다음 받는 공격 피해 99% 감소\n";
+        }
+        if (pradonaPower.HasFlag(EPradonaPower.Gula))
+        {
+            if (index < _pradonaStack.Count)
+            {
+                if (ColorUtility.TryParseHtmlString("#558701", out Color color))
+                {
+                    _pradonaStack[index].color = color;
+                }
+                _pradonaStack[index].enabled = true;
+                index++;
+            }
+            temp += "폭식 : 일반 기술 재사용 대기시간 초기화\n";
+        }
+        if (pradonaPower.HasFlag(EPradonaPower.Luxuria))
+        {
+            if (index < _pradonaStack.Count)
+            {
+                if (ColorUtility.TryParseHtmlString("#FF82B1", out Color color))
+                {
+                    _pradonaStack[index].color = color;
+                }
+                _pradonaStack[index].enabled = true;
+                index++;
+            }
+            temp += "색욕 : 기절 효과 해제\n";
+        }
+        if (pradonaPower.HasFlag(EPradonaPower.Ira))
+        {
+            if (index < _pradonaStack.Count)
+            {
+                if (ColorUtility.TryParseHtmlString("#F95502", out Color color))
+                {
+                    _pradonaStack[index].color = color;
+                }
+                _pradonaStack[index].enabled = true;
+                index++;
+            }
+            temp += "분노 : 치명타 확률 크게 증가\n";
+        }
+
+        temp = temp.TrimEnd('\n');
+
+        if (string.IsNullOrWhiteSpace(temp))
+        {
+            _skillPradona.TooltipText =
+                "재사용 대기시간 15초\r\n프라도나가 권능으로 당신을 도와줍니다.\n\n현재 선택된 권능이 없어 사용할 수 없습니다.";
+        }
+        else
+        {
+            _skillPradona.TooltipText =
+            "재사용 대기시간 15초\r\n프라도나가 권능으로 당신을 도와줍니다.\n\n" + temp;
+        }
     }
 }

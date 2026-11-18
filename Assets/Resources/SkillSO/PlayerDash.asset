@@ -14,10 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _type: 1
   _cooldown: 0.5
+  _cooldownInBossbattle: 15
+  _mpCost: 0
   _startTrigger: Dash
   _comboTrigger: 
   _rotationSpeed: 1080
   _comboGraceTime: 0.8
+  _dashCancelTime: 0
+  _strikeCancelTime: 0
   _dashDuration: 0.25
   _dashStartDelay: 0.04
   _dashEasePower: 2.2
@@ -32,14 +36,61 @@ MonoBehaviour:
     lateProgress: 0.55
     earlyLifetimeStep: 0.07
     alphaStep: 0.04
-    departure: {lifetime: 0.3, alpha: 0.75, smear: 0, hold: 0.3}
-    early: {lifetime: 0.32, alpha: 0.7, smear: 0.06, hold: 0.4}
-    late: {lifetime: 0.18, alpha: 0.7, smear: 0.06, hold: 0.25}
+    minAlpha: 0
+    ghostWindow: {x: 0, y: 0}
+    departure:
+      lifetime: 0.3
+      alpha: 0.75
+      smear: 0
+      hold: 0.3
+    early:
+      lifetime: 0.32
+      alpha: 0.7
+      smear: 0.06
+      hold: 0.4
+    late:
+      lifetime: 0.18
+      alpha: 0.7
+      smear: 0.06
+      hold: 0.25
+  _movementCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  _followEffect: {fileID: 0}
+  _markedCooldownReduction: 0
+  _finisherWindow: 0
+  _finisherMpCost: 0
+  _finisherWindupRatio: 1
+  _fullHitFlow: 0
+  _crownStatus: {fileID: 0}
+  _crownWindow: 2
+  _empoweredDamageMultiplier: 1.2
+  _empoweredAttacks: []
+  _crownEffects: []
+  _crownEffectYaw: 225
+  _syncEffectSpeed: 0
   _steps:
   - stateName: Dash
     recoverStateName: 
     moveDistance: 8
     moveStart: 0
     moveEnd: 1
+    forwardMoveReduction: 0
+    moveCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    sideMoveCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
     hits: []
     effectPrefab: {fileID: 0}
+    effectTime: 0

@@ -1,6 +1,14 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
+public enum EConsumableCooldownGroup
+{
+    [InspectorName("쿨타임 공유 없음")]
+    None = 0,
+    [InspectorName("회복 아이템")]
+    Healing = 1,
+}
+
 [CreateAssetMenu(fileName = "NewConsumable", menuName = "Espoir/ConsumableSO")]
 public class CItemConsumableSO : CItemSO
 {
@@ -14,10 +22,13 @@ public class CItemConsumableSO : CItemSO
     [SerializeField] private float _effectDuration = 3f;
     [Tooltip("던지는 아이템인지 유무 (던지는 아이템이면 위의 것들이 맞으면 적용되는거로 처리됨)")]
     [SerializeField] private bool _isThrow = false;
+    [Tooltip("쿨타임을 공유할 그룹")]
+    [SerializeField] private EConsumableCooldownGroup _cooldownGroup = EConsumableCooldownGroup.None;
 
     public IReadOnlyList<CConsumableAction> Action => _action;
     public IReadOnlyList<SStatusApply> ItemStatus => _itemStatus;
     public bool IsThrow => _isThrow;
+    public EConsumableCooldownGroup CooldownGroup => _cooldownGroup;
     public GameObject EffectPrefab => _effectPrefab;
     public float EffectDuration => _effectDuration;
 }

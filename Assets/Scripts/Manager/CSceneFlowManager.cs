@@ -168,8 +168,13 @@ public partial class CSceneFlowManager : MonoBehaviour
         if (_isTraveling)
         {
             PlaceArrivedPlayer(id);
-            yield return StartCoroutine(Co_FadeTo(0f, _fadeDuration));
         }
+        if (id == ESceneId.Title)
+        {
+            Time.timeScale = 1f;
+        }
+
+        yield return StartCoroutine(Co_FadeTo(0f, _fadeDuration));
 
         CLogger.Success($"씬 로드 -> {sceneName}");
     }

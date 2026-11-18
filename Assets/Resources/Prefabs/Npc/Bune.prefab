@@ -166,6 +166,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5564712487070810640}
   - component: {fileID: 3919253942390425404}
+  - component: {fileID: 5044094999947753327}
   m_Layer: 0
   m_Name: Bune
   m_TagString: Untagged
@@ -223,6 +224,18 @@ MonoBehaviour:
   _blockMask:
     serializedVersion: 2
     m_Bits: 1
+--- !u!114 &5044094999947753327
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1974270984162178909}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64cb50c776a34bcb8059539a29ff24e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2624379278770477616
 GameObject:
   m_ObjectHideFlags: 0

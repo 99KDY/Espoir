@@ -30,6 +30,7 @@ public class CPlayer : CUnit
     [SerializeField] private InputActionReference _pointerPosition;
     [SerializeField] private InputActionReference _attackInput;
     [SerializeField] private InputActionReference _dashInput;
+    [SerializeField] private InputActionReference _pradonaInput;
     [SerializeField] private SSkillSlot[] _skillSlots;
     [SerializeField] private InputActionReference[] _quickslotInputs = new InputActionReference[4];
 
@@ -40,6 +41,10 @@ public class CPlayer : CUnit
     [Header("패시브 설정")]
     [SerializeField] private CPlayerPassive _passive = new CPlayerPassive();
 
+    [Header("프라도나 권능 관련 정보")]
+    [SerializeField] private float _pradonaCooldownSet = 60f;
+    [SerializeField] private EPradonaPower _pradonaPowerDebug;
+
     private CPlayerMovement _movement;
     private CPlayerSkill _skill;
     private Dictionary<EEquipmentSlot, CItemEquipment> _equipment = new Dictionary<EEquipmentSlot, CItemEquipment>();
@@ -48,6 +53,7 @@ public class CPlayer : CUnit
     private bool _isInvincible;
     private bool _isInputLocked;
     private EPradonaPower _pradonaPower;
+    private float _pradonaCooldown;
 
     protected float _hpMaxBaseline = 1;
     protected float _attackBaseline = 0;
@@ -115,7 +121,11 @@ public class CPlayer : CUnit
     public EPradonaPower PradonaPower
     {
         get { return _pradonaPower; }
-        set { _pradonaPower = value; }
+        set { 
+            _pradonaPower = value; 
+            CPlayerUI_Build script = FindFirstObjectByType<CPlayerUI_Build>();
+            script.InvokePradonaChanged(_pradonaPower);
+        }
     }
 
     public void EquipmentResync()
@@ -420,14 +430,14 @@ public class CPlayer : CUnit
     /// 무적 상태가 아닐 때 체력 피해를 적용합니다.
     /// </summary>
 
-    public override void GetDamage(float value, ERatioSwitch ratioSwitch = ERatioSwitch.Constant)
+    public override void GetDamage(float value, ERatioSwitch ratioSwitch = ERatioSwitch.Constant, bool penetrateInvincible = false)
     {
         if (_isInvincible)
         {
             return;
         }
 
-        base.GetDamage(value, ratioSwitch);
+        base.GetDamage(value, ratioSwitch, penetrateInvincible);
     }
 
     /// <summary>
@@ -462,10 +472,10 @@ public class CPlayer : CUnit
     /// 적의 공격으로 체력이 감소하면 전투의 흐름을 차감합니다.
     /// </summary>
 
-    public override void OnHit(CUnit attacker, CUnit defender, SDamageInfo damage)
+    public override void OnHit(CUnit attacker, CUnit defender, SDamageInfo damage, bool penetrateInvincible = false)
     {
         float previousHp = HpCurrent;
-        base.OnHit(attacker, defender, damage);
+        base.OnHit(attacker, defender, damage, penetrateInvincible);
 
         if (defender == this && HpCurrent < previousHp)
         {
@@ -479,6 +489,7 @@ public class CPlayer : CUnit
         _pointerPosition?.action?.Enable();
         _attackInput?.action?.Enable();
         _dashInput?.action?.Enable();
+        _pradonaInput?.action?.Enable();
 
         if (_skillSlots == null)
         {
@@ -505,6 +516,7 @@ public class CPlayer : CUnit
         _pointerPosition?.action?.Disable();
         _attackInput?.action?.Disable();
         _dashInput?.action?.Disable();
+        _pradonaInput?.action?.Disable();
 
         if (_skill != null)
         {
@@ -593,10 +605,18 @@ public class CPlayer : CUnit
         }
     }
 
+    [ContextMenu("Pradona Debug")]
+    public void SetPradonaDebug()
+    {
+        CLogger.Success($"Pradona power -> {_pradonaPowerDebug}");
+        PradonaPower = _pradonaPowerDebug;
+    }
+
     protected override void Update()
     {
         base.Update();
         _movement.ApplyGravity();
+        _pradonaCooldown = Mathf.Max(0f, _pradonaCooldown - Time.deltaTime);
 
         if (HpCurrent <= 0f)
         {
@@ -613,17 +633,26 @@ public class CPlayer : CUnit
 
         UpdateQuickslotInput();
 
-        if (!_isInputLocked && _dashInput.action.WasPressedThisFrame() && _skill.TryDash(GetPointerDirection()))
+        if (!_isInputLocked && !IsStunned && _dashInput.action.WasPressedThisFrame() && _skill.TryDash(GetPointerDirection()))
         {
             return;
         }
 
         bool isCameraBlocked = _testCamera != null && _testCamera.IsInputBlocked;
         bool canAct = !_isInputLocked && !isCameraBlocked;
-        // UI 위에서 누른 마우스 입력만 막는다. 같은 액션의 키보드 입력(C)은 그대로 둔다.
+        // UI 위에서 누른 마우 스 입력만 막는다. 같은 액션의 키보드 입력(C)은 그대로 둔다.
         bool isPointerOverUi = EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
 
-        if (canAct)
+        if (canAct &&
+            Time.timeScale > 0f &&
+            _pradonaPower != EPradonaPower.None &&
+            _pradonaCooldown <= 0f &&
+            _pradonaInput?.action?.WasPressedThisFrame() == true)
+        {
+            CastPradonaPower();
+        }
+
+        if (canAct && !IsStunned)
         {
             if (_attackInput.action.WasPressedThisFrame() && !(isPointerOverUi && IsPointerControl(_attackInput.action)))
             {
@@ -654,8 +683,8 @@ public class CPlayer : CUnit
         {
             _movement.SetMoveTarget(position);
         }
-
-        _movement.Move(_movementMultiply);
+        if (!IsStunned) _movement.Move(_movementMultiply);
+        else _movement.Stop();
     }
 
     private static bool IsPointerControl(InputAction action)
@@ -709,5 +738,59 @@ public class CPlayer : CUnit
                 _inventory.TryUseQuickSlot(i, isBattle);
             }
         }
+    }
+
+    private void CastPradonaPower()
+    {
+        _pradonaCooldown = _pradonaCooldownSet;
+        if (_pradonaPower.HasFlag(EPradonaPower.Invidia))
+        {
+            AddStatus(31);
+        }
+        if (_pradonaPower.HasFlag(EPradonaPower.Avaritia))
+        {
+            AddStatus(32);
+        }
+        if (_pradonaPower.HasFlag(EPradonaPower.Pigritia))
+        {
+            AddStatus(34);
+        }
+        if (_pradonaPower.HasFlag(EPradonaPower.Gula))
+        {
+            _skill.ResetCooldowns(true, true, false);
+        }
+        if (_pradonaPower.HasFlag(EPradonaPower.Luxuria))
+        {
+            for (int i = _status.Count - 1; i >= 0; i--)
+            {
+                CStatus status = _status[i];
+                if (status.Trigger.HasFlag(EStatusTrigger.IsStun))
+                {
+                    RemoveStatus(status);
+                }
+            }
+        }
+        if (_pradonaPower.HasFlag(EPradonaPower.Ira))
+        {
+            AddStatus(35);
+        }
+    }
+
+    public void GetPradonaCooldown(out float ratio, out float remainCooldown)
+    {
+        remainCooldown = _pradonaCooldown;
+        ratio = _pradonaCooldown / _pradonaCooldownSet;
+    }
+
+    protected override void Die()
+    {
+        base.Die();
+        if (_actionsBlocked) return;
+
+        _actionsBlocked = true;
+        _movement?.Stop();
+        _skill?.CancelSkill();
+
+        CGameManager.Instance?.SetGameState(EGameState.Gameover);
     }
 }

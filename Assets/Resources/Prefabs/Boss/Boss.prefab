@@ -13,13 +13,13 @@ GameObject:
   - component: {fileID: 3536428649296106979}
   - component: {fileID: 7484433350781376968}
   - component: {fileID: 6668783763347091967}
-  m_Layer: 7
+  m_Layer: 10
   m_Name: Boss
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1929441329760321138
 Transform:
   m_ObjectHideFlags: 0
@@ -73,16 +73,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 479ff49f76e31344ca4237016364c58b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _baseHpMax: 0
-  _baseAttack: 0
-  _baseDefence: 0
+  _baseHpMax: 100000
+  _baseAttack: 50
+  _baseDefence: 20
   _debugLog: 0
   _statusEffectAnchor: {fileID: 0}
-  _radius: 1
+  _statusEffectOffset: {x: 0, y: 0, z: 0}
+  _statusEffectRadius: 1
   _targetStatSO: {fileID: 0}
   _drops: []
   _player: {fileID: 0}
-  _tartgetMask:
+  _targetMask:
     serializedVersion: 2
     m_Bits: 64
   _sightCheck: 1
@@ -94,15 +95,19 @@ MonoBehaviour:
   - {fileID: 0}
   _bossState: 0
   _previewPattern: {fileID: 3628415296826627438}
+  _mainCount: 0
   _animator: {fileID: 7484433350781376968}
   _rotateSpeed: 1000
   _atkTime: 5
   _normalAtkRange: 6
-  _detectedRange: 12
+  _detectedRange: 20
+  _returnDelayTime: 2
   _whirlRange: 14
   _whirlInner: 7
-  _donutRange: 12
-  _donutInner: 8
+  _donutRange: 18
+  _donutInner: 10
+  _areaAngle: 30
+  _divideArea: 6
 --- !u!95 &7484433350781376968
 Animator:
   serializedVersion: 5
@@ -113,7 +118,7 @@ Animator:
   m_GameObject: {fileID: 849696862997825102}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: c199fa5903ca88241a70a3816b525217, type: 3}
-  m_Controller: {fileID: 9100000, guid: 90daea6109e651e4584505db39cfd8d8, type: 2}
+  m_Controller: {fileID: 9100000, guid: 0f4392c55e5c79648af7d5d20c0dbbf4, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -247,6 +252,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: be2c0dc89e924bd42b9c5a1bad77ed58, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _player: {fileID: 0}
   _polygonPoint: []
   _polygonTriangles: 
   _polygonSides: 10
