@@ -6,6 +6,7 @@
  *    - CItemShown은 인벤토리를 띄웠을 때 보여주는 용도로 사용하기
  */
 
+using JetBrains.Annotations;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -81,7 +82,6 @@ public class CInventory : MonoBehaviour
                 return i;
             }
         }
-
         return -1;
     }
 
@@ -105,7 +105,7 @@ public class CInventory : MonoBehaviour
 
     // 아이템 획득
 
-    
+
     public int Debugitemcode;
 
     [ContextMenu("아이템 추가")]
@@ -119,10 +119,16 @@ public class CInventory : MonoBehaviour
     // 실제로 추가한 수량을 반환
     public int AddItem(int id, int quantity = 1)
     {
+        return AddItemInternal(id, quantity, true);
+    }
+
+    private int AddItemInternal(int id, int quantity, bool notify)
+    {
         if (quantity <= 0)
         {
             return 0;
         }
+
 
         /*
         !! if(TryMakeItem(id, out CItem item))
@@ -225,9 +231,13 @@ public class CInventory : MonoBehaviour
             }
         }
 
-        OnInventoryChanged?.Invoke();
+        if (notify)
+        {
+            OnInventoryChanged?.Invoke();
+        }
         return addedQuantity;
     }
+
 
     public bool TryMoveItem(int fromIndex, int toIndex)
     {
@@ -572,7 +582,7 @@ public class CInventory : MonoBehaviour
         {
             CItem item = _items[i];
 
-            if (item is CItemConsumable &&  item.Id == itemId && item.Quantity > 0)
+            if (item is CItemConsumable && item.Id == itemId && item.Quantity > 0)
             {
                 return TryUseItem(i, isBattle);
             }
@@ -687,6 +697,143 @@ public class CInventory : MonoBehaviour
 
         _gold -= amount;
         OnGoldChanged?.Invoke();
+        return true;
+    }
+
+    public List<int> GetQuickSlotSaveDate()
+    {
+        return new List<int>(_quickSlotIds);
+    }
+
+    public bool TryLoadQuickSlotSaveData(List<int> itemIds)
+    {
+        if (itemIds == null || itemIds.Count != _quickSlotIds.Length)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < _quickSlotIds.Length; i++)
+        {
+            _quickSlotIds[i] = itemIds[i];
+        }
+
+        OnInventoryChanged?.Invoke();
+        return true;
+    }
+
+    public bool TrybuyOneItem(int itemId, int price)
+    {
+        if (price < 0 || Gold < price)
+        {
+            return false;
+        }
+
+        if (AddItemInternal(itemId, 1, false) != 1)
+        {
+            return false;
+        }
+
+        _gold -= price;
+        OnInventoryChanged?.Invoke();
+
+        if (price > 0)
+        {
+            OnGoldChanged?.Invoke();
+        }
+
+        return true;
+    }
+
+    // 판매 대기 항목. 가방의 실제 객체와 수량을 함께 확인합니다.
+    public sealed class SellRequest
+    {
+        public int SlotIndex { get; }
+        public CItem Item { get; }
+        public int Quantity { get; }
+        public int UnitPrice { get; }
+
+        public SellRequest(int slotIndex, CItem item, int quantity, int unitPrice)
+        {
+            SlotIndex = slotIndex;
+            Item = item;
+            Quantity = quantity;
+            UnitPrice = unitPrice;
+        }
+    }
+
+    public bool TrySellItem(int slotIndex, CItem expectedItem, int quantity, int unitprice)
+    {
+        return TrySellItems(new List<SellRequest>
+        {
+            new SellRequest(slotIndex, expectedItem, quantity, unitprice)
+        });
+    }
+
+    // 모두 검증한 뒤 차감합니다. 중간 항목이 잘못되어도 일부만 팔리지 않습니다.
+    public bool TrySellItems(IReadOnlyList<SellRequest> requests)
+    {
+        if (requests == null || requests.Count == 0 || requests.Count > 20 || _gold < 0)
+        {
+            return false;
+        }
+
+        long income = 0;
+        HashSet<int> usedSlots = new HashSet<int>();
+        HashSet<CItem> usedItems = new HashSet<CItem>();
+
+        for (int i = 0; i < requests.Count; i++)
+        {
+            SellRequest request = requests[i];
+            if (request == null || !IsValidSlot(request.SlotIndex) || request.Quantity <= 0 || request.UnitPrice < 0 ||
+                !usedSlots.Add(request.SlotIndex))
+            {
+                return false;
+            }
+
+            CItem item = _items[request.SlotIndex];
+            if (item == null || !ReferenceEquals(item, request.Item) || item.Quantity < request.Quantity || !usedItems.Add(item))
+            {
+                return false;
+            }
+
+            if (item is CItemEquipment equipment)
+            {
+                if (equipment.IsEquip || request.Quantity != 1)
+                {
+                    return false;
+                }
+            }
+            else if (!(item is CItemConsumable))
+            {
+                return false;
+            }
+
+            income += (long)request.UnitPrice * request.Quantity;
+            if (income > int.MaxValue - (long)_gold)
+            {
+                return false;
+            }
+        }
+
+        for (int i = 0; i < requests.Count; i++)
+        {
+            SellRequest request = requests[i];
+            if (request.Item.Quantity == request.Quantity)
+            {
+                _items[request.SlotIndex] = null;
+            }
+            else
+            {
+                request.Item.Quantity -= request.Quantity;
+            }
+        }
+
+        _gold += (int)income;
+        OnInventoryChanged?.Invoke();
+        if (income > 0)
+        {
+            OnGoldChanged?.Invoke();
+        }
         return true;
     }
 

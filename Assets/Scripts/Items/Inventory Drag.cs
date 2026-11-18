@@ -28,6 +28,4 @@ public class InventoryDrag : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
         }
         
     }
-
-
 }

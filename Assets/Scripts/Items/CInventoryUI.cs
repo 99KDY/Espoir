@@ -32,6 +32,8 @@ public class CInventoryUI : MonoBehaviour
     [SerializeField] private Transform _playerQuickSlotContent;
     [SerializeField] private Image[] __hudQuickSlotCooldownFills;
     [SerializeField] private TMP_Text _goldText;
+    [SerializeField] private TMP_Text _quickSlotHintText;
+    [SerializeField] private GameObject _quickSlotHintPanel;
 
     private enum MenuTarget
     {
@@ -346,6 +348,12 @@ public class CInventoryUI : MonoBehaviour
         CItem item = _inventory.GetItem(index);
         if (item == null) return;
 
+        if (_isShopSellMode)
+        {
+            SellItemSelected?.Invoke(index, item);
+            return;
+        }
+
         CloseContextMenu();
         _menuTarget = MenuTarget.Bag;
         _selectedSlotIndex = index;
@@ -417,6 +425,16 @@ public class CInventoryUI : MonoBehaviour
         _selectedQuickIndex = -1;
         _isMoving = false;
         _isRegisteringQuickSlot = false;
+
+        if (_quickSlotHintText != null)
+        {
+            _quickSlotHintText.gameObject.SetActive(false);
+        }
+
+        if (_quickSlotHintPanel != null)
+        {
+            _quickSlotHintPanel.SetActive(false);
+        }
     }
 
     private void OnClickUseButton()
@@ -482,10 +500,26 @@ public class CInventoryUI : MonoBehaviour
 
     private void OnClickMoveButton()
     {
-        if (_menuTarget != MenuTarget.Bag || _selectedSlotIndex < 0) return;
+        if (_menuTarget != MenuTarget.Bag || _selectedSlotIndex < 0)
+        {
+            return;
+        }
 
         _isMoving = true;
+        _isRegisteringQuickSlot = false;
         _itemContextMenu.SetActive(false);
+        HideTooltip();
+
+        if (_quickSlotHintText != null)
+        {
+            _quickSlotHintText.text = "이동할 가방 슬롯을 클릭하세요.";
+            _quickSlotHintText.gameObject.SetActive(true);
+        }
+
+        if(_quickSlotHintPanel != null)
+        {
+            _quickSlotHintPanel.SetActive(true);
+        }
     }
 
     private void SelectMoveDestination(int index)
@@ -509,6 +543,17 @@ public class CInventoryUI : MonoBehaviour
 
         _isRegisteringQuickSlot = true;
         _itemContextMenu.SetActive(false);
+
+        if (_quickSlotHintText != null)
+        {
+            _quickSlotHintText.text = "등록할 퀵슬롯을 클릭하세요.";
+            _quickSlotHintText.gameObject.SetActive(true);
+        }
+
+        if (_quickSlotHintPanel != null)
+        {
+            _quickSlotHintPanel.SetActive(true);
+        }
     }
 
     private void SelectQuickSlot(int index)
@@ -638,4 +683,22 @@ public class CInventoryUI : MonoBehaviour
         if (_goldText == null) return;
         _goldText.text = $"{_inventory.Gold:N0} G";
     }
+
+    public event System.Action<int, CItem> SellItemSelected;
+    private bool _isShopSellMode;
+
+    public void SetShopSellMode(bool enabled)
+    {
+        _isShopSellMode = enabled;
+        CloseContextMenu();
+        HideTooltip();
+
+        if (enabled)
+        {
+            _InventoryPanel.SetActive(true);
+            RefreshInventory();
+        }
+    }
 }
+
+
