@@ -6555,7 +6555,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8376499686187891618, guid: 07a2f8530a1722449a2b7f8fe1afa560, type: 3}
       propertyPath: m_Name
-      value: UI Canvas_Revision
+      value: Inventory UI Canvas_Revision
       objectReference: {fileID: 0}
     - target: {fileID: 8920989246341227357, guid: 07a2f8530a1722449a2b7f8fe1afa560, type: 3}
       propertyPath: m_Pivot.x
