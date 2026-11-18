@@ -52,6 +52,7 @@ public class CInventoryUI : MonoBehaviour
     private EEquipmentSlot _selectedEquipmentSlot;
     private bool _isMoving;
     private bool _isRegisteringQuickSlot;
+    private bool _changedGameState;
     private Image[] _cooldownFills;
     private TMP_Text[] _cooldownTexts;
     private Image[] _quickCooldownFills;
@@ -146,16 +147,23 @@ public class CInventoryUI : MonoBehaviour
 
         if (Input.GetKeyUp(KeyCode.I))
         {
-            if (_InventoryPanel.activeSelf)
+            bool canOpen = CGameManager.Instance == null ||
+                CGameManager.Instance.GameState == EGameState.Idle ||
+                CGameManager.Instance.GameState == EGameState.UI;
+
+            if (canOpen)
             {
-                _InventoryPanel.SetActive(false);
-                HideTooltip();
-                CloseContextMenu();
-            }
-            else if (_inventory.CanOpenInventory)
-            {
-                _InventoryPanel.SetActive(true);
-                RefreshInventory();
+                if (_InventoryPanel.activeSelf)
+                {
+                    SetInventoryOpen(false);
+                }
+                else if (_inventory.CanOpenInventory &&
+                        (CGameManager.Instance == null ||
+                        CGameManager.Instance.BattleState == EBattleState.None)
+                    )
+                {
+                    SetInventoryOpen(true);
+                }
             }
         }
 
@@ -690,16 +698,37 @@ public class CInventoryUI : MonoBehaviour
     public void SetShopSellMode(bool enabled)
     {
         _isShopSellMode = enabled;
-        CloseContextMenu();
+        SetInventoryOpen(enabled);
+    }
+
+    public void SetInventoryOpen(bool enabled)
+    {
         HideTooltip();
+        CloseContextMenu();
 
         _InventoryPanel.SetActive(enabled);
 
         if (enabled)
         {
             RefreshInventory();
+
+            if (CGameManager.Instance != null &&
+                CGameManager.Instance.GameState == EGameState.Idle)
+            {
+                _changedGameState = true;
+                CGameManager.Instance.SetGameState(EGameState.UI);
+            }
+        }
+        else
+        {
+            if (_changedGameState &&
+                CGameManager.Instance != null &&
+                CGameManager.Instance.GameState == EGameState.UI)
+            {
+                CGameManager.Instance.SetGameState(EGameState.Idle);
+            }
+
+            _changedGameState = false;
         }
     }
 }
-
-
