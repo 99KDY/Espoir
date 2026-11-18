@@ -106,12 +106,25 @@ public class CShopUI : MonoBehaviour
         RefreshGold();
         _resultText.text = string.Empty;
         _shopPanel.SetActive(true);
+
+        if (CGameManager.Instance != null && CGameManager.Instance.GameState == EGameState.Idle)
+        {
+            _changedGameState = true;
+            CGameManager.Instance.SetGameState(EGameState.UI);
+        }
     }
 
     public void Close()
     {
         EndSell();
         _shopPanel.SetActive(false);
+        if (_changedGameState &&
+            CGameManager.Instance != null &&
+            CGameManager.Instance.GameState == EGameState.UI)
+        {
+            CGameManager.Instance.SetGameState(EGameState.Idle);
+        }
+        _changedGameState = false;
     }
 
     private void Buy(int productIndex)
@@ -187,6 +200,7 @@ public class CShopUI : MonoBehaviour
     private bool _sellPanelReady;
     private CItem _pendingItem;
     private int _pendingEntryIndex = -1;
+    private bool _changedGameState;
 
     private void InitializeSellPanel()
     {
@@ -534,7 +548,6 @@ public class CShopUI : MonoBehaviour
 
     private void OnDisable()
     {
-        EndSell();
-        if (_shopPanel != null) _shopPanel.SetActive(false);
+        Close();
     }
 }

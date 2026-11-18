@@ -615,6 +615,7 @@ public class CPlayer : CUnit
     protected override void Update()
     {
         base.Update();
+        if (Time.timeScale <= 0f) return;
         _movement.ApplyGravity();
         _pradonaCooldown = Mathf.Max(0f, _pradonaCooldown - Time.deltaTime);
 
