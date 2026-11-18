@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 
 public enum ESkillType
@@ -47,6 +47,7 @@ public class CSkillSO : ScriptableObject
     [Header("스킬 설정")]
     [SerializeField] private ESkillType _type;
     [SerializeField, Min(0f)] private float _cooldown;
+    [SerializeField, Min(0f)] private float _cooldownInBossbattle;
     [SerializeField, Min(0)] private int _mpCost;
     [SerializeField] private string _startTrigger;
     [SerializeField] private string _comboTrigger;
@@ -92,6 +93,7 @@ public class CSkillSO : ScriptableObject
 
     public ESkillType Type => _type;
     public float Cooldown => _cooldown;
+    public float CooldownInBossbattle => _cooldownInBossbattle;
     public int MpCost => _mpCost;
     public string StartTrigger => _startTrigger;
     public string ComboTrigger => _comboTrigger;

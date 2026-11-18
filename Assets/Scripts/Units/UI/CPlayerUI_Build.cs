@@ -37,6 +37,7 @@ public class CPlayerUI_Build : MonoBehaviour
     [SerializeField] private CSkillUI _skillD = null;
     [SerializeField] private CSkillUI _skillPradona = null;
     [SerializeField] private Image _crownRemaining = null;
+    [SerializeField] private CanvasGroup _skillDCanvas = null;
 
     [SerializeField] private List<CQuickslotUI> _quickslot = null;
 
@@ -270,6 +271,15 @@ public class CPlayerUI_Build : MonoBehaviour
         _skillR.Refresh(ratio, remainCooldown, _player.GetSkillAvailable(ESkillType.Slam));
         _player.GetSkillCooldown(ESkillType.Dash, out ratio, out remainCooldown);
         _skillD.Refresh(ratio, remainCooldown, _player.GetSkillAvailable(ESkillType.Dash));
+
+        if (_skillDCanvas != null)
+        {
+            bool isCooldown = remainCooldown > 0f;
+            _skillDCanvas.alpha = isCooldown ? 1f : 0f;
+            _skillDCanvas.interactable = isCooldown;
+            _skillDCanvas.blocksRaycasts = isCooldown;
+        }
+
         _player.GetPradonaCooldown(out ratio, out remainCooldown);
         _skillPradona.Refresh(ratio, remainCooldown, _player.PradonaPower != EPradonaPower.None && remainCooldown <= 0f);
     }

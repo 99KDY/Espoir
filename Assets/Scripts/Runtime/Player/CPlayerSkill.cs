@@ -55,6 +55,7 @@ public class CPlayerSkill : MonoBehaviour
 
     public bool IsBusy => _currentSkill != null;
     public float CrownWindowRemaining => _CROWN.RemainingTime;
+    public float DashCooldownDuration { get; set; }
     public CPlayerLeviathan Leviathan => _LEVIATHAN;
 
     /// <summary>
@@ -119,7 +120,15 @@ public class CPlayerSkill : MonoBehaviour
         {
             if (pair.Key.Type != type) continue;
             remainCooldown = Mathf.Max(0f,pair.Value.readyTime - Time.time);
-            ratio = pair.Key.Cooldown > 0f ? Mathf.Clamp01(remainCooldown / pair.Key.Cooldown) : 0f;
+            if (pair.Key.Type == ESkillType.Dash)
+            {
+                if (DashCooldownDuration == 0) DashCooldownDuration = pair.Key.Cooldown;
+                ratio = pair.Key.Cooldown > 0f ? Mathf.Clamp01(remainCooldown / DashCooldownDuration) : 0f;
+            }
+            else
+            {
+                ratio = pair.Key.Cooldown > 0f ? Mathf.Clamp01(remainCooldown / pair.Key.Cooldown) : 0f;
+            }
             return;
         }
     }
@@ -443,11 +452,25 @@ public class CPlayerSkill : MonoBehaviour
         FinishSkill(isCanceling, keepEffects);
         _currentSkill = runtime;
         _stateCheckFrame = Time.frameCount + 1;
-        runtime.readyTime = Time.time + skill.Cooldown;
+
+        // 대시만 보스배틀일 때 쿨 길어지게
+        float cooldown = skill.Cooldown;
+        if (skill.Type == ESkillType.Dash)
+        {
+            if ((CGameManager.Instance != null) &&
+                (CGameManager.Instance.BattleState == EBattleState.BossBattle))
+            {
+                cooldown = skill.CooldownInBossbattle;
+            }
+            DashCooldownDuration = cooldown;
+        }
+
+        runtime.readyTime = Time.time + cooldown;
         _direction = direction.sqrMagnitude > 0.0001f ? direction.normalized : transform.forward;
 
         if (skill.Type == ESkillType.Dash)
         {
+            _owner.AddStatus(28, 0f);
             transform.rotation = Quaternion.LookRotation(_direction);
             _DASH_TRAIL.Begin(skill.DashTrail, transform, _animator, _direction, _EFFECTS);
         }
@@ -901,6 +924,14 @@ public class CPlayerSkill : MonoBehaviour
 
     private void FinishSkill(bool canceled = false, bool keepEffects = false)
     {
+        // 대시무적 제거
+        if (_owner != null &&
+            _currentSkill != null &&
+            _currentSkill.data.Type == ESkillType.Dash)
+        {
+            _owner.RemoveStatus(28);
+        }
+
         _EFFECTS.End(canceled, keepEffects);
         if (canceled)
         {

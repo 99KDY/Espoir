@@ -430,14 +430,14 @@ public class CPlayer : CUnit
     /// 무적 상태가 아닐 때 체력 피해를 적용합니다.
     /// </summary>
 
-    public override void GetDamage(float value, ERatioSwitch ratioSwitch = ERatioSwitch.Constant)
+    public override void GetDamage(float value, ERatioSwitch ratioSwitch = ERatioSwitch.Constant, bool penetrateInvincible = false)
     {
         if (_isInvincible)
         {
             return;
         }
 
-        base.GetDamage(value, ratioSwitch);
+        base.GetDamage(value, ratioSwitch, penetrateInvincible);
     }
 
     /// <summary>
@@ -472,10 +472,10 @@ public class CPlayer : CUnit
     /// 적의 공격으로 체력이 감소하면 전투의 흐름을 차감합니다.
     /// </summary>
 
-    public override void OnHit(CUnit attacker, CUnit defender, SDamageInfo damage)
+    public override void OnHit(CUnit attacker, CUnit defender, SDamageInfo damage, bool penetrateInvincible = false)
     {
         float previousHp = HpCurrent;
-        base.OnHit(attacker, defender, damage);
+        base.OnHit(attacker, defender, damage, penetrateInvincible);
 
         if (defender == this && HpCurrent < previousHp)
         {
@@ -780,5 +780,17 @@ public class CPlayer : CUnit
     {
         remainCooldown = _pradonaCooldown;
         ratio = _pradonaCooldown / _pradonaCooldownSet;
+    }
+
+    protected override void Die()
+    {
+        base.Die();
+        if (_actionsBlocked) return;
+
+        _actionsBlocked = true;
+        _movement?.Stop();
+        _skill?.CancelSkill();
+
+        CGameManager.Instance?.SetGameState(EGameState.Gameover);
     }
 }
