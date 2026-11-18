@@ -12,6 +12,7 @@ public enum ETalkEnd
     Travel = 2,
     Summon = 3,
     Unsummon = 4,
+    Shop = 5,
 }
 
 /// <summary>

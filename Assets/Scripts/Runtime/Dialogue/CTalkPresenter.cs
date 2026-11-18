@@ -76,6 +76,8 @@ public class CTalkPresenter : MonoBehaviour
     private string _travelDestination;
     private bool _isInRange;
 
+    private CShopUI _targetShop;
+
     /// <summary>
     /// 지금 이름표 · 말 걸기 · 대화 대상인 NPC.
     /// </summary>
@@ -256,6 +258,7 @@ public class CTalkPresenter : MonoBehaviour
     public bool TryOpen()
     {
         if (_isOpen || _isBusy || !_isInRange || _current == null || _dialog == null) return false;
+        if (_targetShop != null && _targetShop.IsOpen) return false;
 
         CGameManager manager = CGameManager.Instance;
         if (manager != null && manager.GameState != EGameState.Idle) return false;
@@ -369,6 +372,16 @@ public class CTalkPresenter : MonoBehaviour
             case ETalkEnd.Unsummon:
                 Close();
                 if (_summoner != null) _summoner.Unsummon();
+                return;
+            case ETalkEnd.Shop:
+                _targetShop = _current != null ? _current.ShopUI : null;
+                Close();
+                if (_targetShop == null)
+                {
+                    CLogger.Error("CTalkPresenter : 상점 UI 미연결");
+                    return;
+                }
+                _targetShop.Open();
                 return;
             default:
                 Close();

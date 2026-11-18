@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,6 +14,8 @@ public class CShopUI : MonoBehaviour
     [SerializeField] private TMP_Text _resultText;
     [SerializeField, Min(0.1f)] private float _closeDistance = 4f;
     [SerializeField] private CInventoryUI _inventoryUI;
+
+    public bool IsOpen => _shopPanel != null && _shopPanel.activeInHierarchy;
 
     private void Awake()
     {
@@ -63,7 +65,7 @@ public class CShopUI : MonoBehaviour
         {
             graphic.raycastTarget = false;
         }
-        // ¹öÆ° ¹è°æ¸¸ Å¬¸¯À» ¹Ş½À´Ï´Ù.
+        // ë²„íŠ¼ ë°°ê²½ë§Œ í´ë¦­ì„ ë°›ìŠµë‹ˆë‹¤.
         if (button.targetGraphic != null) button.targetGraphic.raycastTarget = true;
         Image buttonImage = button.GetComponent<Image>();
         if (buttonImage != null) buttonImage.raycastTarget = true;
@@ -123,8 +125,8 @@ public class CShopUI : MonoBehaviour
         RefreshGold();
 
         _resultText.text = bought
-            ? $"{_shop.Products[productIndex].Name} 1°³¸¦ ±¸¸ÅÇß½À´Ï´Ù."
-            : "±¸¸Å ½ÇÆĞ. °ñµå¿Í °¡¹æ °ø°£À» È®ÀÎÇØ ÁÖ¼¼¿ä.";
+            ? $"{_shop.Products[productIndex].Name} 1ê°œë¥¼ êµ¬ë§¤í–ˆìŠµë‹ˆë‹¤."
+            : "êµ¬ë§¤ ì‹¤íŒ¨. ê³¨ë“œì™€ ê°€ë°© ê³µê°„ì„ í™•ì¸í•´ ì£¼ì„¸ìš”.";
     }
 
     private void RefreshGold()
@@ -155,13 +157,13 @@ public class CShopUI : MonoBehaviour
 
     private const int SellSlotCount = 20;
 
-    [Header("ÆÇ¸Å ´ë±â 20Ä­")]
+    [Header("íŒë§¤ ëŒ€ê¸° 20ì¹¸")]
     [SerializeField] private GameObject _sellPanel;
     [SerializeField] private Transform _sellContent;
     [SerializeField] private Button _sellSlotTemplate;
     [SerializeField] private TMP_Text _sellTotalText;
 
-    [Header("ÆÇ¸Å ¼ö·® ¼±ÅÃ")]
+    [Header("íŒë§¤ ìˆ˜ëŸ‰ ì„ íƒ")]
     [SerializeField] private GameObject _quantityPanel;
     [SerializeField] private TMP_Text _quantityPrompt;
     [SerializeField] private TMP_InputField _quantityInput;
@@ -193,7 +195,7 @@ public class CShopUI : MonoBehaviour
 
         if (!_sellPanelReady)
         {
-            Debug.LogWarning("CShopUI: ÆÇ¸Å ÆĞ³Î°ú ¼ö·® ¼±ÅÃ UI¸¦ ¿¬°áÇØ ÁÖ¼¼¿ä.", this);
+            Debug.LogWarning("CShopUI: íŒë§¤ íŒ¨ë„ê³¼ ìˆ˜ëŸ‰ ì„ íƒ UIë¥¼ ì—°ê²°í•´ ì£¼ì„¸ìš”.", this);
             return;
         }
 
@@ -207,7 +209,7 @@ public class CShopUI : MonoBehaviour
             remove == null || remove.GetComponent<Button>() == null)
         {
             _sellPanelReady = false;
-            Debug.LogError("ÆÇ¸Å ½½·Ô¿¡ ItemIcon(Image), QuantityText(TMP), RemoveButton(Button)ÀÌ ÇÊ¿äÇÕ´Ï´Ù.", this);
+            Debug.LogError("íŒë§¤ ìŠ¬ë¡¯ì— ItemIcon(Image), QuantityText(TMP), RemoveButton(Button)ì´ í•„ìš”í•©ë‹ˆë‹¤.", this);
             return;
         }
 
@@ -245,7 +247,7 @@ public class CShopUI : MonoBehaviour
     {
         if (!_sellPanelReady)
         {
-            _resultText.text = "ÆÇ¸Å UI ¿¬°áÀ» È®ÀÎÇØ ÁÖ¼¼¿ä.";
+            _resultText.text = "íŒë§¤ UI ì—°ê²°ì„ í™•ì¸í•´ ì£¼ì„¸ìš”.";
             return;
         }
 
@@ -270,7 +272,7 @@ public class CShopUI : MonoBehaviour
         }
         _sellPanel.SetActive(true);
         RefreshSellPanel();
-        _resultText.text = "°¡¹æ ¾ÆÀÌÅÛÀ» ¿ìÅ¬¸¯ÇÏ¸é ÆÇ¸Å ¼ö·®À» °í¸¦ ¼ö ÀÖ½À´Ï´Ù.";
+        _resultText.text = "ê°€ë°© ì•„ì´í…œì„ ìš°í´ë¦­í•˜ë©´ íŒë§¤ ìˆ˜ëŸ‰ì„ ê³ ë¥¼ ìˆ˜ ìˆìŠµë‹ˆë‹¤.";
     }
 
     private void SelectSellItem(int slotIndex, CItem item)
@@ -284,7 +286,7 @@ public class CShopUI : MonoBehaviour
             (!(item is CItemConsumable) && !(item is CItemEquipment)) ||
             (item is CItemEquipment equipment && equipment.IsEquip))
         {
-            _resultText.text = "ÆÇ¸ÅÇÒ ¼ö ¾ø´Â ¾ÆÀÌÅÛÀÔ´Ï´Ù.";
+            _resultText.text = "íŒë§¤í•  ìˆ˜ ì—†ëŠ” ì•„ì´í…œì…ë‹ˆë‹¤.";
             return;
         }
 
@@ -312,7 +314,7 @@ public class CShopUI : MonoBehaviour
 
         if (entryIndex < 0)
         {
-            _resultText.text = "ÆÇ¸Å ¸ñ·ÏÀº ÃÖ´ë 20Ä­ÀÔ´Ï´Ù. Ç×¸ñÀ» Ãë¼ÒÇÑ µÚ ´ã¾Æ ÁÖ¼¼¿ä.";
+            _resultText.text = "íŒë§¤ ëª©ë¡ì€ ìµœëŒ€ 20ì¹¸ì…ë‹ˆë‹¤. í•­ëª©ì„ ì·¨ì†Œí•œ ë’¤ ë‹´ì•„ ì£¼ì„¸ìš”.";
             return;
         }
 
@@ -329,14 +331,14 @@ public class CShopUI : MonoBehaviour
             ? 1
             : Mathf.Min(_sellEntries[entryIndex].Quantity, item.Quantity);
 
-        _quantityPrompt.text = $"{item.Name}\n¸î °³ ÆÇ¸ÅÇÏ½Ã°Ú½À´Ï±î? (1~{item.Quantity}°³)";
+        _quantityPrompt.text = $"{item.Name}\nëª‡ ê°œ íŒë§¤í•˜ì‹œê² ìŠµë‹ˆê¹Œ? (1~{item.Quantity}ê°œ)";
         _quantityInput.SetTextWithoutNotify(selectedQuantity.ToString());
         _quantityPanel.SetActive(true);
         _quantityPanel.transform.SetAsLastSibling();
         _quantityInput.ActivateInputField();
     }
 
-    // ¼ö·® Ã¢ÀÇ '´ã±â' ¹öÆ°¿¡¼­ È£ÃâÇÕ´Ï´Ù.
+    // ìˆ˜ëŸ‰ ì°½ì˜ 'ë‹´ê¸°' ë²„íŠ¼ì—ì„œ í˜¸ì¶œí•©ë‹ˆë‹¤.
     public void AddSelectedQuantity()
     {
         if (!_isSelling || _pendingItem == null || _pendingEntryIndex < 0)
@@ -353,14 +355,14 @@ public class CShopUI : MonoBehaviour
         if (FindBagSlot(_pendingItem) < 0)
         {
             CancelQuantity();
-            _resultText.text = "¼±ÅÃÇÑ ¾ÆÀÌÅÛÀÌ °¡¹æ¿¡ ¾ø½À´Ï´Ù. ´Ù½Ã ¼±ÅÃÇØ ÁÖ¼¼¿ä.";
+            _resultText.text = "ì„ íƒí•œ ì•„ì´í…œì´ ê°€ë°©ì— ì—†ìŠµë‹ˆë‹¤. ë‹¤ì‹œ ì„ íƒí•´ ì£¼ì„¸ìš”.";
             return;
         }
 
         if (!int.TryParse(_quantityInput.text, out int quantity) ||
             quantity < 1 || quantity > _pendingItem.Quantity)
         {
-            _quantityPrompt.text = $"1~{_pendingItem.Quantity} »çÀÌÀÇ ¼ö·®À» ÀÔ·ÂÇØ ÁÖ¼¼¿ä.";
+            _quantityPrompt.text = $"1~{_pendingItem.Quantity} ì‚¬ì´ì˜ ìˆ˜ëŸ‰ì„ ì…ë ¥í•´ ì£¼ì„¸ìš”.";
             return;
         }
 
@@ -368,7 +370,7 @@ public class CShopUI : MonoBehaviour
         CancelQuantity();
     }
 
-    // °³´ç ÆÇ¸Å°¡¸¦ Á¤¼ö °ñµå·Î °è»êÇÏ¸ç ³ª¸ÓÁö´Â ¹ö¸³´Ï´Ù.
+    // ê°œë‹¹ íŒë§¤ê°€ë¥¼ ì •ìˆ˜ ê³¨ë“œë¡œ ê³„ì‚°í•˜ë©° ë‚˜ë¨¸ì§€ëŠ” ë²„ë¦½ë‹ˆë‹¤.
     private int GetSellUnitPrice(CItem item)
     {
         return item is CItemEquipment ? item.Cost / 10 : item.Cost / 5;
@@ -384,7 +386,7 @@ public class CShopUI : MonoBehaviour
             UnitPrice = price
         };
         RefreshSellPanel();
-        _resultText.text = $"{item.Name} {quantity}°³ ´ãÀ½ ¡¤ °³´ç {price:N0} G";
+        _resultText.text = $"{item.Name} {quantity}ê°œ ë‹´ìŒ Â· ê°œë‹¹ {price:N0} G";
     }
 
     public void CancelQuantity()
@@ -397,7 +399,7 @@ public class CShopUI : MonoBehaviour
     public void CancelSell()
     {
         EndSell();
-        _resultText.text = "ÆÇ¸Å ¸ñ·ÏÀ» Ãë¼ÒÇß½À´Ï´Ù.";
+        _resultText.text = "íŒë§¤ ëª©ë¡ì„ ì·¨ì†Œí–ˆìŠµë‹ˆë‹¤.";
     }
 
     private void EditSellEntry(int index)
@@ -408,7 +410,7 @@ public class CShopUI : MonoBehaviour
         int slot = FindBagSlot(entry.Item);
         if (slot < 0)
         {
-            _resultText.text = "°¡¹æ¿¡ ¾ø´Â Ç×¸ñÀÔ´Ï´Ù. X ¹öÆ°À¸·Î ¸ñ·Ï¿¡¼­ Á¦°ÅÇØ ÁÖ¼¼¿ä.";
+            _resultText.text = "ê°€ë°©ì— ì—†ëŠ” í•­ëª©ì…ë‹ˆë‹¤. X ë²„íŠ¼ìœ¼ë¡œ ëª©ë¡ì—ì„œ ì œê±°í•´ ì£¼ì„¸ìš”.";
             return;
         }
 
@@ -454,7 +456,7 @@ public class CShopUI : MonoBehaviour
             }
         }
 
-        _sellTotalText.text = $"ÆÇ¸Å ¸ñ·Ï {count}/20Ä­ ¡¤ ÇÕ°è {total:N0} G";
+        _sellTotalText.text = $"íŒë§¤ ëª©ë¡ {count}/20ì¹¸ Â· í•©ê³„ {total:N0} G";
     }
 
     public void ConfirmSell()
@@ -472,7 +474,7 @@ public class CShopUI : MonoBehaviour
 
         if (_quantityPanel.activeSelf)
         {
-            _resultText.text = "¼ö·® Ã¢¿¡¼­ ´ã±â ¶Ç´Â Ãë¼Ò¸¦ ¸ÕÀú ´­·¯ ÁÖ¼¼¿ä.";
+            _resultText.text = "ìˆ˜ëŸ‰ ì°½ì—ì„œ ë‹´ê¸° ë˜ëŠ” ì·¨ì†Œë¥¼ ë¨¼ì € ëˆŒëŸ¬ ì£¼ì„¸ìš”.";
             return;
         }
 
@@ -488,18 +490,18 @@ public class CShopUI : MonoBehaviour
 
         if (requests.Count == 0)
         {
-            _resultText.text = "ÆÇ¸ÅÇÒ ¾ÆÀÌÅÛÀ» ¸ÕÀú ´ã¾Æ ÁÖ¼¼¿ä.";
+            _resultText.text = "íŒë§¤í•  ì•„ì´í…œì„ ë¨¼ì € ë‹´ì•„ ì£¼ì„¸ìš”.";
             return;
         }
 
         if (!_inventory.TrySellItems(requests))
         {
-            _resultText.text = "ÆÇ¸ÅµÇÁö ¾Ê¾Ò½À´Ï´Ù. º¸À¯ ¼ö·®, ¸ñ·Ï°ú °ñµå ÇÑµµ¸¦ È®ÀÎÇØ ÁÖ¼¼¿ä.";
+            _resultText.text = "íŒë§¤ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤. ë³´ìœ  ìˆ˜ëŸ‰, ëª©ë¡ê³¼ ê³¨ë“œ í•œë„ë¥¼ í™•ì¸í•´ ì£¼ì„¸ìš”.";
             return;
         }
         EndSell();
         RefreshGold();
-        _resultText.text = "¸ñ·ÏÀÇ ¾ÆÀÌÅÛÀ» ¸ğµÎ ÆÇ¸ÅÇß½À´Ï´Ù.";
+        _resultText.text = "ëª©ë¡ì˜ ì•„ì´í…œì„ ëª¨ë‘ íŒë§¤í–ˆìŠµë‹ˆë‹¤.";
     }
 
     private void EndSell()
