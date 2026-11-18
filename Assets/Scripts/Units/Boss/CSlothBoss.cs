@@ -192,7 +192,7 @@ public class CSlothBoss : CEnemy
         }
         else
         {
-            _atkTime = _isMain ? 7 : 5;
+            _atkTime = _isMain ? 7.3f : 5;
             _atkTimer += Time.fixedDeltaTime;        
         }
     }
@@ -386,6 +386,7 @@ public class CSlothBoss : CEnemy
                 break;
 
         }
+        _delayTimer = 0f;
     }
 
     private void SubAttackPattern()
@@ -420,6 +421,7 @@ public class CSlothBoss : CEnemy
                        
                 break;
         }
+        _delayTimer = 0f;
     }
 
     private void MainAttackPattern()
@@ -1019,7 +1021,7 @@ public class CSlothBoss : CEnemy
                 continue;
             }
 
-            SDamageInfo damageToPlayer= new SDamageInfo(damage, true ,ERatioSwitch.ByMax);
+            SDamageInfo damageToPlayer= new SDamageInfo(damage, true ,ERatioSwitch.ByCurrent);
             float lastHp = player.HpCurrent;
             
             player.OnHit(this, damageToPlayer);
@@ -1049,18 +1051,22 @@ public class CSlothBoss : CEnemy
 
     private async UniTaskVoid FreezeAnimation(float duration, CancellationToken cancelAnima)
     {
-        _animator.speed = 0f;
+        _animator.speed = 0.2f;
 
-        CPlayer player = GetComponent<CPlayer>();
+        if(_player == null)
+        {
+            CLogger.Error("플레이어를 참조하지 않았습니다.");
+            return;
+        }
 
-        SDamageInfo recieveDamage = new SDamageInfo(player.Attack);
+        SDamageInfo recieveDamage = new SDamageInfo(_player.Attack);
 
         float bossLastHP = this.HpCurrent;
 
         
         try
         {
-            this.OnHit(player, recieveDamage);
+            this.OnHit(_player, recieveDamage);
 
             await UniTask.Delay
                 (
@@ -1167,7 +1173,7 @@ public class CSlothBoss : CEnemy
 
             if(isHit == true)
             {
-                SDamageInfo playerToDamage = new SDamageInfo(0.6f, ERatioSwitch.ByMax);
+                SDamageInfo playerToDamage = new SDamageInfo(0.6f, ERatioSwitch.ByCurrent);
                 float currentHP = player.HpCurrent;
 
                 player.OnHit(this, playerToDamage);
