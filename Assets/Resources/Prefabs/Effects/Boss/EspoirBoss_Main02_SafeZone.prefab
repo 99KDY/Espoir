@@ -50,7 +50,7 @@ MonoBehaviour:
     group: 0
     hidden: 0
     rotation: 0
-    scale: 1
+    scale: 0.9
     keepAfterAttack: 0
     offset: {x: 0, y: 0, z: 0}
     overrideRadius: 1

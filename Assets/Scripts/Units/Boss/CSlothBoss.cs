@@ -1,11 +1,11 @@
 ﻿
+using Cysharp.Threading.Tasks;
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using System.Threading;
-using Cysharp.Threading.Tasks;
+using UnityEngine;
 using static UnityEngine.GraphicsBuffer;
-using System;
 using Random = UnityEngine.Random;
 
 public class CSlothBoss : CEnemy
@@ -44,7 +44,7 @@ public class CSlothBoss : CEnemy
     [SerializeField] private float _atkTime = 5.0f;
     [SerializeField] private float _normalAtkRange = 7.0f;
     [SerializeField] private float _detectedRange = 15.0f;
-    [SerializeField] private float _returnDelayTime = 2f;
+    [SerializeField] private float _returnDelayTime = 3f;
 
 
     [Header("Pattern Range")]
@@ -102,6 +102,7 @@ public class CSlothBoss : CEnemy
 
 
     private int normalAtk;
+    private int normalCount;
     private int subAtk;
     private int mainAtk;
     private bool _onAttack;
@@ -191,7 +192,7 @@ public class CSlothBoss : CEnemy
         }
         else
         {
-            
+            _atkTime = _isMain ? 7 : 5;
             _atkTimer += Time.fixedDeltaTime;        
         }
     }
@@ -199,9 +200,9 @@ public class CSlothBoss : CEnemy
 
     private void LookAtPlayer()
     {
-        Vector3 targer = new Vector3(_target.position.x, this.transform.position.y, _target.position.z);
+        Vector3 target = new Vector3(_target.position.x, this.transform.position.y, _target.position.z);
 
-        Vector3 lookPlayer = targer - this.transform.position;
+        Vector3 lookPlayer = target - this.transform.position;
 
         float distance = lookPlayer.magnitude;
 
@@ -209,125 +210,31 @@ public class CSlothBoss : CEnemy
         {
             if (_onAttack == false)
             {
+                if (MainPatternExecute())
+                {
+                    return;
+                }
+
+                if (SNPatternExecute(distance))
+                {
+                    return;
+                }
+
+
                 Vector3 dir = lookPlayer.normalized;
                 Quaternion lookRotation = Quaternion.LookRotation(dir);
                 transform.rotation = Quaternion.RotateTowards(transform.rotation, lookRotation, _rotateSpeed * Time.deltaTime);
 
-                float currentHP = this.HpCurrent;
-
-                if(currentHP < this.HpMax * 0.8f && _mainCount == 0)
-                {
-                    _isSub = false;
-                    _isMain = false;
-                    if (_delayTimer > _returnDelayTime)
-                    {
-                        _isMain = true;
-                        mainAtk = 2;
-                        _currentState = ESlothBossState.MainAttack;
-                        _delayTimer = 0;
-
-                    }
-
-
-                }
-
-                else if (currentHP < this.HpMax * 0.6f && _mainCount == 1)
-                {
-                    if (_delayTimer > _returnDelayTime)
-                    {
-                        _isMain = true;
-                        mainAtk = 0;
-                        _currentState = ESlothBossState.MainAttack;
-                        _delayTimer = 0;
-
-                    }
-
-                }
-
-
-
-                else if (currentHP < this.HpMax * 0.4f && _mainCount == 2)
-                {
-                    _isSub = false;
-                    _isMain = false;
-                    if (_delayTimer > _returnDelayTime)
-                    {
-                        _isMain = true;
-                        mainAtk = 1;
-                        _currentState = ESlothBossState.MainAttack;
-                        _delayTimer = 0;
-
-                    }
-
-                }
-
-                else if (currentHP < this.HpMax * 0.2f && _mainCount == 3)
-                {
-                    if (_delayTimer > _returnDelayTime)
-                    {
-                        _isMain = true;
-                        mainAtk = 0;
-                        _currentState = ESlothBossState.MainAttack;
-                        _delayTimer = 0;
-
-                    }
-
-                }
-
-
-                else
-                {
-
-                    if (distance <= _normalAtkRange)
-                    {
-                        _isSub = false;
-                        _isMain = false;
-
-                        if (_delayTimer > _returnDelayTime)
-                        {
-                            _isNormal = true;
-
-                            _currentState = ESlothBossState.NormalAttack;
-                            _delayTimer = 0;
-
-                        }
-
-                        else
-                        {
-                            _delayTimer += Time.deltaTime;
-                        }
-
-                    }
-
-                    else
-                    {
-
-                        if (_delayTimer > _returnDelayTime)
-                        {
-                            _isSub = true;
-                            _currentState = ESlothBossState.SubAttack;
-                            _delayTimer = 0;
-                        }
-
-                        else
-                        {
-                            _isNormal = false;
-                            _isMain = false;
-                            _delayTimer += Time.deltaTime;
-                        }
-
-
-
-                    }
-
-                }
-
                 
             }
 
+
             else
             {
-                CLogger.Log("Boss Animator Moving");
+
+                
+                _returnDelayTime = _isMain ? 7 : 3;
+                CLogger.Log("Boss Pattern Executing");
             }
 
         }
@@ -338,6 +245,104 @@ public class CSlothBoss : CEnemy
 
     }
 
+    private bool MainPatternExecute()
+    {
+        float currentHP = this.HpCurrent;
+
+        if (currentHP < this.HpMax * 0.8f && _mainCount == 0)
+        {
+            CallingMainPattern(2);
+
+            return true;
+        }
+
+        else if (currentHP < this.HpMax * 0.6f && _mainCount == 1)
+        {
+            CallingMainPattern(0);
+            return true;
+        }
+
+        else if (currentHP < this.HpMax * 0.4f && _mainCount == 2)
+        {
+            CallingMainPattern(1);
+            return true;
+        }
+
+        else if (currentHP < this.HpMax * 0.2f && _mainCount == 3)
+        {
+            CallingMainPattern(0);
+            return true;
+        }
+
+        return false;
+    }
+
+    private void CallingMainPattern(int mainIndex)
+    {
+        _isSub = false;
+        _isNormal = false;
+
+        if (_delayTimer > _returnDelayTime)
+        {
+            _isMain = true;
+            mainAtk = mainIndex;
+            _currentState = ESlothBossState.MainAttack;
+            _delayTimer = 0;
+
+        }
+
+
+    }
+
+
+    private bool SNPatternExecute(float distance)
+    {
+       
+        if (distance <= _normalAtkRange && normalCount <= 3)
+        {
+            _isSub = false;
+            _isMain = false;
+
+            if (_delayTimer > _returnDelayTime)
+            {
+                _isNormal = true;
+
+                _currentState = ESlothBossState.NormalAttack;
+                _delayTimer = 0;
+                normalCount++;
+                return true;
+            }
+
+            else
+            {
+                _delayTimer += Time.deltaTime;
+            }
+
+        }
+
+        else
+        {
+
+            if (_delayTimer > _returnDelayTime)
+            {
+                _isSub = true;
+                _currentState = ESlothBossState.SubAttack;
+                _delayTimer = 0;
+                normalCount = 0;
+                return true;
+            }
+
+            else
+            {
+                _isNormal = false;
+                _isMain = false;
+                _delayTimer += Time.deltaTime;
+            }
+
+        }
+
+        return false;
+    }
 
 
 
@@ -393,9 +398,8 @@ public class CSlothBoss : CEnemy
         _isMain = false;
         _isNormal = false;
 
-        subAtk = UnityEngine.Random.Range(1, 4);
+        subAtk = (normalCount > Random.Range(3, 6)) ? Random.Range(1, 3) : Random.Range(1, 4);
 
-        subAtk = 1;
         _onAttack = true;
 
         CLogger.Log($"Sub Attack Pattern : {subAtk}");
@@ -440,7 +444,7 @@ public class CSlothBoss : CEnemy
                 break;
 
             case 1:
-                _animator.SetTrigger(_secondMain);
+
                 FindSafeZoneAttack().Forget();
                 break;
 
@@ -449,11 +453,9 @@ public class CSlothBoss : CEnemy
                 LightningBeamAttack().Forget();
                 break;
 
-            case 3:
-                _animator.SetTrigger(_finalMain);
-                break;
         }
 
+        _delayTimer = 0f;
 
     }
 
@@ -972,6 +974,11 @@ public class CSlothBoss : CEnemy
 
     private async UniTask LikeOneShotAttack()
     {
+        if(_mainCount == 3)
+        {
+            return;
+        }
+
         int battleVersion = _battleVersion;
         _onAttack = true;
 
@@ -1012,7 +1019,7 @@ public class CSlothBoss : CEnemy
                 continue;
             }
 
-            SDamageInfo damageToPlayer= new SDamageInfo(damage, true ,ERatioSwitch.ByCurrent);
+            SDamageInfo damageToPlayer= new SDamageInfo(damage, true ,ERatioSwitch.ByMax);
             float lastHp = player.HpCurrent;
             
             player.OnHit(this, damageToPlayer);
@@ -1023,14 +1030,10 @@ public class CSlothBoss : CEnemy
 
     }
 
-    private void LikeOneShotAttack_First()
+    private void LikeOneShotAttack_damage()
     {
-        LikeOneShotDamage(0.6f);
-    }
-
-    private void LikeOneShotAttack_Second()
-    {
-        LikeOneShotDamage(0.99f);
+        float damage = _mainCount == 1 ? 0.6f : 0.99f;
+        LikeOneShotDamage(damage);
     }
 
 
@@ -1063,7 +1066,7 @@ public class CSlothBoss : CEnemy
                 (
                     TimeSpan.FromSeconds(6),
                     ignoreTimeScale: true,
-                    cancellationToken: this.GetCancellationTokenOnDestroy()
+                    cancellationToken: _cts.Token
                 );
 
             float bossCurrentHP = this.HpCurrent;
@@ -1095,26 +1098,40 @@ public class CSlothBoss : CEnemy
     {
         int battleVersion = _battleVersion;
         _onAttack = true;
-
+        _animator.SetTrigger(_secondMain);
 
         _atkTimer = 0;
 
-        await UniTask.Delay(4300);
+        await UniTask.Delay(TimeSpan.FromSeconds(7.2f));
         if (battleVersion != _battleVersion) return;
         _atkTimer = 0;
-
-        await UniTask.Delay(3000);
-        if (battleVersion != _battleVersion) return;
-
         _mainCount++;
         _onAttack = false;
 
     }
 
 
-    private void FindSafeZone()
+
+    private void FindSafeZoneDamage()
     {
-        int hit = FindPlayer(20);
+        int hit = FindPlayer(25);
+
+        List<Vector3> safeZones = new List<Vector3>();
+
+        for (int i = 0; i < 4; i++)
+        {
+            float safeAngle = 45f + (i * 90f);
+
+            Quaternion rot = Quaternion.Euler(0f , safeAngle, 0f);
+
+            Vector3 safeDir = rot * this.transform.forward;
+
+            Vector3 safePos = this.transform.position + (safeDir * 18f);
+            safePos.y = 0f;
+
+            safeZones.Add(safePos);
+        }
+
 
         for (int i = 0; i < hit; i++)
         {
@@ -1129,44 +1146,34 @@ public class CSlothBoss : CEnemy
                 continue;
             }
 
-            Vector3 playerPos = player.transform.position - this.transform.position;
+            bool isHit = true;
 
-            playerPos.y = 0;
+            Vector3 playerPos = new Vector3(player.transform.position.x , this.transform.position.y, player.transform.position.z);
 
-            float dis = Vector3.Dot(this.transform.forward.normalized , playerPos.normalized);
-           
-            bool isHit = false;
-            
-            for (int j = 0 ; j < 2 ; j++ )
+            for(int j = 0; j < safeZones.Count; j++)
             {
-                if (Mathf.Abs(dis) == 45f + (j * 180f))
+                Vector3 szPos = new Vector3(safeZones[j].x, this.transform.position.y, safeZones[j].z);
+                float distance = Vector3.Distance(szPos , playerPos);
+
+                if (distance <= 4f)
                 {
-                    Vector3 safeZone = playerPos * 20f;
-
-                    float safeCircle = Vector3.Distance(safeZone, player.transform.position);
-
-                    if(safeCircle >= 5.0f)
-                    {
-                        isHit = true;
-
-                        break;
-                    }
+                    isHit = false;
+                    
+                    break;
                 }
 
 
             }
 
-            if (isHit == true)
+            if(isHit == true)
             {
-                SDamageInfo damageToPlayer = new SDamageInfo(1f, true, ERatioSwitch.ByMax);
-                float lastHp = player.HpCurrent;
+                SDamageInfo playerToDamage = new SDamageInfo(0.6f, ERatioSwitch.ByMax);
+                float currentHP = player.HpCurrent;
 
-                player.OnHit(this, damageToPlayer);
+                player.OnHit(this, playerToDamage);
 
-                CLogger.Log($"{player.name}의 현재 체력 : {player.HpCurrent}");
-            }    
-
-
+                CLogger.Log($"현재 플레이어 체력 : {player.HpCurrent}");
+            }
 
         }
 
@@ -1312,9 +1319,15 @@ public class CSlothBoss : CEnemy
 
     private void ShootLightningBeam()
     {
-        int hit = FindPlayer(25);
+        Vector3 boxSize = new Vector3(4f, 4f, 25f);
 
-        for(int i = 0; i < hit; i++)
+        Vector3 boxCenter = this.transform.position + (this.transform.forward * (boxSize.z * 0.5f));
+
+        Quaternion boxRot = this.transform.rotation;
+
+        int hitCount = Physics.OverlapBoxNonAlloc(boxCenter, boxSize * 0.8f, _hitCollider, boxRot , _targetMask);
+
+        for (int i = 0; i < hitCount; i++) 
         {
             if (_hitCollider[i] == null)
             {
@@ -1322,27 +1335,18 @@ public class CSlothBoss : CEnemy
             }
 
             CPlayer player = _hitCollider[i].GetComponent<CPlayer>();
-            if (player == null || player.HpCurrent <= 0)
+            if(player == null || player.HpCurrent <= 0)
             {
                 continue;
             }
 
-            Vector3 playerPos = player.transform.position - this.transform.position;
-            playerPos.y = 0;
+            SDamageInfo damageToPlayer = new SDamageInfo(0.6f, true ,ERatioSwitch.ByCurrent);
+            player.OnHit(this, damageToPlayer);
 
-            float damageDis = Vector3.Distance(this.transform.forward, playerPos);
+            CLogger.Log($"{player.name}의 현재 체력 : {player.HpCurrent}");
 
-            if(Mathf.Abs(damageDis) <= 5f)
-            {
-                SDamageInfo damageToPlayer = new SDamageInfo(0.8f, true, ERatioSwitch.ByCurrent);
-                float lastHp = player.HpCurrent;
-
-                CLogger.Log($"{player.name}의 현재 체력 : {player.HpCurrent}");
-            }
 
         }
-
-
 
     }
     
