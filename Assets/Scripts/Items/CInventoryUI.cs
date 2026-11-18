@@ -693,9 +693,10 @@ public class CInventoryUI : MonoBehaviour
         CloseContextMenu();
         HideTooltip();
 
+        _InventoryPanel.SetActive(enabled);
+
         if (enabled)
         {
-            _InventoryPanel.SetActive(true);
             RefreshInventory();
         }
     }

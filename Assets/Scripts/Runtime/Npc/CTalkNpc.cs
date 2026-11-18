@@ -38,6 +38,11 @@ public class CTalkNpc : MonoBehaviour
     [SerializeField] private LayerMask _groundMask = 1 << 3;
     [SerializeField] private LayerMask _blockMask = 1 << 0;
 
+    [Header("상점")]
+    [SerializeField] private CShopUI _shopUI;
+
+    public CShopUI ShopUI => _shopUI;
+
     private static readonly int _TALK_HASH_DEFAULT = Animator.StringToHash("Talk");
 
     private float _homeYaw;
