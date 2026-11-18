@@ -36,7 +36,7 @@ public class CBossHpView : MonoBehaviour
     }
 
     [Header("대상")]
-    [SerializeField] private CSlothBoss _boss;
+    [SerializeField] private CEnemy _boss;
     [SerializeField] private CPlayer _player;
     [SerializeField] private string _bossName = "벨페고르";
     [SerializeField] private string _bossTitle = "나태의 군주";
@@ -162,7 +162,7 @@ public class CBossHpView : MonoBehaviour
     /// <summary>
     /// 지금 연결된 보스.
     /// </summary>
-    public CSlothBoss Boss => _boss;
+    public CEnemy Boss => _boss;
 
     private void Awake()
     {

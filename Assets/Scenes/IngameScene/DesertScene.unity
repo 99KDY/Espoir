@@ -2895,7 +2895,7 @@ PrefabInstance:
     - target: {fileID: 4535814836221742356, guid: 96eeb1dcd2671444bb4f41bf169d7951, type: 3}
       propertyPath: _targetEnemy.Array.data[0]
       value: 
-      objectReference: {fileID: 5445629871151430336, guid: cba6c99a6203b5145880f290e7ad4571, type: 3}
+      objectReference: {fileID: 5445629871151430336, guid: 67776269c8f1439478910e9f43f235ba, type: 3}
     - target: {fileID: 4535814836221742356, guid: 96eeb1dcd2671444bb4f41bf169d7951, type: 3}
       propertyPath: _drops.Array.data[0].chance
       value: 0.2
@@ -3712,14 +3712,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Boss
       objectReference: {fileID: 0}
-    - target: {fileID: 849696862997825102, guid: fc44008c7d95e394abbb953b8b53d960, type: 3}
-      propertyPath: m_Layer
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 849696862997825102, guid: fc44008c7d95e394abbb953b8b53d960, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 1929441329760321138, guid: fc44008c7d95e394abbb953b8b53d960, type: 3}
       propertyPath: m_LocalPosition.x
       value: -3
@@ -3760,26 +3752,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 3536428649296106979, guid: fc44008c7d95e394abbb953b8b53d960, type: 3}
-      propertyPath: _baseHpMax
-      value: 100000
-      objectReference: {fileID: 0}
-    - target: {fileID: 3536428649296106979, guid: fc44008c7d95e394abbb953b8b53d960, type: 3}
-      propertyPath: _baseAttack
-      value: 50
-      objectReference: {fileID: 0}
-    - target: {fileID: 3536428649296106979, guid: fc44008c7d95e394abbb953b8b53d960, type: 3}
-      propertyPath: _baseDefence
-      value: 20
-      objectReference: {fileID: 0}
-    - target: {fileID: 3536428649296106979, guid: fc44008c7d95e394abbb953b8b53d960, type: 3}
-      propertyPath: _targetMask.m_Bits
-      value: 64
-      objectReference: {fileID: 0}
-    - target: {fileID: 7484433350781376968, guid: fc44008c7d95e394abbb953b8b53d960, type: 3}
-      propertyPath: m_Controller
-      value: 
-      objectReference: {fileID: 9100000, guid: 0f4392c55e5c79648af7d5d20c0dbbf4, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
