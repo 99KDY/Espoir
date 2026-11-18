@@ -1364593,7 +1364593,7 @@ AnimationClip:
     floatParameter: 0
     intParameter: 0
     messageOptions: 0
-  - time: 5.4666667
+  - time: 5.6
     functionName: ShootLightningBeam
     data: 
     objectReferenceParameter: {fileID: 0}
