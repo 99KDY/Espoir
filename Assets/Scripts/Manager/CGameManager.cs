@@ -135,6 +135,7 @@ public class CGameManager : MonoBehaviour
     private CSoundManager _soundManager;
     private CPlayer _player;
     private CInventoryUI _inventoryUI;
+    private CShopUI _shopUI;
     private Action _confirmAction;
     private Dictionary<EBossClear, float> _bossTime;
     
@@ -227,6 +228,7 @@ public class CGameManager : MonoBehaviour
         _player = FindFirstObjectByType<CPlayer>();
         _soundManager = FindFirstObjectByType<CSoundManager>();
         _inventoryUI = FindFirstObjectByType<CInventoryUI>();
+        _shopUI = FindFirstObjectByType<CShopUI>();
         _soundManager.PlayBGM(EBackgroundSound.BaseBGM);
         SetGameState(EGameState.Idle);
         SetBattleState(EBattleState.None);
@@ -312,7 +314,11 @@ public class CGameManager : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            if (_inventoryUI != null && _inventoryUI.IsOpen)
+            if (_shopUI != null && _shopUI.IsOpen)
+            {
+                _shopUI.Close();
+            }
+            else if (_inventoryUI != null && _inventoryUI.IsOpen)
             {
                 _inventoryUI.SetInventoryOpen(false);
             }
