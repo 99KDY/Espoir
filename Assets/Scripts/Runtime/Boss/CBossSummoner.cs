@@ -256,6 +256,13 @@ public class CBossSummoner : MonoBehaviour
             }
         }
 
+        if (_isSummoned && _boss != null &&
+            _boss.gameObject.activeInHierarchy && _boss.HpCurrent <= 0f)
+        {
+            Unsummon();
+            return;
+        }
+
         if (_isSummoned && _player != null)
         {
             Vector3 offset = _player.transform.position - _altar.position;

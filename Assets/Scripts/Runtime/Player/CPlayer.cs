@@ -578,6 +578,13 @@ public class CPlayer : CUnit
         EquipmentResync();
     }
 
+    [ContextMenu("Status Debug")]
+    public void SetStatusDebug()
+    {
+        EquipmentResync();
+        CLogger.Success($"스테이터스 다시 받아옴");
+    }
+
     [ContextMenu("Equip Debug sets")]
     public void GetDebugSet()
     {
