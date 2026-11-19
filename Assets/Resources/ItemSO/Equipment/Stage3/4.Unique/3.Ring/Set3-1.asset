@@ -17,14 +17,14 @@ MonoBehaviour:
   _rarity: 3
   _cost: 6000
   _itemIcon: {fileID: -834178875, guid: 72bc4d4a67f69034399ce769b058f220, type: 3}
-  _description: "<i>\ub2eb\ud78c \uc131\ubb38 \ubc16\uc5d0\ub3c4 \ub3cc\uc544\uac08 \uae38\uc740 \uc788\uc5c8\ub2e4.</i>\nHP +30, ATK +12, DEF +2\n\uc138\ud2b8 \ud6a8\uacfc \uc5ec\uc815\uc758 \uc778\uc7a5\n(2) \uc774\ub3d9\uc18d\ub3c4 +10%\n(3) \ubc29\uc5b4\ub825 +25%\n(4) \uc8fc\ub294 \ud53c\ud574 +15%, \ubc1b\ub294 \ud53c\ud574 -10%"
+  _description: "<i>\ub2eb\ud78c \uc131\ubb38 \ubc16\uc5d0\ub3c4 \ub3cc\uc544\uac08 \uae38\uc740 \uc788\uc5c8\ub2e4.</i>\nHP +60, ATK +24, DEF +4\n\uc138\ud2b8 \ud6a8\uacfc \uc5ec\uc815\uc758 \uc778\uc7a5\n(2) \uacf5\uaca9\uc18d\ub3c4 +10%\n(3) \ubc29\uc5b4\ub825 +25%\n(4) \uc8fc\ub294 \ud53c\ud574 +15%, \ubc1b\ub294 \ud53c\ud574 -10%"
   _slot: 3
   _setNumber: 301
   _action:
   - action: 1
-    param: 30
+    param: 60
   - action: 3
-    param: 12
+    param: 24
   - action: 5
-    param: 2
+    param: 4
   _equipmentStatus: []
