@@ -231,11 +231,7 @@ public class CTitleManager : MonoBehaviour
         _bgmValue.text = $"{Mathf.RoundToInt(bgm * 100f)}%";
         _seValue.text = $"{Mathf.RoundToInt(se * 100f)}%";
 
-        if (_mixer == null)
-            return;
-
-        _mixer.SetFloat("BGMLevel", 20f * Mathf.Log10(Mathf.Max(0.0001f, bgm)));
-        _mixer.SetFloat("SELevel", 20f * Mathf.Log10(Mathf.Max(0.0001f, se)));
+        _soundManager?.SetTitleVolume(bgm, se);
     }
 
     private void SetTitleMenu(bool visible)

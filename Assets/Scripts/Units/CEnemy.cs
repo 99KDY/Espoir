@@ -4,7 +4,7 @@ using UnityEngine;
 
 public interface IBoss
 {
-
+    public void ResetBattleState();
 }
 
 public class CEnemy : CUnit

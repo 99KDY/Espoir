@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
 
 /// <summary>
 /// 화면 상단 중앙에 보스 초상화, 이름, 체력 막대와 남은 체력 비율을 표시합니다.
@@ -86,6 +85,10 @@ public class CBossHpView : MonoBehaviour
     [SerializeField] private RectTransform _statusRoot;
     [SerializeField] private CStatusUI _statusPrefab;
     [SerializeField] private CTooltipUI _tooltip;
+
+    [Header("타이머 보여주는 부분")]
+    [SerializeField] private TMP_Text _currentTimer;
+    [SerializeField] private TMP_Text _bestTimer;
 
     // 피격과 치명타 흔들림의 정규화 시간별 위치입니다.
     private static readonly float[] _SHAKE_T = { 0f, 0.2f, 0.5f, 0.8f, 1f };
@@ -230,6 +233,7 @@ public class CBossHpView : MonoBehaviour
         Layout();
         Paint(now);
         UpdateStatus();
+        UpdateTimerText();
     }
 
     private void FindBoss(float now)
@@ -297,6 +301,7 @@ public class CBossHpView : MonoBehaviour
         _portraitShadow.Snap(_low.Target);
         _veilAlpha.Snap(1f);
         _lineAlpha.Snap(1f);
+        SetBestTimer();
     }
 
     private float Ratio()
@@ -421,14 +426,19 @@ public class CBossHpView : MonoBehaviour
         PlaceText(_hpValue, valueX, l.rowBaseline);
         PlaceText(_hpLabel, valueX - l.valueGap - labelW, l.rowBaseline);
 
-        if (_statusRoot != null)
-        {
-            float barBottom = l.barTop + l.barHeight;
-            float lineBottom = l.top + l.portraitSize + l.lineBelow;
-            float statusTop = Mathf.Max(barBottom, lineBottom) + 6f;
+        float barBottom = l.barTop + l.barHeight;
+        float lineBottom = l.top + l.portraitSize + l.lineBelow;
+        float statusTop = Mathf.Max(barBottom, lineBottom) + 6f;
 
+        if (_statusRoot != null)
             PlaceBox(_statusRoot, columnX, statusTop, l.barWidth, 30f);
-        }
+
+        if (_currentTimer != null)
+            PlaceText(_currentTimer, columnRight, statusTop + 18f);
+
+        if (_bestTimer != null)
+            PlaceText(_bestTimer, columnRight, statusTop + 36f);
+
     }
 
     private void Paint(float now)
@@ -527,7 +537,7 @@ public class CBossHpView : MonoBehaviour
         text.rectTransform.anchoredPosition = new Vector2(x, -baseline);
     }
 
-    public void UpdateStatus()
+    private void UpdateStatus()
     {
         if (_statusRoot == null || _statusPrefab == null)
         {
@@ -585,5 +595,53 @@ public class CBossHpView : MonoBehaviour
                 Destroy(targetUi.gameObject);
             }
         }
+    }
+
+    private void SetBestTimer()
+    {
+        if (_bestTimer == null) return;
+        if (CGameManager.Instance == null)
+        {
+            _bestTimer.text = "";
+            _bestTimer.gameObject.SetActive(false);
+            return;
+        }
+        if (_boss is CSlothBoss)
+        {
+            CGameManager.Instance.TryGetBossClearTime(EBossClear.Pigritia, out float bestTime);
+            if (bestTime <= 0)
+            {
+                _bestTimer.text = "최고기록\n없음";
+                _bestTimer.gameObject.SetActive(true);
+            }
+            else
+            {
+                _bestTimer.text = "최고기록\n" + FormatTimer(bestTime);
+                _bestTimer.gameObject.SetActive(true);
+            }
+            return;
+        }
+    }
+
+    private void UpdateTimerText()
+    {
+        if (_currentTimer == null || _bestTimer == null) return;
+        if (CGameManager.Instance == null) return;
+        if (_boss is CSlothBoss)
+        {
+            if (CGameManager.Instance.TryGetBossTimer(EBossClear.Pigritia, out float currentTimer, out bool timeOvered))
+            {
+                _currentTimer.text = FormatTimer(currentTimer);
+                _currentTimer.gameObject.SetActive(true);
+            }
+            else _currentTimer.gameObject.SetActive(false);
+        }
+        else return;
+    }
+
+    private static string FormatTimer(float time)
+    {
+        int seconds = (int)(time * 100f);
+        return $"{seconds / 6000:D2}:{seconds / 100 % 60:D2}.{seconds % 100:D2}";
     }
 }
