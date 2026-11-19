@@ -29,6 +29,7 @@ public class CPlayerSkill : MonoBehaviour
     private readonly CPlayerCrown _CROWN = new CPlayerCrown();
     private readonly CPlayerLeviathan _LEVIATHAN = new CPlayerLeviathan();
 
+    private CPlayerSkillAudio _audio;
     private CPlayer _owner;
     private CPlayerMovement _movement;
     private CSkillRuntime _currentSkill;
@@ -282,6 +283,7 @@ public class CPlayerSkill : MonoBehaviour
     public bool Initialize(CPlayer owner)
     {
         _owner = owner;
+        _audio = GetComponentInChildren<CPlayerSkillAudio>();
         _movement = GetComponent<CPlayerMovement>();
 
         return _animator != null && _playerAttack != null &&
@@ -479,6 +481,7 @@ public class CPlayerSkill : MonoBehaviour
             _CROWN.Use(_owner);
             runtime.readyTime = Time.time + skill.Cooldown;
             CrownUsed?.Invoke(_owner.FindStatusStack(skill.CrownStatus.Id));
+            _audio?.PlayCrown(_owner.FindStatusStack(skill.CrownStatus.Id));
             return true;
         }
 
@@ -537,6 +540,7 @@ public class CPlayerSkill : MonoBehaviour
         if (skill.Type == ESkillType.Dash)
         {
             _owner.AddStatus(28, 0f);
+            _audio?.PlayDash();
             transform.rotation = Quaternion.LookRotation(_direction);
             _DASH_TRAIL.Begin(skill.DashTrail, transform, _animator, _direction, _EFFECTS);
         }
@@ -669,6 +673,7 @@ public class CPlayerSkill : MonoBehaviour
 
         runtime.readyTime = Time.time + runtime.data.Cooldown;
         _LEVIATHAN.BeginBuff(_owner);
+        _audio?.PlayLeviathanBuff();
         return true;
     }
 
@@ -682,6 +687,7 @@ public class CPlayerSkill : MonoBehaviour
         _SPELL.Begin(_owner, _direction, runtime.data, _EFFECTS);
         _DASH_TRAIL.Reset(transform.position, runtime.data.DashTrail.firstDistance);
         _LEVIATHAN.BeginFinisher(_owner);
+        _audio?.PlayLeviathanFinisher();
 
         if (isCanceling)
         {
@@ -790,6 +796,7 @@ public class CPlayerSkill : MonoBehaviour
         }
 
         CSkillSO skill = _currentSkill.data;
+        _audio?.UpdateStep(skill, state, _animator.speed, _nextHitIndex);
         if (skill.Type == ESkillType.Strike && state.normalizedTime >= skill.Steps[index].hits[0].time)
         {
             _animator.speed = _baseAttackSpeed;
@@ -959,6 +966,7 @@ public class CPlayerSkill : MonoBehaviour
 
         _hasQueuedCombo = false;
         _stepIndex = index;
+        _audio?.BeginStep(_currentSkill.data, index);
         _nextHitIndex = 0;
         _hasAddedStrikeStack = false;
         _moveProgress = 0f;
@@ -991,6 +999,7 @@ public class CPlayerSkill : MonoBehaviour
 
     private void FinishSkill(bool canceled = false, bool keepEffects = false)
     {
+        _audio?.EndStep(canceled);
         // 대시무적 제거
         if (_owner != null &&
             _currentSkill != null &&
