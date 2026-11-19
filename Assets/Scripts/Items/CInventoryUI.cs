@@ -187,6 +187,7 @@ public class CInventoryUI : MonoBehaviour
         {
             CItem item = _inventory.GetItem(i);
             SetIcon(_itemIcons[i], item?.ItemIcon);
+            _itemIcons[i].color = item != null && _salePendingItems.Contains(item) ? new Color(0.4f, 0.4f, 0.4f, 1f) : Color.white;
 
             RefreshGold();
 
@@ -698,6 +699,11 @@ public class CInventoryUI : MonoBehaviour
     public void SetShopSellMode(bool enabled)
     {
         _isShopSellMode = enabled;
+        if (!enabled)
+        {
+            SetSalePendingItems(null);
+        }
+
         SetInventoryOpen(enabled);
     }
 
@@ -729,6 +735,29 @@ public class CInventoryUI : MonoBehaviour
             }
 
             _changedGameState = false;
+        }
+    }
+
+    private readonly HashSet<CItem> _salePendingItems = new HashSet<CItem>();
+
+    public void SetSalePendingItems(IEnumerable<CItem> items)
+    {
+        _salePendingItems.Clear();
+
+        if (items != null)
+        {
+            foreach (CItem item in items)
+            {
+                if (item != null)
+                {
+                    _salePendingItems.Add(item);
+                }
+            }
+        }
+
+        if (_itemIcons != null)
+        {
+            RefreshInventory();
         }
     }
 }

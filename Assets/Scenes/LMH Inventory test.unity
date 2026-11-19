@@ -11255,6 +11255,7 @@ MonoBehaviour:
   _productRow: {fileID: 1030852580}
   _goldText: {fileID: 1183388177}
   _resultText: {fileID: 594437837}
+  _sellButtonText: {fileID: 0}
   _closeDistance: 4
   _inventoryUI: {fileID: 782821528}
   _sellPanel: {fileID: 985745312}
@@ -12917,7 +12918,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _player: {fileID: 472875770}
-  _gold: 100
+  _gold: 32321411
   Debugitemcode: 0
 --- !u!1 &1723698796
 GameObject:
