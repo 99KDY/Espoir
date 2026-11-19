@@ -10,7 +10,9 @@ public enum EBackgroundSound
     BaseBGM,
     BattleBGM,
     BossBGM,
-    DialogueBGM
+    DialogueBGM,
+    LocalNpcBGM,
+    BossSummonerBGM
     // 여기서부터 배경음 리스트 만들기
 }
 
