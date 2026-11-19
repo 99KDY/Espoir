@@ -433,12 +433,13 @@ public class CBossHpView : MonoBehaviour
         if (_statusRoot != null)
             PlaceBox(_statusRoot, columnX, statusTop, l.barWidth, 30f);
 
+        float timerBaseline = Mathf.Max(barBottom, l.tagTop + l.tagHeight) + 20f;
+
         if (_currentTimer != null)
-            PlaceText(_currentTimer, columnRight, statusTop + 18f);
+            PlaceText(_currentTimer, columnRight, timerBaseline);
 
         if (_bestTimer != null)
-            PlaceText(_bestTimer, columnRight, statusTop + 36f);
-
+            PlaceText(_bestTimer, columnRight, timerBaseline + 19f);
     }
 
     private void Paint(float now)
@@ -602,7 +603,6 @@ public class CBossHpView : MonoBehaviour
         if (_bestTimer == null) return;
         if (CGameManager.Instance == null)
         {
-            _bestTimer.text = "";
             _bestTimer.gameObject.SetActive(false);
             return;
         }
@@ -611,12 +611,12 @@ public class CBossHpView : MonoBehaviour
             CGameManager.Instance.TryGetBossClearTime(EBossClear.Pigritia, out float bestTime);
             if (bestTime <= 0)
             {
-                _bestTimer.text = "최고기록\n없음";
+                _bestTimer.text = "최고기록 없음";
                 _bestTimer.gameObject.SetActive(true);
             }
             else
             {
-                _bestTimer.text = "최고기록\n" + FormatTimer(bestTime);
+                _bestTimer.text = "최고 " + FormatTimer(bestTime);
                 _bestTimer.gameObject.SetActive(true);
             }
             return;
@@ -642,6 +642,6 @@ public class CBossHpView : MonoBehaviour
     private static string FormatTimer(float time)
     {
         int seconds = (int)(time * 100f);
-        return $"{seconds / 6000:D2}:{seconds / 100 % 60:D2}.{seconds % 100:D2}";
+        return $"{seconds / 6000:D2}:{seconds / 100 % 60:D2}<size=72%>.{seconds % 100:D2}</size>";
     }
 }
