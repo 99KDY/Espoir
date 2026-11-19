@@ -71,7 +71,7 @@ public class CMonsterHpLayer : MonoBehaviour
 
     private void HandleDamageResolved(SDamageResult result)
     {
-        if (result.hpLost <= 0f || !(result.target is CEnemy enemy) || enemy is CSlothBoss) return;
+        if (result.hpLost <= 0f || !(result.target is CEnemy enemy) || enemy is IBoss) return;
 
         CMonsterHpView view = Track(enemy);
         if (view == null) return;
@@ -140,7 +140,7 @@ public class CMonsterHpLayer : MonoBehaviour
         for (int i = 0; i < enemies.Length; i++)
         {
             CEnemy enemy = enemies[i];
-            if (enemy is CSlothBoss || enemy.HpCurrent <= 0f || _BY_TARGET.ContainsKey(enemy)) continue;
+            if (enemy is IBoss || enemy.HpCurrent <= 0f || _BY_TARGET.ContainsKey(enemy)) continue;
             Track(enemy);
         }
     }

@@ -260,6 +260,51 @@ public class CPreviewPattern : MonoBehaviour
 
     }
 
+    public void ShowDoubleDonutPattern(int sides, float outerRadius, float outerInner, float innerRadius, float innerInner)
+    {
+        if (_mesh == null)
+        {
+            _mesh = GetComponent<MeshFilter>().mesh;
+        }
+
+        List<Vector3> points = new List<Vector3>();
+        List<int> triangles = new List<int>();
+
+        AddDonut(points, triangles, sides, outerRadius, outerInner);
+        AddDonut(points, triangles, sides, innerRadius, innerInner);
+
+        _mesh.Clear();
+        _mesh.vertices = points.ToArray();
+        _mesh.triangles = triangles.ToArray();
+        _mesh.uv = GetMeshUV(points.ToArray());
+    }
+
+    private void AddDonut(List<Vector3> points, List<int> triangles, int sides, float outerRadius, float innerRadius)
+    {
+        int offset = points.Count;
+        points.AddRange(GetCirclePoint(sides, outerRadius));
+        points.AddRange(GetCirclePoint(sides, innerRadius));
+
+        for (int i = 0; i < sides; i++)
+        {
+            int outerIndex = offset + i;
+            int nextOuter = offset + ((i + 1) % sides);
+            int innerIndex = offset + i + sides;
+            int nextInner = offset + ((i + 1) % sides) + sides;
+
+            triangles.Add(outerIndex);
+            triangles.Add(innerIndex);
+            triangles.Add(nextOuter);
+
+            triangles.Add(nextOuter);
+            triangles.Add(innerIndex);
+            triangles.Add(nextInner);
+        }
+    }
+
+
+
+
     public void ShowArcPattern(int sides, float radius, float startDeg, float endDeg)
     {
         if(_mesh == null)

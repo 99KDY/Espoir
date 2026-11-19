@@ -362,10 +362,10 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
-  m_AdditionalShaderChannelsFlag: 0
+  m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: -10
+  m_SortingOrder: -9
   m_TargetDisplay: 0
 --- !u!114 &1763507000220639008
 MonoBehaviour:
@@ -433,7 +433,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _player: {fileID: 0}
   _camera: {fileID: 0}
-  _map: {fileID: 0}
+  _map: {fileID: 11400000, guid: cfec9c9da0f184f42afd64d5e295c330, type: 2}
   _mapImage: {fileID: 1005913494750606426}
   _halfRange: 34
   _zoomSteps:
@@ -452,7 +452,7 @@ MonoBehaviour:
   _liveFarClip: 600
   _liveCullingMask:
     serializedVersion: 2
-    m_Bits: 4294967263
+    m_Bits: 2015
   _liveShadowDistance: 260
   _areaText: {fileID: 4364069981784640330}
   _areaTag: {fileID: 6288605644601006831}
@@ -932,7 +932,7 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
+    rgba: 4293588735
   m_fontColor: {r: 1, g: 0.9647059, b: 0.91764706, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
@@ -945,7 +945,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -1289,7 +1289,7 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
+    rgba: 4281080344
   m_fontColor: {r: 0.09411765, g: 0.101960786, b: 0.17254902, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
@@ -1302,7 +1302,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2

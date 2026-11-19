@@ -34,6 +34,8 @@ public class QACheatCommands : MonoBehaviour
         DebugLogConsole.AddCommand<int, int>("estatus", "적에게 상태이상을 부여합니다. (예: status 11 5)", Cheat_AddEnemyStatus);
 
         DebugLogConsole.AddCommand<int>("clear", "플레이어 상태이상을 제거합니다. (예: clear 10)", Cheat_ClearStatus);
+
+        DebugLogConsole.AddCommand<int>("boss", "보스 최대 체력의 입력한 %만큼 깎습니다. (예: boss 10)", Cheat_DamageBossByPercent);
     }
 
     private InputActionMap _playerMap;
@@ -185,12 +187,62 @@ public class QACheatCommands : MonoBehaviour
     }
 
     /// <summary>
+    /// 보스 최대체력 비율 피해 치트
+    /// </summary>
+    public void Cheat_DamageBossByPercent(int percent)
+    {
+        if (percent <= 0)
+        {
+            CLogger.Log("[QA] 1 이상의 퍼센트를 입력하세요. (예: boss 10)");
+            return;
+        }
+
+        CSlothBoss[] bosses = FindObjectsOfType<CSlothBoss>();
+        if (bosses == null || bosses.Length == 0)
+        {
+            CLogger.Log("[QA] 씬에서 보스를 찾지 못했습니다.");
+            return;
+        }
+
+        float ratio = Mathf.Clamp(percent, 1, 100) / 100f;
+
+        for (int i = 0; i < bosses.Length; i++)
+        {
+            CSlothBoss boss = bosses[i];
+            if (boss == null || boss.HpCurrent <= 0f)
+            {
+                continue;
+            }
+
+            boss.GetDamage(ratio, ERatioSwitch.ByMax);
+            CLogger.Log($"[QA] 보스 체력 {percent}% 감소. 현재 {boss.HpCurrent} / {boss.HpMax}");
+        }
+    }
+
+    /// <summary>
     /// 골드 추가 치트
     /// </summary>
     public void AddGold(int amount)
     {
-        CLogger.Log($"[QA] 골드가 {amount}만큼 추가되었습니다. (기능 연결 필요)");
-        // TODO : 재화 매니저 완성하면 데이터 연동예정
+        CPlayer player = FindPlayer();
+        if (player == null)
+        {
+            return;
+        }
+
+        if (player.Inventory == null)
+        {
+            CLogger.Log("[QA] 플레이어 인벤토리를 찾지 못했습니다.");
+            return;
+        }
+
+        if (player.Inventory.TryAddGold(amount) == false)
+        {
+            CLogger.Log("[QA] 골드를 추가하지 못했습니다. 1 이상의 값을 입력하세요.");
+            return;
+        }
+
+        CLogger.Log($"[QA] 골드가 {amount}만큼 추가되었습니다. 현재 골드: {player.Inventory.Gold}");
     }
 
     /// <summary>

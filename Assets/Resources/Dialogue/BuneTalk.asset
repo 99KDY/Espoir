@@ -51,8 +51,8 @@ MonoBehaviour:
       \uB2EC\uB77C\uC9C0\uACA0\uC9C0\uB9CC."
     ask: 
     choices: []
-    next: menu
-    end: 0
+    next: 
+    end: 5
     dest: 
   - id: want
     lines:

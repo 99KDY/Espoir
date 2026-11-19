@@ -2,6 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public interface IBoss
+{
+
+}
+
 public class CEnemy : CUnit
 {
     [Header("몬스터 정보 (테스트 전용, 우선시됨)")]

@@ -52,6 +52,7 @@ public class CInventoryUI : MonoBehaviour
     private EEquipmentSlot _selectedEquipmentSlot;
     private bool _isMoving;
     private bool _isRegisteringQuickSlot;
+    private bool _changedGameState;
     private Image[] _cooldownFills;
     private TMP_Text[] _cooldownTexts;
     private Image[] _quickCooldownFills;
@@ -146,16 +147,23 @@ public class CInventoryUI : MonoBehaviour
 
         if (Input.GetKeyUp(KeyCode.I))
         {
-            if (_InventoryPanel.activeSelf)
+            bool canOpen = CGameManager.Instance == null ||
+                CGameManager.Instance.GameState == EGameState.Idle ||
+                CGameManager.Instance.GameState == EGameState.UI;
+
+            if (canOpen)
             {
-                _InventoryPanel.SetActive(false);
-                HideTooltip();
-                CloseContextMenu();
-            }
-            else if (_inventory.CanOpenInventory)
-            {
-                _InventoryPanel.SetActive(true);
-                RefreshInventory();
+                if (_InventoryPanel.activeSelf)
+                {
+                    SetInventoryOpen(false);
+                }
+                else if (_inventory.CanOpenInventory &&
+                        (CGameManager.Instance == null ||
+                        CGameManager.Instance.BattleState == EBattleState.None)
+                    )
+                {
+                    SetInventoryOpen(true);
+                }
             }
         }
 
@@ -179,7 +187,6 @@ public class CInventoryUI : MonoBehaviour
         {
             CItem item = _inventory.GetItem(i);
             SetIcon(_itemIcons[i], item?.ItemIcon);
-            _itemIcons[i].color = item != null && _salePendingItems.Contains(item) ? new Color(0.4f,0.4f,0.4f,1f) : Color.white;
 
             RefreshGold();
 
@@ -691,43 +698,37 @@ public class CInventoryUI : MonoBehaviour
     public void SetShopSellMode(bool enabled)
     {
         _isShopSellMode = enabled;
-        if (!enabled)
-        {
-            SetSalePendingItems(null);
-        }
+        SetInventoryOpen(enabled);
+    }
 
-        CloseContextMenu();
+    public void SetInventoryOpen(bool enabled)
+    {
         HideTooltip();
+        CloseContextMenu();
+
+        _InventoryPanel.SetActive(enabled);
 
         if (enabled)
         {
-            _InventoryPanel.SetActive(true);
             RefreshInventory();
-        }
-    }
 
-    private readonly HashSet<CItem> _salePendingItems = new HashSet<CItem>();
-
-    public void SetSalePendingItems(IEnumerable<CItem> items)
-    {
-        _salePendingItems.Clear();
-
-        if(items != null)
-        {
-            foreach (CItem item in items)
+            if (CGameManager.Instance != null &&
+                CGameManager.Instance.GameState == EGameState.Idle)
             {
-                if (item != null)
-                {
-                    _salePendingItems.Add(item);
-                }
+                _changedGameState = true;
+                CGameManager.Instance.SetGameState(EGameState.UI);
             }
         }
-
-        if(_itemIcons != null)
+        else
         {
-            RefreshInventory();
+            if (_changedGameState &&
+                CGameManager.Instance != null &&
+                CGameManager.Instance.GameState == EGameState.UI)
+            {
+                CGameManager.Instance.SetGameState(EGameState.Idle);
+            }
+
+            _changedGameState = false;
         }
     }
 }
-
-

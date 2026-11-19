@@ -130,6 +130,7 @@ public class CGameManager : MonoBehaviour
 
     private CSoundManager _soundManager;
     private CPlayer _player;
+    private CInventoryUI _inventoryUI;
     private Action _confirmAction;
 
     private int _currentActiveSpawner = 0;
@@ -206,6 +207,7 @@ public class CGameManager : MonoBehaviour
         _screenChange.onClick.AddListener(() => OnGameResolutionChange());
         _player = FindFirstObjectByType<CPlayer>();
         _soundManager = FindFirstObjectByType<CSoundManager>();
+        _inventoryUI = FindFirstObjectByType<CInventoryUI>();
         _soundManager.PlayBGM(EBackgroundSound.BaseBGM);
         SetGameState(EGameState.Idle);
         SetBattleState(EBattleState.None);
@@ -291,7 +293,14 @@ public class CGameManager : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            ToggleBaseMenu();
+            if (_inventoryUI != null && _inventoryUI.IsOpen)
+            {
+                _inventoryUI.SetInventoryOpen(false);
+            }
+            else
+            {
+                ToggleBaseMenu();
+            }
         }
 
         if (_zoneText != null)
