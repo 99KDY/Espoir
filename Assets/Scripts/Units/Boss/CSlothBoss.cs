@@ -1424,7 +1424,7 @@ public class CSlothBoss : CEnemy, IBoss
 
         if(grogi)
         {
-            _animator.SetTrigger("tGrogi"); // 추후에 그로기 애니메이션으로 변경
+            _animator.CrossFade("tGrogi", 0.2f); // 추후에 그로기 애니메이션으로 변경
 
             grogi = false;
         }
@@ -1434,6 +1434,9 @@ public class CSlothBoss : CEnemy, IBoss
         if(_grogiTimer >= _grogiTime)
         {
             _onGrogi = false;
+            _onAttack = false;
+            _currentState = ESlothBossState.Idle;
+            _grogiTimer = 0f;
         }
 
 
