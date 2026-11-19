@@ -73,9 +73,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 479ff49f76e31344ca4237016364c58b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _baseHpMax: 100000
+  _baseHpMax: 200000
   _baseAttack: 50
-  _baseDefence: 20
+  _baseDefence: 30
   _debugLog: 0
   _statusEffectAnchor: {fileID: 0}
   _statusEffectOffset: {x: 0, y: 0, z: 0}
@@ -1055,7 +1055,8 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 10
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 5866666021909216657, guid: c199fa5903ca88241a70a3816b525217, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:

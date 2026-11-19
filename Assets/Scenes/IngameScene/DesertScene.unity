@@ -203,25 +203,9 @@ PrefabInstance:
       value: Npc_Bune
       objectReference: {fileID: 0}
     - target: {fileID: 3919253942390425404, guid: 30019f52f04be454e9ab1e9fbb2ff4b7, type: 3}
-      propertyPath: _npcId
-      value: bune
-      objectReference: {fileID: 0}
-    - target: {fileID: 3919253942390425404, guid: 30019f52f04be454e9ab1e9fbb2ff4b7, type: 3}
-      propertyPath: _title
-      value: "\uD0D0\uC695\uC758 \uAD70\uC8FC"
-      objectReference: {fileID: 0}
-    - target: {fileID: 3919253942390425404, guid: 30019f52f04be454e9ab1e9fbb2ff4b7, type: 3}
-      propertyPath: _script
-      value: 
-      objectReference: {fileID: 11400000, guid: 75f8126a486525c4c95f97b9dda3e933, type: 2}
-    - target: {fileID: 3919253942390425404, guid: 30019f52f04be454e9ab1e9fbb2ff4b7, type: 3}
       propertyPath: _shopUI
       value: 
       objectReference: {fileID: 1315336375}
-    - target: {fileID: 3919253942390425404, guid: 30019f52f04be454e9ab1e9fbb2ff4b7, type: 3}
-      propertyPath: _displayName
-      value: "\uBD80\uB124"
-      objectReference: {fileID: 0}
     - target: {fileID: 5564712487070810640, guid: 30019f52f04be454e9ab1e9fbb2ff4b7, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.0027999878
@@ -265,54 +249,24 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 1974270984162178909, guid: 30019f52f04be454e9ab1e9fbb2ff4b7, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 73384866}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 30019f52f04be454e9ab1e9fbb2ff4b7, type: 3}
 --- !u!4 &73384864 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5564712487070810640, guid: 30019f52f04be454e9ab1e9fbb2ff4b7, type: 3}
   m_PrefabInstance: {fileID: 73384863}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &73384865 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 1974270984162178909, guid: 30019f52f04be454e9ab1e9fbb2ff4b7, type: 3}
+--- !u!114 &73384866 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6256462279449169721, guid: 30019f52f04be454e9ab1e9fbb2ff4b7, type: 3}
   m_PrefabInstance: {fileID: 73384863}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &73384866
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 73384865}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7ded7413c5b76164292a04619e4fe70d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _products:
-  - {fileID: 11400000, guid: 6067895fdbd3acd4fa542b0db18c9c05, type: 2}
-  - {fileID: 11400000, guid: 0d87ef08587dddd4ea6d5e7cbfc3afba, type: 2}
-  - {fileID: 11400000, guid: bdedfab0f74cf454f8060f73e62eaa59, type: 2}
-  - {fileID: 11400000, guid: 05b781b3a6506604fa4181078de25e5a, type: 2}
-  - {fileID: 11400000, guid: 19c884e0a575f014b9450731f317495d, type: 2}
-  - {fileID: 11400000, guid: 929baa987bcefcf4a8a89a35b617ebf9, type: 2}
-  - {fileID: 11400000, guid: 66af0b87baec9954f83068ce00284551, type: 2}
-  - {fileID: 11400000, guid: 663a6da0bd8dd76429a538633784420b, type: 2}
-  - {fileID: 11400000, guid: 5ca88bbe3e130fd4dbf156ad8bb87b53, type: 2}
-  - {fileID: 11400000, guid: 01cc584628da77042945bdb23cb11e2e, type: 2}
-  - {fileID: 11400000, guid: 300b0fd2c90536c44baa0676d22d7e5a, type: 2}
-  - {fileID: 11400000, guid: cf308b2be837550498ccfaed20fa5cba, type: 2}
-  - {fileID: 11400000, guid: 2ea12bdd338f2f640a430d807e46c2e1, type: 2}
-  - {fileID: 11400000, guid: 2b984f122c0fb7b4f8f157a579b6c4c9, type: 2}
-  - {fileID: 11400000, guid: 822c269565caae6488922d8608fa563d, type: 2}
-  - {fileID: 11400000, guid: a913d0950e3122c4f8abb68bf9a7bfe8, type: 2}
-  - {fileID: 11400000, guid: da24a43b0bb71f64bab2cc5b9f91074f, type: 2}
-  - {fileID: 11400000, guid: ba659751950193145a51b496bd986a74, type: 2}
-  - {fileID: 11400000, guid: 21989847cc20fed459778b6f14457d19, type: 2}
-  - {fileID: 11400000, guid: ca19bc7c2407d9c4984e5afd3cb7419e, type: 2}
 --- !u!1 &198977906
 GameObject:
   m_ObjectHideFlags: 0
@@ -3786,10 +3740,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 7484433350781376968, guid: fc44008c7d95e394abbb953b8b53d960, type: 3}
-      propertyPath: m_Controller
-      value: 
-      objectReference: {fileID: 9100000, guid: 90daea6109e651e4584505db39cfd8d8, type: 2}
+    - target: {fileID: 3536428649296106979, guid: fc44008c7d95e394abbb953b8b53d960, type: 3}
+      propertyPath: _baseHpMax
+      value: 200000
+      objectReference: {fileID: 0}
+    - target: {fileID: 3536428649296106979, guid: fc44008c7d95e394abbb953b8b53d960, type: 3}
+      propertyPath: _baseDefence
+      value: 30
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -4679,6 +4637,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: SoundManager
       objectReference: {fileID: 0}
+    - target: {fileID: 422360027959029055, guid: c09567da9c497ff4aad4e4a905fa9b24, type: 3}
+      propertyPath: m_audioClip
+      value: 
+      objectReference: {fileID: 8300000, guid: e319c50cfabccbc4e91a1e442d9df202, type: 3}
     - target: {fileID: 657299966365706007, guid: c09567da9c497ff4aad4e4a905fa9b24, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -4723,6 +4685,14 @@ PrefabInstance:
       propertyPath: m_audioClip
       value: 
       objectReference: {fileID: 8300000, guid: baf1b3c61a4b41a3bfd13f632606fac5, type: 3}
+    - target: {fileID: 1344529677658508459, guid: c09567da9c497ff4aad4e4a905fa9b24, type: 3}
+      propertyPath: m_audioClip
+      value: 
+      objectReference: {fileID: 8300000, guid: 9d7e480e88f2afe4d8fcb8ba1ee2eadc, type: 3}
+    - target: {fileID: 3199664634484076545, guid: c09567da9c497ff4aad4e4a905fa9b24, type: 3}
+      propertyPath: m_audioClip
+      value: 
+      objectReference: {fileID: 8300000, guid: 1eafd52b777069e43ae8246b3ec18498, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -5528,6 +5498,7 @@ MonoBehaviour:
   _npcId: statue
   _displayName: "\uB098\uD0DC\uC758 \uC870\uAC01\uC0C1"
   _title: "\uBCA8\uD398\uACE0\uB974\uC758 \uBD09\uC778"
+  _dialogueBgm: 7
   _talkRadius: 4.8
   _isLarge: 1
   _script: {fileID: 11400000, guid: f660cc24c6041b543997e9c4da3327bc, type: 2}
@@ -6894,10 +6865,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 3911677135374801832, guid: 0e2d050cca53a1d41a3b33f0e685f626, type: 3}
-      propertyPath: _travelGuide
-      value: 
-      objectReference: {fileID: 11400000, guid: ca94250419c441249b1714e22eb4ac9c, type: 2}
     - target: {fileID: 8518116438065500505, guid: 0e2d050cca53a1d41a3b33f0e685f626, type: 3}
       propertyPath: m_Name
       value: Npc_Vargas

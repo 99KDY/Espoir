@@ -13,6 +13,9 @@ public class CTalkNpc : MonoBehaviour
     [SerializeField] private string _displayName = "바르가스";
     [SerializeField] private string _title = "길잡이";
 
+    [Header("대화 BGM")]
+    [SerializeField] private EBackgroundSound _dialogueBgm = EBackgroundSound.DialogueBGM;
+
     [Header("말 걸기")]
     [SerializeField, Min(0.5f)] private float _talkRadius = 3.6f;
     [Tooltip("석상처럼 큰 NPC: 받침부터 꼭대기까지 한 화면에 담는 대화 카메라를 씀")]
@@ -235,5 +238,9 @@ public class CTalkNpc : MonoBehaviour
     public void Gesture()
     {
         if (_animator != null && _animator.isActiveAndEnabled) _animator.SetTrigger(_talkHash);
+    }
+    public void PlayDialogueBGM()
+    {
+        CSoundManager.Instance?.PlayBGM(_dialogueBgm);
     }
 }

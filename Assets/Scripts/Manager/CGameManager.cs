@@ -408,7 +408,6 @@ public class CGameManager : MonoBehaviour
             case EGameState.Idle:
                 break;
             case EGameState.Story:
-                _soundManager.PlayBGM(EBackgroundSound.DialogueBGM);
                 break;
             case EGameState.UI:
                 _soundManager.PlaySE(EEffectSound.QuestionAppear);

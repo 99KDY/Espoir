@@ -1335,10 +1335,11 @@ MonoBehaviour:
   _npcId: vargas
   _displayName: "\uBC14\uB974\uAC00\uC2A4"
   _title: "\uAE38\uC7A1\uC774"
+  _dialogueBgm: 5
   _talkRadius: 3.6
   _isLarge: 0
   _script: {fileID: 0}
-  _travelGuide: {fileID: 0}
+  _travelGuide: {fileID: 11400000, guid: ca94250419c441249b1714e22eb4ac9c, type: 2}
   _headBone: {fileID: 5688447365094944320}
   _headFallbackHeight: 1.45
   _boundsRenderers: []
@@ -1354,6 +1355,7 @@ MonoBehaviour:
   _blockMask:
     serializedVersion: 2
     m_Bits: 1
+  _shopUI: {fileID: 0}
 --- !u!114 &3353151471494673165
 MonoBehaviour:
   m_ObjectHideFlags: 0
