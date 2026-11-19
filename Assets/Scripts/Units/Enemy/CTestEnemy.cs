@@ -330,7 +330,7 @@ public class CTestEnemy : CEnemy
             {
                 _isMove = false;
                 _isChasingPlayer = false;
-                CLogger.Log("원래 위치로");
+                // CLogger.Log("원래 위치로");
                 Vector3 direction = _startPos - transform.position;
                 direction.y = 0f;
 
