@@ -518,7 +518,7 @@ public abstract class CUnit : MonoBehaviour
 
     public virtual void GetHeal(float value, ERatioSwitch ratioSwitch = ERatioSwitch.Constant, bool forceHeal = false)
     {
-        if (_hpCurrent <= 0f)
+        if (_hpCurrent <= 0f && !forceHeal)
         {
             return;
         }

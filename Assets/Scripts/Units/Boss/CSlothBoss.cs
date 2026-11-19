@@ -4,9 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
-using Unity.VisualScripting;
 using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
 using Random = UnityEngine.Random;
 
 public class CSlothBoss : CEnemy, IBoss
@@ -188,7 +186,8 @@ public class CSlothBoss : CEnemy, IBoss
 
     private void FixedUpdate()
     {
-        if(_onGrogi == true)
+        if (_isDead || HpCurrent <= 0f) return;
+        if (_onGrogi == true)
         {
             
             _bossState = ESlothBossState.Grogi;
@@ -1134,7 +1133,8 @@ public class CSlothBoss : CEnemy, IBoss
         _atkTimer = 0;
 
         await UniTask.Delay(TimeSpan.FromSeconds(7.2f));
-        
+        if (battleVersion != _battleVersion) return;
+
         _atkTimer = 0;
         _mainCount++;
         _onAttack = false;
@@ -1223,6 +1223,7 @@ public class CSlothBoss : CEnemy, IBoss
         _atkTimer = 0;
 
         await UniTask.Delay(4300);
+        if (battleVersion != _battleVersion) return;
         _atkTimer = 0;
 
         if(_previewPattern != null)
@@ -1507,6 +1508,17 @@ public class CSlothBoss : CEnemy, IBoss
     /// </summary>
     public void ResetBattleState()
     {
+        if (_isDead && HpCurrent > 0f)
+        {
+            _isDead = false;
+
+            if (_animator != null)
+            {
+                _animator.speed = 1f;
+                _animator.enabled = true;
+            }
+        }
+
         _battleVersion++;
 
         // 공격 대기 시간(_atkTime)은 공격 중에 0 으로 바뀌므로 첫 소환 때(전투 전) 값을 기억해 두고 되돌림
@@ -1534,8 +1546,25 @@ public class CSlothBoss : CEnemy, IBoss
 
     protected override void Die()
     {
-        CGameManager.Instance?.EndBossTimer(EBossClear.Pigritia, true);
+        if (_isDead) return;
+
         ResetBattleState();
+        _isDead = true;
+        _currentState = ESlothBossState.Dead;
+        _onGrogi = false;
+
+        _cts?.Cancel();
+
+        if (_animator != null) _animator.enabled = false;
+        if (_previewPattern != null) _previewPattern.ClearPreview();
+
+        if (_previewInnerPattern != null && _previewInnerPattern != _previewPattern)
+            _previewInnerPattern.ClearPreview();
+
+        GetComponentInChildren<CEspoirBossFxDriver>(true)?.StopAll();
+
+        CGameManager.Instance?.EndBossTimer(EBossClear.Pigritia, true);
+        
         base.Die();
     }
 }
