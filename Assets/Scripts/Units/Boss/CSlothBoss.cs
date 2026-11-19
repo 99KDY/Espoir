@@ -19,7 +19,8 @@ public class CSlothBoss : CEnemy, IBoss
         NormalAttack,
         SubAttack,
         MainAttack,
-        Dead
+        Dead,
+        Grogi
     }
 
 
@@ -67,7 +68,7 @@ public class CSlothBoss : CEnemy, IBoss
 
     #region Animator 변수
 
-    private int _fisrtNorm = Animator.StringToHash("nAttack01");
+    private int _firstNorm = Animator.StringToHash("nAttack01");
     private int _secondNorm = Animator.StringToHash("nAttack02");
     private int _thirdNorm = Animator.StringToHash("nAttack03");
 
@@ -115,6 +116,7 @@ public class CSlothBoss : CEnemy, IBoss
     private bool _isSub;
     private bool _isMain;
     private bool _isDead;
+    private bool _onGrogi;
 
     private CancellationTokenSource _cts;
 
@@ -186,6 +188,16 @@ public class CSlothBoss : CEnemy, IBoss
 
     private void FixedUpdate()
     {
+        if(_onGrogi == true)
+        {
+            
+            _bossState = ESlothBossState.Grogi;
+            BossState();
+
+
+            return;
+        }
+
         LookAtPlayer();
         
         if(_atkTimer > _atkTime)
@@ -370,7 +382,7 @@ public class CSlothBoss : CEnemy, IBoss
         switch (normalAtk)
         {
             case 0:
-                _animator.SetTrigger(_fisrtNorm);
+                _animator.SetTrigger(_firstNorm);
                 NormalAttackDelay().Forget();
 
                 break;
@@ -500,6 +512,12 @@ public class CSlothBoss : CEnemy, IBoss
                 break;
 
             case ESlothBossState.Dead:
+                break;
+
+            case ESlothBossState.Grogi:
+                _onAttack = true;
+                GrogiState();
+
                 break;
         }
 
@@ -1085,8 +1103,8 @@ public class CSlothBoss : CEnemy, IBoss
 
             if((patternStartHP - bossCurrentHP) >= patternStartHP * 0.05)
             {
+                 _onGrogi = true;
                 
-                 _animator.SetTrigger(_fisrtNorm);
             }
         }
 
@@ -1401,6 +1419,31 @@ public class CSlothBoss : CEnemy, IBoss
 
 
 
+    private void GrogiState()
+    {
+        _isMain = false;
+        _isSub = false;
+        
+        bool grogi = true;
+
+
+        if(grogi)
+        {
+            _animator.SetTrigger("tGrogi"); // 추후에 그로기 애니메이션으로 변경
+
+            grogi = false;
+        }
+
+        _atkTimer += Time.deltaTime;
+
+        if(_atkTimer >= _atkTime)
+        {
+            _onGrogi = false;
+        }
+
+
+
+    }
 
     private int NormalFindPlayer(float radius)
     {
