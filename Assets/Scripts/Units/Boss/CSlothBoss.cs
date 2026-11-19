@@ -1416,27 +1416,25 @@ public class CSlothBoss : CEnemy, IBoss
 
     private void GrogiState()
     {
+        if (_grogiTimer == 0f)
+        {
+            _isMain = false;
+            _isSub = false;
+            _animator.SetTrigger("tGrogi");
+        }
+
+        _grogiTimer += Time.fixedDeltaTime;
+        if (_grogiTimer < _grogiTime) return;
+
         _isMain = false;
         _isSub = false;
-        
-        bool grogi = true;
 
-
-        if(grogi)
-        {
-            _animator.SetTrigger("tGrogi"); // 추후에 그로기 애니메이션으로 변경
-
-            grogi = false;
-        }
-
-        _grogiTimer += Time.deltaTime;
-
-        if(_grogiTimer >= _grogiTime)
-        {
-            _onGrogi = false;
-        }
-
-
+        _grogiTimer = 0f;
+        _onGrogi = false;
+        _onAttack = false;
+        _currentState = ESlothBossState.Idle;
+        _atkTimer = 0f;
+        _delayTimer = 0f;
 
     }
 
@@ -1514,6 +1512,20 @@ public class CSlothBoss : CEnemy, IBoss
         }
 
         _battleVersion++;
+
+        _cts?.Cancel();
+        _cts?.Dispose();
+        _cts = null;
+
+        _onGrogi = false;
+        _grogiTimer = 0f;
+        normalCount = 0;
+
+        if (_animator != null && _animator.isActiveAndEnabled)
+        {
+            _animator.speed = 1f;
+            _animator.ResetTrigger("tGrogi");
+        }
 
         // 공격 대기 시간(_atkTime)은 공격 중에 0 으로 바뀌므로 첫 소환 때(전투 전) 값을 기억해 두고 되돌림
         if (_initialAtkTime < 0f) _initialAtkTime = _atkTime;
