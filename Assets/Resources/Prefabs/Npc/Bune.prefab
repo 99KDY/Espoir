@@ -254,8 +254,6 @@ MonoBehaviour:
   _products:
   - {fileID: 11400000, guid: 6067895fdbd3acd4fa542b0db18c9c05, type: 2}
   - {fileID: 11400000, guid: 0d87ef08587dddd4ea6d5e7cbfc3afba, type: 2}
-  - {fileID: 11400000, guid: bdedfab0f74cf454f8060f73e62eaa59, type: 2}
-  - {fileID: 11400000, guid: 05b781b3a6506604fa4181078de25e5a, type: 2}
   - {fileID: 11400000, guid: 19c884e0a575f014b9450731f317495d, type: 2}
   - {fileID: 11400000, guid: 929baa987bcefcf4a8a89a35b617ebf9, type: 2}
   - {fileID: 11400000, guid: 66af0b87baec9954f83068ce00284551, type: 2}
