@@ -46,6 +46,8 @@ public class CSlothBoss : CEnemy, IBoss
     [SerializeField] private float _detectedRange = 15.0f;
     [SerializeField] private float _returnDelayTime = 3f;
 
+    [Header("Boss GrogiState")]
+    [SerializeField] private float _grogiTime = 5.0f;
 
     [Header("Pattern Range")]
     [SerializeField] private float _whirlRange = 15f;
@@ -100,7 +102,7 @@ public class CSlothBoss : CEnemy, IBoss
     private float _grogiDamage;
     private float _atkTimer;
     private float _delayTimer;
-
+    private float _grogiTimer;
 
     private int normalAtk;
     private int normalCount;
@@ -190,7 +192,7 @@ public class CSlothBoss : CEnemy, IBoss
         if (_onGrogi == true)
         {
             
-            _bossState = ESlothBossState.Grogi;
+            _currentState = ESlothBossState.Grogi;
             BossState();
 
 
@@ -1245,19 +1247,19 @@ public class CSlothBoss : CEnemy, IBoss
     {
         int hit = FindPlayer(20);
 
-        List<Vector3> safeZones = new List<Vector3>();
+        List<Vector3> damageZones = new List<Vector3>();
 
         for (int i = 0; i < 4; i++)
         {
-            float safeAngle = 45f + (i * 90f);
+            float shakerAngle = 45f + (i * 90f);
 
-            Quaternion rot = Quaternion.Euler(0f, safeAngle, 0f);
+            Quaternion rot = Quaternion.Euler(0f, shakerAngle, 0f);
 
-            Vector3 safeDir = rot * this.transform.forward;
+            Vector3 damagePosDir = rot * this.transform.forward;
 
-            Vector3 safePos = this.transform.position + (safeDir * 18f);
+            Vector3 damagePos = this.transform.position + (damagePosDir * 18f);
             
-            safeZones.Add(safePos);
+            damageZones.Add(damagePos);
         }
 
 
@@ -1278,26 +1280,18 @@ public class CSlothBoss : CEnemy, IBoss
 
             playerPos.y = 0;
 
-            float dis = Vector3.Dot(this.transform.forward.normalized, playerPos.normalized);
-
             bool isHit = false;
 
-            for (int j = 0; j < 2; j++)
+            for(int j = 0; j < damageZones.Count; j++)
             {
-                if (Mathf.Abs(dis) == 45f + (j * 180f))
+                float damageRange = Vector3.Distance(damageZones[i], playerPos);
+
+                if(Mathf.Abs(damageRange) <= 4f)
                 {
-                    Vector3 hitZone = playerPos * 11f;
-
-                    float safeCircle = Vector3.Distance(hitZone, player.transform.position);
-
-                    if (safeCircle <= 5.0f)
-                    {
-                        isHit = true;
-
-                        break;
-                    }
-
+                    isHit = true;
+                    break;
                 }
+
 
             }
 
@@ -1321,19 +1315,19 @@ public class CSlothBoss : CEnemy, IBoss
     {
         int hit = FindPlayer(20);
 
-        List<Vector3> safeZones = new List<Vector3>();
+        List<Vector3> startZones = new List<Vector3>();
 
         for (int i = 0; i < 4; i++)
         {
-            float safeAngle = 45f + (i * 90f);
+            float startAngle = 45f + (i * 90f);
 
-            Quaternion rot = Quaternion.Euler(0f, safeAngle, 0f);
+            Quaternion rot = Quaternion.Euler(0f, startAngle, 0f);
 
-            Vector3 safeDir = rot * this.transform.forward;
+            Vector3 startDir = rot * this.transform.forward;
 
-            Vector3 safePos = this.transform.position + (safeDir * 18f);
-           
-            safeZones.Add(safePos);
+            Vector3 startPos = this.transform.position + (startDir * 18f);
+
+            startZones.Add(startPos);
         }
 
 
@@ -1435,9 +1429,9 @@ public class CSlothBoss : CEnemy, IBoss
             grogi = false;
         }
 
-        _atkTimer += Time.deltaTime;
+        _grogiTimer += Time.deltaTime;
 
-        if(_atkTimer >= _atkTime)
+        if(_grogiTimer >= _grogiTime)
         {
             _onGrogi = false;
         }

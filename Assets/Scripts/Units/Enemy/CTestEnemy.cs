@@ -178,7 +178,7 @@ public class CTestEnemy : CEnemy
                 Vector3 direction = _startPos - transform.position;
                 direction.y = 0f;
 
-                if (direction.sqrMagnitude > 0.001f)
+                if (direction.sqrMagnitude > 0.01f)
                 {
                     Quaternion targetRotation = Quaternion.LookRotation(direction);
                     transform.rotation = Quaternion.RotateTowards(
@@ -204,7 +204,7 @@ public class CTestEnemy : CEnemy
         Vector3 direction = target - this.transform.position;
         direction.y = 0f;
 
-        if (direction.sqrMagnitude > 0.001f)
+        if (direction.sqrMagnitude > 0.01f)
         {
             Quaternion targetRotation = Quaternion.LookRotation(direction);
             transform.rotation = Quaternion.RotateTowards(
@@ -335,7 +335,7 @@ public class CTestEnemy : CEnemy
                 Vector3 direction = _startPos - transform.position;
                 direction.y = 0f;
 
-                if (direction.sqrMagnitude > 0.001f)
+                if (direction.sqrMagnitude > 0.01f)
                 {
                     _isMove = true;
                     _isReturn = true;
