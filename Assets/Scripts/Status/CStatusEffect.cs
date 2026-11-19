@@ -230,13 +230,13 @@ public partial class CStatus
                 });
                 break;
             // 탐욕의 항아리
-            // 준 피해의 5%만큼 체력을 회복합니다.
+            // 준 피해의 2%만큼 체력을 회복합니다.
             // 최대 최대체력의 5%
             case 3:
                 _trigger |= EStatusTrigger.OnHit;
                 _onHit.Add((CUnit attacker, CUnit defender, float damage) =>
                 {
-                    float healAmount = Mathf.Min(attacker.HpMax * 0.05f, damage * 0.05f);
+                    float healAmount = Mathf.Min(attacker.HpMax * 0.05f, damage * 0.02f);
                     attacker.GetHeal(healAmount, ERatioSwitch.Constant);
                     return damage;
                 });

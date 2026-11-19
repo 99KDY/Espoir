@@ -16,7 +16,7 @@ MonoBehaviour:
   _name: "\uD0D0\uC695\uC758 \uD56D\uC544\uB9AC"
   _description: "\uD0D0\uC695\uC758 \uD56D\uC544\uB9AC\uAC00 \uB290\uAEF4\uC9C0\uB294
     \uC7A5\uBE44\uC785\uB2C8\uB2E4.\n(2) \uACF5\uACA9\uC18D\uB3C4 +10%\n(3) \uACF5\uACA9\uB825
-    +25%\n(4) \uD53C\uD574\uD761\uC218 +5%"
+    +25%\n(4) \uc900 \ud53c\ud574\uc758 2% \ud68c\ubcf5(1\ud68c \ucd5c\ub300 HP\uc758 5%)"
   _actionSet2: []
   _equipmentStatusSet2:
   - statusId: 13
