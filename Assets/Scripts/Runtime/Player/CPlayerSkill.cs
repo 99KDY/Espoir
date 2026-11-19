@@ -29,6 +29,7 @@ public class CPlayerSkill : MonoBehaviour
     private readonly CPlayerCrown _CROWN = new CPlayerCrown();
     private readonly CPlayerLeviathan _LEVIATHAN = new CPlayerLeviathan();
 
+    private CPlayerSkillAudio _audio;
     private CPlayer _owner;
     private CPlayerMovement _movement;
     private CSkillRuntime _currentSkill;
@@ -67,6 +68,72 @@ public class CPlayerSkill : MonoBehaviour
     /// 스킬 쿨타임이 줄어든 순간 호출됩니다(E 가 낙인 가득 대상에 적중). 인자 = 스킬, 줄어든 초.
     /// </summary>
     public event System.Action<CSkillSO, float> CooldownReduced;
+
+    /// <summary>
+    /// 평타 콤보의 타격 판정 하나를 처리할 때 호출됩니다(적중 여부와 무관). 인자 = 평타 스킬, 단계 번호, 그 단계의 타격 번호.
+    /// </summary>
+    public event System.Action<CSkillSO, int, int> BasicAttackHitProcessed;
+
+    /// <summary>
+    /// 평타 콤보가 진행 중이거나 다음 단계로 이어질 수 있는 동안 참입니다.
+    /// </summary>
+    public bool IsBasicComboAlive
+    {
+        get
+        {
+            if (_currentSkill != null)
+            {
+                return _currentSkill.data.Type == ESkillType.Melee;
+            }
+
+            if (_lastBasicAttack == null || _animator == null)
+            {
+                return false;
+            }
+
+            return CanContinue(_lastBasicAttack, _animator.GetCurrentAnimatorStateInfo(0));
+        }
+    }
+
+    /// <summary>
+    /// 현재 왕관 상태에 맞는 평타 설정을 반환합니다.
+    /// </summary>
+    public CSkillSO BasicAttackData => _owner != null ? _CROWN.GetAttack(_owner, _basicAttack) : _basicAttack;
+
+    /// <summary>
+    /// 현재 실행 중인 평타가 마지막 단계인지 반환합니다.
+    /// </summary>
+    public bool IsBasicFinisherActive => _currentSkill != null &&
+        _currentSkill.data.Type == ESkillType.Melee &&
+        _stepIndex == _currentSkill.data.Steps.Length - 1;
+
+    /// <summary>
+    /// Q 막타 연계가 남은 시간(초)입니다. 마지막 단계에서 취소 가능해져 아직 막타가 끝나지 않았으면 연계 시간 전체를 반환합니다.
+    /// </summary>
+    public float StrikeLinkRemaining
+    {
+        get
+        {
+            if (!IsStrikeLinkOpen)
+            {
+                return 0f;
+            }
+
+            foreach (CSkillRuntime runtime in _SKILLS.Values)
+            {
+                if (runtime.data.Type != ESkillType.Strike)
+                {
+                    continue;
+                }
+
+                float window = runtime.data.FinisherWindow;
+                float remaining = _lastFinisherTime + window - Time.time;
+                return remaining > 0f ? Mathf.Min(remaining, window) : window;
+            }
+
+            return 0f;
+        }
+    }
 
     /// <summary>
     /// 지금 Q(Strike)를 쓰면 막타 연계(MP · 선딜 감소)가 되는지 알려 줍니다. Q 가 쿨타임이면 거짓입니다.
@@ -216,6 +283,7 @@ public class CPlayerSkill : MonoBehaviour
     public bool Initialize(CPlayer owner)
     {
         _owner = owner;
+        _audio = GetComponentInChildren<CPlayerSkillAudio>();
         _movement = GetComponent<CPlayerMovement>();
 
         return _animator != null && _playerAttack != null &&
@@ -413,6 +481,7 @@ public class CPlayerSkill : MonoBehaviour
             _CROWN.Use(_owner);
             runtime.readyTime = Time.time + skill.Cooldown;
             CrownUsed?.Invoke(_owner.FindStatusStack(skill.CrownStatus.Id));
+            _audio?.PlayCrown(_owner.FindStatusStack(skill.CrownStatus.Id));
             return true;
         }
 
@@ -471,6 +540,7 @@ public class CPlayerSkill : MonoBehaviour
         if (skill.Type == ESkillType.Dash)
         {
             _owner.AddStatus(28, 0f);
+            _audio?.PlayDash();
             transform.rotation = Quaternion.LookRotation(_direction);
             _DASH_TRAIL.Begin(skill.DashTrail, transform, _animator, _direction, _EFFECTS);
         }
@@ -603,6 +673,7 @@ public class CPlayerSkill : MonoBehaviour
 
         runtime.readyTime = Time.time + runtime.data.Cooldown;
         _LEVIATHAN.BeginBuff(_owner);
+        _audio?.PlayLeviathanBuff();
         return true;
     }
 
@@ -616,6 +687,7 @@ public class CPlayerSkill : MonoBehaviour
         _SPELL.Begin(_owner, _direction, runtime.data, _EFFECTS);
         _DASH_TRAIL.Reset(transform.position, runtime.data.DashTrail.firstDistance);
         _LEVIATHAN.BeginFinisher(_owner);
+        _audio?.PlayLeviathanFinisher();
 
         if (isCanceling)
         {
@@ -724,6 +796,7 @@ public class CPlayerSkill : MonoBehaviour
         }
 
         CSkillSO skill = _currentSkill.data;
+        _audio?.UpdateStep(skill, state, _animator.speed, _nextHitIndex);
         if (skill.Type == ESkillType.Strike && state.normalizedTime >= skill.Steps[index].hits[0].time)
         {
             _animator.speed = _baseAttackSpeed;
@@ -808,6 +881,7 @@ public class CPlayerSkill : MonoBehaviour
             if (isBasicAttack)
             {
                 hit.damageRatio *= _CROWN.GetDamageMultiplier(_owner);
+                BasicAttackHitProcessed?.Invoke(skill, _stepIndex, _nextHitIndex - 1);
             }
 
             SPlayerHitResult result = _playerAttack.Attack(_owner, hit, hit.appliesMark);
@@ -892,6 +966,7 @@ public class CPlayerSkill : MonoBehaviour
 
         _hasQueuedCombo = false;
         _stepIndex = index;
+        _audio?.BeginStep(_currentSkill.data, index);
         _nextHitIndex = 0;
         _hasAddedStrikeStack = false;
         _moveProgress = 0f;
@@ -924,6 +999,7 @@ public class CPlayerSkill : MonoBehaviour
 
     private void FinishSkill(bool canceled = false, bool keepEffects = false)
     {
+        _audio?.EndStep(canceled);
         // 대시무적 제거
         if (_owner != null &&
             _currentSkill != null &&
