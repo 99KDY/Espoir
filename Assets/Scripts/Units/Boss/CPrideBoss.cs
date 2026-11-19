@@ -106,4 +106,8 @@ public class CPrideBoss : CEnemy, IBoss
         }
     }
 
+    public void ResetBattleState()
+    {
+        throw new NotImplementedException();
+    }
 }

@@ -29,6 +29,7 @@ public class CSaveData
     public int completedQuest;
     public int bossClear;
     public int pradonaPower;
+    public List<float> bossTime;
     #endregion
 
     #region Property
@@ -184,6 +185,41 @@ public class CSaveData
             pradonaPower = (int)value;
         }
     }
+
+    public Dictionary<EBossClear, float> BossTime
+    {
+        get
+        {
+            Dictionary<EBossClear, float> result = new Dictionary<EBossClear, float>();
+
+            for (int i = 0; i < 8; i++)
+            {
+                EBossClear targetBoss = (EBossClear)(1 << i);
+                if ((EBossClear.AvailableBoss & targetBoss) == 0) continue;
+
+                result[targetBoss] = bossTime != null && i < bossTime.Count
+                    ? bossTime[i]
+                    : 0f;
+            }
+
+            return result;
+        }
+        set
+        {
+            bossTime = new List<float>(8);
+
+            for (int i = 0; i < 8; i++)
+            {
+                EBossClear targetBoss = (EBossClear)(1 << i);
+                float tempTime = 0f;
+                if ((EBossClear.AvailableBoss & targetBoss) != 0 && value != null)
+                {
+                    value.TryGetValue(targetBoss, out tempTime);
+                }
+                bossTime.Add(tempTime);
+            }
+        }
+    }
     #endregion
 
     public CSaveData
@@ -198,7 +234,8 @@ public class CSaveData
             EQuestList actingQuest,
             EQuestList completedQuest,
             EBossClear bossClear,
-            EPradonaPower pradonaPower
+            EPradonaPower pradonaPower,
+            Dictionary<EBossClear, float> bossTime
         )
     {
         this.version = version;
@@ -212,6 +249,7 @@ public class CSaveData
         this.CompletedQuest = completedQuest;
         this.BossClear = bossClear;
         this.PradonaPower = pradonaPower;
+        this.BossTime = bossTime;
     }
 
     public CSaveData
@@ -226,10 +264,11 @@ public class CSaveData
         EQuestList actingQuest,
         EQuestList completedQuest,
         EBossClear bossClear,
-        EPradonaPower pradonaPower
+        EPradonaPower pradonaPower,
+        Dictionary<EBossClear, float> bossTime
     ) : this(version, currentStage, money, inventory, equipment,
         new List<int>(quickslot), availableQuest,actingQuest, completedQuest,
-        bossClear, pradonaPower) { }
+        bossClear, pradonaPower, bossTime) { }
 }
 
 public static class CSaveManager 
@@ -244,7 +283,7 @@ public static class CSaveManager
 #else
     private readonly static bool _isPersist = true;
 #endif
-    public readonly static int Version = 1;
+    public readonly static int Version = 2;
 
     public static int MaxSaveSlot
     {
@@ -387,6 +426,8 @@ public static class CSaveManager
                         File.ReadAllText(path)
                     );
 
+                bool migrated = MigrateSaveData(loadedData);
+
                 _saveDataErrorCode[index] = CheckSaveData(loadedData);
                 if (_saveDataErrorCode[index] != 0)
                 {
@@ -396,6 +437,17 @@ public static class CSaveManager
                 else
                 {
                     _saveData[index] = loadedData;
+                    if (migrated)
+                    {
+                        if (SaveData(index, loadedData))
+                        {
+                            CLogger.Success($"저장슬롯 {index} - 병합 후 저장 성공!");
+                        }
+                        else
+                        {
+                            CLogger.Error($"저장슬롯 {index} - 병합 후 저장 실패");
+                        }
+                    }
                     return true;
                 }
             }
@@ -605,5 +657,17 @@ public static class CSaveManager
 
         data = _saveData[index];
         return true;
+    }
+
+    private static bool MigrateSaveData(CSaveData data)
+    {
+        if (data == null) return false;
+        if (data.Version == 1)
+        {
+            data.BossTime = null;
+            data.version = 2;
+            return true;
+        }
+        return false;
     }
 }

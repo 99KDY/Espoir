@@ -1532,4 +1532,10 @@ public class CSlothBoss : CEnemy, IBoss
         if (_player != null) _target = _player.transform;
     }
 
+    protected override void Die()
+    {
+        CGameManager.Instance?.EndBossTimer(EBossClear.Pigritia, true);
+        ResetBattleState();
+        base.Die();
+    }
 }

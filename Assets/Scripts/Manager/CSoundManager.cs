@@ -59,6 +59,8 @@ public class CSoundManager : MonoBehaviour
     private float _fadeFactor = 1.0f;
 
     private static CSoundManager _instance;
+    private float _titleBgmLevel = 1f;
+    private float _titleSeLevel = 1f;
 
     public static CSoundManager Instance
     {
@@ -123,6 +125,11 @@ public class CSoundManager : MonoBehaviour
         SetVolume();
     }
 
+    public void SetTitleVolume(float bgm, float se)
+    {
+        _titleBgmLevel = Mathf.Clamp01(bgm);
+        _titleSeLevel = Mathf.Clamp01(se);
+    }
     private void ResetDictionary()
     {
         foreach (var bgm in _backgroundSounds)
@@ -155,8 +162,8 @@ public class CSoundManager : MonoBehaviour
 
     private void SetVolume()
     {
-        float bgmVolume = (CGameManager.Instance == null) ? _fadeFactor : CGameManager.Instance.BgmLevel * _fadeFactor;
-        float seVolume = (CGameManager.Instance == null) ? 1f : CGameManager.Instance.SeLevel;
+        float bgmVolume = (CGameManager.Instance == null) ? _titleBgmLevel * _fadeFactor : CGameManager.Instance.BgmLevel * _fadeFactor;
+        float seVolume = (CGameManager.Instance == null) ? _titleSeLevel : CGameManager.Instance.SeLevel;
 
         if (bgmVolume <= 0.0001f)
         {

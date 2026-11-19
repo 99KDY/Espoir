@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.UI;
+using static UnityEngine.GraphicsBuffer;
 
 public enum EGameState
 {
@@ -60,6 +60,7 @@ public enum EBossClear
     Ira         = 1 << 5,
     Superbia    = 1 << 6,
     Pradona     = 1 << 7,
+    AvailableBoss = Pigritia | Luxuria | Superbia | Pradona,
 }
 
 [Flags]
@@ -132,6 +133,11 @@ public class CGameManager : MonoBehaviour
     private CPlayer _player;
     private CInventoryUI _inventoryUI;
     private Action _confirmAction;
+    private Dictionary<EBossClear, float> _bossTime;
+    
+    // 보스 타이머용
+    private EBossClear _attempBoss = EBossClear.None;
+    private float _attempStartTime;
 
     private int _currentActiveSpawner = 0;
 
@@ -148,6 +154,7 @@ public class CGameManager : MonoBehaviour
     public static CGameManager Instance => _instance;
     public float BgmLevel => _bgmSlider.value;
     public float SeLevel => _seSlider.value;
+    public Dictionary<EBossClear, float> BossTime => _bossTime;
 
     private void Awake()
     {
@@ -157,6 +164,12 @@ public class CGameManager : MonoBehaviour
             return;
         }
         _instance = this;
+
+        _bossTime = new Dictionary<EBossClear, float>();
+        _bossTime.Add(EBossClear.Pigritia, 0f);
+        _bossTime.Add(EBossClear.Luxuria, 0f);
+        _bossTime.Add(EBossClear.Superbia, 0f);
+        _bossTime.Add(EBossClear.Pradona, 0f);
     }
 
     void Start()
@@ -168,11 +181,11 @@ public class CGameManager : MonoBehaviour
                 () =>
                 {
                     _soundManager.PlaySE(EEffectSound.Success);
-                    #if UNITY_EDITOR
+#if UNITY_EDITOR
                     UnityEditor.EditorApplication.isPlaying = false;
-                    #else
+#else
                     Application.Quit();
-                    #endif
+#endif
                 }));
         _gameGotoTitle.onClick.AddListener(() =>
             ShowQuestion(
@@ -197,7 +210,7 @@ public class CGameManager : MonoBehaviour
                 _confirmAction();
                 HideQuestion();
             });
-        _confirmNo.onClick.AddListener(() => 
+        _confirmNo.onClick.AddListener(() =>
             {
                 _soundManager.PlaySE(EEffectSound.Beep);
                 HideQuestion();
@@ -409,6 +422,7 @@ public class CGameManager : MonoBehaviour
                 break;
             case EGameState.Gameover:
                 _soundManager.PlaySE(EEffectSound.Beep);
+                EndBossTimer(_attempBoss, false);
                 _menuBackground.alpha = 1;
                 _menuBackground.interactable = true;
                 _menuBackground.blocksRaycasts = true;
@@ -525,7 +539,7 @@ public class CGameManager : MonoBehaviour
             default:
                 break;
         }
-        
+
         RefreshQualityButtons(index);
     }
 
@@ -629,7 +643,7 @@ public class CGameManager : MonoBehaviour
             LoadData(data);
             return true;
         }
-        
+
         // 새 시작인데 데이터가 이미 있을경우
         if (CSaveManager.Available(slot)) return false;
 
@@ -644,7 +658,7 @@ public class CGameManager : MonoBehaviour
     private bool SaveData(int slot)
     {
         if (_player == null || _player.Inventory == null) return false;
-        
+
         List<CItem> items = new List<CItem>(_player.Inventory.MaxItemSlot);
         int[] quickSlots = new int[_player.Inventory.QuickSlotLength];
 
@@ -662,7 +676,8 @@ public class CGameManager : MonoBehaviour
                 _actingQuest,
                 _completedQuest,
                 _bossClearState,
-                _player.PradonaPower);
+                _player.PradonaPower,
+                _bossTime);
 
         return CSaveManager.SaveData(slot, data);
     }
@@ -674,7 +689,7 @@ public class CGameManager : MonoBehaviour
 
     private void LoadData(int slot)
     {
-        CSaveManager.GetData(slot, out CSaveData data);
+        if (!CSaveManager.GetData(slot, out CSaveData data)) return;
         LoadData(data);
     }
 
@@ -686,6 +701,7 @@ public class CGameManager : MonoBehaviour
         _completedQuest = data.CompletedQuest;
         _bossClearState = data.BossClear;
         _player.PradonaPower = data.PradonaPower;
+        _bossTime = data.BossTime;
         foreach (KeyValuePair<EEquipmentSlot, CItemEquipment> pair in data.Equipment)
         {
             if (_player.Equipment.TryGetValue(pair.Key, out CItemEquipment previous) &&
@@ -758,7 +774,7 @@ public class CGameManager : MonoBehaviour
 
     public int GetMaxCompleteNumber()
     {
-        return System.Enum.GetValues(typeof(EBossClear)).Length - 1;
+        return 8;
     }
 
     public static int GetMaxCompleteNumberStatic()
@@ -766,8 +782,97 @@ public class CGameManager : MonoBehaviour
         return System.Enum.GetValues(typeof(EBossClear)).Length - 1;
     }
 
+    /// <summary>
+    /// 보스를 클리어했을 때 사용하는 함수입니다.
+    /// </summary>
+    /// <param name="target"></param>
     public void SetBossCleared(EBossClear target)
     {
+        if (target == EBossClear.None || (target & (target - 1)) != 0)
+        {
+            CLogger.Error("[CGameManager] SetBossCleared의 target이 하나가 아님!");
+            return;
+        }
         _bossClearState |= target;
+    }
+
+    /// <summary>
+    /// 보스를 클리어했을 때 사용하는 함수입니다. time은 0 초과 시간입니다.
+    /// </summary>
+    /// <param name="target"></param>
+    public void SetBossCleared(EBossClear target, float time)
+    {
+        if (target == EBossClear.None || (target & (target - 1)) != 0)
+        {
+            CLogger.Error("[CGameManager] SetBossCleared의 target이 하나가 아님!");
+            return;
+        }
+        if ((target & EBossClear.AvailableBoss) == 0)
+        {
+            CLogger.Error($"[CGameManager] GetBossClearTime의 target은 토벌할 수 없음 : {target}");
+            return;
+        }
+        if (time <= 0)
+        {
+            CLogger.Error("[CGameManager] SetBossCleared의 시간이 0 이하임");
+            return;
+        }
+        _bossClearState |= target;
+        if (_bossTime.ContainsKey(target) && _bossTime[target] <= time && _bossTime[target] > 0f)
+        {
+            CLogger.Log($"[CGameManager] {target} 처치 기록 갱신실패 -> 데이터 저장되지 않음.");
+            return;
+        }
+        _bossTime[target] = time;
+    }
+
+    public bool TryGetBossClearTime(EBossClear target, out float time)
+    {
+        time = 0f;
+        if (target == EBossClear.None || (target & (target - 1)) != 0)
+        {
+            CLogger.Error("[CGameManager] GetBossClearTime의 target이 하나가 아님!");
+            return false;
+        }
+        if ((target & EBossClear.AvailableBoss) == 0)
+        {
+            CLogger.Error($"[CGameManager] GetBossClearTime의 target은 토벌할 수 없음 : {target}");
+            return false;
+        }
+        time = _bossTime[target];
+        return true;
+    }
+
+    public void BeginBossTimer(EBossClear boss)
+    {
+        if (boss == EBossClear.None || (boss & (boss - 1)) != 0 ||
+            _gameState == EGameState.Gameover || (boss & EBossClear.AvailableBoss) == 0) return;
+        _attempBoss = boss;
+        _attempStartTime = Time.time;
+    }
+
+    public bool TryGetBossTimer(EBossClear boss, out float currentTimer, out bool timeOvered)
+    {
+        currentTimer = 0f;
+        timeOvered = false;
+        if (boss == EBossClear.None || (boss & (boss - 1)) != 0 ||
+            _attempBoss != boss || _gameState == EGameState.Gameover) return false;
+        
+        currentTimer = Time.time - _attempStartTime;
+        timeOvered = (_bossTime[boss] > 0) && (currentTimer > _bossTime[boss]);
+
+        return true;
+    }
+
+    public void EndBossTimer(EBossClear boss, bool cleared)
+    {
+        if (boss == EBossClear.None || (boss & (boss - 1)) != 0 || _attempBoss != boss) return;
+        if (cleared && TryGetBossTimer(boss, out float currentTimer, out _))
+        {
+            if (currentTimer > 0f) SetBossCleared(boss, currentTimer);
+            else SetBossCleared(boss);
+        }
+
+        _attempBoss = EBossClear.None;
     }
 }
