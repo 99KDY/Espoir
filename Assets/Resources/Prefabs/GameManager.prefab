@@ -2593,7 +2593,7 @@ MonoBehaviour:
   _popupScreen: {fileID: 1123113944592675210}
   _popupTitle: {fileID: 3853412291945401174}
   _popupDescription: {fileID: 5300658926838852257}
-  _saveScreen: {fileID: 0}
+  _saveScreen: {fileID: 8244244688437718014}
   _zoneText: {fileID: 0}
 --- !u!1 &3153266128254965371
 GameObject:
@@ -6076,7 +6076,7 @@ CanvasGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6589098837514208203}
   m_Enabled: 1
-  m_Alpha: 1
+  m_Alpha: 0
   m_Interactable: 0
   m_BlocksRaycasts: 0
   m_IgnoreParentGroups: 0
