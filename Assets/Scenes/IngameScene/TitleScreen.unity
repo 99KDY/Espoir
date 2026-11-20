@@ -6860,42 +6860,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 987009864681462001, guid: c4298839a91e9ff48ba00a90f7fc16bf, type: 3}
-      propertyPath: _scenes.Array.size
-      value: 4
-      objectReference: {fileID: 0}
-    - target: {fileID: 987009864681462001, guid: c4298839a91e9ff48ba00a90f7fc16bf, type: 3}
-      propertyPath: _scenes.Array.data[0].Id
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 987009864681462001, guid: c4298839a91e9ff48ba00a90f7fc16bf, type: 3}
-      propertyPath: _scenes.Array.data[1].Id
-      value: 30
-      objectReference: {fileID: 0}
-    - target: {fileID: 987009864681462001, guid: c4298839a91e9ff48ba00a90f7fc16bf, type: 3}
-      propertyPath: _scenes.Array.data[2].Id
-      value: 31
-      objectReference: {fileID: 0}
-    - target: {fileID: 987009864681462001, guid: c4298839a91e9ff48ba00a90f7fc16bf, type: 3}
-      propertyPath: _scenes.Array.data[3].Id
-      value: 32
-      objectReference: {fileID: 0}
-    - target: {fileID: 987009864681462001, guid: c4298839a91e9ff48ba00a90f7fc16bf, type: 3}
-      propertyPath: _scenes.Array.data[0].SceneName
-      value: TitleScreen
-      objectReference: {fileID: 0}
-    - target: {fileID: 987009864681462001, guid: c4298839a91e9ff48ba00a90f7fc16bf, type: 3}
-      propertyPath: _scenes.Array.data[1].SceneName
-      value: DesertScene
-      objectReference: {fileID: 0}
-    - target: {fileID: 987009864681462001, guid: c4298839a91e9ff48ba00a90f7fc16bf, type: 3}
-      propertyPath: _scenes.Array.data[2].SceneName
-      value: GardenScene
-      objectReference: {fileID: 0}
-    - target: {fileID: 987009864681462001, guid: c4298839a91e9ff48ba00a90f7fc16bf, type: 3}
-      propertyPath: _scenes.Array.data[3].SceneName
-      value: TowerScene
-      objectReference: {fileID: 0}
     - target: {fileID: 3574640439174886849, guid: c4298839a91e9ff48ba00a90f7fc16bf, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0

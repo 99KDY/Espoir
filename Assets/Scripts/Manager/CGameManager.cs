@@ -1,11 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Threading;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.UI;
-using static UnityEngine.GraphicsBuffer;
 
 public enum EGameState
 {
@@ -108,11 +108,18 @@ public class CGameManager : MonoBehaviour
     [SerializeField] Button _confirmYes;
     [SerializeField] Button _confirmNo;
 
+    [SerializeField] CanvasGroup _popupScreen;
+    [SerializeField] TMP_Text _popupTitle;
+    [SerializeField] TMP_Text _popupDescription;
+
+    [SerializeField] CanvasGroup _saveScreen;
+
     [Header("디버그용")]
     [SerializeField] TMP_Text _zoneText;
 
     private const string BgmVolumeKey = "Espoir.Settings.BgmVolume";
     private const string SeVolumeKey = "Espoir.Settings.SeVolume";
+    private const string AutosaveKey = "Espoir.Settings.Autosave";
 
     private EGameState _gameState;
     private EBattleState _battleState;
@@ -132,6 +139,7 @@ public class CGameManager : MonoBehaviour
     private CSoundManager _soundManager;
     private CPlayer _player;
     private CInventoryUI _inventoryUI;
+    private CShopUI _shopUI;
     private Action _confirmAction;
     private Dictionary<EBossClear, float> _bossTime;
     
@@ -140,6 +148,10 @@ public class CGameManager : MonoBehaviour
     private float _attempStartTime;
 
     private int _currentActiveSpawner = 0;
+
+    // 팝업용
+    private Coroutine _popupCoroutine;
+    private Coroutine _saveCoroutine;
 
     public EGameState GameState => _gameState;
     public EBattleState BattleState => _battleState;
@@ -221,6 +233,7 @@ public class CGameManager : MonoBehaviour
         _player = FindFirstObjectByType<CPlayer>();
         _soundManager = FindFirstObjectByType<CSoundManager>();
         _inventoryUI = FindFirstObjectByType<CInventoryUI>();
+        _shopUI = FindFirstObjectByType<CShopUI>();
         _soundManager.PlayBGM(EBackgroundSound.BaseBGM);
         SetGameState(EGameState.Idle);
         SetBattleState(EBattleState.None);
@@ -288,6 +301,13 @@ public class CGameManager : MonoBehaviour
         _menuBase.blocksRaycasts = false;
 
         LoadVolumeSettings();
+
+        _gameAutosave.SetIsOnWithoutNotify(PlayerPrefs.GetInt(AutosaveKey, 1) == 1);
+        _gameAutosave.onValueChanged.AddListener(isOn =>
+        {
+            PlayerPrefs.SetInt(AutosaveKey, isOn ? 1 : 0);
+            PlayerPrefs.Save();
+        });
     }
 
     void Update()
@@ -306,7 +326,11 @@ public class CGameManager : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            if (_inventoryUI != null && _inventoryUI.IsOpen)
+            if (_shopUI != null && _shopUI.IsOpen)
+            {
+                _shopUI.Close();
+            }
+            else if (_inventoryUI != null && _inventoryUI.IsOpen)
             {
                 _inventoryUI.SetInventoryOpen(false);
             }
@@ -402,7 +426,6 @@ public class CGameManager : MonoBehaviour
             case EGameState.Idle:
                 break;
             case EGameState.Story:
-                _soundManager.PlayBGM(EBackgroundSound.DialogueBGM);
                 break;
             case EGameState.UI:
                 _soundManager.PlaySE(EEffectSound.QuestionAppear);
@@ -652,7 +675,12 @@ public class CGameManager : MonoBehaviour
 
     public bool SaveData()
     {
-        return SaveData(CSceneFlowManager.Instance.TargetSaveData);
+        bool result = SaveData(CSceneFlowManager.Instance.TargetSaveData);
+        if (result)
+        {
+            StartCoroutine(ShowSaveNotify());
+        }
+        return result;
     }
 
     private bool SaveData(int slot)
@@ -821,9 +849,17 @@ public class CGameManager : MonoBehaviour
         if (_bossTime.ContainsKey(target) && _bossTime[target] <= time && _bossTime[target] > 0f)
         {
             CLogger.Log($"[CGameManager] {target} 처치 기록 갱신실패 -> 데이터 저장되지 않음.");
+            if (target == EBossClear.Pigritia)
+            {
+                StartCoroutine(ShowPopup("벨패고르 처치", "시간 : " + FormatTimer(time)));
+            }
             return;
         }
         _bossTime[target] = time;
+        if (target == EBossClear.Pigritia)
+        {
+            StartCoroutine(ShowPopup("벨패고르 처치", "시간 : " + FormatTimer(time) + "\n최고기록 갱신!"));
+        }
     }
 
     public bool TryGetBossClearTime(EBossClear target, out float time)
@@ -875,4 +911,102 @@ public class CGameManager : MonoBehaviour
 
         _attempBoss = EBossClear.None;
     }
+
+    public IEnumerator ShowPopup(string title, string description)
+    {
+        if (_popupScreen == null || _popupTitle == null || _popupDescription == null)
+        {
+            yield break;
+        }
+
+        if (_popupCoroutine != null)
+        {
+            StopCoroutine(_popupCoroutine);
+            _popupCoroutine = null;
+        }
+
+        _popupCoroutine = StartCoroutine(ShowPopupInternal(title, description));
+        yield return _popupCoroutine;
+        _popupCoroutine = null;
+    }
+
+    private IEnumerator ShowPopupInternal(string title, string description)
+    {
+        _popupScreen.alpha = 0f;
+        _popupTitle.text = title;
+        _popupDescription.text = description;
+
+        float t = 0f;
+        while (t < 0.5f)
+        {
+            float dt = Time.unscaledDeltaTime;
+            t += dt;
+            float lerp = Mathf.Clamp01(t / 0.5f);
+            _popupScreen.alpha = Mathf.Lerp(0f, 1f, lerp);
+            yield return null;
+        }
+
+        yield return new WaitForSecondsRealtime(2f);
+
+        t = 0f;
+        while (t < 0.5f)
+        {
+            float dt = Time.unscaledDeltaTime;
+            t += dt;
+            float lerp = Mathf.Clamp01(t / 0.5f);
+            _popupScreen.alpha = Mathf.Lerp(1f, 0f, lerp);
+            yield return null;
+        }
+    }
+
+    private static string FormatTimer(float time)
+    {
+        int seconds = (int)(time * 100f);
+        return $"{seconds / 6000:D2}:{seconds / 100 % 60:D2}<size=72%>.{seconds % 100:D2}</size>";
+    }
+    public IEnumerator ShowSaveNotify()
+    {
+        if (_saveScreen == null)
+        {
+            yield break;
+        }
+
+        if (_saveCoroutine != null)
+        {
+            StopCoroutine(_saveCoroutine);
+            _saveCoroutine = null;
+        }
+
+        _saveCoroutine = StartCoroutine(ShowSaveNotifyInternal());
+        yield return _saveCoroutine;
+        _saveCoroutine = null;
+    }
+
+    private IEnumerator ShowSaveNotifyInternal()
+    {
+        _saveScreen.alpha = 0f;
+
+        float t = 0f;
+        while (t < 0.25f)
+        {
+            float dt = Time.unscaledDeltaTime;
+            t += dt;
+            float lerp = Mathf.Clamp01(t / 0.25f);
+            _saveScreen.alpha = Mathf.Lerp(0f, 1f, lerp);
+            yield return null;
+        }
+
+        yield return new WaitForSecondsRealtime(1f);
+
+        t = 0f;
+        while (t < 0.25f)
+        {
+            float dt = Time.unscaledDeltaTime;
+            t += dt;
+            float lerp = Mathf.Clamp01(t / 0.25f);
+            _saveScreen.alpha = Mathf.Lerp(1f, 0f, lerp);
+            yield return null;
+        }
+    }
+
 }

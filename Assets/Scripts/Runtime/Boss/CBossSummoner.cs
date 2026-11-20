@@ -141,7 +141,7 @@ public class CBossSummoner : MonoBehaviour
     {
         if (_isSummoned || _boss == null) return false;
         if (_boss is not IBoss) return false;
-
+        CGameManager.Instance.InvokeAutosave();
         _isSummoned = true;
         CGameManager.Instance.InvokeBossBattleActivation(true);
         _summonTime = 0f;
@@ -254,6 +254,13 @@ public class CBossSummoner : MonoBehaviour
                 _cineTime = -1f;
                 if (_player != null) _player.SetInputLocked(false);
             }
+        }
+
+        if (_isSummoned && _boss != null &&
+            _boss.gameObject.activeInHierarchy && _boss.HpCurrent <= 0f)
+        {
+            Unsummon();
+            return;
         }
 
         if (_isSummoned && _player != null)
