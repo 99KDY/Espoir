@@ -150,11 +150,12 @@ public class CSlothBoss : CEnemy, IBoss
         }
 
 
-        _patternPos = _previewPattern.transform.position;
+
         _target = _player.transform;
         _previewPattern = this.GetComponentInChildren<CPreviewPattern>();
         _previewInnerPattern = this.GetComponentInChildren<CPreviewPattern>();
         _animator = this.GetComponent<Animator>();
+        _patternPos = _previewPattern.transform.position;
 
     }
 
@@ -1026,7 +1027,7 @@ public class CSlothBoss : CEnemy, IBoss
 
     private void LikeOneShotDamage(float damage)
     {
-        int hits = FindPlayer(20);
+        int hits = FindPlayer(30);
 
         for(int i = 0; i < hits; i++)
         {
@@ -1102,7 +1103,7 @@ public class CSlothBoss : CEnemy, IBoss
 
             float bossCurrentHP = this.HpCurrent;
 
-            if((patternStartHP - bossCurrentHP) >= patternStartHP * 0.05)
+            if((patternStartHP - bossCurrentHP) >= patternStartHP * 0.035)
             {
                  _onGrogi = true;
                 
@@ -1199,7 +1200,7 @@ public class CSlothBoss : CEnemy, IBoss
 
             if(isHit == true)
             {
-                SDamageInfo playerToDamage = new SDamageInfo(0.6f, ERatioSwitch.ByCurrent);
+                SDamageInfo playerToDamage = new SDamageInfo(0.6f, ERatioSwitch.ByMax);
                 float currentHP = player.HpCurrent;
 
                 player.OnHit(this, playerToDamage);
@@ -1297,7 +1298,7 @@ public class CSlothBoss : CEnemy, IBoss
 
             if(isHit == true)
             {
-                SDamageInfo damageToPlayer = new SDamageInfo(0.3f, true, ERatioSwitch.ByCurrent);
+                SDamageInfo damageToPlayer = new SDamageInfo(0.3f, true, ERatioSwitch.ByMax);
                 float lastHp = player.HpCurrent;
 
                 player.OnHit(this, damageToPlayer);
@@ -1377,7 +1378,9 @@ public class CSlothBoss : CEnemy, IBoss
     {
         Vector3 boxSize = new Vector3(4f, 4f, 25f);
 
-        Vector3 boxCenter = this.transform.position + (this.transform.forward * (boxSize.z * 0.5f));
+        Vector3 startPos = this.transform.forward * 1f;
+
+        Vector3 boxCenter = (this.transform.position + this.transform.forward * 1f) + (this.transform.forward * (boxSize.z * 0.5f));
 
         Quaternion boxRot = this.transform.rotation;
 
@@ -1396,7 +1399,7 @@ public class CSlothBoss : CEnemy, IBoss
                 continue;
             }
 
-            SDamageInfo damageToPlayer = new SDamageInfo(0.6f, true ,ERatioSwitch.ByCurrent);
+            SDamageInfo damageToPlayer = new SDamageInfo(0.6f, true ,ERatioSwitch.ByMax);
             player.OnHit(this, damageToPlayer);
 
             CLogger.Log($"{player.name}의 현재 체력 : {player.HpCurrent}");
@@ -1424,7 +1427,18 @@ public class CSlothBoss : CEnemy, IBoss
 
         if(grogi)
         {
-            _animator.CrossFade("tGrogi", 0.2f); // 추후에 그로기 애니메이션으로 변경
+
+            _animator.ResetTrigger(_firstNorm);
+            _animator.ResetTrigger(_secondNorm);
+            _animator.ResetTrigger(_thirdNorm);
+            _animator.ResetTrigger(_firstSub);
+            _animator.ResetTrigger(_secondSub);
+            _animator.ResetTrigger(_thirdSub);
+            _animator.ResetTrigger(_forthSub);
+            _animator.ResetTrigger(_firstMain);
+            _animator.ResetTrigger(_secondMain);
+            _animator.ResetTrigger(_thirdMain);
+            _animator.CrossFadeInFixedTime("tGrogi", 0.2f); // 추후에 그로기 애니메이션으로 변경
 
             grogi = false;
         }
