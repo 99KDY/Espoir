@@ -16,8 +16,7 @@ MonoBehaviour:
   _name: "\uAD8C\uB2A5 : \uC544\uCCB4\uB514\uC544"
   _icon: {fileID: 21300000, guid: 6e4b3e85a2414ad3b45bda58ce3c7e7f, type: 3}
   _description: 
-  _tooltip: "\uB2E4\uC74C \uC790\uC2E0\uC5D0\uAC8C \uC801\uC911\uD558\uB294 \uACF5\uACA9\uC758
-    \uD53C\uD574 99% \uAC10\uC18C"
+  _tooltip: "1\uCD08 \uC774\uB0B4\uC5D0 \uCC98\uC74C\uC73C\uB85C \uBC1B\uB294 \uACF5\uACA9\uC758 \uD53C\uD574\uAC00 99% \uAC10\uC18C\uD569\uB2C8\uB2E4."
   _isDebuff: 0
   _duration: 1
   _stack: 3
