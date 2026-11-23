@@ -10,6 +10,9 @@ public partial class CSceneFlowManager
     [Header("맵 이동 — 이동하면 끝나는 상태이상 (나머지 상태 · 체력 · MP · 가방 · 장비 · 퀵슬롯 · 쿨타임은 이어짐)")]
     [SerializeField] private List<CStatusSO> _endOnTravel = new List<CStatusSO>();
 
+    private bool _hasBossRecords;
+    private EBossClear _carriedBossClear;
+    private readonly Dictionary<EBossClear, float> _BOSS_RECORDS = new Dictionary<EBossClear, float>();
     private bool _isTraveling;
     private CPlayer _arrivingPlayer;
     private bool _wasArrivalInputLocked;
@@ -86,7 +89,21 @@ public partial class CSceneFlowManager
     private void CaptureLeavingPlayer()
     {
         _CARRY.Clear();
+        _hasBossRecords = false;
+        _BOSS_RECORDS.Clear();
         if (!_isTraveling) return;
+
+        CGameManager game = CGameManager.Instance;
+        if (game != null)
+        {
+            _carriedBossClear = game.BossClearState;
+            foreach (KeyValuePair<EBossClear, float> pair in game.BossTime)
+            {
+                _BOSS_RECORDS.Add(pair.Key, pair.Value);
+            }
+            _hasBossRecords = true;
+        }
+
         CPlayer player = FindFirstObjectByType<CPlayer>();
         if (player == null) return;
         _END_ON_TRAVEL_IDS.Clear();
@@ -124,6 +141,13 @@ public partial class CSceneFlowManager
             player.transform.SetPositionAndRotation(map.StartPoint.position, map.StartPoint.rotation);
             if (wasEnabled) controller.enabled = true;
         }
+
+        if (_hasBossRecords && !_firstLoadFromTitle && CGameManager.Instance != null)
+        {
+            CGameManager.Instance.RestoreBossRecords(_carriedBossClear, _BOSS_RECORDS);
+        }
+        _hasBossRecords = false;
+        _BOSS_RECORDS.Clear();
 
         OnTravelArrived?.Invoke(id);
 

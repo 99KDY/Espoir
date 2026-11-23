@@ -140,11 +140,15 @@ public class CGameManager : MonoBehaviour
     private CPlayer _player;
     private CInventoryUI _inventoryUI;
     private CShopUI _shopUI;
+    private CCharacterInfoUI _characterInfoUI;
     private Action _confirmAction;
     private Dictionary<EBossClear, float> _bossTime;
     
     // 보스 타이머용
     private EBossClear _attempBoss = EBossClear.None;
+    private static EBossClear _bossFoundState;
+    // 씬 이동 중에도 플레이시간을 유지하며 새 게임과 불러오기에서 초기화한다.
+    private static float _playTime;
     private float _attempStartTime;
 
     private int _currentActiveSpawner = 0;
@@ -167,6 +171,8 @@ public class CGameManager : MonoBehaviour
     public float BgmLevel => _bgmSlider.value;
     public float SeLevel => _seSlider.value;
     public Dictionary<EBossClear, float> BossTime => _bossTime;
+    public EBossClear BossFoundState => _bossFoundState;
+    public float PlayTime => _playTime;
 
     private void Awake()
     {
@@ -234,6 +240,7 @@ public class CGameManager : MonoBehaviour
         _soundManager = FindFirstObjectByType<CSoundManager>();
         _inventoryUI = FindFirstObjectByType<CInventoryUI>();
         _shopUI = FindFirstObjectByType<CShopUI>();
+        _characterInfoUI = FindFirstObjectByType<CCharacterInfoUI>();
         _soundManager.PlayBGM(EBackgroundSound.BaseBGM);
         SetGameState(EGameState.Idle);
         SetBattleState(EBattleState.None);
@@ -312,6 +319,9 @@ public class CGameManager : MonoBehaviour
 
     void Update()
     {
+        // 메뉴, 대화, 일시정지 시간은 플레이시간에 넣지 않는다.
+        if (_gameState == EGameState.Idle) _playTime += Time.unscaledDeltaTime;
+
         if (Input.GetKeyDown(KeyCode.P))
         {
             if (_gameState == EGameState.Idle)
@@ -333,6 +343,10 @@ public class CGameManager : MonoBehaviour
             else if (_inventoryUI != null && _inventoryUI.IsOpen)
             {
                 _inventoryUI.SetInventoryOpen(false);
+            }
+            else if (_characterInfoUI != null && _characterInfoUI.IsOpen)
+            {
+                _characterInfoUI.Close();
             }
             else
             {
@@ -670,6 +684,8 @@ public class CGameManager : MonoBehaviour
         // 새 시작인데 데이터가 이미 있을경우
         if (CSaveManager.Available(slot)) return false;
 
+        _playTime = 0f;
+        _bossFoundState = EBossClear.None;
         return SaveData(slot);
     }
 
@@ -706,6 +722,8 @@ public class CGameManager : MonoBehaviour
                 _bossClearState,
                 _player.PradonaPower,
                 _bossTime);
+        data.PlayTime = _playTime;
+        data.BossFound = _bossFoundState;
 
         return CSaveManager.SaveData(slot, data);
     }
@@ -730,6 +748,8 @@ public class CGameManager : MonoBehaviour
         _bossClearState = data.BossClear;
         _player.PradonaPower = data.PradonaPower;
         _bossTime = data.BossTime;
+        _playTime = data.PlayTime;
+        _bossFoundState = data.BossFound;
         foreach (KeyValuePair<EEquipmentSlot, CItemEquipment> pair in data.Equipment)
         {
             if (_player.Equipment.TryGetValue(pair.Key, out CItemEquipment previous) &&
@@ -879,12 +899,26 @@ public class CGameManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// 맵 이동 전에 보관한 보스 처치 여부와 최단 기록을 복원합니다.
+    /// </summary>
+    public void RestoreBossRecords(EBossClear cleared, IReadOnlyDictionary<EBossClear, float> times)
+    {
+        _bossClearState = cleared;
+        _bossTime.Clear();
+        foreach (KeyValuePair<EBossClear, float> pair in times)
+        {
+            _bossTime.Add(pair.Key, pair.Value);
+        }
+    }
+
     public void BeginBossTimer(EBossClear boss)
     {
         if (boss == EBossClear.None || (boss & (boss - 1)) != 0 ||
             _gameState == EGameState.Gameover || (boss & EBossClear.AvailableBoss) == 0) return;
         _attempBoss = boss;
         _attempStartTime = Time.time;
+        _bossFoundState |= boss;
     }
 
     public bool TryGetBossTimer(EBossClear boss, out float currentTimer, out bool timeOvered)

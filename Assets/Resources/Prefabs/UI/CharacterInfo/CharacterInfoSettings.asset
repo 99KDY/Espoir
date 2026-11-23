@@ -1,0 +1,108 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 792eb60aa68630c49834d367d968ea22, type: 3}
+  m_Name: CharacterInfoSettings
+  m_EditorClassIdentifier: 
+  _player:
+    title: "\uC9C8\uD22C\uC758 \uAD70\uC8FC"
+    name: "\uB808\uBE44\uC544"
+    latinName: LEVIA
+  _helper:
+    title: "\uC870\uB825\uC790"
+    name: "\uD504\uB77C\uB3C4\uB098"
+    latinName: PRADONA
+  _tabCaptions:
+  - PROFILE
+  - STATS
+  - RECORDS
+  - PRADONA
+  _bestTimePrefix: "\uCD5C\uB2E8 "
+  _clearedStyle:
+    label: "\uCC98\uCE58"
+    tagFill: {r: 1, g: 0.9411765, b: 0.8627451, a: 1}
+    tagText: {r: 0.09411765, g: 0.101960786, b: 0.17254902, a: 1}
+    textAlpha: 1
+    placeAlpha: 0.8
+  _challengingStyle:
+    label: "\uB3C4\uC804 \uC911"
+    tagFill: {r: 1, g: 0.7529412, b: 0.4392157, a: 0.2}
+    tagText: {r: 1, g: 0.6862745, b: 0.48235294, a: 1}
+    textAlpha: 1
+    placeAlpha: 0.8
+  _unknownStyle:
+    label: "\uBBF8\uBC1C\uACAC"
+    tagFill: {r: 1, g: 1, b: 1, a: 0.08}
+    tagText: {r: 1, g: 1, b: 1, a: 0.5}
+    textAlpha: 0.45
+    placeAlpha: 0.45
+  _playerTheme:
+    cream: {r: 1, g: 0.9411765, b: 0.8627451, a: 1}
+    accent: {r: 1, g: 0.6862745, b: 0.48235294, a: 1}
+    soft: {r: 1, g: 0.95686275, b: 0.9098039, a: 0.78}
+    tabIdle: {r: 1, g: 0.95686275, b: 0.9098039, a: 0.62}
+    pill: {r: 1, g: 0.9411765, b: 0.87058824, a: 0.24}
+    hint: {r: 1, g: 0.95686275, b: 0.9098039, a: 0.55}
+  _helperTheme:
+    cream: {r: 0.9529412, g: 0.9254902, b: 1, a: 1}
+    accent: {r: 0.8392157, g: 0.76862746, b: 1, a: 1}
+    soft: {r: 0.89411765, g: 0.84705883, b: 1, a: 0.84}
+    tabIdle: {r: 0.8784314, g: 0.8235294, b: 1, a: 0.62}
+    pill: {r: 0.76862746, g: 0.6666667, b: 1, a: 0.28}
+    hint: {r: 0.8784314, g: 0.8235294, b: 1, a: 0.55}
+  _loadingAlpha: 0.85
+  _closeFill: {r: 0.05490196, g: 0.05490196, b: 0.101960786, a: 0.4}
+  _closeHoverFill: {r: 1, g: 0.9411765, b: 0.87058824, a: 0.18}
+  _contentDelay: 1.65
+  _fadeTime: 0.5
+  _fadeDelay: 0.18
+  _letterboxFadeTime: 0.3
+  _letterboxTime: 1.1
+  _letterboxDelay: 0.1
+  _sideInTime: 0.9
+  _sideInDistance: 34
+  _nameLetterDelay: 0.15
+  _nameLetterTime: 1
+  _nameLetterStagger: 0.11
+  _nameLetterRise: 16
+  _firstPageDelay: 0.35
+  _firstPageTime: 0.7
+  _pageSwapDelay: 0.15
+  _pageFadeTime: 0.35
+  _pageSlideDistance: 12
+  _pillTime: 0.5
+  _tabColorTime: 0.3
+  _numberInTime: 0.6
+  _numberInDistance: 26
+  _sweepTime: 0.8
+  _sweepPeak: 0.15
+  _loadingFadeTime: 0.3
+  _itemInTime: 0.5
+  _itemInDistance: 10
+  _itemStagger: 0.05
+  _statInTime: 0.7
+  _statInDistance: 12
+  _statStagger: 0.055
+  _barFillTime: 1.15
+  _barFillDelay: 0.2
+  _countUpTime: 0.82
+  _countUpDelay: 0.14
+  _countUpStagger: 0.055
+  _barShinePeriod: 3.8
+  _barShineDelay: 1.3
+  _barShineMoveRatio: 0.45
+  _barShineWidthRatio: 0.6
+  _barShineRange: {x: -0.6, y: 1}
+  _themeTime: 0.5
+  _nameSwapTime: 0.55
+  _nameSwapDistance: 18
+  _parallax: {x: 8, y: 4.8}
+  _parallaxFollow: 0.08

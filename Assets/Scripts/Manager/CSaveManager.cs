@@ -29,6 +29,8 @@ public class CSaveData
     public int bossClear;
     public int pradonaPower;
     public List<float> bossTime;
+    public float playTime;
+    public int bossFound;
     #endregion
 
     #region Property
@@ -182,6 +184,36 @@ public class CSaveData
         set
         {
             pradonaPower = (int)value;
+        }
+    }
+
+    /// <summary>
+    /// 누적 플레이시간(초)입니다. 이전 저장 데이터는 0으로 읽습니다.
+    /// </summary>
+    public float PlayTime
+    {
+        get
+        {
+            return playTime;
+        }
+        set
+        {
+            playTime = Mathf.Max(0f, value);
+        }
+    }
+
+    /// <summary>
+    /// 전투를 시작한 군주 목록입니다. 이전 저장 데이터는 None으로 읽습니다.
+    /// </summary>
+    public EBossClear BossFound
+    {
+        get
+        {
+            return (EBossClear) bossFound;
+        }
+        set
+        {
+            bossFound = (int)value;
         }
     }
 
