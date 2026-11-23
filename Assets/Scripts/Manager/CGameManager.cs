@@ -721,9 +721,9 @@ public class CGameManager : MonoBehaviour
                 _completedQuest,
                 _bossClearState,
                 _player.PradonaPower,
-                _bossTime);
-        data.PlayTime = _playTime;
-        data.BossFound = _bossFoundState;
+                _bossTime,
+                _playTime,
+                _bossFoundState);
 
         return CSaveManager.SaveData(slot, data);
     }

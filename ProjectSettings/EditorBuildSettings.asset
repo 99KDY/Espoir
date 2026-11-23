@@ -17,28 +17,28 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/Heyseong/TowerScene.unity
     guid: a3f5e4c5f931d8e47a91fb38da4eccfa
-  - enabled: 0
+  - enabled: 1
     path: Assets/Scenes/IngameScene/TitleScreen.unity
     guid: 61945f486fd83d24799c7b5f8b108f21
-  - enabled: 0
+  - enabled: 1
     path: Assets/Scenes/IngameScene/DesertScene.unity
     guid: bbf887d6420aeae4da5f169656d04c77
-  - enabled: 0
+  - enabled: 1
     path: Assets/Scenes/IngameScene/GardenScene.unity
     guid: 522de41ad1b88f341ac23e63f11ebb91
-  - enabled: 0
+  - enabled: 1
     path: Assets/Scenes/IngameScene/TowerScene.unity
     guid: 7d12a0bf190e1d14888fd4d1286854bc
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/QA_Test/TC_2.2/TitleScreen.unity
     guid: 1758a7d194f071b499c4d2de74320734
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/QA_Test/TC_2.2/DesertScene.unity
     guid: 9d9a4910bb81fff41b56a2c1ce98bf56
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/QA_Test/TC_2.2/GardenScene.unity
     guid: 6941e5b535a239644a477ff1b2fa6fda
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/QA_Test/TC_2.2/TowerScene.unity
     guid: f2fcdef0538a83941ad60912b84d1d10
   m_configObjects: {}
