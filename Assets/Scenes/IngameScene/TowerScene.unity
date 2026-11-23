@@ -2127,6 +2127,8 @@ MonoBehaviour:
   _previewPattern: {fileID: 851047416706587755, guid: 3d56617bb82fb404eae644a9d2c9f4e5, type: 3}
   _swordPrefab: {fileID: 4162717494305218262, guid: 860c1b0ade605da4c9401d247d9ef216, type: 3}
   _slamImpactPrefab: {fileID: 1239580890412519468, guid: 928d716669357ab46935688a87d58e3f, type: 3}
+  _warpSwordPrefab: {fileID: 4162717494305218262, guid: 558b15c7709863240a37a4fb0968275b, type: 3}
+  _warpArrivalFxPrefab: {fileID: 3287305276043393269, guid: e91740dee565bc745be1bc776ed66c2c, type: 3}
   _battleStartRadius: 20
   _battleEndRadius: 25
   _attackRadius: 3
@@ -2136,7 +2138,7 @@ MonoBehaviour:
   _moveObstacleMask:
     serializedVersion: 2
     m_Bits: 193
-  _enableLog: 0
+  _enableLog: 1
 --- !u!136 &296554356
 CapsuleCollider:
   m_ObjectHideFlags: 0
