@@ -17,7 +17,7 @@ MonoBehaviour:
   _rarity: 1
   _cost: 600
   _itemIcon: {fileID: -863389763, guid: 47160164cc1f71243bfeef5631611974, type: 3}
-  _description: "<i>\uc0ac\ub791\ubc1b\ub358 \uc5bc\uad74\uc744 \uc78a\uc9c0 \uc54a\uc73c\ub824 \ub080 \ubc18\uc9c0.</i>\nHP +25, ATK +20, DEF +2.5\n\uc138\ud2b8 \ud6a8\uacfc \uc0c9\uc695\uc758 \uc18d\uc0ad\uc784\n(2) \uacf5\uaca9\uc18d\ub3c4 +10%\n(3) \uacf5\uaca9\ub825 +25%\n(4) \uc8fc\ub294 \ud53c\ud574 +30%, \ubc1b\ub294 \ud53c\ud574 +10%"
+  _description: "<i>\uc0ac\ub791\ubc1b\ub358 \uc5bc\uad74\uc744 \uc78a\uc9c0 \uc54a\uc73c\ub824 \ub080 \ubc18\uc9c0.</i>\nHP +25, ATK +20, DEF +2.5\n\uc138\ud2b8 \ud6a8\uacfc \uc0c9\uc695\uc758 \uc18d\uc0ad\uc784\n(2) \uacf5\uaca9\uc18d\ub3c4 +10%\n(3) \uacf5\uaca9\ub825 +25%\n(4) \uc8fc\ub294 \ud53c\ud574 +30%, \ubc1b\ub294 \ud53c\ud574 +15%"
   _slot: 3
   _setNumber: 202
   _action:
