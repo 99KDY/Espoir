@@ -33,11 +33,14 @@ public class CPreviewPattern : MonoBehaviour
 
     private float _Timer;
 
-    void Start()
+    private void Awake()
     {
         _mesh = new Mesh();
         this.GetComponent<MeshFilter>().mesh = _mesh;
-        
+    }
+    private void OnDestroy()
+    {
+        if (_mesh != null) Destroy(_mesh);
     }
 
     // 패턴 구역 채우기 

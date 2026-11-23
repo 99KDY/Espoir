@@ -266,7 +266,9 @@ public class CSaveData
             EQuestList completedQuest,
             EBossClear bossClear,
             EPradonaPower pradonaPower,
-            Dictionary<EBossClear, float> bossTime
+            Dictionary<EBossClear, float> bossTime,
+            float playTime,
+            EBossClear bossFound
         )
     {
         this.version = version;
@@ -281,6 +283,8 @@ public class CSaveData
         this.BossClear = bossClear;
         this.PradonaPower = pradonaPower;
         this.BossTime = bossTime;
+        this.playTime = playTime;
+        this.BossFound = bossFound;
     }
 
     public CSaveData
@@ -296,10 +300,12 @@ public class CSaveData
         EQuestList completedQuest,
         EBossClear bossClear,
         EPradonaPower pradonaPower,
-        Dictionary<EBossClear, float> bossTime
+        Dictionary<EBossClear, float> bossTime,
+        float playTime,
+        EBossClear bossFound
     ) : this(version, currentStage, money, inventory, equipment,
         new List<int>(quickslot), availableQuest,actingQuest, completedQuest,
-        bossClear, pradonaPower, bossTime) { }
+        bossClear, pradonaPower, bossTime, playTime, bossFound) { }
 }
 
 public static class CSaveManager 
@@ -314,7 +320,7 @@ public static class CSaveManager
 #else
     private readonly static bool _isPersist = true;
 #endif
-    public readonly static int Version = 2;
+    public readonly static int Version = 3;
 
     public static int MaxSaveSlot
     {
@@ -697,6 +703,12 @@ public static class CSaveManager
         {
             data.BossTime = null;
             data.version = 2;
+        }
+        if (data.Version == 2)
+        {
+            data.PlayTime = data.playTime;
+            data.BossFound |= data.BossClear;
+            data.version = 3;
             return true;
         }
         return false;
