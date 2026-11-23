@@ -1,5 +1,6 @@
 ﻿
 using Cysharp.Threading.Tasks;
+using Cysharp.Threading.Tasks.Triggers;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -60,8 +61,10 @@ public class CSlothBoss : CEnemy, IBoss
     [SerializeField] private float _areaAngle = 30f;
     [SerializeField] private int _divideArea = 6;
 
-
-
+    [Header("Thunder Votalge Cylinder")]
+    [SerializeField] private float _thunderOrbitRadius = 11f;
+    [SerializeField] private float _thunderSpeed = 90f;
+    [SerializeField] private float _hitRadius = 2f;
 
 
     #endregion
@@ -98,7 +101,7 @@ public class CSlothBoss : CEnemy, IBoss
     private Vector3 _patternPos;
     private Vector3 _savePos;
 
-
+    private float _thunderAngle;
     private float _grogiDamage;
     private float _atkTimer;
     private float _delayTimer;
@@ -175,7 +178,7 @@ public class CSlothBoss : CEnemy, IBoss
         base.Start();
         _startState = ESlothBossState.Idle;
         _currentState = _bossState;
-
+     
     }
 
 
@@ -1055,7 +1058,7 @@ public class CSlothBoss : CEnemy, IBoss
 
     private void LikeOneShotAttack_damage()
     {
-        float damage = _mainCount == 1 ? 0.6f : 0.99f;
+        float damage = _mainCount == 1 ? 0.6f : 0.95f;
         LikeOneShotDamage(damage);
     }
 
@@ -1220,7 +1223,7 @@ public class CSlothBoss : CEnemy, IBoss
         _onAttack = true;
         if(_previewPattern != null)
         {
-            _previewPattern.ShowDonutPattern(50, 19f, 14f);
+            _previewPattern.ShowDonutPattern(100, 14f, 10f);
         }
 
         _atkTimer = 0;
@@ -1258,7 +1261,7 @@ public class CSlothBoss : CEnemy, IBoss
 
             Vector3 damagePosDir = rot * this.transform.forward;
 
-            Vector3 damagePos = this.transform.position + (damagePosDir * 18f);
+            Vector3 damagePos = this.transform.position + (damagePosDir * 11f);
             
             damageZones.Add(damagePos);
         }
@@ -1314,21 +1317,23 @@ public class CSlothBoss : CEnemy, IBoss
 
     private void ThunderVoltage()
     {
-        int hit = FindPlayer(20);
+        int hit = FindPlayer(22);
+
+        _thunderAngle += _thunderSpeed * Time.deltaTime;
 
         List<Vector3> startZones = new List<Vector3>();
 
         for (int i = 0; i < 4; i++)
         {
-            float startAngle = 45f + (i * 90f);
+            float startAngle = 45f + (i * 90f) - _thunderAngle;
 
             Quaternion rot = Quaternion.Euler(0f, startAngle, 0f);
 
-            Vector3 startDir = rot * this.transform.forward;
+            Vector3 dir = rot * this.transform.forward;
 
-            Vector3 startPos = this.transform.position + (startDir * 18f);
+            Vector3 currentPos = this.transform.position + (dir * _thunderOrbitRadius);
 
-            startZones.Add(startPos);
+            startZones.Add(currentPos);
         }
 
 
@@ -1345,16 +1350,23 @@ public class CSlothBoss : CEnemy, IBoss
                 continue;
             }
 
-            float playerToPos = Vector3.Angle(this.transform.forward, player.transform.position);
            
-
             bool isHit = false;
 
             for (int j = 0; j < 4; j++)
             {
-                if (playerToPos == 45f + (j * 90f))
+                Vector3 voltagePos = startZones[j];
+
+                Vector2 voltageXZ = new Vector2(voltagePos.x, voltagePos.z);
+                Vector2 playerXZ = new Vector2(player.transform.position.x, player.transform.position.z);
+
+                float distance = Vector3.Distance(voltageXZ, playerXZ);
+                            
+                if(distance <= _hitRadius)
                 {
                     isHit = true;
+
+                    break;
                 }
 
             }
@@ -1423,7 +1435,7 @@ public class CSlothBoss : CEnemy, IBoss
         {
             _isMain = false;
             _isSub = false;
-            
+
             _animator.ResetTrigger(_firstNorm);
             _animator.ResetTrigger(_secondNorm);
             _animator.ResetTrigger(_thirdNorm);
@@ -1434,7 +1446,7 @@ public class CSlothBoss : CEnemy, IBoss
             _animator.ResetTrigger(_firstMain);
             _animator.ResetTrigger(_secondMain);
             _animator.ResetTrigger(_thirdMain);
-            
+
             _animator.SetTrigger("tGrogi");
         }
 
