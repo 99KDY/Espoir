@@ -1,0 +1,102 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4d2af088db76e164fa9128ed19bca50e, type: 3}
+  m_Name: CharacterInfoHandMark
+  m_EditorClassIdentifier: 
+  _sourceRendererName: PradonaUpperBody
+  _handBoneName: hand.L
+  _middleBoneName: middle_proximal.L
+  _markMesh: {fileID: 4300000, guid: 6dd60b9a5e38d1d4e8644b9c48c51c36, type: 2}
+  _rimMesh: {fileID: 4300000, guid: 26244daf875f39941834880d5ec6dabc, type: 2}
+  _frameCenter: {x: 0.0008645807, y: 0.062154695, z: 0.000034688248}
+  _frameRight: {x: -0.9998439, y: 0.013913647, z: -0.010912217}
+  _frameUp: {x: 0.013908375, y: 0.99990326, z: 0.00055801036}
+  _frameNormal: {x: -0.010918927, y: -0.00040615207, z: 0.9999401}
+  _handLength: 0.10360118
+  _markSize: 0.08702499
+  _crestTexture: {fileID: 2800000, guid: 5e9232ae7dfb0654fb73ff265a8a68e7, type: 3}
+  _circleTexture: {fileID: 2800000, guid: 2b3f2138b3f2c294284cde170340c594, type: 3}
+  _crescentTexture: {fileID: 2800000, guid: f385a06c252da8f41b394063047cf168, type: 3}
+  _inkShader: {fileID: 4800000, guid: 75bb1fbf3eac564429a1330e88890d82, type: 3}
+  _glowShader: {fileID: 4800000, guid: a958759dccc1ebf43acad392f5d15bbb, type: 3}
+  _rimShader: {fileID: 4800000, guid: 2cb1501feff7bfd47b531a009703461f, type: 3}
+  _ringShader: {fileID: 4800000, guid: eca8b87448b60b14b835a1b5cdb8c877, type: 3}
+  _inkColor: {r: 0.7254902, g: 0.54509807, b: 0.8784314, a: 1}
+  _inkWhiten: 0.3
+  _inkAmount: 0.448
+  _glowColor: {r: 0.8627451, g: 0.8117647, b: 1, a: 1}
+  _coreWhite: 0.7
+  _core: 1.5
+  _sheen: 0.28
+  _aura: 0.07
+  _flow: 0.15
+  _idle: 0
+  _glowTint: {r: 0.5529412, g: 0.47058824, b: 0.8627451, a: 1}
+  _glowTintWhiten: 0.4
+  _halo: 0.5
+  _wide: 0.112
+  _keepHue: 0.9
+  _skinPeak: 0.9
+  _rimPower: 0.6
+  _rimColorA: {r: 0.6156863, g: 0.36078432, b: 1, a: 1}
+  _rimColorB: {r: 0.84313726, g: 0.65882355, b: 1, a: 1}
+  _ringColorA: {r: 0.5411765, g: 0.3019608, b: 1, a: 1}
+  _ringColorB: {r: 0.84313726, g: 0.65882355, b: 1, a: 1}
+  _rings:
+  - usesCrescent: 0
+    isBracelet: 0
+    radius: 1.05
+    lift: 0.6
+    along: 0.5
+    tilt: 0
+    spin: 0.1
+    power: 0.8
+    hot: 2.2
+    isBurst: 0
+    burstDuration: 0
+    burstFrom: 0
+    startAngle: 3.04
+  - usesCrescent: 1
+    isBracelet: 1
+    radius: 0.7
+    lift: 0.1
+    along: 0.42
+    tilt: 24
+    spin: 0.85
+    power: 0.7
+    hot: 2.2
+    isBurst: 0
+    burstDuration: 0
+    burstFrom: 0
+    startAngle: 1.74
+  - usesCrescent: 1
+    isBracelet: 0
+    radius: 2.3
+    lift: 0.3
+    along: 0.5
+    tilt: 0
+    spin: 0.5
+    power: 1
+    hot: 3
+    isBurst: 1
+    burstDuration: 0.5
+    burstFrom: 0.2
+    startAngle: 1.68
+  _revealTime: 0.32
+  _glowRise: 9
+  _glowFall: 3.5
+  _pulse: 0.06
+  _pulseSpeed: 1.4
+  _protectAlong: 0.6
+  _glowScale: 1
+  _ringScale: 1
+  _rimScale: 1

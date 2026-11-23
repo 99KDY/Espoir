@@ -1,0 +1,283 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 10d886c6dcbb0e34580a4f494e1eec95, type: 3}
+  m_Name: CharacterInfoStageSettings
+  m_EditorClassIdentifier: 
+  _assets:
+    playerVisualPrefab: {fileID: 1631033712835418074, guid: 3ab393c7bb3f458eab236e36312a1582, type: 3}
+    helperPrefab: {fileID: 294617406054953270, guid: 3aae0360bd2e339499387d5f0c08f528, type: 3}
+    handMark: {fileID: 11400000, guid: cc7f4404671298948b3b8706099ec60f, type: 2}
+    holdClips:
+    - {fileID: 7400000, guid: 61e663e1dd0016040abd081c6ed154b7, type: 2}
+    - {fileID: 7400000, guid: 0c9f2e2185aafe34fae940068ca8b2cb, type: 2}
+    - {fileID: 7400000, guid: 38daa0f8e4381a447a8202b04a3c85ba, type: 2}
+    transitionClips:
+    - {fileID: 7400000, guid: 3f1f469374b90b74299436b5840daef7, type: 2}
+    - {fileID: 7400000, guid: 3e5e496399ca7a943afb1ec10df3966f, type: 2}
+    - {fileID: 7400000, guid: 7de86a8ee98f2d044ac8d3be8b18622a, type: 2}
+    - {fileID: 7400000, guid: 573142bae1f6df244a03afa2dc65c27d, type: 2}
+    - {fileID: 7400000, guid: c6d34a2196e7b9449995a23ab8653059, type: 2}
+    - {fileID: 7400000, guid: a243cf53e81b2a047b6716989c7d3c29, type: 2}
+    swapOutClip: {fileID: 7400000, guid: caf80d5f8773835439c16df45061b6a8, type: 2}
+    helperSwapClip: {fileID: 7400000, guid: ec5fc5a0171b127488b915bcd8e3d50a, type: 2}
+    helperHoldClip: {fileID: 7400000, guid: f85ff4801364cc640aec140387c650d7, type: 2}
+    wordTextures:
+    - {fileID: 2800000, guid: d0b9619d84390074a9221ff2842dab9c, type: 3}
+    - {fileID: 2800000, guid: 7fd58524190d0d34eaf678d71bc5ab8c, type: 3}
+    - {fileID: 2800000, guid: 8f37595a49c6d7a41bb45ec1957626b7, type: 3}
+    - {fileID: 2800000, guid: 328c0120d2eeb1842977558b1117d492, type: 3}
+    wordShader: {fileID: 4800000, guid: 901d2c6cb25699843a36280d11672b8d, type: 3}
+    haloShader: {fileID: 4800000, guid: a28d2633db757cc43860d55f770e5656, type: 3}
+    glintShader: {fileID: 4800000, guid: 6cff449c72e5bc049865f3f83e36209b, type: 3}
+    swordEndA: {x: -1.3248596, y: 0.0003198471, z: -0.0003198472}
+    swordEndB: {x: 0.21567477, y: 0.0003198471, z: -0.0003198472}
+    postProcessResources: {fileID: 11400000, guid: d82512f9c8e5d4a4d938b575d47f88d4, type: 2}
+  _shots:
+  - azimuth: -0.28
+    distance: 2.1
+    height: 1.52
+    lookHeight: 1.36
+    fieldOfView: 26
+    screenX: 0.3
+    face: -0.2
+    drift: 0.012
+  - azimuth: 0.42
+    distance: 5.2
+    height: 1.15
+    lookHeight: 1.2
+    fieldOfView: 29
+    screenX: 0.36
+    face: 0.1
+    drift: 0.01
+  - azimuth: 2.75
+    distance: 3.4
+    height: 1.75
+    lookHeight: 1.45
+    fieldOfView: 34
+    screenX: 0.32
+    face: 0
+    drift: 0.008
+  _camera:
+    tabTime: 0.9
+    whipPower: 11
+    parallax: 1.2
+    parallaxAzimuth: 0.05
+    parallaxHeight: 0.07
+    mouseFollow: 3
+    push: 0.05
+    pushTime: 9
+    introAzimuth: 2.4
+    introDistance: 1.5
+    introHeight: 2.8
+    introTime: 2.3
+    openBlendTime: 0.85
+    closeBlendTime: 0.6
+    dragAngle: 0.006
+    doubleClickTime: 0.3
+    shakeDecay: 7
+    dragThrow: 0.6
+    dragMaxSpeed: 6
+    dragDamping: 4
+    dragBand: 0.07
+    depthOffset: 10
+    volumeLayer: 1
+  _occlusion:
+    mask:
+      serializedVersion: 2
+      m_Bits: 9
+    baseStep: 0.39
+    baseTries: 8
+    bodyHeights: {x: 0.42, y: 0.93, z: 1.53}
+    cameraRadius: 0.25
+  _look:
+    blur: 11
+    dim: 0.4
+    tint: {x: 0.9, y: 0.9, z: 1.03}
+    saturation: 0.5
+    vignette: 0.34
+    side: 0.9
+    follow: 3.2
+    focusRange: 1
+    focusHeight: 1
+    centerHeight: 1.05
+    flash: 0.8
+    zoom: 0.8
+    moment: 1.5
+    landFlash: 0.35
+    flashDecay: 5
+    zoomDecay: 9
+    haloDecay: 2.2
+    wordOpacity: 0.62
+    wordX: 0.34
+    wordWidth: 0.6
+    wordDistance: 1.3
+    wordColor: {r: 1, g: 0.9411765, b: 0.8627451, a: 1}
+    wipeOutTime: 0.16
+    wipeInTime: 0.6
+    sweepTime: 1.3
+    sweepDelay: 0.55
+    halo: 0.5
+    haloTop: {r: 1, g: 0.6117647, b: 0.5254902, a: 1}
+    haloBottom: {r: 0.6039216, g: 0.6431373, b: 1, a: 1}
+    haloSize: {x: 3.3, y: 3.9}
+    haloDistance: 0.75
+    haloHeight: 1.3
+    glint: 1
+    glintColorA: {r: 1, g: 0.9490196, b: 0.87058824, a: 1}
+    glintColorB: {r: 1, g: 0.83137256, b: 0.6039216, a: 1}
+    glintTime: 0.9
+    glintOpenDelay: 1.1
+    panelBlur: 18
+    panelEdge: 0.5417
+    panelFeather: 0.2438
+  _theme:
+    tint: 0.2925
+    vignette: 0.1575
+    match: 0.45
+    follow: 5
+    colorFollow: 6
+    player:
+      light: {r: 1, g: 0.43529412, b: 0.4, a: 1}
+      backgroundTint: {x: 1.18, y: 0.9, z: 0.88}
+      word: {r: 1, g: 0.8901961, b: 0.85490197, a: 1}
+      haloTop: {r: 1, g: 0.5529412, b: 0.4627451, a: 1}
+      haloBottom: {r: 1, g: 0.72156864, b: 0.6431373, a: 1}
+    helper:
+      light: {r: 0.6431373, g: 0.53333336, b: 1, a: 1}
+      backgroundTint: {x: 0.93, y: 0.88, z: 1.18}
+      word: {r: 0.8509804, g: 0.7882353, b: 1, a: 1}
+      haloTop: {r: 0.72156864, g: 0.6117647, b: 1, a: 1}
+      haloBottom: {r: 0.56078434, g: 0.6156863, b: 1, a: 1}
+  _swap:
+    hitTime: 0.9
+    glowTime: 2.15
+    hideTime: 2.45
+    holdTime: 2.6
+    rate:
+    - {x: 0, y: 1}
+    - {x: 0.76, y: 1}
+    - {x: 0.8, y: 0.45}
+    - {x: 0.862, y: 0.45}
+    - {x: 0.884, y: 1}
+    - {x: 0.8995, y: 1}
+    - {x: 0.9, y: 0.03}
+    - {x: 0.9035, y: 0.03}
+    - {x: 0.912, y: 0.3}
+    - {x: 0.975, y: 0.3}
+    - {x: 1.03, y: 1}
+    - {x: 99, y: 1}
+    rateStep: 0.0004
+    keys:
+    - time: 0
+      isCut: 1
+      lookAt: {x: 0.25, y: 1.22, z: 0}
+      azimuth: -13
+      distance: 4
+      heightOffset: -0.05
+      fieldOfView: 30
+      roll: -0.03
+      blur: 1
+    - time: 0.76
+      isCut: 0
+      lookAt: {x: 0.42, y: 1.36, z: 0}
+      azimuth: -4
+      distance: 3
+      heightOffset: -0.18
+      fieldOfView: 30
+      roll: 0.02
+      blur: 1
+    - time: 0.76
+      isCut: 1
+      lookAt: {x: 0.465, y: 1.56, z: 0}
+      azimuth: 8
+      distance: 2.25
+      heightOffset: 0.04
+      fieldOfView: 28
+      roll: 0
+      blur: 0.6
+    - time: 1
+      isCut: 0
+      lookAt: {x: 0.465, y: 1.56, z: 0}
+      azimuth: -3
+      distance: 1.95
+      heightOffset: 0.02
+      fieldOfView: 28
+      roll: 0
+      blur: 0.6
+    - time: 1
+      isCut: 1
+      lookAt: {x: 0.52, y: 1.24, z: 0.14}
+      azimuth: 14
+      distance: 3.3
+      heightOffset: 0.04
+      fieldOfView: 29
+      roll: 0
+      blur: 0.9
+    - time: 2.15
+      isCut: 0
+      lookAt: {x: 0.09, y: 1.34, z: 0.3}
+      azimuth: 10
+      distance: 1.72
+      heightOffset: 0.03
+      fieldOfView: 28
+      roll: 0
+      blur: 0.85
+    fitTries:
+    - {x: 0, y: 1}
+    - {x: 14, y: 1}
+    - {x: -14, y: 1}
+    - {x: 0, y: 0.82}
+    - {x: 28, y: 1}
+    - {x: -28, y: 1}
+    - {x: 28, y: 0.82}
+    - {x: -28, y: 0.82}
+    - {x: 45, y: 0.9}
+    - {x: -45, y: 0.9}
+    - {x: 0, y: 0.66}
+    - {x: 65, y: 0.9}
+    - {x: -65, y: 0.9}
+    - {x: 90, y: 0.85}
+    - {x: -90, y: 0.85}
+    mouseAzimuth: 2.4
+    mouseHeight: 0.05
+    helperLightAngles: {x: 35, y: 32}
+    startFlash: 0.5
+    hitFlash: 0.85
+    hitZoom: 0.8
+    hitShake: 0.65
+    hitShakeDelay: 0.12
+    leaveFlash: 0.8
+    leaveZoom: 0.8
+    wordPosition: {x: 0.13, y: 0.67}
+    wordWidth: 0.6
+    wordAppearTime: 1.9
+    wordAppearLength: 0.5
+    wordDepth: 1.5
+    wordMinDepth: 2.4
+    gustLength: 1.2
+    gustStrength: 1.1
+    gustDecay: 0.22
+    gustBack: 0.8
+    gustUp: 0.42
+    protectRadius: 0.3
+  _motion:
+    transitionBlend: 0.12
+    settleBlend: 0.14
+    holdBlend: 0.45
+    swapBlend: 0.26
+    arriveTimes:
+    - 0.62
+    - 0.8
+    - 0.75
+    - 0.79
+    - 0.96
+    - 0.9

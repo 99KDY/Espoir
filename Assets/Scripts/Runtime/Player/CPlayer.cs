@@ -70,6 +70,11 @@ public class CPlayer : CUnit
     public float MovementSpeedMultiplier => _movementMultiply;
     public float AttackSpeedMultiplier => _attackSpeedMultiply;
     public float MaxMp => _maxMp;
+    public float BaseHpMax => _baseHpMax;
+    public float BaseAttack => _baseAttack;
+    public float BaseDefence => _baseDefence;
+    public float BaseCriticalRate => _baseCritRate;
+    public float BaseCriticalDamage => _baseCritDmg;
     public CInventory Inventory => _inventory;
     protected override IReadOnlyList<CStatus> EquipmentStatusForEffects => _equipmentStatus;
     public CPlayerPassive Passive => _passive;
