@@ -13,6 +13,7 @@ public class CEnemy : CUnit
     [SerializeField] private CEnemyStatSO _targetStatSO;
 
     [Header("드롭하는 아이템 범위")]
+    [SerializeField] private int _dropCount = 1;
     [SerializeField] private List<SDropTable> _drops;
 
     private bool _isDropped = false;
@@ -70,9 +71,12 @@ public class CEnemy : CUnit
         if (!_isDropped)
         {
             _isDropped = true;
-            if (player != null && player.Inventory != null)
+            if (player != null && player.Inventory != null && _dropCount > 0)
             {
-                if (CItemSO.TryMakeDropItem(_drops, out CItemSO targetItem)) player.Inventory.AddItem(targetItem.Id);
+                for (int i = 0; i < _dropCount; i++)
+                {
+                    if (CItemSO.TryMakeDropItem(_drops, out CItemSO targetItem)) player.Inventory.AddItem(targetItem.Id);
+                }
             }
         }
     }

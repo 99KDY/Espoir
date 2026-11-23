@@ -4232,6 +4232,7 @@ MonoBehaviour:
   _statusEffectOffset: {x: 0, y: 0, z: 0}
   _statusEffectRadius: 1
   _targetStatSO: {fileID: 0}
+  _dropCount: 1
   _drops: []
 --- !u!136 &1023618043
 CapsuleCollider:
