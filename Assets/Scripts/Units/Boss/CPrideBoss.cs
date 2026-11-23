@@ -34,11 +34,15 @@ public class CPrideBoss : CEnemy, IBoss
     [Header("인식범위 (확인용)")]
     [SerializeField] private float _battleStartRadius = 20f;
     [SerializeField] private float _battleEndRadius = 25f;
-    [SerializeField] private float _attackRadius = 3f;
+    [SerializeField] private float _attackRadius = 2f; // 기본 평타 검찍기 공격범위
+    [SerializeField] private float _attackDelay = 1.5f; // 기본 평타 검찍기 내려오는 시간
 
-    [Header("평타 이동")]
-    [SerializeField] private LayerMask _groundMask = 1 << 3; // Ground
+    [Header("평타 이동용")]
+    [SerializeField] private LayerMask _groundMask = 1 << 0;
     [SerializeField] private LayerMask _moveObstacleMask = (1 << 0) | (1 << 6) | (1 << 7);
+
+    [Header("서브 패턴용")]
+    [SerializeField] private float _subAttackChance = 1 / 3f;
 
     [Header("디버그 로그")]
     [SerializeField] private bool _enableLog = false;
@@ -50,6 +54,7 @@ public class CPrideBoss : CEnemy, IBoss
     private CancellationTokenSource _cts;
     private readonly List<CEspoirBossFxPlayer> _activeSlamImpacts = new List<CEspoirBossFxPlayer>();
     private Animator _animator;
+    private float _realAttackDelay;
 
     
     private bool CanFight => _player != null && _previewPattern != null
@@ -76,6 +81,7 @@ public class CPrideBoss : CEnemy, IBoss
         _rb = GetComponent<Rigidbody>();
         _collider = GetComponent<CapsuleCollider>();
         _animator = GetComponentInChildren<Animator>(true);
+        _realAttackDelay = _attackDelay;
     }
 
     protected override void Update()
@@ -108,11 +114,12 @@ public class CPrideBoss : CEnemy, IBoss
 
     private async UniTask RunBattleLoop(CancellationToken token)
     {
+        _realAttackDelay = _attackDelay; // 나중에 2페되면 이거 줄이면 될듯!
         try
         {
             while (!token.IsCancellationRequested)
             {
-                await UniTask.Delay(1500, delayTiming: PlayerLoopTiming.LastUpdate,
+                await UniTask.Delay(3000, delayTiming: PlayerLoopTiming.LastUpdate,
                     cancellationToken: token);
 
                 if (!CanFight
@@ -121,12 +128,19 @@ public class CPrideBoss : CEnemy, IBoss
                     return;
                 }
 
-                await RunNormalAttack(token);
+                if (_subAttackChance > 0f && Random.value <= _subAttackChance)
+                {
+                    await RunSubAttack(token);
+                }
+                else
+                {
+                    await RunNormalAttack(token);
+                }
             }
         }
         catch (OperationCanceledException) when (token.IsCancellationRequested)
         {
-            // 전투 종료로 진행 중인 공격이 취소됨.
+            // 전투 종료로 진행 중인 공격이 취소
         }
         finally
         {
@@ -145,17 +159,17 @@ public class CPrideBoss : CEnemy, IBoss
 
 
         // 2번: 4m 이내에서 50%.
-        if (distanceSquared > 0.0001f && distanceSquared <= 4f * 4f && Random.value < 0.99f)
+        if (distanceSquared > 0.0001f && distanceSquared <= 4f * 4f && Random.value < 0.25f)
         {
             if (_enableLog) CLogger.Log("현재 거리 4m 이내, 백스탭 시도함");
             Vector3 forward = toPlayer.normalized;
-            Vector3 backstepPoint = _rb.position - forward * 4f;
+            Vector3 backstepPoint = _rb.position - forward * 5f;
 
             if (TryGetMoveDestination(backstepPoint, out _)
-                && !_rb.SweepTest(-forward, out _, 4f, QueryTriggerInteraction.Ignore))
+                && !_rb.SweepTest(-forward, out _, 5f, QueryTriggerInteraction.Ignore))
             {
                 _rb.rotation = Quaternion.LookRotation(forward);
-                Vector3 attackPoint = _rb.position + forward * 4f;
+                Vector3 attackPoint = _rb.position + forward * 5f;
 
                 if (_animator != null && _animator.isActiveAndEnabled)
                 {
@@ -163,7 +177,8 @@ public class CPrideBoss : CEnemy, IBoss
                 }
 
                 await UniTask.WhenAll(
-                    SlamTask(attackPoint, 0.5f, 0.15f, _attackRadius * 0.75f, token),
+                    SlamTask(attackPoint, _realAttackDelay * 0.75f, 0.15f, _attackRadius * 0.65f, token,
+                        new SDamageInfo(100f, false, ERatioSwitch.Constant, false, null)),
                     BackstepTask(-forward, token));
                 return;
             }
@@ -206,25 +221,143 @@ public class CPrideBoss : CEnemy, IBoss
                     {
                         Instantiate(_warpArrivalFxPrefab, destination, Quaternion.identity);
                     }
-
-                    await SlamTask(_player.transform.position, 0.5f, 0.15f, _attackRadius * 0.75f, token);
-                    return;
                 }
+                await SlamTask(_player.transform.position, _realAttackDelay * 0.75f, 0.15f, _attackRadius * 0.65f, token,
+                        new SDamageInfo(100f, false, ERatioSwitch.Constant, false, null));
+                return;
             }
         }
 
         // 1번: 기본 낙하와 이동 불가 시 대체 공격.
-        await SlamTask(_player.transform.position, 1f, 0.3f, _attackRadius, token);
+        await SlamTask(_player.transform.position, _realAttackDelay * 1f, 0.2f, _attackRadius, token,
+                        new SDamageInfo(100f, false, ERatioSwitch.Constant, false, null));
     }
+
+    private async UniTask RunSubAttack(CancellationToken token)
+    {
+        switch(Random.Range(0, 2))
+        {
+            case 0:
+                await RunGiantSlam(token);
+                break;
+            case 1:
+                await RunSeveralSlam(true, token);
+                break;
+            default:
+                throw new NotImplementedException();
+        }
+        
+    }
+
+    #region SubPattern
+    private async UniTask RunGiantSlam(CancellationToken token)
+    {
+        const float fallingTime = 0.25f;
+        const float escapeGap = 1f; // 도망칠 수 있게 적용하는 최소 회피간격
+        Vector3 attackPoint = _player.transform.position;
+        
+
+        float aimedRadius = _attackRadius * 1.5f;
+        float spreadRadius = _attackRadius * 1f;
+        float innerDistance = aimedRadius + spreadRadius + escapeGap;
+
+        for (int i = 0; i < 3; i++)
+        {
+            token.ThrowIfCancellationRequested();
+
+            if (!CanFight || GetPlayerDistanceSquared() > _battleEndRadius * _battleEndRadius)
+            {
+                return;
+            }
+
+            float additionalTime = i % 2 == 1 ? 2.5f : 3f;
+
+            float readyTime = Mathf.Max(fallingTime, _realAttackDelay * 0.75f * additionalTime);
+            Vector3 center = _player.transform.position;
+            UniTask[] slams = new UniTask[1 + i * 2];
+
+            bool hitApplied = false;
+
+            bool TryConsumeHit()
+            {
+                if (hitApplied) return false;
+                hitApplied = true;
+                return true;
+            }
+
+            slams[0] = SlamTask(center, readyTime, fallingTime, aimedRadius, token,
+                new SDamageInfo(200f, false, ERatioSwitch.Constant, false, null), 3f, TryConsumeHit);
+
+            int spreadCount = slams.Length - 1;
+            float angleOffset = Random.Range(0f, 360f);
+
+            for (int j = 0; j < spreadCount; j++)
+            {
+                float angle = (angleOffset + j * (360f / spreadCount)
+                    + Random.Range(-15f, 15f)) * Mathf.Deg2Rad;
+                float distance = Random.Range(innerDistance, innerDistance + 3f);
+                Vector3 direction = new Vector3(Mathf.Sin(angle), 0f, Mathf.Cos(angle));
+                Vector3 point = center + direction * distance;
+
+                slams[j + 1] = SlamTask(point, readyTime, fallingTime, spreadRadius, token,
+                    new SDamageInfo(200f, false, ERatioSwitch.Constant, false, null), 2f, TryConsumeHit);
+            }
+
+            await UniTask.WhenAll(slams);
+        }
+    }
+
+    private async UniTask RunSeveralSlam(bool special, CancellationToken token)
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            token.ThrowIfCancellationRequested();
+
+            if (!CanFight || GetPlayerDistanceSquared() > _battleEndRadius * _battleEndRadius)
+            {
+                return;
+            }
+
+            bool hitApplied = false;
+
+            bool TryConsumeHit()
+            {
+                if (hitApplied) return false;
+                hitApplied = true;
+                return true;
+            }
+
+            SlamTask(_player.transform.position, _realAttackDelay, 0.2f, _attackRadius, token,
+                new SDamageInfo(150f, false, ERatioSwitch.Constant, false, null), 1.5f, TryConsumeHit).Forget();
+
+
+            if (special)
+            {
+                float angleOffset = Random.Range(0f, 360f) * Mathf.Deg2Rad;
+                float distance = Random.Range(_attackRadius * 2f + 0.5f, _attackRadius * 2f + 3f);
+                Vector3 direction = new Vector3(Mathf.Sin(angleOffset), 0f, Mathf.Cos(angleOffset));
+                Vector3 point = _player.transform.position + direction * distance;
+                SlamTask(point, _realAttackDelay, 0.2f, _attackRadius, token,
+                new SDamageInfo(150f, false, ERatioSwitch.Constant, false, null), 1.5f, TryConsumeHit).Forget();
+            }
+
+            await UniTask.Delay((int)(_realAttackDelay * 2000 / 3f),
+                delayTiming: PlayerLoopTiming.LastUpdate,
+                cancellationToken: token);
+        }
+
+        await UniTask.Delay(2000);
+    }
+    #endregion
 
     private async UniTask BackstepTask(Vector3 direction, CancellationToken token)
     {
-        // 0.4초 동안 뒤로 이동
-        _rb.velocity = direction * 10f + Vector3.up * _rb.velocity.y;
+        // 0.25초 동안 뒤로 이동
+        _rb.velocity = direction * 20f + Vector3.up * _rb.velocity.y;
 
         try
         {
-            await UniTask.Delay(400, delayTiming: PlayerLoopTiming.LastUpdate,
+            await UniTask.Delay(250, delayTiming: PlayerLoopTiming.LastUpdate,
                 cancellationToken: token);
         }
         finally
@@ -254,7 +387,7 @@ public class CPrideBoss : CEnemy, IBoss
 
         try
         {
-            await UniTask.Delay(100, delayTiming: PlayerLoopTiming.LastUpdate,
+            await UniTask.Delay(250, delayTiming: PlayerLoopTiming.LastUpdate,
                 cancellationToken: token);
 
             float elapsed = 0f;
@@ -308,7 +441,9 @@ public class CPrideBoss : CEnemy, IBoss
         return toPlayer.sqrMagnitude;
     }
 
-    private async UniTask SlamTask(Vector3 attackPoint, float readyTime, float fallingTime, float radius, CancellationToken token)
+
+    private async UniTask SlamTask(Vector3 attackPoint, float readyTime, float fallingTime, float radius, CancellationToken token,
+        SDamageInfo damage, float swordScale = 1f, Func<bool> tryConsumeHit = null)
     {
         if (TryGetGround(attackPoint, out RaycastHit ground))
         {
@@ -334,6 +469,7 @@ public class CPrideBoss : CEnemy, IBoss
             if (_swordPrefab != null)
             {
                 sword = Instantiate(_swordPrefab, airPoint, Quaternion.identity);
+                sword.transform.localScale *= swordScale;
             }
 
             await UniTask.Delay(
@@ -363,10 +499,10 @@ public class CPrideBoss : CEnemy, IBoss
             Vector3 offset = _player.transform.position - attackPoint;
             offset.y = 0f;
 
-            if (offset.sqrMagnitude <= radius * radius)
+            if (offset.sqrMagnitude <= radius * radius &&
+                (tryConsumeHit == null || tryConsumeHit()))
             {
-                _player.OnHit(this,
-                    new SDamageInfo(100f, false, ERatioSwitch.Constant, false, null));
+                _player.OnHit(this, damage);
             }
 
             await UniTask.Delay(200, cancellationToken: token); 

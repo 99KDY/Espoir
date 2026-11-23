@@ -703,6 +703,11 @@ public class CInventoryUI : MonoBehaviour
 
     public void SetInventoryOpen(bool enabled)
     {
+        if (enabled && CGameManager.Instance?.BattleState == EBattleState.BossBattle)
+        {
+            return;
+        }
+
         HideTooltip();
         CloseContextMenu();
 

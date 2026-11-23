@@ -27,5 +27,5 @@ MonoBehaviour:
   _removeStack: 0
   _stackDuration: 0
   _actionList: []
-  _customStatus: 0
+  _customStatus: 11
   _customEffect: {fileID: 0}
