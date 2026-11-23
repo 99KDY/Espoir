@@ -15,10 +15,12 @@ MonoBehaviour:
   _id: 19
   _name: "\uB098\uD0DC\uC758 \uD30C\uD3B8 4\uC14B"
   _icon: {fileID: 21300000, guid: 8103115f896b430a9fb45f2a45606853, type: 3}
-  _description: "\uC804\uD22C\uB2F9 1\uBC88, \uCD5C\uB300 \uCCB4\uB825\uC758 50%\uB97C
-    \uB118\uB294 \uD53C\uD574 \uBB34\uD6A8"
-  _tooltip: "\uCD5C\uB300 \uCCB4\uB825\uC758 50%\uB97C \uB118\uB294 \uD53C\uD574
-    1\uBC88 \uBB34\uD6A8\uC2DC\uCF1C \uC90D\uB2C8\uB2E4."
+  _description: "\ucd5c\ub300\uccb4\ub825\uc758 50%\ub97c \ucd08\uacfc\ud558\ub294 \ud53c\ud574\ub97c \ubb34\ud6a8\ud654\ud569\ub2c8\ub2e4. \uc7ac\uc0ac\uc6a9 \ub300\uae30\uc2dc\uac04 120\ucd08."
+  _tooltip: "\uCD5C\uB300 \uCCB4\uB825\uC758 50%\uB97C \uB118\uB294 \uD53C\uD574\uB97C
+    1\uBC88 \uBB34\uD6A8\uC2DC\uCF1C\uC90D\uB2C8\uB2E4.\n\uC7AC\uC0AC\uC6A9 \uB300\uAE30\uC2DC\uAC04
+    120\uCD08\n(\uC544\uC774\uCF58\uC758 \uC2A4\uD0DD\uD45C\uAE30\uAC00 \uB0A8\uC740
+    \uCFE8\uD0C0\uC784\uC785\uB2C8\uB2E4)"
+  _isDebuff: 0
   _duration: 0
   _stack: 0
   _maxStack: 0
@@ -28,3 +30,4 @@ MonoBehaviour:
   _stackDuration: 0
   _actionList: []
   _customStatus: 2
+  _customEffect: {fileID: 0}

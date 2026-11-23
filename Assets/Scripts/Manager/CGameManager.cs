@@ -496,6 +496,14 @@ public class CGameManager : MonoBehaviour
                 _soundManager.PlayBGM(EBackgroundSound.BattleBGM);
                 break;
             case EBattleState.BossBattle:
+                if (_shopUI != null && _shopUI.IsOpen)
+                {
+                    _shopUI.Close();
+                }
+                if (_inventoryUI != null && _inventoryUI.IsOpen)
+                {
+                    _inventoryUI.SetInventoryOpen(false);
+                }
                 _player.InvokeOnBattleStart(true);
                 _soundManager.PlayBGM(EBackgroundSound.BossBGM);
                 break;

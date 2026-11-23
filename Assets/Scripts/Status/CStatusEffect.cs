@@ -210,20 +210,36 @@ public partial class CStatus
                 });
                 break;
             // 나태의 파편
-            // 전투당 한번, 최대체력의 50%를 초과하는 피해를 무효화합니다.
+            // 최대체력의 50%를 초과하는 피해를 무효화합니다. (재사용 대기시간 120초)
             case 2:
-                _trigger |= EStatusTrigger.OnBattleStart | EStatusTrigger.OnDamage;
+                _trigger |= EStatusTrigger.OnBattleStart | EStatusTrigger.OnDamage | EStatusTrigger.OnDelta;
                 _onBattleStart.Add((CUnit unit, bool isBossBattle) =>
                 {
                     _boolParam = true;
-                    _stack = 1;
+                    _stack = 0;
+                    _timerParam = 0f;
+                });
+                _onDelta.Add((CUnit unit, float deltaTime) =>
+                {
+                    if (!_boolParam)
+                    {
+                        _timerParam -= deltaTime;
+                        _stack = Mathf.CeilToInt(_timerParam);
+                        if (_timerParam <= 0f)
+                        {
+                            _timerParam = 0f;
+                            _boolParam = true;
+                            _stack = 0;
+                        }
+                    }
                 });
                 _onDamage.Add((CUnit attacker, CUnit defender, float damage) =>
                 {
                     if (_boolParam && damage > (defender.HpMax * 0.5))
                     {
                         _boolParam = false;
-                        _stack = 0;
+                        _timerParam = 120f;
+                        _stack = Mathf.CeilToInt(_timerParam);
                         return 0;
                     }
                     else return damage;
@@ -319,7 +335,7 @@ public partial class CStatus
                 _trigger |= EStatusTrigger.OnHit;
                 _onHit.Add((CUnit attacker, CUnit defender, float damage) =>
                 {
-                    attacker.AddStatus(33);
+                    defender.AddStatus(33);
                     attacker.RemoveStatus(this);
                     return damage;
                 });
@@ -330,7 +346,7 @@ public partial class CStatus
                 _trigger |= EStatusTrigger.OnDamage;
                 _onDamage.Add((CUnit attacker, CUnit defender, float damage) =>
                 {
-                    attacker.RemoveStatus(this);
+                    defender.RemoveStatus(this);
                     return damage * 0.01f;
                 });
                 break;
