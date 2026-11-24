@@ -64,7 +64,7 @@ public class CSlothBoss : CEnemy, IBoss
     [Header("Thunder Voltalge Cylinder")]
     [SerializeField] private float _thunderOrbitRadius = 11f;
     [SerializeField] private float _thunderSpeed = 90f;
-    [SerializeField] private float _hitRadius = 2.5f;
+    [SerializeField] private float _thunderHitRadius = 2.5f;
 
 
     #endregion
@@ -142,10 +142,10 @@ public class CSlothBoss : CEnemy, IBoss
 
         }
 
-        if(_soundManager == null)
+        if (_soundManager == null)
         {
             _soundManager = FindFirstObjectByType<CSoundManager>();
-            if(_soundManager == null)
+            if (_soundManager == null)
             {
                 CLogger.Warn("사운드 매니저 찾을 수 없음");
             }
@@ -167,7 +167,7 @@ public class CSlothBoss : CEnemy, IBoss
         _cts?.Cancel();
         _cts?.Dispose();
     }
-        
+
     private void OnDisable()
     {
         _battleVersion++;
@@ -178,7 +178,7 @@ public class CSlothBoss : CEnemy, IBoss
         base.Start();
         _startState = ESlothBossState.Idle;
         _currentState = _bossState;
-     
+
     }
 
 
@@ -195,7 +195,7 @@ public class CSlothBoss : CEnemy, IBoss
         if (_isDead || HpCurrent <= 0f) return;
         if (_onGrogi == true)
         {
-            
+
             _currentState = ESlothBossState.Grogi;
             BossState();
 
@@ -204,8 +204,8 @@ public class CSlothBoss : CEnemy, IBoss
         }
 
         LookAtPlayer();
-        
-        if(_atkTimer > _atkTime)
+
+        if (_atkTimer > _atkTime)
         {
             BossState();
 
@@ -213,7 +213,7 @@ public class CSlothBoss : CEnemy, IBoss
         else
         {
             _atkTime = _isMain ? 7.3f : 5;
-            _atkTimer += Time.fixedDeltaTime;        
+            _atkTimer += Time.fixedDeltaTime;
         }
     }
 
@@ -245,14 +245,14 @@ public class CSlothBoss : CEnemy, IBoss
                 Quaternion lookRotation = Quaternion.LookRotation(dir);
                 transform.rotation = Quaternion.RotateTowards(transform.rotation, lookRotation, _rotateSpeed * Time.deltaTime);
 
-                
+
             }
 
 
             else
             {
 
-                
+
                 _returnDelayTime = _isMain ? 7 : 3;
                 CLogger.Log("Boss Pattern Executing");
             }
@@ -320,7 +320,7 @@ public class CSlothBoss : CEnemy, IBoss
 
     private bool SNPatternExecute(float distance)
     {
-       
+
         if (distance <= _normalAtkRange && normalCount <= 3)
         {
             _isSub = false;
@@ -371,7 +371,7 @@ public class CSlothBoss : CEnemy, IBoss
 
     private void NormalAttackPattern()
     {
-        if(_isNormal == false)
+        if (_isNormal == false)
         {
             return;
         }
@@ -414,7 +414,7 @@ public class CSlothBoss : CEnemy, IBoss
 
     private void SubAttackPattern()
     {
-        if(_isSub == false)
+        if (_isSub == false)
         {
             return;
         }
@@ -441,7 +441,7 @@ public class CSlothBoss : CEnemy, IBoss
 
             case 3:
                 DonutAttack().Forget();
-                       
+
                 break;
         }
         _delayTimer = 0f;
@@ -475,7 +475,8 @@ public class CSlothBoss : CEnemy, IBoss
 
             case 2:
                 _animator.SetTrigger(_thirdMain);
-                LightningBeamAttack().Forget();
+                LightningAttack().Forget();
+
                 break;
 
         }
@@ -492,7 +493,7 @@ public class CSlothBoss : CEnemy, IBoss
         {
             return;
         }
-        
+
         switch (_currentState)
         {
             case ESlothBossState.Idle:
@@ -500,19 +501,19 @@ public class CSlothBoss : CEnemy, IBoss
 
             case ESlothBossState.NormalAttack:
                 NormalAttackPattern();
-                
+
                 _isNormal = false;
                 break;
 
             case ESlothBossState.SubAttack:
                 SubAttackPattern();
-                
+
                 _isSub = false;
                 break;
 
             case ESlothBossState.MainAttack:
                 MainAttackPattern();
-                
+
                 _isMain = false;
                 break;
 
@@ -551,7 +552,7 @@ public class CSlothBoss : CEnemy, IBoss
 
         for (int i = 0; i < hit; i++)
         {
-            if(_hitCollider == null)
+            if (_hitCollider == null)
             {
                 continue;
             }
@@ -563,12 +564,12 @@ public class CSlothBoss : CEnemy, IBoss
                 continue;
             }
 
-           
+
             SDamageInfo damageToPlayer = new SDamageInfo(0.1f, ERatioSwitch.ByMax);
             float lastHp = player.HpCurrent;
 
             player.OnHit(this, damageToPlayer);
-            
+
             CLogger.Log($"{player.name}의 현재 체력 : {player.HpCurrent}");
 
         }
@@ -583,7 +584,7 @@ public class CSlothBoss : CEnemy, IBoss
 
         Vector3 spinAreaDir = -this.transform.right;
 
-         for (int i = 0; i < hit; i++)
+        for (int i = 0; i < hit; i++)
         {
             if (_hitCollider == null)
             {
@@ -599,9 +600,9 @@ public class CSlothBoss : CEnemy, IBoss
 
             Vector3 damageDir = player.transform.position - this.transform.position;
 
-            float area = Vector3.Dot(spinAreaDir,damageDir);
+            float area = Vector3.Dot(spinAreaDir, damageDir);
 
-            if(area >= 0f)
+            if (area >= 0f)
             {
                 SDamageInfo damageToPlayer = new SDamageInfo(0.2f, ERatioSwitch.ByMax);
                 float lastHp = player.HpCurrent;
@@ -637,7 +638,7 @@ public class CSlothBoss : CEnemy, IBoss
             }
 
             SDamageInfo damageToPlayer = new SDamageInfo(0.15f, ERatioSwitch.ByMax);
-           
+
             player.OnHit(this, damageToPlayer);
 
             CLogger.Log($"{player.name}의 현재 체력 : {player.HpCurrent}");
@@ -652,7 +653,7 @@ public class CSlothBoss : CEnemy, IBoss
     {
         int battleVersion = _battleVersion;
 
-        if(_previewPattern != null)
+        if (_previewPattern != null)
         {
             _previewPattern.ShowDonutPattern(20, 15f, 3f);
         }
@@ -669,8 +670,8 @@ public class CSlothBoss : CEnemy, IBoss
         {
             _previewPattern.ClearPreview();
         }
-        
-        
+
+
         _animator.SetTrigger(_secondSub);
 
         await UniTask.Delay(2500);
@@ -693,21 +694,21 @@ public class CSlothBoss : CEnemy, IBoss
             }
 
             CPlayer player = _hitCollider[i].GetComponent<CPlayer>();
-            if(player == null || player.HpCurrent <= 0)
+            if (player == null || player.HpCurrent <= 0)
             {
                 continue;
             }
 
             float distance = Vector3.Distance
                 (
-                    new Vector3 (this.transform.position.x , 0f , this.transform.position.z),
-                    new Vector3( player.transform.position.x , 0f, player.transform.position.z)
+                    new Vector3(this.transform.position.x, 0f, this.transform.position.z),
+                    new Vector3(player.transform.position.x, 0f, player.transform.position.z)
                 );
 
-            if(distance >= 3f && distance <= _whirlRange)
+            if (distance >= 3f && distance <= _whirlRange)
             {
                 SDamageInfo damageToPlayer = new SDamageInfo(0.1f, true, ERatioSwitch.ByMax);
-                
+
                 player.OnHit(this, damageToPlayer);
 
 
@@ -716,11 +717,11 @@ public class CSlothBoss : CEnemy, IBoss
 
         }
     }
-    
+
     private async UniTask DonutAttack()
     {
         int battleVersion = _battleVersion;
-        if(_previewPattern != null)
+        if (_previewPattern != null)
         {
             _previewPattern.ShowDoubleDonutPattern(20, 18f, 10f, 7f, 3f);
         }
@@ -846,7 +847,7 @@ public class CSlothBoss : CEnemy, IBoss
     private void DoubleHandStampDamage()
     {
         int hit = FindPlayer(13f);
-                
+
         for (int i = 0; i < hit; i++)
         {
             if (_hitCollider[i] == null)
@@ -859,7 +860,7 @@ public class CSlothBoss : CEnemy, IBoss
                 continue;
             }
 
-            
+
             float atkRange = Vector3.Distance(_savePos, player.transform.position);
 
             if (atkRange <= 8.0f)
@@ -928,7 +929,7 @@ public class CSlothBoss : CEnemy, IBoss
     private void AlternationDamage(float offsetAngle)
     {
         int hit = FindPlayer(15f);
- 
+
         for (int i = 0; i < hit; i++)
         {
             if (_hitCollider[i] == null)
@@ -948,7 +949,7 @@ public class CSlothBoss : CEnemy, IBoss
                     new Vector3(player.transform.position.x, 0f, player.transform.position.z)
                 );
 
-            if(distance > 15f)
+            if (distance > 15f)
             {
                 continue;
             }
@@ -963,11 +964,11 @@ public class CSlothBoss : CEnemy, IBoss
 
             for (int j = 0; j < _divideArea; j++)
             {
-                float standardAngle = offsetAngle +(j * angleStep);
+                float standardAngle = offsetAngle + (j * angleStep);
                 float tickAngle = Mathf.DeltaAngle(standardAngle, playerAngle);
-                
-                if(Mathf.Abs(tickAngle) <= _areaAngle * 0.5f)
-                { 
+
+                if (Mathf.Abs(tickAngle) <= _areaAngle * 0.5f)
+                {
                     isHit = true;
                     break;
                 }
@@ -1016,7 +1017,7 @@ public class CSlothBoss : CEnemy, IBoss
 
         await UniTask.Delay(4000);
         if (battleVersion != _battleVersion) return;
-        if(_previewPattern != null)
+        if (_previewPattern != null)
         {
             _previewPattern.ClearPreview();
         }
@@ -1032,7 +1033,7 @@ public class CSlothBoss : CEnemy, IBoss
     {
         int hits = FindPlayer(30);
 
-        for(int i = 0; i < hits; i++)
+        for (int i = 0; i < hits; i++)
         {
             if (_hitCollider[i] == null)
             {
@@ -1045,9 +1046,9 @@ public class CSlothBoss : CEnemy, IBoss
                 continue;
             }
 
-            SDamageInfo damageToPlayer= new SDamageInfo(damage, true ,ERatioSwitch.ByCurrent);
+            SDamageInfo damageToPlayer = new SDamageInfo(damage, true, ERatioSwitch.ByCurrent);
             float lastHp = player.HpCurrent;
-            
+
             player.OnHit(this, damageToPlayer);
 
             CLogger.Log($"{player.name}의 현재 체력 : {player.HpCurrent}");
@@ -1074,7 +1075,7 @@ public class CSlothBoss : CEnemy, IBoss
         _cts?.Cancel();
         _cts = new CancellationTokenSource();
 
-        FreezeAnimation(6f,_cts.Token).Forget();
+        FreezeAnimation(6f, _cts.Token).Forget();
 
     }
 
@@ -1082,7 +1083,7 @@ public class CSlothBoss : CEnemy, IBoss
     {
         _animator.speed = 0.2f;
 
-        if(_player == null)
+        if (_player == null)
         {
             CLogger.Error("플레이어를 참조하지 않았습니다.");
             return;
@@ -1092,7 +1093,7 @@ public class CSlothBoss : CEnemy, IBoss
 
         float patternStartHP = this.HpCurrent;
 
-        
+
         try
         {
             this.OnHit(_player, recieveDamage);
@@ -1106,21 +1107,21 @@ public class CSlothBoss : CEnemy, IBoss
 
             float bossCurrentHP = this.HpCurrent;
 
-            if((patternStartHP - bossCurrentHP) >= patternStartHP * 0.035)
+            if ((patternStartHP - bossCurrentHP) >= patternStartHP * 0.035)
             {
-                 _onGrogi = true;
-                
+                _onGrogi = true;
+
             }
         }
 
-        catch(OperationCanceledException)
+        catch (OperationCanceledException)
         {
             return;
         }
 
         finally
         {
-            if(this != null )
+            if (this != null)
             {
                 _animator.speed = 1f;
             }
@@ -1159,12 +1160,12 @@ public class CSlothBoss : CEnemy, IBoss
         {
             float safeAngle = 45f + (i * 90f);
 
-            Quaternion rot = Quaternion.Euler(0f , safeAngle, 0f);
+            Quaternion rot = Quaternion.Euler(0f, safeAngle, 0f);
 
             Vector3 safeDir = rot * this.transform.forward;
 
             Vector3 safePos = this.transform.position + (safeDir * 18f);
-            
+
             safeZones.Add(safePos);
         }
 
@@ -1184,24 +1185,24 @@ public class CSlothBoss : CEnemy, IBoss
 
             bool isHit = true;
 
-            Vector3 playerPos = new Vector3(player.transform.position.x , this.transform.position.y, player.transform.position.z);
+            Vector3 playerPos = new Vector3(player.transform.position.x, this.transform.position.y, player.transform.position.z);
 
-            for(int j = 0; j < safeZones.Count; j++)
+            for (int j = 0; j < safeZones.Count; j++)
             {
                 Vector3 szPos = new Vector3(safeZones[j].x, this.transform.position.y, safeZones[j].z);
-                float distance = Vector3.Distance(szPos , playerPos);
+                float distance = Vector3.Distance(szPos, playerPos);
 
                 if (distance <= 4f)
                 {
                     isHit = false;
-                    
+
                     break;
                 }
 
 
             }
 
-            if(isHit == true)
+            if (isHit == true)
             {
                 SDamageInfo playerToDamage = new SDamageInfo(0.6f, ERatioSwitch.ByMax);
                 float currentHP = player.HpCurrent;
@@ -1217,18 +1218,17 @@ public class CSlothBoss : CEnemy, IBoss
     }
 
 
-    private async UniTask LightningBeamAttack()
+    private async UniTask LightningAttack()
     {
         int battleVersion = _battleVersion;
         _onAttack = true;
-        if(_previewPattern != null)
+        if (_previewPattern != null)
         {
             _previewPattern.ShowDonutPattern(100, 14f, 10f);
         }
-
         _atkTimer = 0;
 
-        await UniTask.Delay(2000);
+        await UniTask.Delay(1500);
         if (battleVersion != _battleVersion) return;
 
         if (_previewPattern != null)
@@ -1236,22 +1236,117 @@ public class CSlothBoss : CEnemy, IBoss
             _previewPattern.ClearPreview();
         }
 
-        ThunderVoltage();
 
+        List<Vector3> circleCenter = new List<Vector3>();
+
+        for (int i = 0; i < 4; i++)
+        {
+            float startAngle = 45f + (i * 90f);
+
+            Quaternion rot = Quaternion.Euler(0f, startAngle, 0f);
+
+            Vector3 dir = rot * this.transform.forward;
+
+            Vector3 currentPos = this.transform.position + (dir.normalized * _thunderOrbitRadius);
+
+            circleCenter.Add(currentPos);
+        }
+
+        int hitCount = 0;
+        bool isHit = false;
+
+        for (int i = 0; i < circleCenter.Count; i++)
+        {
+            int hit = Physics.OverlapSphereNonAlloc(circleCenter[i], _thunderHitRadius, _hitCollider, _targetMask);
+                     
+            if(hit > 0)
+            {
+                isHit = true;
+
+                hitCount += hit;
+
+                break;
+
+            }
+
+        }
+
+        if (isHit == true)
+        {
+            SDamageInfo damageToPlayer = new SDamageInfo(0.3f, ERatioSwitch.ByCurrent);
+            _player.OnHit(this, damageToPlayer);
+            CLogger.Log($"현재 플레이어 체력 : {_player.HpCurrent}");
+
+            isHit = false;
+        }
+
+
+        await UniTask.Delay(500);
+        
         _atkTimer = 0;
 
+        hitCount = 0;
+   
+        for(int i = 0; i < circleCenter.Count; i++)
+        {
+            if(_hitCollider == null)
+            {
+                continue;
+            }
+
+            if(_player == null || _player.HpCurrent <= 0)
+            {
+                continue;
+            }
+
+            circleCenter[i] = RotateValoteCal(circleCenter[i], this.transform.position, Vector3.up, (-_thunderAngle) * Time.deltaTime);
+
+            Vector3 hitPos = _player.transform.position - circleCenter[i];
+
+            float distance = hitPos.magnitude;
+
+            float range = Vector3.Distance(_player.transform.position, this.transform.position);
+
+            if(distance <= _thunderHitRadius && (range >= 10f && range <= 14f))
+            {
+                isHit= true;
+
+                break;
+            }
 
 
-        
+        }
+
+        if (isHit == true)
+        {
+            SDamageInfo damageToPlayer = new SDamageInfo(0.3f, ERatioSwitch.ByCurrent);
+            _player.OnHit(this, damageToPlayer);
+            CLogger.Log($"현재 플레이어 체력 : {_player.HpCurrent}");
+
+            isHit = false;
+
+        }
 
 
         await UniTask.Delay(5000);
         if (battleVersion != _battleVersion) return;
 
-        _mainCount++; 
+        _mainCount++;
         _onAttack = false;
 
     }
+
+    private Vector3 RotateValoteCal(Vector3 startPos, Vector3 pivot, Vector3 axis, float angle)
+    {
+        Vector3 dir = startPos - pivot;
+        dir = Quaternion.AngleAxis(angle, axis) * dir;
+        
+
+        return (pivot + dir);
+    }
+
+
+
 
 
     private void EarthShaker()
@@ -1328,7 +1423,7 @@ public class CSlothBoss : CEnemy, IBoss
 
         for (int i = 0; i < 4; i++)
         {
-            float startAngle = 45f + (i * 90f) - _thunderAngle;
+            float startAngle = 45f + (i * 90f);
 
             Quaternion rot = Quaternion.Euler(0f, startAngle, 0f);
 
@@ -1339,8 +1434,19 @@ public class CSlothBoss : CEnemy, IBoss
             circleCenter.Add(currentPos);
         }
 
+        int hitCount = 0;
 
         for (int i = 0; i < circleCenter.Count; i++)
+        {
+            int hit = Physics.OverlapSphereNonAlloc(circleCenter[i], _thunderHitRadius,_hitCollider,_targetMask);
+            
+            hitCount += hit;
+
+        }
+
+
+
+        for (int i = 0; i < hitCount; i++)
         {
             if (_hitCollider[i] == null)
             {
@@ -1365,7 +1471,7 @@ public class CSlothBoss : CEnemy, IBoss
 
                 float distance = Vector3.Distance(voltageXZ, playerXZ);
                             
-                if(distance <= _hitRadius)
+                if(distance <= _thunderHitRadius)
                 {
                     isHit = true;
 
