@@ -45,6 +45,7 @@ Shader "Espoir/Environment/Chapter2/Toon"
         _Night ("Night", Float) = 1
         // 들풀 사이 꽃 (CChapter2Grass 가 인스턴스로 그림): 풀 반경 가장자리에서 뿌리로 줄어들고 살랑임
         [Toggle] _GrassFlower ("Grass Flower", Float) = 0
+        [Toggle] _Still ("Disable Cloth Wind", Float) = 0
     }
 
     CGINCLUDE
@@ -63,6 +64,7 @@ Shader "Espoir/Environment/Chapter2/Toon"
     float _PaveSize;
     float _Night;
     float _GrassFlower;
+    float _Still;
 
     float3 WindOffsetMap(float3 worldPos, float3 worldNormal, float2 uv)
     {
@@ -73,7 +75,7 @@ Shader "Espoir/Environment/Chapter2/Toon"
             return float3(sin(t * 1.2 + worldPos.x * 0.8 + worldPos.y * 1.3), 0.4 * sin(t * 1.7 + worldPos.z),
                           cos(t * 1.0 + worldPos.z * 0.7 + worldPos.y)) * 0.03;
         }
-        if (pattern == 14)
+        if (pattern == 14 && _Still < 0.5)
         {
             float wave = sin(t * 3.4 - uv.x * 5.5 + uv.y * 1.2) * 0.75
                 + sin(t * 5.1 - uv.x * 9.0) * 0.25;

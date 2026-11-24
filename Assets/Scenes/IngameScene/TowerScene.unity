@@ -5374,6 +5374,63 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6678368836905787011, guid: d006353c862bf5c469db1d8cba313bfc, type: 3}
   m_PrefabInstance: {fileID: 2134446734}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &216857513
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 4811801580868898784, guid: a0e2f8af8227a394a83c538f5236dbcc, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 39.59798
+      objectReference: {fileID: 0}
+    - target: {fileID: 4811801580868898784, guid: a0e2f8af8227a394a83c538f5236dbcc, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 21
+      objectReference: {fileID: 0}
+    - target: {fileID: 4811801580868898784, guid: a0e2f8af8227a394a83c538f5236dbcc, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -83.4386
+      objectReference: {fileID: 0}
+    - target: {fileID: 4811801580868898784, guid: a0e2f8af8227a394a83c538f5236dbcc, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.9238795
+      objectReference: {fileID: 0}
+    - target: {fileID: 4811801580868898784, guid: a0e2f8af8227a394a83c538f5236dbcc, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4811801580868898784, guid: a0e2f8af8227a394a83c538f5236dbcc, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.38268346
+      objectReference: {fileID: 0}
+    - target: {fileID: 4811801580868898784, guid: a0e2f8af8227a394a83c538f5236dbcc, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4811801580868898784, guid: a0e2f8af8227a394a83c538f5236dbcc, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4811801580868898784, guid: a0e2f8af8227a394a83c538f5236dbcc, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4811801580868898784, guid: a0e2f8af8227a394a83c538f5236dbcc, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5847700543352033209, guid: a0e2f8af8227a394a83c538f5236dbcc, type: 3}
+      propertyPath: m_Name
+      value: Chapter3BossThrone
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: a0e2f8af8227a394a83c538f5236dbcc, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -5403,3 +5460,4 @@ SceneRoots:
   - {fileID: 1909274462}
   - {fileID: 747790413}
   - {fileID: 201579853}
+  - {fileID: 216857513}

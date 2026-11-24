@@ -126,6 +126,30 @@ Shader "Espoir/NpcToon"
         _RimHair ("Rim Hair", Float) = 1
         _Halftone ("Halftone", Float) = 0
         _HalftoneScale ("Halftone Scale", Float) = 5
+
+        [Header(Creature Fur)]
+        [Toggle(_CREATURE_FUR)] _CreatureFur ("Creature Fur", Float) = 0
+        _FurCut ("Fur Cut (strength, softness, color tolerance, threshold)", Vector) = (0, 0.02, 0.06, 0.5)
+        _FurCutA ("Fur Cut A", Color) = (0.8, 0.34, 0.14, 1)
+        _FurCutB ("Fur Cut B", Color) = (0.99, 0.62, 0.3, 1)
+        _Sheen ("Sheen (strength, threshold, softness)", Vector) = (0, 0.86, 0.03, 0)
+        _SheenColor ("Sheen Color", Color) = (1, 0.94, 0.85, 1)
+        _FurForm ("Fur Shading (edge strength/threshold, center strength/threshold)", Vector) = (0, 0.32, 0, 0.85)
+        _FurFormColor ("Fur Form Color", Color) = (0.79, 0.64, 0.61, 1)
+        _FurFormSoft ("Fur Form Soft", Float) = 0
+        _BackRim ("Back Rim", Float) = 0
+        _BackRimColor ("Back Rim Color", Color) = (0.6, 0.7, 1, 1)
+        _BackRimShape ("Back Rim Shape (width, soft)", Vector) = (0.55, 0.2, 0, 0)
+        _Under ("Underside Tint Strength", Float) = 0
+        _UnderColor ("Underside Color", Color) = (0.85, 0.7, 0.65, 1)
+        _CEyeL ("Creature Eye L (rest xyz, radius)", Vector) = (0, 0, 0, 0)
+        _CEyeR ("Creature Eye R (rest xyz, radius)", Vector) = (0, 0, 0, 0)
+        _CEyeRight ("Creature Eye Right (rest)", Vector) = (1, 0, 0, 0)
+        _CEyeUp ("Creature Eye Up (rest)", Vector) = (0, 1, 0, 0)
+        _CEyeFx ("Creature Eye Fx (lit, glow, lid, highlight)", Vector) = (0, 0, 0, 0)
+        _CEyeHl ("Creature Eye Highlight (size, x, y)", Vector) = (0.5, -0.8, 0.3, 0)
+        _JigA ("Mane Mask (front start/end, top start/end)", Vector) = (0, -1, 0, -1)
+        _JigB ("Mane Mask (bottom start/end, half width, enabled)", Vector) = (-1, 0, 1, 0)
     }
 
     SubShader
@@ -143,8 +167,10 @@ Shader "Espoir/NpcToon"
             #pragma vertex vert
             #pragma fragment frag
             #pragma multi_compile_fwdbase nolightmap nodirlightmap nodynlightmap novertexlight
+            #pragma shader_feature_local _CREATURE_FUR
             #include "UnityCG.cginc"
             #include "AutoLight.cginc"
+            #include "NpcCreatureFur.cginc"
 
             #define PI 3.141592653589793
 
@@ -188,6 +214,9 @@ Shader "Espoir/NpcToon"
                 float3 normal : NORMAL;
                 float4 tangent : TANGENT;     // xyz = 평활화한 노멀
                 float2 uv : TEXCOORD0;
+            #if defined(_CREATURE_FUR)
+                float3 restPos : TEXCOORD2;
+            #endif
             };
 
             struct v2f
@@ -199,6 +228,9 @@ Shader "Espoir/NpcToon"
                 float3 viewNormal : TEXCOORD3;
                 float3 softNormal : TEXCOORD4;
                 UNITY_SHADOW_COORDS(5)
+            #if defined(_CREATURE_FUR)
+                float3 restPos : TEXCOORD6;
+            #endif
             };
 
             v2f vert(appdata v)
@@ -207,6 +239,11 @@ Shader "Espoir/NpcToon"
                 o.pos = UnityObjectToClipPos(v.vertex);
                 o.uv = TRANSFORM_TEX(v.uv, _MainTex);
                 o.worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
+            #if defined(_CREATURE_FUR)
+                o.restPos = v.restPos;
+                o.worldPos += _Jig.xyz * JigMask(v.restPos);
+                o.pos = UnityWorldToClipPos(o.worldPos);
+            #endif
                 o.worldNormal = UnityObjectToWorldNormal(v.normal);
                 o.viewNormal = normalize(mul((float3x3)UNITY_MATRIX_IT_MV, v.normal));
                 o.softNormal = UnityObjectToWorldNormal(v.tangent.xyz);
@@ -293,6 +330,9 @@ Shader "Espoir/NpcToon"
                 float3 albedo = pow(max(rawAlbedo, 0.0), _AlbedoGamma);
                 float la = luma(albedo);
                 albedo = max(lerp(la.xxx, albedo, _AlbedoSat), 0.0);
+            #if defined(_CREATURE_FUR)
+                if (_Part > 2.5) albedo = FurCutAlbedo(albedo);
+            #endif
 
                 int part = (int)(_Part + 0.5);
                 // 목 색 맞춤
@@ -355,6 +395,12 @@ Shader "Espoir/NpcToon"
 
                 if (part == 1 && _FaceSoftNrm > 0.0) N = normalize(lerp(N, SN, _FaceSoftNrm));
                 if (part == 1) N = normalize(lerp(N, normalize(hp + 1e-5), _FaceNormalSmooth));
+
+                float eyeMask = 0.0, irisMask = 0.0, eyeArea = 0.0;
+                float2 eyeOffset = float2(0.0, 0.0);
+            #if defined(_CREATURE_FUR)
+                CreatureEyeMask(i.restPos, rawAlbedo, eyeMask, irisMask, eyeArea, eyeOffset);
+            #endif
 
                 float NdotL = dot(N, L);
                 UNITY_LIGHT_ATTENUATION(sh, i, i.worldPos);
@@ -477,6 +523,11 @@ Shader "Espoir/NpcToon"
 
                 // 램프
                 float castSh = part == 1 ? 1.0 : sh;
+                if (eyeMask > 0.0 && _CEyeFx.x > 0.0)
+                {
+                    lf = lerp(lf, max(lf, 0.95), eyeMask * _CEyeFx.x);
+                    castSh = lerp(castSh, 1.0, eyeMask * _CEyeFx.x);
+                }
                 float3 ramp = rampPart(part, lf);
                 float3 rampCast = rampPart(part, lf * castSh);
                 if (part == 1 && (_FaceEdge > 0.0 || _FaceShade < 1.0))
@@ -635,6 +686,11 @@ Shader "Espoir/NpcToon"
                     col = lerp(col, col * 1.32, mid * _HairForm.z * lerp(0.6, 1.0, litMask));
                 }
 
+            #if defined(_CREATURE_FUR)
+                float3 geoN = normalize(i.worldNormal) * (front ? 1.0 : -1.0);
+                col = CreatureFurShade(col, albedo, part, N, geoN, V, NdotH, litMask, eyeMask, _RimFace);
+            #endif
+
                 // 림라이트
                 float fres = 1.0 - max(dot(N, V), 0.0);
                 float rim = smoothstep(_RimWidth, _RimWidth + _RimSoft, fres) * (0.3 + 0.7 * litMask);
@@ -668,6 +724,10 @@ Shader "Espoir/NpcToon"
                         col = lerp(col, float3(1.0, 0.97, 0.97) * _LightColor.rgb, irisDisk * max(s1, s2) * _EyeFx.w);
                     }
                 }
+
+            #if defined(_CREATURE_FUR)
+                if (eyeArea > 0.0) col = CreatureEyeShade(col, irisMask, eyeArea, eyeOffset, _LightColor.rgb);
+            #endif
 
                 // 하프톤
                 if (_Halftone > 0.0)

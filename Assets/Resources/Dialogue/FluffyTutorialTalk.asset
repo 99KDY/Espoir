@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f2a9cfc51bb93f24eab9de60c80fcaf6, type: 3}
+  m_Name: FluffyTutorialTalk
+  m_EditorClassIdentifier: 
+  _startNode: hello
+  _summonedStartNode: 
+  _nodes:
+  - id: hello
+    lines:
+    - "…킁. 바람 냄새가 달라졌어. 너도 맡아 봐. 모래 냄새야."
+    - "나, 이제 사막으로 가. 여길 떠나면 이 개울로는 다시 못 돌아와."
+    ask:
+    choices: []
+    next: choice
+    end: 0
+    dest:
+  - id: choice
+    lines: []
+    ask: "…같이 갈래?"
+    choices:
+    - text: "응. 같이 사막으로 가자."
+      to: leave
+    - text: "아직은 여기 있을래."
+      to: stay
+    next:
+    end: 0
+    dest:
+  - id: leave
+    lines:
+    - "그럼 내 발자국을 밟아. 모래가 지우기 전에."
+    ask:
+    choices: []
+    next:
+    end: 2
+    dest: m51
+  - id: stay
+    lines:
+    - "그래. 물소리 좀 더 듣고 와. 난 여기 있을게."
+    ask:
+    choices: []
+    next:
+    end: 1
+    dest:

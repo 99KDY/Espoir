@@ -19,6 +19,7 @@ public class CTalkCamera : MonoBehaviour
     [SerializeField, Min(0.01f)] private float _blendOutTime = 0.7f;
     [SerializeField, Min(0f)] private float _talkSharpness = 4.5f;
     [SerializeField, Min(0f)] private float _cineSharpness = 3f;
+    [SerializeField] private bool _hideCompanionsInTalk = true;
 
     [Header("NPC 단독 카메라")]
     [SerializeField] private float _npcHeight = 1.46f;
@@ -31,6 +32,13 @@ public class CTalkCamera : MonoBehaviour
     [SerializeField] private float _largeFov = 36f;
     [SerializeField] private float _largeScreenRatio = 0.62f;
     [SerializeField] private float _largeSideAngle = 0.45f;
+
+    [Header("동물 NPC 카메라")]
+    [SerializeField, Range(1f, 179f)] private float _creatureFov = 30f;
+    [Tooltip("화면 높이 대비 NPC 높이")]
+    [SerializeField, Range(0.01f, 1f)] private float _creatureScreenRatio = 0.46f;
+    [Tooltip("정면에서 비켜 보는 각도(라디안)")]
+    [SerializeField] private float _creatureSideAngle = 0.14f;
 
     private readonly struct SPose
     {
@@ -70,6 +78,8 @@ public class CTalkCamera : MonoBehaviour
     private bool _hasBaseFov;
     private bool _heroHidden;
     private readonly List<Renderer> _HIDDEN_RENDERERS = new List<Renderer>();
+    private bool _companionsHidden;
+    private readonly List<Renderer> _HIDDEN_COMPANION_RENDERERS = new List<Renderer>();
 
     /// <summary>
     /// 0 = 게임 카메라, 1 = 대화/소환 카메라.
@@ -87,6 +97,7 @@ public class CTalkCamera : MonoBehaviour
     private void OnDisable()
     {
         ShowHero();
+        ShowCompanions();
         if (_hasBaseFov) _camera.fieldOfView = _baseFov;
         _hasBaseFov = false;
         _blend = 0f;
@@ -163,6 +174,7 @@ public class CTalkCamera : MonoBehaviour
             }
 
             ShowHero();
+            ShowCompanions();
             return;
         }
 
@@ -234,6 +246,10 @@ public class CTalkCamera : MonoBehaviour
         if (hideHero && e > 0.5f) HideHero();
 
         else ShowHero();
+
+        if (_hideCompanionsInTalk && _isTalking && _npc != null && e > 0.5f) HideCompanions();
+
+        else ShowCompanions();
     }
 
     private SPose GetTalkPose()
@@ -260,6 +276,21 @@ public class CTalkCamera : MonoBehaviour
             Vector3 look = npcFeet;
             look.y = npcFeet.y + h * 0.5f - viewHeight * 0.12f;
             return new SPose(position, look, _largeFov, true);
+        }
+
+        if (_npc.IsCreature)
+        {
+            float height = _npc.CreatureHeight;
+            float halfFovTangent = Mathf.Tan(_creatureFov * Mathf.Deg2Rad * 0.5f);
+            float viewHeight = height / _creatureScreenRatio;
+            float distanceToNpc = viewHeight / (2f * halfFovTangent) *
+                (1f + 0.12f * Mathf.Exp(-(_time - _talkStartTime) * 0.5f));
+            Vector3 front = Quaternion.AngleAxis(_side * _creatureSideAngle * Mathf.Rad2Deg, Vector3.up) * -d;
+            Vector3 body = _npc.GetBodyCenter();
+            Vector3 position = body + front * distanceToNpc;
+            position.y = Mathf.Max(npcFeet.y + height * 0.95f, GetGroundHeight(position, npcFeet.y) + 0.6f);
+            Vector3 look = body - Vector3.up * (viewHeight * 0.13f);
+            return new SPose(position, look, _creatureFov, true);
         }
 
         float cd = Mathf.Clamp(distance - 0.3f, _npcDistanceRange.x, _npcDistanceRange.y);
@@ -365,5 +396,38 @@ public class CTalkCamera : MonoBehaviour
         }
 
         _HIDDEN_RENDERERS.Clear();
+    }
+
+    private void HideCompanions()
+    {
+        if (_companionsHidden) return;
+
+        _companionsHidden = true;
+        _HIDDEN_COMPANION_RENDERERS.Clear();
+
+        foreach (CCompanionFollow companion in FindObjectsByType<CCompanionFollow>(FindObjectsSortMode.None))
+        {
+            foreach (Renderer target in companion.GetComponentsInChildren<Renderer>())
+            {
+                if (!target.enabled) continue;
+
+                target.enabled = false;
+                _HIDDEN_COMPANION_RENDERERS.Add(target);
+            }
+        }
+    }
+
+    private void ShowCompanions()
+    {
+        if (!_companionsHidden) return;
+
+        _companionsHidden = false;
+
+        foreach (Renderer target in _HIDDEN_COMPANION_RENDERERS)
+        {
+            if (target != null) target.enabled = true;
+        }
+
+        _HIDDEN_COMPANION_RENDERERS.Clear();
     }
 }

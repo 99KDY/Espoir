@@ -11,10 +11,14 @@ Shader "Espoir/NpcToonOutline"
         _OutlineColor ("Color (uOutlineColor)", Color) = (0.078, 0.047, 0.094, 1)
         _OutlineTex ("Use Texture (uOutlineTex)", Float) = 1
         _OutlineDark ("Texture Darkness (uOutlineDark)", Float) = 0.35
+        [Toggle(_CREATURE_FUR)] _CreatureFur ("Creature Fur", Float) = 0
+        _JigA ("Mane Mask (front start/end, top start/end)", Vector) = (0, -1, 0, -1)
+        _JigB ("Mane Mask (bottom start/end, half width, enabled)", Vector) = (-1, 0, 1, 0)
     }
 
     CGINCLUDE
     #include "UnityCG.cginc"
+    #include "NpcCreatureFur.cginc"
 
     sampler2D _MainTex; float4 _MainTex_ST;
     float4 _BaseColor;
@@ -29,6 +33,9 @@ Shader "Espoir/NpcToonOutline"
         float4 vertex : POSITION;
         float3 normal : NORMAL;
         float2 uv : TEXCOORD0;
+    #if defined(_CREATURE_FUR)
+        float3 restPos : TEXCOORD2;
+    #endif
     };
 
     struct v2f
@@ -42,6 +49,9 @@ Shader "Espoir/NpcToonOutline"
     {
         v2f o;
         float4 clip = UnityObjectToClipPos(v.vertex);
+    #if defined(_CREATURE_FUR)
+        clip = UnityWorldToClipPos(mul(unity_ObjectToWorld, v.vertex).xyz + _Jig.xyz * JigMask(v.restPos));
+    #endif
         float3 vn = normalize(mul((float3x3)UNITY_MATRIX_IT_MV, v.normal));
         float2 dir = mul((float2x2)UNITY_MATRIX_P, vn.xy);
         float dl = length(dir);
@@ -105,6 +115,7 @@ Shader "Espoir/NpcToonOutline"
             CGPROGRAM
             #pragma target 3.0
             #pragma vertex vert
+            #pragma shader_feature_local _CREATURE_FUR
             #pragma fragment frag
             ENDCG
         }
@@ -121,6 +132,7 @@ Shader "Espoir/NpcToonOutline"
             CGPROGRAM
             #pragma target 3.0
             #pragma vertex vert
+            #pragma shader_feature_local _CREATURE_FUR
             #pragma fragment FragMask
             ENDCG
         }
