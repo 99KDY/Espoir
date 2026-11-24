@@ -36,15 +36,12 @@ public class CPrideBoss : CEnemy, IBoss
     [Header("인식범위 (확인용)")]
     [SerializeField] private float _battleStartRadius = 20f;
     [SerializeField] private float _battleEndRadius = 25f;
-    [SerializeField] private float _attackRadius = 2f; // 기본 평타 검찍기 공격범위
+    [SerializeField] private float _attackRadius = 1.5f; // 기본 평타 검찍기 공격범위
     [SerializeField] private float _attackDelay = 1.5f; // 기본 평타 검찍기 내려오는 시간
 
     [Header("평타 이동용")]
     [SerializeField] private LayerMask _groundMask = 1 << 0;
     [SerializeField] private LayerMask _moveObstacleMask = (1 << 0) | (1 << 6) | (1 << 7);
-
-    [Header("서브 패턴용")]
-    [SerializeField] private float _subAttackChance = 1 / 3f;
 
     [Header("메인 패턴용")]
     [SerializeField] private Material _mainBeamMaterial;
@@ -62,6 +59,10 @@ public class CPrideBoss : CEnemy, IBoss
     private Animator _animator;
     private float _realAttackDelay;
     private const float MainLaserSwordScale = 1.2f;
+
+    private int _mainCounter = 0;
+    private bool _nextMainIsCross = true;
+    private bool _isRage = false;
 
     private Vector3 _arenaCenter;
 
@@ -91,6 +92,7 @@ public class CPrideBoss : CEnemy, IBoss
         _collider = GetComponent<CapsuleCollider>();
         _animator = GetComponentInChildren<Animator>(true);
         _realAttackDelay = _attackDelay;
+        _isRage = true;
     }
 
     protected override void Update()
@@ -128,11 +130,8 @@ public class CPrideBoss : CEnemy, IBoss
         {
             while (!token.IsCancellationRequested)
             {
-                await UniTask.Delay(3000, delayTiming: PlayerLoopTiming.LastUpdate,
+                await UniTask.Delay(1500, delayTiming: PlayerLoopTiming.LastUpdate,
                     cancellationToken: token);
-
-                await RunRotatingCrossLaserAttack(token);
-                return;
 
                 if (!CanFight ||
                     GetPlayerDistanceSquared() > _battleEndRadius * _battleEndRadius)
@@ -140,13 +139,36 @@ public class CPrideBoss : CEnemy, IBoss
                     return;
                 }
 
-                if (_subAttackChance > 0f && Random.value <= _subAttackChance)
+                if (_mainCounter < 5)
                 {
-                    await RunSubAttack(token);
+                    int subAttackRatio = _isRage ? 3 : 4;
+                    switch(Random.Range(0, subAttackRatio))
+                    {
+                        case 0:
+                            await RunSubAttack(token);
+                            break;
+                        default:
+                            await RunNormalAttack(token);
+                            break;
+                    }
+                    _mainCounter++;
                 }
                 else
                 {
-                    await RunNormalAttack(token);
+                    bool useCross = _isRage && _nextMainIsCross;
+
+                    if (useCross)
+                    {
+                        await RunRotatingCrossLaserAttack(token);
+                    }
+                    else
+                    {
+                        await RunMainLaserAttack(token);
+                    }
+
+                    token.ThrowIfCancellationRequested();
+                    _mainCounter = 0;
+                    _nextMainIsCross = !useCross;
                 }
             }
         }
@@ -160,25 +182,22 @@ public class CPrideBoss : CEnemy, IBoss
         }
     }
 
-
     private async UniTask RunNormalAttack(CancellationToken token)
     {
         Vector3 toPlayer = _player.transform.position - _rb.position;
         toPlayer.y = 0f;
 
         float distanceSquared = toPlayer.sqrMagnitude;
-        if (_enableLog) CLogger.Log($"보스와의 거리 - {toPlayer.magnitude}");
 
 
         // 2번: 4m 이내에서 50%.
         if (distanceSquared > 0.0001f && distanceSquared <= 4f * 4f && Random.value < 0.25f)
         {
-            if (_enableLog) CLogger.Log("현재 거리 4m 이내, 백스탭 시도함");
             Vector3 forward = toPlayer.normalized;
             Vector3 backstepPoint = _rb.position - forward * 5f;
 
             if (TryGetMoveDestination(backstepPoint, out _)
-                && !_rb.SweepTest(-forward, out _, 5f, QueryTriggerInteraction.Ignore))
+                && !IsBackstepPathBlocked(-forward, 5f))
             {
                 _rb.rotation = Quaternion.LookRotation(forward);
                 Vector3 attackPoint = _rb.position + forward * 5f;
@@ -200,15 +219,15 @@ public class CPrideBoss : CEnemy, IBoss
         if (_warpSwordPrefab != null && distanceSquared >= 10f * 10f)
         {
             float chaseChance = distanceSquared >= 15f * 15f ? 0.75f : 0.5f;
-            if (_enableLog) CLogger.Log($"현재 거리 10m 이상 : 돌진 확률 {chaseChance}");
             Vector3 forward = toPlayer.normalized;
             Vector3 behindPlayer = _player.transform.position + forward * 2.5f;
             behindPlayer.y = _rb.position.y;
+            Vector3 sideOffset = Vector3.Cross(Vector3.up, forward) * 2f;
 
-            if (Random.value < chaseChance
-                && TryGetMoveDestination(behindPlayer, out Vector3 destination))
+            if (Random.value < chaseChance &&
+                (TryGetMoveDestination(behindPlayer, out Vector3 destination) ||
+                TryGetMoveDestination(behindPlayer + sideOffset, out destination)))
             {
-                if (_enableLog) CLogger.Log($"현재 거리 10m 이상 : 돌진!");
                 await FlyWarpSwordTask(destination, token);
                 token.ThrowIfCancellationRequested();
 
@@ -217,7 +236,9 @@ public class CPrideBoss : CEnemy, IBoss
                     return;
                 }
 
-                if (TryGetMoveDestination(behindPlayer, out destination))
+                Vector3 landingPoint = destination;
+                if (TryGetMoveDestination(landingPoint, out destination) ||
+                    TryGetMoveDestination(landingPoint + sideOffset, out destination))
                 {
                     _rb.velocity = Vector3.zero;
                     _rb.position = destination;
@@ -282,7 +303,7 @@ public class CPrideBoss : CEnemy, IBoss
 
         const int invincibleStatusId = 38;
         Rigidbody body = _rb;
-        Vector3 restPosition = body.position;
+        if (!TryGetMoveDestination(_arenaCenter, out Vector3 restPosition)) return;
         Vector3 groundOrigin = restPosition;
 
         if (TryGetGround(groundOrigin, out RaycastHit ground))
@@ -290,8 +311,7 @@ public class CPrideBoss : CEnemy, IBoss
             groundOrigin.y = ground.point.y;
         }
 
-        Vector3 forward = AimFrom(groundOrigin, Vector3.forward);
-        Vector3 right = Vector3.Cross(Vector3.up, forward);
+        bool arrivedAtCenter = false;
         bool wasKinematic = body.isKinematic;
         CStatus invincible = null;
         GameObject[] swords = new GameObject[3];
@@ -306,6 +326,14 @@ public class CPrideBoss : CEnemy, IBoss
 
             if (!wasKinematic) body.velocity = Vector3.zero;
             body.isKinematic = true;
+
+            await MoveBossTask(restPosition, 0.45f, token);
+            if (!CanFight) return;
+
+            arrivedAtCenter = true;
+
+            Vector3 forward = AimFrom(groundOrigin, Vector3.forward);
+            Vector3 right = Vector3.Cross(Vector3.up, forward);
             body.rotation = Quaternion.LookRotation(forward);
 
             for (int i = 0; i < swords.Length; i++)
@@ -322,7 +350,7 @@ public class CPrideBoss : CEnemy, IBoss
                 }
             }
 
-            await MoveBossTask(restPosition, 0.35f, token);
+            await MoveBossTask(restPosition + Vector3.up * 3f, 0.45f, token);
             if (!CanFight) return;
 
             foreach (GameObject sword in swords)
@@ -376,7 +404,7 @@ public class CPrideBoss : CEnemy, IBoss
 
             if (!CanFight) return;
 
-            await MoveBossTask(restPosition, 0.35f, token);
+            await MoveBossTask(restPosition, 0.8f, token);
         }
         finally
         {
@@ -387,7 +415,7 @@ public class CPrideBoss : CEnemy, IBoss
 
             if (body != null)
             {
-                body.position = restPosition;
+                if (arrivedAtCenter) body.position = restPosition;
                 body.isKinematic = wasKinematic;
             }
 
@@ -419,12 +447,13 @@ public class CPrideBoss : CEnemy, IBoss
         const float warningTime = 1f;
         const float warningAngle = 15f;
         const float fireTime = 5f;
-        const float fireAngle = 90f;
+        const float fireAngle = 135f;
         const float width = 3f;
         const float fadeInTime = 0.15f;
         const float fadeOutTime = 0.18f;
         const float returnTime = 0.3f;
         const float tipDistance = 3.3125f * MainLaserSwordScale;
+        const float hitInterval = 1f;
 
         float radius = _crossLaserRadius;
         float halfWidth = width * 0.5f;
@@ -523,7 +552,9 @@ public class CPrideBoss : CEnemy, IBoss
                 previews[i].ClearPreview();
             }
 
-            bool hit = false;
+            
+            float nextHitTime = 0f;
+
             elapsed = 0f;
 
             while (elapsed < fireTime && CanFight)
@@ -531,7 +562,7 @@ public class CPrideBoss : CEnemy, IBoss
                 float angle = startYaw + warningAngle + fireAngle * (elapsed / fireTime);
                 pivot.rotation = Quaternion.Euler(0f, angle, 0f);
 
-                if (!hit)
+                if (elapsed >= nextHitTime)
                 {
                     Vector3 local = pivot.InverseTransformPoint(_player.transform.position);
                     float x = Mathf.Abs(local.x);
@@ -539,7 +570,7 @@ public class CPrideBoss : CEnemy, IBoss
 
                     if ((x <= halfWidth && z <= radius) || (z <= halfWidth && x <= radius))
                     {
-                        hit = true;
+                        nextHitTime = elapsed + hitInterval;
                         _player.OnHit(this, damage);
                     }
                 }
@@ -567,6 +598,8 @@ public class CPrideBoss : CEnemy, IBoss
                     swords[i].localPosition = Vector3.Lerp(swordPositions[i], beamHeight, t);
                 }
             }
+
+            await MoveBossTask(center, 0.8f, token);
         }
         finally
         {
@@ -574,7 +607,7 @@ public class CPrideBoss : CEnemy, IBoss
 
             if (_rb != null)
             {
-                if (startedHovering) await MoveBossTask(center, 0.8f, token);
+                if (startedHovering) _rb.position = center;
                 _rb.isKinematic = wasKinematic;
             }
 
@@ -886,7 +919,7 @@ public class CPrideBoss : CEnemy, IBoss
         float spreadRadius = _attackRadius * 1f;
         float innerDistance = aimedRadius + spreadRadius + escapeGap;
 
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < 2; i++)
         {
             token.ThrowIfCancellationRequested();
 
@@ -895,11 +928,12 @@ public class CPrideBoss : CEnemy, IBoss
                 return;
             }
 
-            float additionalTime = i % 2 == 1 ? 2.5f : 3f;
+            float additionalTime = i % 2 == 1 ? 1.5f : 1.5f;
 
             float readyTime = Mathf.Max(fallingTime, _realAttackDelay * 0.75f * additionalTime);
             Vector3 center = _player.transform.position;
-            UniTask[] slams = new UniTask[1 + i * 2];
+            int swordCount = i == 0 ? 1 : 5;
+            UniTask[] slams = new UniTask[swordCount];
 
             bool hitApplied = false;
 
@@ -934,7 +968,7 @@ public class CPrideBoss : CEnemy, IBoss
 
     private async UniTask RunSeveralSlam(bool special, CancellationToken token)
     {
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < 5; i++)
         {
             token.ThrowIfCancellationRequested();
 
@@ -971,14 +1005,15 @@ public class CPrideBoss : CEnemy, IBoss
                 cancellationToken: token);
         }
 
-        await UniTask.Delay(2000);
+        await UniTask.Delay(2000, delayTiming: PlayerLoopTiming.LastUpdate,
+            cancellationToken: token);
     }
 
     private async UniTask RunBackstepSwordVolley(CancellationToken token)
     {
         if (_linePreviewPattern == null || _warpSwordPrefab == null || !CanFight) return;
 
-        const float backstepDistance = 7.5f;
+        const float backstepDistance = 5f;
         const int swordCount = 3;
 
         Vector3 target = _rb.position;
@@ -989,8 +1024,8 @@ public class CPrideBoss : CEnemy, IBoss
         forward.Normalize();
 
         Vector3 retreatPoint = target - forward * backstepDistance;
-        if (!TryGetMoveDestination(retreatPoint, out _)
-            || _rb.SweepTest(-forward, out _, backstepDistance, QueryTriggerInteraction.Ignore))
+        if (!TryGetMoveDestination(retreatPoint, out _) ||
+            IsBackstepPathBlocked(-forward, backstepDistance))
         {
             await RunAimedLineSword(token);
             return;
@@ -1140,7 +1175,16 @@ public class CPrideBoss : CEnemy, IBoss
     private bool TryGetMoveDestination(Vector3 point, out Vector3 destination)
     {
         destination = point;
-        if (!TryGetGround(point, out RaycastHit ground)) return false;
+
+        if (!TryGetGround(point, out RaycastHit ground))
+        {
+            if (_enableLog)
+            {
+                CLogger.Warn($"[PrideBoss] 바닥 탐색 실패 : 목적지 {point}, Ground Mask {_groundMask.value}");
+            }
+
+            return false;
+        }
 
         destination.y = ground.point.y + 0.02f;
 
@@ -1149,9 +1193,44 @@ public class CPrideBoss : CEnemy, IBoss
         float halfSegment = Mathf.Max(0f, bounds.extents.y - radius);
         Vector3 center = destination + (bounds.center - _rb.position);
         Vector3 verticalOffset = Vector3.up * halfSegment;
+        Vector3 bottom = center - verticalOffset;
+        Vector3 top = center + verticalOffset;
 
-        return !Physics.CheckCapsule(center - verticalOffset, center + verticalOffset,
+        bool blocked = Physics.CheckCapsule(bottom, top,
             radius, _moveObstacleMask, QueryTriggerInteraction.Ignore);
+
+        if (blocked && _enableLog)
+        {
+            CLogger.Warn($"[PrideBoss] 목적지 겹침 : 위치 {destination}, 바닥 {ground.collider.name}");
+
+            Collider[] blockers = Physics.OverlapCapsule(bottom, top,
+                radius, _moveObstacleMask, QueryTriggerInteraction.Ignore);
+
+            for (int i = 0; i < blockers.Length; i++)
+            {
+                Collider obstacle = blockers[i];
+                string layerName = LayerMask.LayerToName(obstacle.gameObject.layer);
+                CLogger.Warn($"[PrideBoss] 목적지를 막은 콜라이더 {obstacle.name} ({layerName})");
+            }
+        }
+
+        return !blocked;
+    }
+
+    private bool IsBackstepPathBlocked(Vector3 direction, float distance)
+    {
+        bool blocked = _rb.SweepTest(direction, out RaycastHit hit,
+            distance, QueryTriggerInteraction.Ignore);
+
+        if (blocked && _enableLog && hit.collider != null)
+        {
+            Collider obstacle = hit.collider;
+            string layerName = LayerMask.LayerToName(obstacle.gameObject.layer);
+            CLogger.Warn(
+                $"[PrideBoss] 백스텝 경로 충돌 : {obstacle.name} ({layerName}), {hit.distance:F2}m / {distance:F2}m");
+        }
+
+        return blocked;
     }
 
     private bool TryGetGround(Vector3 point, out RaycastHit hit)
@@ -1471,6 +1550,10 @@ public class CPrideBoss : CEnemy, IBoss
                 _animator.Play(IdleState, 0, 0f);
             }
         }
+
+        _isRage = false;
+        _mainCounter = 0;
+        _nextMainIsCross = true;
 
         _activeSlamImpacts.Clear();
         CancellationTokenSource source = _cts;
