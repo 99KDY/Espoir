@@ -166,9 +166,9 @@ public class CInventoryUI : MonoBehaviour
                 }
                 else
                 {
-                    if (CGameManager.Instance.BattleState != EBattleState.None)
+                    if (CGameManager.Instance != null && CGameManager.Instance.BattleState != EBattleState.None)
                     {
-                        CGameManager.Instance?.ShowError("전투 중에는 인벤토리를 열 수 없습니다.", Color.red, true);
+                        CGameManager.Instance.ShowError("전투 중에는 인벤토리를 열 수 없습니다.", Color.red, true);
                     }
                 }
             }

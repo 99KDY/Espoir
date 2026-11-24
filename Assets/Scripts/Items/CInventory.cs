@@ -477,6 +477,7 @@ public class CInventory : MonoBehaviour
 
         if (emptySlot < 0)
         {
+            CGameManager.Instance.ShowError("장비를 벗으려면 가방에 빈칸이 필요합니다.", Color.red, true);
             return false;
         }
 
