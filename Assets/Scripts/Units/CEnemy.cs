@@ -75,9 +75,25 @@ public class CEnemy : CUnit
             _isDropped = true;
             if (player != null && player.Inventory != null && _dropCount > 0)
             {
+                bool inventoryFull = false;
+
                 for (int i = 0; i < _dropCount; i++)
                 {
-                    if (CItemSO.TryMakeDropItem(_drops, out CItemSO targetItem)) player.Inventory.AddItem(targetItem.Id);
+                    if (!CItemSO.TryMakeDropItem(_drops, out CItemSO targetItem))
+                    {
+                        continue;
+                    }
+
+                    if (player.Inventory.AddItem(targetItem.Id) == 0 &&
+                        player.Inventory.FindEmptySlot() < 0)
+                    {
+                        inventoryFull = true;
+                    }
+                }
+
+                if (inventoryFull)
+                {
+                    CGameManager.Instance?.ShowError("가방이 가득 차 아이템을 받을 수 없습니다.", Color.red);
                 }
             }
         }

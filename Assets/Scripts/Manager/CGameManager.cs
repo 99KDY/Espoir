@@ -114,6 +114,8 @@ public class CGameManager : MonoBehaviour
 
     [SerializeField] CanvasGroup _saveScreen;
 
+    [SerializeField] GameObject _errorPrefab;
+
     [Header("디버그용")]
     [SerializeField] TMP_Text _zoneText;
 
@@ -999,6 +1001,75 @@ public class CGameManager : MonoBehaviour
             _popupScreen.alpha = Mathf.Lerp(1f, 0f, lerp);
             yield return null;
         }
+    }
+
+    public void ShowError(string text, Color? color = null, bool trackMouse = false)
+    {
+        GameObject go = Instantiate(_errorPrefab, this.transform);
+        if (color == null) color = Color.red;
+        if (go.TryGetComponent<TMP_Text>(out TMP_Text goText))
+        {
+            StartCoroutine(CreatePopupCoroutine(goText, text, trackMouse, color.Value));
+        }
+        else
+        {
+            CLogger.Error("에러 프리팹 잘못됨");
+        }
+    }
+
+    private IEnumerator CreatePopupCoroutine(TMP_Text go, string text, bool trackMouse, Color color)
+    {
+        go.text = text;
+        go.color = color;
+        RectTransform rectTransform = go.GetComponent<RectTransform>();
+        Vector2 basePoint;
+
+        if (trackMouse)
+        {
+            if (RectTransformUtility.ScreenPointToLocalPointInRectangle
+                (
+                    this.GetComponent<RectTransform>(),
+                    Input.mousePosition,
+                    null,
+                    out Vector2 localPoint)
+                )
+            {
+                rectTransform.anchoredPosition = localPoint;
+                basePoint = localPoint;
+            }
+            else
+            {
+                rectTransform.anchoredPosition = Vector2.zero;
+                basePoint = Vector2.zero;
+            }
+        }
+        else
+        {
+            rectTransform.anchoredPosition = Vector2.zero;
+            basePoint = Vector2.zero;
+        }
+        go.alpha = 0f;
+        rectTransform.localScale = Vector3.one * 1.5f;
+        float timer = 0f;
+        while (timer < 0.125f)
+        {
+            timer += Time.unscaledDeltaTime;
+            rectTransform.localScale = Vector3.one * (1.5f - timer * 4f);
+            go.alpha = timer * 8f;
+            yield return null;
+        }
+        go.alpha = 1f;
+        rectTransform.localScale = Vector3.one;
+        timer = 0f;
+        yield return new WaitForSecondsRealtime(0.5f);
+        while (timer < 0.5f)
+        {
+            timer += Time.unscaledDeltaTime;
+            rectTransform.anchoredPosition = basePoint + Vector2.up * timer * 2 * (rectTransform.rect.height * 0.1f);
+            go.alpha = 1 - timer * 2;
+            yield return null;
+        }
+        Destroy(go.gameObject);
     }
 
     private static string FormatTimer(float time)
