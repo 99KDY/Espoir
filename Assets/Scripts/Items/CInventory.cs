@@ -716,11 +716,17 @@ public class CInventory : MonoBehaviour
     {
         if (price < 0 || Gold < price)
         {
+            CGameManager.Instance?.ShowError("돈이 부족합니다.", Color.red, true);
             return false;
         }
 
         if (AddItemInternal(itemId, 1, false) != 1)
         {
+            string message = FindEmptySlot() < 0
+                ? "가방이 가득 차 구매할 수 없습니다."
+                : "아이템을 구매할 수 없습니다.";
+
+            CGameManager.Instance?.ShowError(message);
             return false;
         }
 

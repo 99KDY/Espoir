@@ -93,7 +93,7 @@ public class CEnemy : CUnit
 
                 if (inventoryFull)
                 {
-                    CGameManager.Instance?.ShowError("가방이 가득 차 아이템을 받을 수 없습니다.", Color.red);
+                    CGameManager.Instance?.ShowError("가방이 가득 차 아이템을 받을 수 없습니다.", Color.red, true);
                 }
             }
         }

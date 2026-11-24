@@ -164,6 +164,13 @@ public class CInventoryUI : MonoBehaviour
                 {
                     SetInventoryOpen(true);
                 }
+                else
+                {
+                    if (CGameManager.Instance.BattleState != EBattleState.None)
+                    {
+                        CGameManager.Instance?.ShowError("전투 중에는 인벤토리를 열 수 없습니다.", Color.red, true);
+                    }
+                }
             }
         }
 

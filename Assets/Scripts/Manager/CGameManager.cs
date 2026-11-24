@@ -706,6 +706,10 @@ public class CGameManager : MonoBehaviour
         {
             StartCoroutine(ShowSaveNotify());
         }
+        else
+        {
+            ShowError("저장 실패. 다시 시도해주세요.", Color.red, true);
+        }
         return result;
     }
 
