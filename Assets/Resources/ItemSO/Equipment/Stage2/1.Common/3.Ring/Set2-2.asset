@@ -13,18 +13,21 @@ MonoBehaviour:
   m_Name: Set2-2
   m_EditorClassIdentifier: 
   _id: 219
-  _name: "<color=#FFFFFF>\uc0c9\uc695\uc758 \ubc18\uc9c0(N)</color>"
+  _name: "<color=#FFFFFF>\uC0C9\uC695\uC758 \uBC18\uC9C0(N)</color>"
   _rarity: 0
-  _cost: 200
   _itemIcon: {fileID: -267231648, guid: 47160164cc1f71243bfeef5631611974, type: 3}
-  _description: "<i>\uc0ac\ub791\ubc1b\ub358 \uc5bc\uad74\uc744 \uc78a\uc9c0 \uc54a\uc73c\ub824 \ub080 \ubc18\uc9c0.</i>\nHP +10, ATK +8, DEF +1\n\uc138\ud2b8 \ud6a8\uacfc \uc0c9\uc695\uc758 \uc18d\uc0ad\uc784\n(2) \uacf5\uaca9\uc18d\ub3c4 +10%\n(3) \uacf5\uaca9\ub825 +25%\n(4) \uc8fc\ub294 \ud53c\ud574 +30%"
+  _description: "<i>\uC0AC\uB791\uBC1B\uB358 \uC5BC\uAD74\uC744 \uC78A\uC9C0 \uC54A\uC73C\uB824
+    \uB080 \uBC18\uC9C0.</i>\nHP +20, ATK +16, DEF +2\n\uC138\uD2B8 \uD6A8\uACFC
+    \uC0C9\uC695\uC758 \uC18D\uC0AD\uC784\n(2) \uACF5\uACA9\uC18D\uB3C4 +10%\n(3)
+    \uACF5\uACA9\uB825 +25%\n(4) \uC8FC\uB294 \uD53C\uD574 +30%, \ubc1b\ub294 \ud53c\ud574 +15%"
+  _cost: 200
   _slot: 3
   _setNumber: 202
   _action:
   - action: 1
-    param: 10
+    param: 20
   - action: 3
-    param: 8
+    param: 16
   - action: 5
-    param: 1
+    param: 2
   _equipmentStatus: []

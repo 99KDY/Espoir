@@ -24,6 +24,11 @@ public class CDynamicBoneHairWind : MonoBehaviour
     private Vector3[] _baseForces;
     private bool _hasPrevious;
 
+    /// <summary>
+    /// 외부에서 Step을 호출해 이동 바람을 갱신하는지 여부입니다.
+    /// </summary>
+    public bool IsManual { get; set; }
+
     private void OnEnable()
     {
         _hasPrevious = false;
@@ -78,9 +83,20 @@ public class CDynamicBoneHairWind : MonoBehaviour
 
     private void Update()
     {
-        float deltaTime = Time.deltaTime;
+        if (IsManual)
+        {
+            return;
+        }
 
-        if (deltaTime <= 0f || _targets == null)
+        Step(Time.deltaTime);
+    }
+
+    /// <summary>
+    /// 전달받은 시간으로 이동 바람과 강성을 갱신합니다.
+    /// </summary>
+    public void Step(float deltaTime)
+    {
+        if (deltaTime <= 0f || _targets == null || _baseStiffness == null)
         {
             return;
         }

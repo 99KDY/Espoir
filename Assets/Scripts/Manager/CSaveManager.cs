@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
-using static UnityEngine.Rendering.PostProcessing.SubpixelMorphologicalAntialiasing;
 
 [Flags]
 public enum ESaveSlot
@@ -29,6 +28,9 @@ public class CSaveData
     public int completedQuest;
     public int bossClear;
     public int pradonaPower;
+    public List<float> bossTime;
+    public float playTime;
+    public int bossFound;
     #endregion
 
     #region Property
@@ -184,6 +186,71 @@ public class CSaveData
             pradonaPower = (int)value;
         }
     }
+
+    /// <summary>
+    /// 누적 플레이시간(초)입니다. 이전 저장 데이터는 0으로 읽습니다.
+    /// </summary>
+    public float PlayTime
+    {
+        get
+        {
+            return playTime;
+        }
+        set
+        {
+            playTime = Mathf.Max(0f, value);
+        }
+    }
+
+    /// <summary>
+    /// 전투를 시작한 군주 목록입니다. 이전 저장 데이터는 None으로 읽습니다.
+    /// </summary>
+    public EBossClear BossFound
+    {
+        get
+        {
+            return (EBossClear) bossFound;
+        }
+        set
+        {
+            bossFound = (int)value;
+        }
+    }
+
+    public Dictionary<EBossClear, float> BossTime
+    {
+        get
+        {
+            Dictionary<EBossClear, float> result = new Dictionary<EBossClear, float>();
+
+            for (int i = 0; i < 8; i++)
+            {
+                EBossClear targetBoss = (EBossClear)(1 << i);
+                if ((EBossClear.AvailableBoss & targetBoss) == 0) continue;
+
+                result[targetBoss] = bossTime != null && i < bossTime.Count
+                    ? bossTime[i]
+                    : 0f;
+            }
+
+            return result;
+        }
+        set
+        {
+            bossTime = new List<float>(8);
+
+            for (int i = 0; i < 8; i++)
+            {
+                EBossClear targetBoss = (EBossClear)(1 << i);
+                float tempTime = 0f;
+                if ((EBossClear.AvailableBoss & targetBoss) != 0 && value != null)
+                {
+                    value.TryGetValue(targetBoss, out tempTime);
+                }
+                bossTime.Add(tempTime);
+            }
+        }
+    }
     #endregion
 
     public CSaveData
@@ -198,7 +265,10 @@ public class CSaveData
             EQuestList actingQuest,
             EQuestList completedQuest,
             EBossClear bossClear,
-            EPradonaPower pradonaPower
+            EPradonaPower pradonaPower,
+            Dictionary<EBossClear, float> bossTime,
+            float playTime,
+            EBossClear bossFound
         )
     {
         this.version = version;
@@ -212,6 +282,9 @@ public class CSaveData
         this.CompletedQuest = completedQuest;
         this.BossClear = bossClear;
         this.PradonaPower = pradonaPower;
+        this.BossTime = bossTime;
+        this.playTime = playTime;
+        this.BossFound = bossFound;
     }
 
     public CSaveData
@@ -226,10 +299,13 @@ public class CSaveData
         EQuestList actingQuest,
         EQuestList completedQuest,
         EBossClear bossClear,
-        EPradonaPower pradonaPower
+        EPradonaPower pradonaPower,
+        Dictionary<EBossClear, float> bossTime,
+        float playTime,
+        EBossClear bossFound
     ) : this(version, currentStage, money, inventory, equipment,
         new List<int>(quickslot), availableQuest,actingQuest, completedQuest,
-        bossClear, pradonaPower) { }
+        bossClear, pradonaPower, bossTime, playTime, bossFound) { }
 }
 
 public static class CSaveManager 
@@ -244,7 +320,7 @@ public static class CSaveManager
 #else
     private readonly static bool _isPersist = true;
 #endif
-    public readonly static int Version = 1;
+    public readonly static int Version = 3;
 
     public static int MaxSaveSlot
     {
@@ -387,6 +463,8 @@ public static class CSaveManager
                         File.ReadAllText(path)
                     );
 
+                bool migrated = MigrateSaveData(loadedData);
+
                 _saveDataErrorCode[index] = CheckSaveData(loadedData);
                 if (_saveDataErrorCode[index] != 0)
                 {
@@ -396,6 +474,17 @@ public static class CSaveManager
                 else
                 {
                     _saveData[index] = loadedData;
+                    if (migrated)
+                    {
+                        if (SaveData(index, loadedData))
+                        {
+                            CLogger.Success($"저장슬롯 {index} - 병합 후 저장 성공!");
+                        }
+                        else
+                        {
+                            CLogger.Error($"저장슬롯 {index} - 병합 후 저장 실패");
+                        }
+                    }
                     return true;
                 }
             }
@@ -605,5 +694,23 @@ public static class CSaveManager
 
         data = _saveData[index];
         return true;
+    }
+
+    private static bool MigrateSaveData(CSaveData data)
+    {
+        if (data == null) return false;
+        if (data.Version == 1)
+        {
+            data.BossTime = null;
+            data.version = 2;
+        }
+        if (data.Version == 2)
+        {
+            data.PlayTime = data.playTime;
+            data.BossFound |= data.BossClear;
+            data.version = 3;
+            return true;
+        }
+        return false;
     }
 }

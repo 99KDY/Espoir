@@ -17,14 +17,14 @@ MonoBehaviour:
   _rarity: 0
   _cost: 100
   _itemIcon: {fileID: -2119614473, guid: f4bbc80c9c19b514cb789303f4d8d816, type: 3}
-  _description: "<i>\uccab \ub9dd\uce58\uc9c8\uc5d0 \ucd08\ub85d \ubcf4\uc11d\uc774 \ub5a8\ub838\ub2e4.</i>\nHP +15, ATK +2, DEF +4\n\uc138\ud2b8 \ud6a8\uacfc \ucd08\uc2ec\uc790\uc758 \ud589\uc6b4\n(2) \ubc29\uc5b4\ub825 +10%\n(3) \ucd5c\ub300 HP +35%\n(4) \ubc1b\ub294 \ud53c\ud574 -20%"
+  _description: "<i>\uccab \ub9dd\uce58\uc9c8\uc5d0 \ucd08\ub85d \ubcf4\uc11d\uc774 \ub5a8\ub838\ub2e4.</i>\nHP +30, ATK +4, DEF +8\n\uc138\ud2b8 \ud6a8\uacfc \ucd08\uc2ec\uc790\uc758 \ud589\uc6b4\n(2) \ubc29\uc5b4\ub825 +10%\n(3) \ucd5c\ub300 HP +35%\n(4) \ubc1b\ub294 \ud53c\ud574 -20%"
   _slot: 2
   _setNumber: 101
   _action:
   - action: 1
-    param: 15
+    param: 30
   - action: 3
-    param: 2
-  - action: 5
     param: 4
+  - action: 5
+    param: 8
   _equipmentStatus: []

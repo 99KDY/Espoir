@@ -13,7 +13,7 @@ public class CBossSummoner : MonoBehaviour
     private static readonly int _FADE = Shader.PropertyToID("_Fade");
 
     [Header("연결")]
-    [SerializeField] private CSlothBoss _boss;
+    [SerializeField] private CEnemy _boss;
     [Tooltip("제단 가운데 (보스가 서는 자리 · 방향)")]
     [SerializeField] private Transform _altar;
     [Tooltip("제단 입구의 나태의 조각상 (소환 장면 카메라 기준)")]
@@ -75,11 +75,12 @@ public class CBossSummoner : MonoBehaviour
     /// </summary>
     public float CurrentAlpha => _alpha;
 
-    public CSlothBoss Boss => _boss;
+    public CEnemy Boss => _boss;
 
     private void Awake()
     {
         if (_boss == null) return;
+        if (_boss is not IBoss) return;
 
         foreach (Renderer target in _boss.GetComponentsInChildren<Renderer>(true))
         {
@@ -139,7 +140,8 @@ public class CBossSummoner : MonoBehaviour
     public bool Summon()
     {
         if (_isSummoned || _boss == null) return false;
-
+        if (_boss is not IBoss) return false;
+        CGameManager.Instance.InvokeAutosave();
         _isSummoned = true;
         CGameManager.Instance.InvokeBossBattleActivation(true);
         _summonTime = 0f;
@@ -157,7 +159,14 @@ public class CBossSummoner : MonoBehaviour
         if (_talkCamera != null) _talkCamera.BeginCinematic(GetCinePosition(), GetCineLook(), _cineFov,
             _cinematicDuration);
         if (_titleView != null) _titleView.Play();
-
+        if (_boss is CSlothBoss)
+        {
+            CGameManager.Instance?.BeginBossTimer(EBossClear.Pigritia);
+        }
+        if (_boss is CPrideBoss)
+        {
+            CGameManager.Instance?.BeginBossTimer(EBossClear.Superbia);
+        }
         OnSummonChanged?.Invoke(true);
         return true;
     }
@@ -167,6 +176,15 @@ public class CBossSummoner : MonoBehaviour
     /// </summary>
     public bool Unsummon()
     {
+        if (_boss is CSlothBoss)
+        {
+            CGameManager.Instance?.EndBossTimer(EBossClear.Pigritia, false);
+        }
+        if (_boss is CPrideBoss)
+        {
+            CGameManager.Instance?.EndBossTimer(EBossClear.Superbia, false);
+        }
+
         if (!_isSummoned || _boss == null) return false;
 
         _isSummoned = false;
@@ -238,6 +256,13 @@ public class CBossSummoner : MonoBehaviour
             }
         }
 
+        if (_isSummoned && _boss != null &&
+            _boss.gameObject.activeInHierarchy && _boss.HpCurrent <= 0f)
+        {
+            Unsummon();
+            return;
+        }
+
         if (_isSummoned && _player != null)
         {
             Vector3 offset = _player.transform.position - _altar.position;
@@ -251,7 +276,10 @@ public class CBossSummoner : MonoBehaviour
         // 페이드 인 시작부터 소환 장면이 끝나 플레이어가 움직일 수 있을 때까지, 그리고 잠재우는 동안은 AI 를 대기 상태로 묶음
         // (공격 타이머 · 상태를 매 프레임 처음 값으로). 애니메이터는 그대로 돌아 대기 애니가 재생된다.
         bool isHolding = _summonTime >= 0f || _cineTime >= 0f || _dismissTime >= 0f;
-        if (isHolding && _boss != null && _boss.gameObject.activeSelf) _boss.ResetBattleState();
+        if (isHolding && _boss != null && _boss.gameObject.activeSelf)
+        {
+            if (_boss is IBoss targetBoss) targetBoss.ResetBattleState();
+        }
     }
 
     // 공격 모션 중이면 대기 상태로 섞어 돌림 (첫 레이어 = 대기, 나머지 공격 레이어 = 빈 상태)
@@ -296,7 +324,8 @@ public class CBossSummoner : MonoBehaviour
         }
 
         if (_boss.HpCurrent < _boss.HpMax) _boss.GetHeal(1f, ERatioSwitch.ByMax, true);
-        _boss.ResetBattleState();
+        if (_boss is IBoss targetBoss) targetBoss.ResetBattleState();
+        _boss.ResetDropState();
     }
 
     private void PlaceOnAltar()

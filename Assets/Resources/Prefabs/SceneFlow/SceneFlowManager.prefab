@@ -181,6 +181,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _scenes:
+  - Id: 0
+    SceneName: TitleScreen
   - Id: 30
     SceneName: DesertScene
   - Id: 31

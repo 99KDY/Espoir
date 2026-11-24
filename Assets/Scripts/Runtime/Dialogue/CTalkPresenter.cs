@@ -293,6 +293,7 @@ public class CTalkPresenter : MonoBehaviour
 
         _current.SetTalker(_player != null ? _player.transform : null);
         if (_talkCamera != null) _talkCamera.BeginTalk(_current);
+        _current.PlayDialogueBGM();
 
         _dialog.Open(_current.DisplayName, _current.Title, Time.unscaledTime);
         bool isSummoned = _summoner != null && _summoner.IsSummoned;

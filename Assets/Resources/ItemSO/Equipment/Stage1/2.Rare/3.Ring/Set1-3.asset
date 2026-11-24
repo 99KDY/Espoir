@@ -17,14 +17,14 @@ MonoBehaviour:
   _rarity: 1
   _cost: 300
   _itemIcon: {fileID: -1302562492, guid: aaac6393ee3dcd14fbb8f908c39148c9, type: 3}
-  _description: "<i>\uc8fc\uc778\uc758 \uc2ec\ubd80\ub984\ub9cc\ud07c\uc740 \ubbf8\ub8f0 \uc218 \uc5c6\uc5c8\ub2e4.</i>\nHP +18.75, ATK +7.5, DEF +1.25\n\uc138\ud2b8 \ud6a8\uacfc \ub098\ud0dc\uc758 \ud30c\ud3b8\n(2) \ubc29\uc5b4\ub825 +10%\n(3) \ucd5c\ub300 HP +35%\n(4) \uc804\ud22c\ub2f9 1\ud68c, \ucd5c\ub300 HP\uc758 50%\ub97c \ub118\ub294 \ud53c\ud574 \ubb34\ud6a8"
+  _description: "<i>\uc8fc\uc778\uc758 \uc2ec\ubd80\ub984\ub9cc\ud07c\uc740 \ubbf8\ub8f0 \uc218 \uc5c6\uc5c8\ub2e4.</i>\nHP +37.5, ATK +15, DEF +2.5\n\uc138\ud2b8 \ud6a8\uacfc \ub098\ud0dc\uc758 \ud30c\ud3b8\n(2) \ubc29\uc5b4\ub825 +10%\n(3) \ucd5c\ub300 HP +35%\n(4) \ucd5c\ub300\uccb4\ub825\uc758 50%\ub97c \ucd08\uacfc\ud558\ub294 \ud53c\ud574\ub97c \ubb34\ud6a8\ud654\ud569\ub2c8\ub2e4. \uc7ac\uc0ac\uc6a9 \ub300\uae30\uc2dc\uac04 120\ucd08."
   _slot: 3
   _setNumber: 103
   _action:
   - action: 1
-    param: 18.75
+    param: 37.5
   - action: 3
-    param: 7.5
+    param: 15
   - action: 5
-    param: 1.25
+    param: 2.5
   _equipmentStatus: []

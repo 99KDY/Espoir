@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -178,7 +177,7 @@ public class CTestEnemy : CEnemy
                 Vector3 direction = _startPos - transform.position;
                 direction.y = 0f;
 
-                if (direction.sqrMagnitude > 0.001f)
+                if (direction.sqrMagnitude > 0.01f)
                 {
                     Quaternion targetRotation = Quaternion.LookRotation(direction);
                     transform.rotation = Quaternion.RotateTowards(
@@ -204,7 +203,7 @@ public class CTestEnemy : CEnemy
         Vector3 direction = target - this.transform.position;
         direction.y = 0f;
 
-        if (direction.sqrMagnitude > 0.001f)
+        if (direction.sqrMagnitude > 0.01f)
         {
             Quaternion targetRotation = Quaternion.LookRotation(direction);
             transform.rotation = Quaternion.RotateTowards(
@@ -331,11 +330,11 @@ public class CTestEnemy : CEnemy
             {
                 _isMove = false;
                 _isChasingPlayer = false;
-                CLogger.Log("원래 위치로");
+                // CLogger.Log("원래 위치로");
                 Vector3 direction = _startPos - transform.position;
                 direction.y = 0f;
 
-                if (direction.sqrMagnitude > 0.001f)
+                if (direction.sqrMagnitude > 0.01f)
                 {
                     _isMove = true;
                     _isReturn = true;

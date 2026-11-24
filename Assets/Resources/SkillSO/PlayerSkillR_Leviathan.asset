@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _type: 3
   _cooldown: 60
-  _mpCost: 120
+  _mpCost: 100
   _startTrigger: SkillR
   _comboTrigger: 
   _rotationSpeed: 1080
@@ -95,7 +95,7 @@ MonoBehaviour:
       markedDamageRatio: 0
       hitStopDuration: 0
       offset: {x: 0, y: 0, z: 7}
-      size: {x: 8, y: 3.5, z: 9.5}
+      size: {x: 10.4, y: 4.55, z: 12.35}
       appliesMark: 0
       opensCrownWindow: 0
     effectPrefab: {fileID: 2980615660813890298, guid: 2685168faedc2874ba0909f249a2e3c9, type: 3}

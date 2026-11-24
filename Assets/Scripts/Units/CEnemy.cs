@@ -4,7 +4,7 @@ using UnityEngine;
 
 public interface IBoss
 {
-
+    public void ResetBattleState();
 }
 
 public class CEnemy : CUnit
@@ -13,6 +13,7 @@ public class CEnemy : CUnit
     [SerializeField] private CEnemyStatSO _targetStatSO;
 
     [Header("드롭하는 아이템 범위")]
+    [SerializeField] private int _dropCount = 1;
     [SerializeField] private List<SDropTable> _drops;
 
     private bool _isDropped = false;
@@ -29,6 +30,8 @@ public class CEnemy : CUnit
     protected override void Awake()
     {
         base.Awake();
+        _baseCritRate = 0f;
+        _critRate = _baseCritRate;
         if (_targetStatSO != null)
         {
             Setup(_targetStatSO);
@@ -70,10 +73,34 @@ public class CEnemy : CUnit
         if (!_isDropped)
         {
             _isDropped = true;
-            if (player != null && player.Inventory != null)
+            if (player != null && player.Inventory != null && _dropCount > 0)
             {
-                if (CItemSO.TryMakeDropItem(_drops, out CItemSO targetItem)) player.Inventory.AddItem(targetItem.Id);
+                bool inventoryFull = false;
+
+                for (int i = 0; i < _dropCount; i++)
+                {
+                    if (!CItemSO.TryMakeDropItem(_drops, out CItemSO targetItem))
+                    {
+                        continue;
+                    }
+
+                    if (player.Inventory.AddItem(targetItem.Id) == 0 &&
+                        player.Inventory.FindEmptySlot() < 0)
+                    {
+                        inventoryFull = true;
+                    }
+                }
+
+                if (inventoryFull)
+                {
+                    CGameManager.Instance?.ShowError("가방이 가득 차 아이템을 받을 수 없습니다.", Color.red, true);
+                }
             }
         }
+    }
+
+    public void ResetDropState()
+    {
+        _isDropped = false;
     }
 }

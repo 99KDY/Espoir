@@ -60,6 +60,7 @@ public enum EBossClear
     Ira         = 1 << 5,
     Superbia    = 1 << 6,
     Pradona     = 1 << 7,
+    AvailableBoss = Pigritia | Luxuria | Superbia | Pradona,
 }
 
 [Flags]
@@ -107,11 +108,20 @@ public class CGameManager : MonoBehaviour
     [SerializeField] Button _confirmYes;
     [SerializeField] Button _confirmNo;
 
+    [SerializeField] CanvasGroup _popupScreen;
+    [SerializeField] TMP_Text _popupTitle;
+    [SerializeField] TMP_Text _popupDescription;
+
+    [SerializeField] CanvasGroup _saveScreen;
+
+    [SerializeField] GameObject _errorPrefab;
+
     [Header("디버그용")]
     [SerializeField] TMP_Text _zoneText;
 
     private const string BgmVolumeKey = "Espoir.Settings.BgmVolume";
     private const string SeVolumeKey = "Espoir.Settings.SeVolume";
+    private const string AutosaveKey = "Espoir.Settings.Autosave";
 
     private EGameState _gameState;
     private EBattleState _battleState;
@@ -131,9 +141,23 @@ public class CGameManager : MonoBehaviour
     private CSoundManager _soundManager;
     private CPlayer _player;
     private CInventoryUI _inventoryUI;
+    private CShopUI _shopUI;
+    private CCharacterInfoUI _characterInfoUI;
     private Action _confirmAction;
+    private Dictionary<EBossClear, float> _bossTime;
+    
+    // 보스 타이머용
+    private EBossClear _attempBoss = EBossClear.None;
+    private static EBossClear _bossFoundState;
+    // 씬 이동 중에도 플레이시간을 유지하며 새 게임과 불러오기에서 초기화한다.
+    private static float _playTime;
+    private float _attempStartTime;
 
     private int _currentActiveSpawner = 0;
+
+    // 팝업용
+    private Coroutine _popupCoroutine;
+    private Coroutine _saveCoroutine;
 
     public EGameState GameState => _gameState;
     public EBattleState BattleState => _battleState;
@@ -148,6 +172,9 @@ public class CGameManager : MonoBehaviour
     public static CGameManager Instance => _instance;
     public float BgmLevel => _bgmSlider.value;
     public float SeLevel => _seSlider.value;
+    public Dictionary<EBossClear, float> BossTime => _bossTime;
+    public EBossClear BossFoundState => _bossFoundState;
+    public float PlayTime => _playTime;
 
     private void Awake()
     {
@@ -157,6 +184,12 @@ public class CGameManager : MonoBehaviour
             return;
         }
         _instance = this;
+
+        _bossTime = new Dictionary<EBossClear, float>();
+        _bossTime.Add(EBossClear.Pigritia, 0f);
+        _bossTime.Add(EBossClear.Luxuria, 0f);
+        _bossTime.Add(EBossClear.Superbia, 0f);
+        _bossTime.Add(EBossClear.Pradona, 0f);
     }
 
     void Start()
@@ -168,11 +201,11 @@ public class CGameManager : MonoBehaviour
                 () =>
                 {
                     _soundManager.PlaySE(EEffectSound.Success);
-                    #if UNITY_EDITOR
+#if UNITY_EDITOR
                     UnityEditor.EditorApplication.isPlaying = false;
-                    #else
+#else
                     Application.Quit();
-                    #endif
+#endif
                 }));
         _gameGotoTitle.onClick.AddListener(() =>
             ShowQuestion(
@@ -197,7 +230,7 @@ public class CGameManager : MonoBehaviour
                 _confirmAction();
                 HideQuestion();
             });
-        _confirmNo.onClick.AddListener(() => 
+        _confirmNo.onClick.AddListener(() =>
             {
                 _soundManager.PlaySE(EEffectSound.Beep);
                 HideQuestion();
@@ -208,6 +241,8 @@ public class CGameManager : MonoBehaviour
         _player = FindFirstObjectByType<CPlayer>();
         _soundManager = FindFirstObjectByType<CSoundManager>();
         _inventoryUI = FindFirstObjectByType<CInventoryUI>();
+        _shopUI = FindFirstObjectByType<CShopUI>();
+        _characterInfoUI = FindFirstObjectByType<CCharacterInfoUI>();
         _soundManager.PlayBGM(EBackgroundSound.BaseBGM);
         SetGameState(EGameState.Idle);
         SetBattleState(EBattleState.None);
@@ -275,10 +310,20 @@ public class CGameManager : MonoBehaviour
         _menuBase.blocksRaycasts = false;
 
         LoadVolumeSettings();
+
+        _gameAutosave.SetIsOnWithoutNotify(PlayerPrefs.GetInt(AutosaveKey, 1) == 1);
+        _gameAutosave.onValueChanged.AddListener(isOn =>
+        {
+            PlayerPrefs.SetInt(AutosaveKey, isOn ? 1 : 0);
+            PlayerPrefs.Save();
+        });
     }
 
     void Update()
     {
+        // 메뉴, 대화, 일시정지 시간은 플레이시간에 넣지 않는다.
+        if (_gameState == EGameState.Idle) _playTime += Time.unscaledDeltaTime;
+
         if (Input.GetKeyDown(KeyCode.P))
         {
             if (_gameState == EGameState.Idle)
@@ -293,9 +338,17 @@ public class CGameManager : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            if (_inventoryUI != null && _inventoryUI.IsOpen)
+            if (_shopUI != null && _shopUI.IsOpen)
+            {
+                _shopUI.Close();
+            }
+            else if (_inventoryUI != null && _inventoryUI.IsOpen)
             {
                 _inventoryUI.SetInventoryOpen(false);
+            }
+            else if (_characterInfoUI != null && _characterInfoUI.IsOpen)
+            {
+                _characterInfoUI.Close();
             }
             else
             {
@@ -389,7 +442,6 @@ public class CGameManager : MonoBehaviour
             case EGameState.Idle:
                 break;
             case EGameState.Story:
-                _soundManager.PlayBGM(EBackgroundSound.DialogueBGM);
                 break;
             case EGameState.UI:
                 _soundManager.PlaySE(EEffectSound.QuestionAppear);
@@ -409,6 +461,7 @@ public class CGameManager : MonoBehaviour
                 break;
             case EGameState.Gameover:
                 _soundManager.PlaySE(EEffectSound.Beep);
+                EndBossTimer(_attempBoss, false);
                 _menuBackground.alpha = 1;
                 _menuBackground.interactable = true;
                 _menuBackground.blocksRaycasts = true;
@@ -445,6 +498,14 @@ public class CGameManager : MonoBehaviour
                 _soundManager.PlayBGM(EBackgroundSound.BattleBGM);
                 break;
             case EBattleState.BossBattle:
+                if (_shopUI != null && _shopUI.IsOpen)
+                {
+                    _shopUI.Close();
+                }
+                if (_inventoryUI != null && _inventoryUI.IsOpen)
+                {
+                    _inventoryUI.SetInventoryOpen(false);
+                }
                 _player.InvokeOnBattleStart(true);
                 _soundManager.PlayBGM(EBackgroundSound.BossBGM);
                 break;
@@ -525,7 +586,7 @@ public class CGameManager : MonoBehaviour
             default:
                 break;
         }
-        
+
         RefreshQualityButtons(index);
     }
 
@@ -629,22 +690,33 @@ public class CGameManager : MonoBehaviour
             LoadData(data);
             return true;
         }
-        
+
         // 새 시작인데 데이터가 이미 있을경우
         if (CSaveManager.Available(slot)) return false;
 
+        _playTime = 0f;
+        _bossFoundState = EBossClear.None;
         return SaveData(slot);
     }
 
     public bool SaveData()
     {
-        return SaveData(CSceneFlowManager.Instance.TargetSaveData);
+        bool result = SaveData(CSceneFlowManager.Instance.TargetSaveData);
+        if (result)
+        {
+            StartCoroutine(ShowSaveNotify());
+        }
+        else
+        {
+            ShowError("저장 실패. 다시 시도해주세요.", Color.red, true);
+        }
+        return result;
     }
 
     private bool SaveData(int slot)
     {
         if (_player == null || _player.Inventory == null) return false;
-        
+
         List<CItem> items = new List<CItem>(_player.Inventory.MaxItemSlot);
         int[] quickSlots = new int[_player.Inventory.QuickSlotLength];
 
@@ -662,7 +734,10 @@ public class CGameManager : MonoBehaviour
                 _actingQuest,
                 _completedQuest,
                 _bossClearState,
-                _player.PradonaPower);
+                _player.PradonaPower,
+                _bossTime,
+                _playTime,
+                _bossFoundState);
 
         return CSaveManager.SaveData(slot, data);
     }
@@ -674,7 +749,7 @@ public class CGameManager : MonoBehaviour
 
     private void LoadData(int slot)
     {
-        CSaveManager.GetData(slot, out CSaveData data);
+        if (!CSaveManager.GetData(slot, out CSaveData data)) return;
         LoadData(data);
     }
 
@@ -686,6 +761,9 @@ public class CGameManager : MonoBehaviour
         _completedQuest = data.CompletedQuest;
         _bossClearState = data.BossClear;
         _player.PradonaPower = data.PradonaPower;
+        _bossTime = data.BossTime;
+        _playTime = data.PlayTime;
+        _bossFoundState = data.BossFound;
         foreach (KeyValuePair<EEquipmentSlot, CItemEquipment> pair in data.Equipment)
         {
             if (_player.Equipment.TryGetValue(pair.Key, out CItemEquipment previous) &&
@@ -758,7 +836,7 @@ public class CGameManager : MonoBehaviour
 
     public int GetMaxCompleteNumber()
     {
-        return System.Enum.GetValues(typeof(EBossClear)).Length - 1;
+        return 8;
     }
 
     public static int GetMaxCompleteNumberStatic()
@@ -766,8 +844,286 @@ public class CGameManager : MonoBehaviour
         return System.Enum.GetValues(typeof(EBossClear)).Length - 1;
     }
 
+    /// <summary>
+    /// 보스를 클리어했을 때 사용하는 함수입니다.
+    /// </summary>
+    /// <param name="target"></param>
     public void SetBossCleared(EBossClear target)
     {
+        if (target == EBossClear.None || (target & (target - 1)) != 0)
+        {
+            CLogger.Error("[CGameManager] SetBossCleared의 target이 하나가 아님!");
+            return;
+        }
         _bossClearState |= target;
     }
+
+    /// <summary>
+    /// 보스를 클리어했을 때 사용하는 함수입니다. time은 0 초과 시간입니다.
+    /// </summary>
+    /// <param name="target"></param>
+    public void SetBossCleared(EBossClear target, float time)
+    {
+        if (target == EBossClear.None || (target & (target - 1)) != 0)
+        {
+            CLogger.Error("[CGameManager] SetBossCleared의 target이 하나가 아님!");
+            return;
+        }
+        if ((target & EBossClear.AvailableBoss) == 0)
+        {
+            CLogger.Error($"[CGameManager] GetBossClearTime의 target은 토벌할 수 없음 : {target}");
+            return;
+        }
+        if (time <= 0)
+        {
+            CLogger.Error("[CGameManager] SetBossCleared의 시간이 0 이하임");
+            return;
+        }
+        _bossClearState |= target;
+        if (_bossTime.ContainsKey(target) && _bossTime[target] <= time && _bossTime[target] > 0f)
+        {
+            CLogger.Log($"[CGameManager] {target} 처치 기록 갱신실패 -> 데이터 저장되지 않음.");
+            if (target == EBossClear.Pigritia)
+            {
+                StartCoroutine(ShowPopup("벨패고르 처치", "시간 : " + FormatTimer(time)));
+            }
+            return;
+        }
+        _bossTime[target] = time;
+        if (target == EBossClear.Pigritia)
+        {
+            StartCoroutine(ShowPopup("벨패고르 처치", "시간 : " + FormatTimer(time) + "\n최고기록 갱신!"));
+        }
+    }
+
+    public bool TryGetBossClearTime(EBossClear target, out float time)
+    {
+        time = 0f;
+        if (target == EBossClear.None || (target & (target - 1)) != 0)
+        {
+            CLogger.Error("[CGameManager] GetBossClearTime의 target이 하나가 아님!");
+            return false;
+        }
+        if ((target & EBossClear.AvailableBoss) == 0)
+        {
+            CLogger.Error($"[CGameManager] GetBossClearTime의 target은 토벌할 수 없음 : {target}");
+            return false;
+        }
+        time = _bossTime[target];
+        return true;
+    }
+
+    /// <summary>
+    /// 맵 이동 전에 보관한 보스 처치 여부와 최단 기록을 복원합니다.
+    /// </summary>
+    public void RestoreBossRecords(EBossClear cleared, IReadOnlyDictionary<EBossClear, float> times)
+    {
+        _bossClearState = cleared;
+        _bossTime.Clear();
+        foreach (KeyValuePair<EBossClear, float> pair in times)
+        {
+            _bossTime.Add(pair.Key, pair.Value);
+        }
+    }
+
+    public void BeginBossTimer(EBossClear boss)
+    {
+        if (boss == EBossClear.None || (boss & (boss - 1)) != 0 ||
+            _gameState == EGameState.Gameover || (boss & EBossClear.AvailableBoss) == 0) return;
+        _attempBoss = boss;
+        _attempStartTime = Time.time;
+        _bossFoundState |= boss;
+    }
+
+    public bool TryGetBossTimer(EBossClear boss, out float currentTimer, out bool timeOvered)
+    {
+        currentTimer = 0f;
+        timeOvered = false;
+        if (boss == EBossClear.None || (boss & (boss - 1)) != 0 ||
+            _attempBoss != boss || _gameState == EGameState.Gameover) return false;
+        
+        currentTimer = Time.time - _attempStartTime;
+        timeOvered = (_bossTime[boss] > 0) && (currentTimer > _bossTime[boss]);
+
+        return true;
+    }
+
+    public void EndBossTimer(EBossClear boss, bool cleared)
+    {
+        if (boss == EBossClear.None || (boss & (boss - 1)) != 0 || _attempBoss != boss) return;
+        if (cleared && TryGetBossTimer(boss, out float currentTimer, out _))
+        {
+            if (currentTimer > 0f) SetBossCleared(boss, currentTimer);
+            else SetBossCleared(boss);
+        }
+
+        _attempBoss = EBossClear.None;
+    }
+
+    public IEnumerator ShowPopup(string title, string description)
+    {
+        if (_popupScreen == null || _popupTitle == null || _popupDescription == null)
+        {
+            yield break;
+        }
+
+        if (_popupCoroutine != null)
+        {
+            StopCoroutine(_popupCoroutine);
+            _popupCoroutine = null;
+        }
+
+        _popupCoroutine = StartCoroutine(ShowPopupInternal(title, description));
+        yield return _popupCoroutine;
+        _popupCoroutine = null;
+    }
+
+    private IEnumerator ShowPopupInternal(string title, string description)
+    {
+        _popupScreen.alpha = 0f;
+        _popupTitle.text = title;
+        _popupDescription.text = description;
+
+        float t = 0f;
+        while (t < 0.5f)
+        {
+            float dt = Time.unscaledDeltaTime;
+            t += dt;
+            float lerp = Mathf.Clamp01(t / 0.5f);
+            _popupScreen.alpha = Mathf.Lerp(0f, 1f, lerp);
+            yield return null;
+        }
+
+        yield return new WaitForSecondsRealtime(2f);
+
+        t = 0f;
+        while (t < 0.5f)
+        {
+            float dt = Time.unscaledDeltaTime;
+            t += dt;
+            float lerp = Mathf.Clamp01(t / 0.5f);
+            _popupScreen.alpha = Mathf.Lerp(1f, 0f, lerp);
+            yield return null;
+        }
+    }
+
+    public void ShowError(string text, Color? color = null, bool trackMouse = false)
+    {
+        GameObject go = Instantiate(_errorPrefab, this.transform);
+        if (color == null) color = Color.red;
+        if (go.TryGetComponent<TMP_Text>(out TMP_Text goText))
+        {
+            StartCoroutine(CreatePopupCoroutine(goText, text, trackMouse, color.Value));
+        }
+        else
+        {
+            CLogger.Error("에러 프리팹 잘못됨");
+        }
+    }
+
+    private IEnumerator CreatePopupCoroutine(TMP_Text go, string text, bool trackMouse, Color color)
+    {
+        go.text = text;
+        go.color = color;
+        RectTransform rectTransform = go.GetComponent<RectTransform>();
+        Vector2 basePoint;
+
+        if (trackMouse)
+        {
+            if (RectTransformUtility.ScreenPointToLocalPointInRectangle
+                (
+                    this.GetComponent<RectTransform>(),
+                    Input.mousePosition,
+                    null,
+                    out Vector2 localPoint)
+                )
+            {
+                rectTransform.anchoredPosition = localPoint;
+                basePoint = localPoint;
+            }
+            else
+            {
+                rectTransform.anchoredPosition = Vector2.zero;
+                basePoint = Vector2.zero;
+            }
+        }
+        else
+        {
+            rectTransform.anchoredPosition = Vector2.zero;
+            basePoint = Vector2.zero;
+        }
+        go.alpha = 0f;
+        rectTransform.localScale = Vector3.one * 1.5f;
+        float timer = 0f;
+        while (timer < 0.125f)
+        {
+            timer += Time.unscaledDeltaTime;
+            rectTransform.localScale = Vector3.one * (1.5f - timer * 4f);
+            go.alpha = timer * 8f;
+            yield return null;
+        }
+        go.alpha = 1f;
+        rectTransform.localScale = Vector3.one;
+        timer = 0f;
+        yield return new WaitForSecondsRealtime(0.5f);
+        while (timer < 0.5f)
+        {
+            timer += Time.unscaledDeltaTime;
+            rectTransform.anchoredPosition = basePoint + Vector2.up * timer * 2 * (rectTransform.rect.height * 0.1f);
+            go.alpha = 1 - timer * 2;
+            yield return null;
+        }
+        Destroy(go.gameObject);
+    }
+
+    private static string FormatTimer(float time)
+    {
+        int seconds = (int)(time * 100f);
+        return $"{seconds / 6000:D2}:{seconds / 100 % 60:D2}<size=72%>.{seconds % 100:D2}</size>";
+    }
+    public IEnumerator ShowSaveNotify()
+    {
+        if (_saveScreen == null)
+        {
+            yield break;
+        }
+
+        if (_saveCoroutine != null)
+        {
+            StopCoroutine(_saveCoroutine);
+            _saveCoroutine = null;
+        }
+
+        _saveCoroutine = StartCoroutine(ShowSaveNotifyInternal());
+        yield return _saveCoroutine;
+        _saveCoroutine = null;
+    }
+
+    private IEnumerator ShowSaveNotifyInternal()
+    {
+        _saveScreen.alpha = 0f;
+
+        float t = 0f;
+        while (t < 0.25f)
+        {
+            float dt = Time.unscaledDeltaTime;
+            t += dt;
+            float lerp = Mathf.Clamp01(t / 0.25f);
+            _saveScreen.alpha = Mathf.Lerp(0f, 1f, lerp);
+            yield return null;
+        }
+
+        yield return new WaitForSecondsRealtime(1f);
+
+        t = 0f;
+        while (t < 0.25f)
+        {
+            float dt = Time.unscaledDeltaTime;
+            t += dt;
+            float lerp = Mathf.Clamp01(t / 0.25f);
+            _saveScreen.alpha = Mathf.Lerp(1f, 0f, lerp);
+            yield return null;
+        }
+    }
+
 }

@@ -210,9 +210,9 @@ public abstract class CUnit : MonoBehaviour
             * statMultiple[EStatusStats.Attack] * statDivide[EStatusStats.Attack];
         _defence = (_baseDefence + statConstant[EStatusStats.Defence])
             * statMultiple[EStatusStats.Defence] * statDivide[EStatusStats.Defence];
-        _critRate = (0.05f + statConstant[EStatusStats.CritRate])
+        _critRate = (_baseCritRate + statConstant[EStatusStats.CritRate])
             * statMultiple[EStatusStats.CritRate] * statDivide[EStatusStats.CritRate];
-        _critDmg = (1.5f + statConstant[EStatusStats.CritDmg])
+        _critDmg = (_baseCritDmg + statConstant[EStatusStats.CritDmg])
             * statMultiple[EStatusStats.CritDmg] * statDivide[EStatusStats.CritDmg];
         _movementMultiply = (1f + statConstant[EStatusStats.Movement])
             * statMultiple[EStatusStats.Movement] * statDivide[EStatusStats.Movement];
@@ -357,24 +357,25 @@ public abstract class CUnit : MonoBehaviour
     {
         isCritical = false;
         float finalDamage = DamageRatioCaculate(attacker, defender, damage);
-        if (damage.forceCritical)
+        if (!damage.isFixed)
         {
-            finalDamage = finalDamage * attacker._critDmg;
-            isCritical = true;
-        }
-        else
-        {
-            if (damage.enableCritical)
+            if (damage.forceCritical)
             {
-                finalDamage = DamageCriticalCalculate(attacker, finalDamage, out isCritical);
+                finalDamage = finalDamage * attacker._critDmg;
+                isCritical = true;
             }
-        }
-        if (damage.isFixed)
-        {   
-            return finalDamage;
+            else
+            {
+                if (damage.enableCritical)
+                {
+                    finalDamage = DamageCriticalCalculate(attacker, finalDamage, out isCritical);
+                }
+            }
+
+            finalDamage = finalDamage * (100f / (100f + Mathf.Max((defender.Defence * (1 - damage.armorPenetration)), -99.9f)));
         }
 
-        finalDamage = finalDamage * (100f / (100f + Mathf.Max((defender.Defence * (1 - damage.armorPenetration)), -99.9f)));
+        
 
         List<CStatus> attackerStatus = new List<CStatus>();
         List<CStatus> defenderStatus = new List<CStatus>();
@@ -390,26 +391,30 @@ public abstract class CUnit : MonoBehaviour
         }
         defenderStatus.AddRange(defender.Status);
 
-        for (int i = 0; i < attackerStatus.Count; i++)
+        if (!damage.isFixed)
         {
-            if (attackerStatus[i].Trigger.HasFlag(EStatusTrigger.OnAttack))
+            for (int i = 0; i < attackerStatus.Count; i++)
             {
-                for (int j = 0; j < attackerStatus[i].OnAttack.Count; j++)
+                if (attackerStatus[i].Trigger.HasFlag(EStatusTrigger.OnAttack))
                 {
-                    finalDamage = attackerStatus[i].OnAttack[j](attacker, defender, finalDamage, isCritical);
+                    for (int j = 0; j < attackerStatus[i].OnAttack.Count; j++)
+                    {
+                        finalDamage = attackerStatus[i].OnAttack[j](attacker, defender, finalDamage, isCritical);
+                    }
+                }
+            }
+            for (int i = 0; i < defenderStatus.Count; i++)
+            {
+                if (defenderStatus[i].Trigger.HasFlag(EStatusTrigger.OnDefence))
+                {
+                    for (int j = 0; j < defenderStatus[i].OnDefence.Count; j++)
+                    {
+                        finalDamage = defenderStatus[i].OnDefence[j](attacker, defender, finalDamage, isCritical);
+                    }
                 }
             }
         }
-        for (int i = 0; i < defenderStatus.Count; i++)
-        {
-            if (defenderStatus[i].Trigger.HasFlag(EStatusTrigger.OnDefence))
-            {
-                for (int j = 0; j < defenderStatus[i].OnDefence.Count; j++)
-                {
-                    finalDamage = defenderStatus[i].OnDefence[j](attacker, defender, finalDamage, isCritical);
-                }
-            }
-        }
+
         for (int i = 0; i < defenderStatus.Count; i++)
         {
             if (defenderStatus[i].Trigger.HasFlag(EStatusTrigger.OnDamage))
@@ -518,7 +523,7 @@ public abstract class CUnit : MonoBehaviour
 
     public virtual void GetHeal(float value, ERatioSwitch ratioSwitch = ERatioSwitch.Constant, bool forceHeal = false)
     {
-        if (_hpCurrent <= 0f)
+        if (_hpCurrent <= 0f && !forceHeal)
         {
             return;
         }

@@ -1,13 +1,4 @@
-﻿/*  지금 생각하는 구조
- *    - CInventory는 그냥 스크립트로 CItem을 담고, 정상적인 상태인지만 확인
- *    - CInventoryUI로 인벤토리 띄웠을 때 보여지는거 관리
- *    
- *    - CItem은 아이템 정보랑 갯수 담기 (CItemSO의 데이터 복사)
- *    - CItemShown은 인벤토리를 띄웠을 때 보여주는 용도로 사용하기
- */
-
-using JetBrains.Annotations;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -756,11 +747,17 @@ public class CInventory : MonoBehaviour
     {
         if (price < 0 || Gold < price)
         {
+            CGameManager.Instance?.ShowError("돈이 부족합니다.", Color.red, true);
             return false;
         }
 
         if (AddItemInternal(itemId, 1, false) != 1)
         {
+            string message = FindEmptySlot() < 0
+                ? "가방이 가득 차 구매할 수 없습니다."
+                : "아이템을 구매할 수 없습니다.";
+
+            CGameManager.Instance?.ShowError(message);
             return false;
         }
 
