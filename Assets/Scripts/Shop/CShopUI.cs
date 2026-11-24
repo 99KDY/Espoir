@@ -244,7 +244,6 @@ public class CShopUI : MonoBehaviour
             quantityLabel.fontSize = 20f;
             quantityLabel.enableAutoSizing = false;
             quantityLabel.alignment = TextAlignmentOptions.BottomRight;
-            quantityLabel.color = Color.black;
             quantityLabel.raycastTarget = false;
             quantityLabel.transform.SetAsLastSibling();
             _sellIcons[i].raycastTarget = false;

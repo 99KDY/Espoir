@@ -84,7 +84,7 @@ public class CPlayerUI_Build : MonoBehaviour
         UpdateHp();
         UpdateMp();
         if (_debugText != null) UpdateDebug();
-        UpdateSkill();
+       // UpdateSkill();
         UpdateQuickslot();
         UpdateStatus();
     }
@@ -258,7 +258,7 @@ public class CPlayerUI_Build : MonoBehaviour
         for (int i = 0; i < _crownStack.Count; i++)
         {
             if (crownStack > i) _crownStack[i].enabled = true;
-            else _crownStack[i].enabled = false;
+           // else _crownStack[i].enabled = false;
         }
         _crownRemaining.fillAmount = _player.CrownWindowRemaining / 2;
         _player.GetSkillCooldown(ESkillType.Strike, out ratio, out remainCooldown);
