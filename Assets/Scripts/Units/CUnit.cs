@@ -210,9 +210,9 @@ public abstract class CUnit : MonoBehaviour
             * statMultiple[EStatusStats.Attack] * statDivide[EStatusStats.Attack];
         _defence = (_baseDefence + statConstant[EStatusStats.Defence])
             * statMultiple[EStatusStats.Defence] * statDivide[EStatusStats.Defence];
-        _critRate = (0.05f + statConstant[EStatusStats.CritRate])
+        _critRate = (_baseCritRate + statConstant[EStatusStats.CritRate])
             * statMultiple[EStatusStats.CritRate] * statDivide[EStatusStats.CritRate];
-        _critDmg = (1.5f + statConstant[EStatusStats.CritDmg])
+        _critDmg = (_baseCritDmg + statConstant[EStatusStats.CritDmg])
             * statMultiple[EStatusStats.CritDmg] * statDivide[EStatusStats.CritDmg];
         _movementMultiply = (1f + statConstant[EStatusStats.Movement])
             * statMultiple[EStatusStats.Movement] * statDivide[EStatusStats.Movement];
