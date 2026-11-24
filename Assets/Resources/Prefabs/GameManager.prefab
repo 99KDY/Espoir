@@ -2594,6 +2594,7 @@ MonoBehaviour:
   _popupTitle: {fileID: 3853412291945401174}
   _popupDescription: {fileID: 5300658926838852257}
   _saveScreen: {fileID: 8244244688437718014}
+  _errorPrefab: {fileID: 5366599432672396336, guid: 836d999017770e74ea1eea704c668b2d, type: 3}
   _zoneText: {fileID: 0}
 --- !u!1 &3153266128254965371
 GameObject:

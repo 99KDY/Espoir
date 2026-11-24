@@ -325,6 +325,7 @@ public class CBossSummoner : MonoBehaviour
 
         if (_boss.HpCurrent < _boss.HpMax) _boss.GetHeal(1f, ERatioSwitch.ByMax, true);
         if (_boss is IBoss targetBoss) targetBoss.ResetBattleState();
+        _boss.ResetDropState();
     }
 
     private void PlaceOnAltar()
