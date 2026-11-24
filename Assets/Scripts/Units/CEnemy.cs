@@ -30,6 +30,8 @@ public class CEnemy : CUnit
     protected override void Awake()
     {
         base.Awake();
+        _baseCritRate = 0f;
+        _critRate = _baseCritRate;
         if (_targetStatSO != null)
         {
             Setup(_targetStatSO);
