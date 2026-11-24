@@ -189,6 +189,8 @@ MonoBehaviour:
     SceneName: GardenScene
   - Id: 32
     SceneName: TowerScene
+  - Id: 1
+    SceneName: TutorialScene
   _fadeDuration: 1
   _fadeGroup: {fileID: 8717387453599295583}
   _loadingText: {fileID: 1059379512822767624}

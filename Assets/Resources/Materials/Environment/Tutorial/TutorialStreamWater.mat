@@ -1,0 +1,49 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: TutorialStreamWater
+  m_Shader: {fileID: 4800000, guid: ca69ebe820aa74d45a5700c8117152e2, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs: []
+    m_Ints: []
+    m_Floats:
+    - _FoamAmount: 0.25
+    - _FoamNoise: 0
+    - _FoamWidth: 0.05
+    - _FogFar: 290
+    - _FogNear: 80
+    - _GlossPatch: 1
+    - _MaxDepth: 0.7
+    - _PoolDepth: 0
+    - _SurfaceOcclusion: 0.6
+    m_Colors:
+    - _DeepTint: {r: 0.20392153, g: 0.3686274, b: 0.47843134, a: 1}
+    - _Flow: {r: 0.7, g: -0.7, b: 0, a: 0}
+    - _Foam: {r: 0.9490196, g: 0.9333333, b: 0.90196073, a: 1}
+    - _FogColor: {r: 0.8784313, g: 0.83137256, b: 0.73725486, a: 1}
+    - _LightTint: {r: 0.982207, g: 0.87039953, b: 0.7238932, a: 1}
+    - _MapAxisX: {r: -1, g: 0, b: 0, a: 0}
+    - _MapAxisZ: {r: 0, g: 0, b: 1, a: 0}
+    - _MapOrigin: {r: 0, g: 0, b: 0, a: 0}
+    - _SkyHorizon: {r: 0.92549014, g: 0.88627446, b: 0.79999995, a: 1}
+    - _SkyZenith: {r: 0.48627448, g: 0.61176467, b: 0.79999995, a: 1}
+    - _Tint: {r: 0.5568627, g: 0.69019604, b: 0.7058823, a: 1}
+  m_BuildTextureStacks: []

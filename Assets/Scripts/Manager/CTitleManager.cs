@@ -172,7 +172,7 @@ public class CTitleManager : MonoBehaviour
             _saveSlots[slot].openButton.interactable = true;
             string region = data.CurrentStage switch
             {
-                0 => "야영지",
+                0 => "모래바람이 닿는 마을",
                 1 => "나태의 사막",
                 2 => "색욕의 정원",
                 3 => "오만의 성지",
@@ -291,7 +291,7 @@ public class CTitleManager : MonoBehaviour
             return;
         }
 
-        ESceneId? destination = ESceneId.Desert;
+        ESceneId? destination = ESceneId.PradonaCamp;
         if (useSaveData)
         {
             if (!CSaveManager.GetData(slot, out CSaveData data))

@@ -32,6 +32,7 @@ public class CChapter2Grass : MonoBehaviour
     [SerializeField] private float _height = 0.34f;
     [SerializeField] private float _heightVariation = 0.3f;
     [SerializeField] private float _wide = 1.25f;
+    [SerializeField, Range(0f, 1f)] private float _paveLimit = 0.45f;
 
     [Header("Ground Under Grass")]
     [SerializeField] private float _under = 0.86f;
@@ -297,7 +298,7 @@ public class CChapter2Grass : MonoBehaviour
         }
 
         // 달빛꽃 무리: 가는 줄기 끝에 은은히 빛나는 꽃, 드문 자리에 몇 송이씩
-        if (random.Next() < _CHUNK_SIZE * _CHUNK_SIZE * _glowPatch)
+        if (_glowFlowerMaterials.Length > 0 && random.Next() < _CHUNK_SIZE * _CHUNK_SIZE * _glowPatch)
         {
             double px = ix * _CHUNK_SIZE + random.Next() * _CHUNK_SIZE;
             double pz = iz * _CHUNK_SIZE + random.Next() * _CHUNK_SIZE;
@@ -397,7 +398,7 @@ public class CChapter2Grass : MonoBehaviour
                 return -1;
             }
         }
-        if (PaveAt(x, z) > 0.45)
+        if (PaveAt(x, z) > _paveLimit)
         {
             return -1;
         }

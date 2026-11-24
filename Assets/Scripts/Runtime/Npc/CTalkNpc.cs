@@ -20,6 +20,9 @@ public class CTalkNpc : MonoBehaviour
     [SerializeField, Min(0.5f)] private float _talkRadius = 3.6f;
     [Tooltip("석상처럼 큰 NPC: 받침부터 꼭대기까지 한 화면에 담는 대화 카메라를 씀")]
     [SerializeField] private bool _isLarge;
+    [SerializeField] private bool _isCreature;
+    [SerializeField, Min(0.1f)] private float _creatureHeight = 1.2f;
+    [SerializeField] private Transform _bodyBone;
     [SerializeField] private CTalkScriptSO _script;
     [SerializeField] private CTravelGuideSO _travelGuide;
 
@@ -34,6 +37,7 @@ public class CTalkNpc : MonoBehaviour
     [SerializeField] private string _talkTrigger = "Talk";
     [SerializeField] private bool _turnToTalker = true;
     [SerializeField, Min(0f)] private float _turnSharpness = 5f;
+    [SerializeField] private bool _returnToHomeYaw = true;
 
     [Header("시작점 근처 배치")]
     [SerializeField] private bool _placeNearPlayerOnStart;
@@ -67,6 +71,10 @@ public class CTalkNpc : MonoBehaviour
     public string Title => _title;
     public float TalkRadius => _talkRadius;
     public bool IsLarge => _isLarge;
+    public bool IsCreature => _isCreature;
+    public float CreatureHeight => _creatureHeight;
+
+    public bool IsTalking => _talker != null;
     public CTravelGuideSO TravelGuide => _travelGuide;
     public Vector3 FeetPosition => transform.position;
 
@@ -101,6 +109,12 @@ public class CTalkNpc : MonoBehaviour
     private void Update()
     {
         if (!_turnToTalker) return;
+
+        if (_talker == null && !_returnToHomeYaw)
+        {
+            _yaw = transform.eulerAngles.y;
+            return;
+        }
 
         float target = _homeYaw;
 
@@ -144,6 +158,20 @@ public class CTalkNpc : MonoBehaviour
     }
 
     /// <summary>
+    /// 대화 카메라가 바라볼 NPC의 몸 중심을 월드 좌표로 반환합니다.
+    /// </summary>
+    public Vector3 GetBodyCenter()
+    {
+        Vector3 feet = transform.position;
+        Vector3 center = feet;
+
+        if (_headBone != null && _bodyBone != null) center = (_headBone.position + _bodyBone.position) * 0.5f;
+
+        center.y = feet.y + _creatureHeight * 0.5f;
+        return center;
+    }
+
+    /// <summary>
     /// 대화를 시작할 묶음 id.
     /// </summary>
     public string GetStartNode(bool isBossSummoned)
@@ -178,7 +206,7 @@ public class CTalkNpc : MonoBehaviour
     }
 
     /// <summary>
-    /// 대화 중 바라볼 상대를 정합니다. null 이면 원래 방향으로 돌아갑니다.
+    /// 대화 중 바라볼 상대를 설정하거나 해제합니다.
     /// </summary>
     public void SetTalker(Transform talker)
     {

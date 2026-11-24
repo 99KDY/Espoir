@@ -1,0 +1,182 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: FluffyFur
+  m_Shader: {fileID: 4800000, guid: a026bcabca08d0640aaaec3002885bad, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords:
+  - _CREATURE_FUR
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _FaceSdfTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _GlossTex:
+        m_Texture: {fileID: 2800000, guid: 090511b1fa05a9940b95a70c1b531f08, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: 090511b1fa05a9940b95a70c1b531f08, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MeanTex:
+        m_Texture: {fileID: 2800000, guid: 090511b1fa05a9940b95a70c1b531f08, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Ramp:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _RampCloth:
+        m_Texture: {fileID: 2800000, guid: 32ab26c8fff2048498dfff155b92605a, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _RampHair:
+        m_Texture: {fileID: 2800000, guid: d365e62fbe8ffdb41b0521b5d39b1dd2, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _RampSkin:
+        m_Texture: {fileID: 2800000, guid: 1b6496b6b87c6f7468b517981759be38, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ShadeTex:
+        m_Texture: {fileID: 2800000, guid: 090511b1fa05a9940b95a70c1b531f08, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _AO: 0.6
+    - _AlbedoFlat: 0
+    - _AlbedoGamma: 1
+    - _AlbedoSat: 1.02
+    - _AmbientStrength: 0.1
+    - _BackRim: 0.35
+    - _CastShadow: 0.15
+    - _ClothHueKeep: 0.35
+    - _CreatureFur: 1
+    - _EyeHlSize: 0.26
+    - _EyeUvU: 0
+    - _FaceBend: 1
+    - _FaceBias: 0.1
+    - _FaceBow: 0
+    - _FaceCastShadow: 0.15
+    - _FaceCenterLit: 0
+    - _FaceCurve: 0.5
+    - _FaceEdge: 0
+    - _FaceFlat: 0
+    - _FaceNormalSmooth: 0.82
+    - _FaceSDF: 0
+    - _FaceSdf2Back: 1
+    - _FaceSdf2Shift: 0
+    - _FaceSdf2Soft: 0
+    - _FaceSdfMapOn: 0
+    - _FaceShade: 1
+    - _FaceSoft: 0.06
+    - _FaceSoftNrm: 0
+    - _FaceWrap: 0
+    - _FurFormSoft: 0.5
+    - _GoldAny: 0
+    - _HairHueKeep: 0
+    - _HairLuma: 0.1
+    - _HairRing: 0
+    - _HairRingBack: 1
+    - _HairRingCurve: 0.3
+    - _HairRingPos: 0.55
+    - _HairRingSoft: 1
+    - _HairRingStrand: 0
+    - _HairRingWidth: 0.08
+    - _HairSpec: 0.62
+    - _HairSpecBody: 1
+    - _HairSpecMatte: 0
+    - _HairSpecPow: 110
+    - _HairSpecThresh: 0.76
+    - _Halftone: 0
+    - _HalftoneScale: 5
+    - _HasFace: 0
+    - _HasGloss: 0
+    - _HasMean: 0
+    - _HasShade: 0
+    - _Metal: 0
+    - _MetalBand: 0.55
+    - _MetalSatMin: 0.35
+    - _MetalSpec: 1
+    - _NeckFull: 0
+    - _NeckShadeAmt: 1
+    - _NeckShadow: 1
+    - _NeckTint: 0
+    - _NoGold: 1
+    - _NoSkin: 0
+    - _Part: 3
+    - _Rim: 0.2
+    - _RimFace: 1
+    - _RimHair: 1
+    - _RimSoft: 0.2
+    - _RimWidth: 0.6
+    - _ShadeAmt: 0
+    - _ShadeHue: 0.5
+    - _SkinPick: 0
+    - _SkinPickWide: 0
+    - _SoftNormal: 1
+    - _SoftNormalSkin: -1
+    - _Steel: 0
+    - _TexShade: 0
+    - _Under: 0.5
+    m_Colors:
+    - _Ambient: {r: 0.56078434, g: 0.627451, b: 0.84705883, a: 1}
+    - _BackRimColor: {r: 0.65882355, g: 0.72156864, b: 1, a: 1}
+    - _BackRimShape: {r: 0.6, g: 0.25, b: 0, a: 0}
+    - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
+    - _CEyeFx: {r: 1, g: 0.8, b: 0.6, a: 0}
+    - _CEyeHl: {r: 0.42, g: -0.52, b: 0.1, a: 0}
+    - _CEyeL: {r: 0.1729, g: -0.7624, b: 0.0274, a: 0.0253}
+    - _CEyeR: {r: -0.1769, g: -0.7611, b: 0.0277, a: 0.0243}
+    - _CEyeRight: {r: 1, g: 0, b: 0, a: 0}
+    - _CEyeUp: {r: 0, g: 0, b: 1, a: 0}
+    - _EyeFx: {r: 0, g: 0, b: 0, a: 0}
+    - _EyePos: {r: 0.36, g: -0.89, b: 0.63, a: 0}
+    - _FaceSdf2: {r: 0, g: 0.74, b: -0.75, a: 0.9}
+    - _FaceSdf2Curve: {r: 0, g: -0.2, b: 0.3, a: 0}
+    - _FaceSdfRect: {r: 1.25, g: -2.2, b: 1.3, a: 0}
+    - _FaceTexFlat: {r: 0, g: 0.12, b: 0.55, a: 0}
+    - _FaceTexFlatCol: {r: 0.94509804, g: 0.77254903, b: 0.74509805, a: 0}
+    - _FaceTexFlatRef: {r: 0.94509804, g: 0.77254903, b: 0.74509805, a: 0}
+    - _FurCut: {r: 0.6, g: 0.28, b: 0.07, a: 0.45}
+    - _FurCutA: {r: 0.91764706, g: 0.6156863, b: 0.40784314, a: 1}
+    - _FurCutB: {r: 0.99607843, g: 0.80784315, b: 0.5882353, a: 1}
+    - _FurForm: {r: 0.35, g: 0.3, b: 0.06, a: 0.85}
+    - _FurFormColor: {r: 0.81960785, g: 0.64705884, b: 0.6117647, a: 1}
+    - _GlossCut: {r: 0, g: 0.08, b: 0, a: 0}
+    - _HairForm: {r: 0, g: 0.35, b: 0, a: 0.9}
+    - _HairSpecColor: {r: 0.54901963, g: 0.4862745, b: 0.4627451, a: 1}
+    - _HairStrand: {r: 0.85, g: 1.35, b: 0, a: 0}
+    - _JigA: {r: -0.5, g: -0.8, b: -0.16, a: -0.72}
+    - _JigB: {r: -0.86, g: -0.74, b: 0.46, a: 1}
+    - _LightColor: {r: 1, g: 0.9647059, b: 0.91764706, a: 1}
+    - _MetalSteelTint: {r: 0.9019608, g: 0.92941177, b: 1, a: 1}
+    - _MetalTint: {r: 1, g: 0.9019608, b: 0.6901961, a: 1}
+    - _RimColor: {r: 1, g: 0.9529412, b: 0.8784314, a: 1}
+    - _Sheen: {r: 0.16, g: 0.87, b: 0.02, a: 0}
+    - _SheenColor: {r: 1, g: 0.94509804, b: 0.8392157, a: 1}
+    - _SkinPickSet: {r: -1, g: 0.5, b: 0.18, a: 1}
+    - _SkinRef: {r: 0.99, g: 0.82, b: 0.78, a: 0}
+    - _SkinTone: {r: 0, g: 0, b: 0, a: -1}
+    - _SkinToneCol: {r: 0.9490196, g: 0.72156864, b: 0.7372549, a: 1}
+    - _UnderColor: {r: 0.8627451, g: 0.70980394, b: 0.65882355, a: 1}
+  m_BuildTextureStacks: []
