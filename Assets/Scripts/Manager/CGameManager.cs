@@ -222,7 +222,6 @@ public class CGameManager : MonoBehaviour
                 "게임을 저장합니까?",
                 () =>
                 {
-                    _soundManager.PlaySE(EEffectSound.Success);
                     SaveData();
                 }));
         _confirmYes.onClick.AddListener(() =>
@@ -666,7 +665,7 @@ public class CGameManager : MonoBehaviour
     {
         if (_gameAutosave.isOn)
         {
-            SaveData();
+            SaveData(false);
         }
     }
     private void OnDestroy()
@@ -699,15 +698,17 @@ public class CGameManager : MonoBehaviour
         return SaveData(slot);
     }
 
-    public bool SaveData()
+    public bool SaveData(bool isManual = true)
     {
         bool result = SaveData(CSceneFlowManager.Instance.TargetSaveData);
         if (result)
         {
+            if (isManual) _soundManager.PlaySE(EEffectSound.Success);
             StartCoroutine(ShowSaveNotify());
         }
         else
         {
+            _soundManager.PlaySE(EEffectSound.Beep);
             ShowError("저장 실패. 다시 시도해주세요.", Color.red, true);
         }
         return result;

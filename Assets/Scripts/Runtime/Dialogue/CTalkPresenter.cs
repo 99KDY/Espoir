@@ -461,7 +461,10 @@ public class CTalkPresenter : MonoBehaviour
         if (_travelFade == null)
         {
             Close();
-            CTalkTravel.Request(destination);
+            if (!CTalkTravel.Request(destination))
+            {
+                CGameManager.Instance.ShowError("해당 지역으로 이동할 수 없습니다.", Color.red, true);
+            }
             return;
         }
 

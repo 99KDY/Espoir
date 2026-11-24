@@ -119,8 +119,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _boss: {fileID: 0}
   _player: {fileID: 0}
-  _bossName: "\uBCA8\uD398\uACE0\uB974"
-  _bossTitle: "\uB098\uD0DC\uC758 \uAD70\uC8FC"
+  _bossName: "\uBCA8\uB9AC\uC5D8"
+  _bossTitle: "\uC624\uB9CC\uC758 \uAD70\uC8FC"
   _showRange: 15
   _hideRange: 22
   _engageHold: 10
@@ -1624,7 +1624,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 59ae544a44d5b534ca92f8d4f90cb94a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _canvas: {fileID: 0}
+  _canvas: {fileID: 5401059038538726159}
   _tooltip: {fileID: 4909648549162738882}
 --- !u!114 &1483733338108841144
 MonoBehaviour:
