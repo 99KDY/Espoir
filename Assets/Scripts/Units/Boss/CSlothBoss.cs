@@ -61,10 +61,10 @@ public class CSlothBoss : CEnemy, IBoss
     [SerializeField] private float _areaAngle = 30f;
     [SerializeField] private int _divideArea = 6;
 
-    [Header("Thunder Votalge Cylinder")]
+    [Header("Thunder Voltalge Cylinder")]
     [SerializeField] private float _thunderOrbitRadius = 11f;
     [SerializeField] private float _thunderSpeed = 90f;
-    [SerializeField] private float _hitRadius = 2f;
+    [SerializeField] private float _hitRadius = 2.5f;
 
 
     #endregion
@@ -1228,17 +1228,24 @@ public class CSlothBoss : CEnemy, IBoss
 
         _atkTimer = 0;
 
-        await UniTask.Delay(4300);
+        await UniTask.Delay(2000);
         if (battleVersion != _battleVersion) return;
-        _atkTimer = 0;
 
-        if(_previewPattern != null)
+        if (_previewPattern != null)
         {
             _previewPattern.ClearPreview();
         }
 
+        ThunderVoltage();
 
-        await UniTask.Delay(3000);
+        _atkTimer = 0;
+
+
+
+        
+
+
+        await UniTask.Delay(5000);
         if (battleVersion != _battleVersion) return;
 
         _mainCount++; 
@@ -1317,11 +1324,7 @@ public class CSlothBoss : CEnemy, IBoss
 
     private void ThunderVoltage()
     {
-        int hit = FindPlayer(22);
-
-        _thunderAngle += _thunderSpeed * Time.deltaTime;
-
-        List<Vector3> startZones = new List<Vector3>();
+        List<Vector3> circleCenter = new List<Vector3>();
 
         for (int i = 0; i < 4; i++)
         {
@@ -1333,11 +1336,11 @@ public class CSlothBoss : CEnemy, IBoss
 
             Vector3 currentPos = this.transform.position + (dir * _thunderOrbitRadius);
 
-            startZones.Add(currentPos);
+            circleCenter.Add(currentPos);
         }
 
 
-        for (int i = 0; i < hit; i++)
+        for (int i = 0; i < circleCenter.Count; i++)
         {
             if (_hitCollider[i] == null)
             {
@@ -1355,7 +1358,7 @@ public class CSlothBoss : CEnemy, IBoss
 
             for (int j = 0; j < 4; j++)
             {
-                Vector3 voltagePos = startZones[j];
+                Vector3 voltagePos = circleCenter[j];
 
                 Vector2 voltageXZ = new Vector2(voltagePos.x, voltagePos.z);
                 Vector2 playerXZ = new Vector2(player.transform.position.x, player.transform.position.z);
@@ -1375,6 +1378,8 @@ public class CSlothBoss : CEnemy, IBoss
             {
                 SDamageInfo damageToPlayer = new SDamageInfo(0.2f, true, ERatioSwitch.ByCurrent);
                 float lastHp = player.HpCurrent;
+
+                player.OnHit(this, damageToPlayer);
 
                 CLogger.Log($"{player.name}의 현재 체력 : {player.HpCurrent}");
             }
