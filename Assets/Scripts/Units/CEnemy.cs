@@ -82,4 +82,9 @@ public class CEnemy : CUnit
             }
         }
     }
+
+    public void ResetDropState()
+    {
+        _isDropped = false;
+    }
 }
