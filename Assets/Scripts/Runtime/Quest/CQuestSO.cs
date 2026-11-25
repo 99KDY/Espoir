@@ -120,6 +120,9 @@ public class CQuestSO : ScriptableObject
     [Header("수락 조건")]
     [SerializeField, Tooltip("보고까지 완료해야 하는 선행 퀘스트")] private CQuestSO _prerequisite;
     [SerializeField, Tooltip("선택한 보스를 모두 처치하면 조건을 충족합니다.")] private EBossClear _requiredBosses;
+    [Header("전부 클리어시 보스 진척도 보상")]
+    [SerializeField, Tooltip("퀘스트 보고 완료 시 켤 보스 클리어 플래그")] private EBossClear _bossClearReward = EBossClear.None;
+
 
     public string QuestId => _questId;
     public string Title => _title;
@@ -127,6 +130,7 @@ public class CQuestSO : ScriptableObject
     public string ReportNpcId => _reportNpcId;
     public CQuestSO Prerequisite => _prerequisite;
     public EBossClear RequiredBosses => _requiredBosses;
+    public EBossClear BossClearReward => _bossClearReward;
     public IReadOnlyList<CQuestObjective> Objectives => _objectives;
 
     /// <summary>

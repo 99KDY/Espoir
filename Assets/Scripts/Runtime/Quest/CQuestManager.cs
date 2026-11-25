@@ -254,6 +254,27 @@ public static class CQuestManager
         if (!_isReady || !TryGetRecord(quest, out CRecord record)) return false;
         if (record.state != EQuestState.Reportable) return false;
 
+        EBossClear reward = quest.BossClearReward;
+        if (reward != EBossClear.None)
+        {
+            if (CGameManager.Instance == null)
+            {
+                CLogger.Error("CGameManager가 없음!");
+                return false;
+            }
+
+            foreach (EBossClear boss in Enum.GetValues(typeof(EBossClear)))
+            {
+                // None과 AvailableBoss 같은 복합 값 건너뛰기
+                if (boss == EBossClear.None || (boss & (boss - 1)) != 0) continue;
+
+                if ((reward & boss) != 0)
+                {
+                    CGameManager.Instance.SetBossCleared(boss);
+                }
+            }
+        }
+
         record.state = EQuestState.Completed;
         record.pendingReplacementId = 0;
         record.warnedForDiscard = false;
