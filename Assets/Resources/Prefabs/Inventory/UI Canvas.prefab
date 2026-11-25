@@ -22000,7 +22000,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 30
   m_TargetDisplay: 0
 --- !u!114 &7669298445071917334
 MonoBehaviour:
@@ -22072,6 +22072,27 @@ MonoBehaviour:
   _braceletIcon: {fileID: 1166721784635241837}
   _ringIcon: {fileID: 470324744336156277}
   _isBattle: 0
+  _useLegacyQuickSlotKeys: 1
+  _hudQuickSlotIcons:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  _hudQuickSlotQuantities:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  _hudQuickSlotCooldownTexts:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  _playerQuickSlotContent: {fileID: 0}
+  __hudQuickSlotCooldownFills: []
+  _goldText: {fileID: 0}
+  _quickSlotHintText: {fileID: 0}
+  _quickSlotHintPanel: {fileID: 0}
 --- !u!1 &8462582832846054659
 GameObject:
   m_ObjectHideFlags: 0
