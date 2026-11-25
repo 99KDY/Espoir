@@ -16,6 +16,7 @@ public partial class CSceneFlowManager
     private bool _isTraveling;
     private CPlayer _arrivingPlayer;
     private bool _wasArrivalInputLocked;
+    private bool _didApplyTravelState;
     private readonly CTravelPlayerState _CARRY = new CTravelPlayerState();
     private readonly HashSet<int> _END_ON_TRAVEL_IDS = new HashSet<int>();
 
@@ -65,6 +66,11 @@ public partial class CSceneFlowManager
 
     private IEnumerator Co_Travel(ESceneId id, string sceneName)
     {
+        _didApplyTravelState = false;
+        bool saveAfterArrival = !_firstLoadFromTitle &&
+            id != ESceneId.Title &&
+            TryGetCurrentSceneId(out ESceneId from) &&
+            from != ESceneId.Title;
         _isTraveling = true;
         if (_firstLoadFromTitle) CQuestManager.Clear();
         OnTravelStarted?.Invoke(id);
@@ -75,6 +81,13 @@ public partial class CSceneFlowManager
         try
         {
             yield return StartCoroutine(Co_LoadSceneWithTransition(id, sceneName));
+
+            CMapInfo map = CMapInfo.Current;
+            if (saveAfterArrival && _didApplyTravelState && _targetSaveData >= 0
+                && map != null && map.SceneId == id)
+            {
+                CGameManager.Instance?.InvokeAutosave();
+            }
         }
         finally
         {
@@ -131,7 +144,12 @@ public partial class CSceneFlowManager
         if (player != null && _CARRY.HasData)
         {
             int skills = _CARRY.Apply(player);
-            if (skills == 0) CLogger.Warn("맵 이동 : 새 플레이어 스킬이 아직 등록되지 않아 쿨타임을 넣지 못함");
+            _didApplyTravelState = true;
+
+            if (skills == 0)
+            {
+                CLogger.Warn("맵 이동 : 새 플레이어 스킬이 아직 등록되지 않아 쿨타임을 넣지 못함");
+            }
         }
 
         if (map != null && map.StartPoint != null && player != null)

@@ -196,6 +196,13 @@ public class CTutorialDirector : MonoBehaviour
         bool hasAdvanced = !isFirst && _state == EQuestState.Active && index != _index;
         EndStep();
 
+        int walkIndex = _quest.FindObjectiveIndex("walk");
+
+        bool reachedCheckpoint = !isFirst && _state == EQuestState.Active &&
+            (state == EQuestState.Reportable ||
+             (state == EQuestState.Active &&
+              walkIndex >= 0 && _index <= walkIndex && index > walkIndex));
+
         _state = state;
         _index = index;
         _step = state == EQuestState.Active ? FindStep(_quest.GetObjective(index)) : null;
@@ -209,6 +216,12 @@ public class CTutorialDirector : MonoBehaviour
             _phase = EPhase.Done;
             _phaseTime = 0f;
             if (_guide != null) _guide.ClearSubtitle();
+            CSceneFlowManager flow = CSceneFlowManager.Instance;
+            if (reachedCheckpoint && flow != null &&
+                flow.TargetSaveData >= 0 && !flow.IsTraveling)
+            {
+                CGameManager.Instance?.InvokeAutosave();
+            }
             return;
         }
 

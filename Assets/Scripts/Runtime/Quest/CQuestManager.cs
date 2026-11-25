@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -42,7 +42,6 @@ public static class CQuestManager
     private const float _SUPPLY_RETRY_SECONDS = 3f;
 
     private static readonly Dictionary<string, CQuestSO> _QUESTS = new Dictionary<string, CQuestSO>();
-    private static readonly Dictionary<EQuestList, CQuestSO> _QUESTS_BY_FLAG = new Dictionary<EQuestList, CQuestSO>();
     private static readonly Dictionary<string, CRecord> _RECORDS = new Dictionary<string, CRecord>();
     private static readonly List<CRecord> _ACTIVE = new List<CRecord>();
     private static bool _isBuilt;
@@ -52,11 +51,6 @@ public static class CQuestManager
 
     public static bool IsReady => _isReady;
     internal static bool HasTrackedQuests => _isReady && _ACTIVE.Count > 0;
-
-    public static EQuestList AvailableQuest => CGameManager.Instance != null
-        ? CGameManager.Instance.AvailableQuest : GetAvailableFlags(EQuestList.None);
-    public static EQuestList ActingQuest => CGameManager.Instance?.ActingQuest ?? EQuestList.None;
-    public static EQuestList CompletedQuest => CGameManager.Instance?.CompletedQuest ?? EQuestList.None;
 
     public static int Version => _version;
 
@@ -197,14 +191,6 @@ public static class CQuestManager
     }
 
     /// <summary>
-    /// 단일 퀘스트 플래그에 연결된 퀘스트의 진행 상태를 반환합니다.
-    /// </summary>
-    public static EQuestState GetState(EQuestList flag)
-    {
-        return _QUESTS_BY_FLAG.TryGetValue(flag, out CQuestSO quest) ? GetState(quest) : EQuestState.None;
-    }
-
-    /// <summary>
     /// 현재 목표의 순번과 진행 수량을 반환합니다.
     /// </summary>
     public static bool TryGetCurrent(CQuestSO quest, out int index, out int count)
@@ -246,19 +232,6 @@ public static class CQuestManager
         return (cleared & quest.RequiredBosses) == quest.RequiredBosses;
     }
 
-    internal static EQuestList GetAvailableFlags(EQuestList available)
-    {
-        if (!_isReady) return available;
-
-        foreach (KeyValuePair<EQuestList, CQuestSO> entry in _QUESTS_BY_FLAG)
-        {
-            if (CanAccept(entry.Value)) available |= entry.Key;
-            else available &= ~entry.Key;
-        }
-
-        return available;
-    }
-
     /// <summary>
     /// 새 퀘스트를 수락하면 true를 반환합니다.
     /// </summary>
@@ -269,7 +242,6 @@ public static class CQuestManager
         CRecord record = new CRecord { quest = quest, state = EQuestState.Active };
         _RECORDS[quest.QuestId] = record;
         _ACTIVE.Add(record);
-        UpdateFlag(CGameManager.Instance, record);
         _version++;
         return true;
     }
@@ -287,38 +259,8 @@ public static class CQuestManager
         record.warnedForDiscard = false;
         record.suppliedItems.Clear();
         _ACTIVE.Remove(record);
-        UpdateFlag(CGameManager.Instance, record);
         _version++;
         return true;
-    }
-
-    /// <summary>
-    /// 퀘스트 진행 상태를 게임 매니저의 플래그에 반영합니다.
-    /// </summary>
-    public static void ApplyFlags(CGameManager game)
-    {
-        if (game == null) return;
-
-        foreach (KeyValuePair<EQuestList, CQuestSO> entry in _QUESTS_BY_FLAG)
-        {
-            CQuestSO quest = entry.Value;
-            if (quest == null || quest.Objectives.Count == 0 || _RECORDS.ContainsKey(quest.QuestId)) continue;
-
-            EQuestState state;
-            if ((game.CompletedQuest & entry.Key) != 0) state = EQuestState.Completed;
-            else if ((game.ActingQuest & entry.Key) != 0) state = EQuestState.Active;
-            else continue;
-
-            CRecord restored = new CRecord { quest = quest, state = state };
-            _RECORDS.Add(quest.QuestId, restored);
-            if (state == EQuestState.Active) _ACTIVE.Add(restored);
-            _version++;
-        }
-
-        foreach (CRecord record in _RECORDS.Values)
-        {
-            UpdateFlag(game, record);
-        }
     }
 
     /// <summary>
@@ -751,22 +693,12 @@ public static class CQuestManager
         }
     }
 
-    private static void UpdateFlag(CGameManager game, CRecord record)
-    {
-        EQuestList flag = record.quest.QuestFlag;
-        if (game != null && _QUESTS_BY_FLAG.TryGetValue(flag, out CQuestSO quest) && quest == record.quest)
-        {
-            game.SetQuestFlag(flag, record.state);
-        }
-    }
-
     private static void Build()
     {
         if (_isBuilt) return;
 
         _isBuilt = true;
         _QUESTS.Clear();
-        _QUESTS_BY_FLAG.Clear();
 
         foreach (CQuestSO quest in Resources.LoadAll<CQuestSO>(CQuestSO.RESOURCES_FOLDER))
         {
@@ -778,21 +710,6 @@ public static class CQuestManager
             }
 
             _QUESTS.Add(quest.QuestId, quest);
-
-            EQuestList flag = quest.QuestFlag;
-            if (flag == EQuestList.None) continue;
-            int bits = (int)flag;
-            if ((bits & (bits - 1)) != 0)
-            {
-                CLogger.Warn($"퀘스트 플래그를 하나만 지정하세요: {quest.name}");
-                continue;
-            }
-
-            if (!_QUESTS_BY_FLAG.TryAdd(flag, quest))
-            {
-                _QUESTS_BY_FLAG[flag] = null;
-                CLogger.Warn($"퀘스트 플래그가 중복되었습니다: {flag} ({quest.name})");
-            }
         }
     }
 }

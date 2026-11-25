@@ -112,7 +112,6 @@ public class CQuestSO : ScriptableObject
     [SerializeField, HideInInspector] private string _assetGuid;
 #endif
     [SerializeField] private string _title = "새 퀘스트";
-    [SerializeField] private EQuestList _questFlag;
     [SerializeField] private List<CQuestObjective> _objectives = new List<CQuestObjective>();
 
     [SerializeField] private string _reportText = "의뢰인에게 보고하기";
@@ -126,7 +125,6 @@ public class CQuestSO : ScriptableObject
     public string Title => _title;
     public string ReportText => _reportText;
     public string ReportNpcId => _reportNpcId;
-    public EQuestList QuestFlag => _questFlag;
     public CQuestSO Prerequisite => _prerequisite;
     public EBossClear RequiredBosses => _requiredBosses;
     public IReadOnlyList<CQuestObjective> Objectives => _objectives;
@@ -165,7 +163,6 @@ public class CQuestSO : ScriptableObject
         if (!string.IsNullOrEmpty(_assetGuid))
         {
             _questId = guid;
-            _questFlag = EQuestList.None;
         }
         else if (string.IsNullOrEmpty(_questId)) _questId = guid;
         _assetGuid = guid;

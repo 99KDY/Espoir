@@ -23,6 +23,7 @@ public class CTravelPlayerState
     private int _gold;
     private float _crownWindowEnd;
     private float _dashCooldownDuration;
+    private EPradonaPower _pradonaPower;
     private readonly List<CItem> _ITEMS = new List<CItem>();
     private int[] _quickSlotIds = new int[0];
     private readonly Dictionary<(EConsumableCooldownGroup group, int itemId), float> _ITEM_COOLDOWN_ENDS = new();
@@ -88,6 +89,7 @@ public class CTravelPlayerState
         CPlayerSkill skill = player.GetComponent<CPlayerSkill>();
         _crownWindowEnd = skill != null ? skill.ExportTimers(_SKILL_READY_TIMES) : float.NegativeInfinity;
         _dashCooldownDuration = skill != null ? skill.DashCooldownDuration : 0f;
+        _pradonaPower = player.PradonaPower;
         _hasData = true;
     }
 
@@ -124,6 +126,7 @@ public class CTravelPlayerState
         if (player.Inventory != null) player.Inventory.ImportState(_ITEMS, _quickSlotIds, _ITEM_COOLDOWN_ENDS, _gold);
         player.RestoreHp(_hp);
         player.RestoreMp(_mp);
+        player.PradonaPower = _pradonaPower;
 
         CPlayerSkill skill = player.GetComponent<CPlayerSkill>();
         int restored = skill != null ? skill.ImportTimers(_SKILL_READY_TIMES, _crownWindowEnd) : 0;

@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.UI;
@@ -32,20 +31,6 @@ public enum EBattleState
     None = 0,
     NormalBattle = 1,
     BossBattle = 2,
-}
-
-[Flags]
-public enum EQuestList
-{
-    None = 0,
-    [InspectorName("질투의 부활")] Invidia = 1 << 0,
-    [InspectorName("탐욕의 부탁")] Avaritia = 1 << 1,
-    [InspectorName("나태의 몰락")] Pigritia = 1 << 2,
-    [InspectorName("폭식의 부탁")] Gula = 1 << 3,
-    [InspectorName("색욕의 몰락")] Luxuria = 1 << 4,
-    [InspectorName("분노의 부탁")] Ira = 1 << 5,
-    [InspectorName("오만의 몰락")] Superbia = 1 << 6,
-    [InspectorName("악의 그릇")] Pradona = 1 << 7,
 }
 
 [Flags]
@@ -128,9 +113,6 @@ public class CGameManager : MonoBehaviour
     private ESettingState _settingState;
     private ESettingState _lastSettingState;
     private EBossClear _bossClearState;
-    private EQuestList _availableQuest;
-    private EQuestList _actingQuest;
-    private EQuestList _completedQuest;
     private bool _isInLobby = false;
     private bool _isPaused = false;
     private float _timeScaleBeforePause = 1f;
@@ -162,9 +144,6 @@ public class CGameManager : MonoBehaviour
     public EGameState GameState => _gameState;
     public EBattleState BattleState => _battleState;
     public EBossClear BossClearState => _bossClearState;
-    public EQuestList AvailableQuest => CQuestManager.GetAvailableFlags(_availableQuest);
-    public EQuestList ActingQuest => _actingQuest;
-    public EQuestList CompletedQuest => _completedQuest;
     public bool IsInLobby => _isInLobby;
     public bool IsPaused => _isPaused;
 
@@ -317,8 +296,8 @@ public class CGameManager : MonoBehaviour
             PlayerPrefs.Save();
         });
 
-        if (CQuestManager.IsReady) CQuestManager.ApplyFlags(this);
-        else if (CSceneFlowManager.Instance == null || CSceneFlowManager.Instance.TargetSaveData < 0)
+        if (!CQuestManager.IsReady &&
+            (CSceneFlowManager.Instance == null || CSceneFlowManager.Instance.TargetSaveData < 0))
         {
             CQuestManager.Restore(null);
         }
@@ -739,16 +718,13 @@ public class CGameManager : MonoBehaviour
                 items,
                 _player.Equipment,
                 quickSlots,
-                AvailableQuest,
-                _actingQuest,
-                _completedQuest,
                 _bossClearState,
                 _player.PradonaPower,
                 _bossTime,
                 _playTime,
-                _bossFoundState);
+                _bossFoundState,
+                CQuestManager.Export());
 
-        data.Quests = CQuestManager.Export();
         return CSaveManager.SaveData(slot, data);
     }
 
@@ -766,16 +742,12 @@ public class CGameManager : MonoBehaviour
     private void LoadData(CSaveData data)
     {
         _player.Inventory.ImportState(data.Inventory, data.Quickslot.ToArray(), new Dictionary<(EConsumableCooldownGroup group, int itemId), float>(), data.Money);
-        _availableQuest = data.AvailableQuest;
-        _actingQuest = data.ActingQuest;
-        _completedQuest = data.CompletedQuest;
         _bossClearState = data.BossClear;
         _player.PradonaPower = data.PradonaPower;
         _bossTime = data.BossTime;
         _playTime = data.PlayTime;
         _bossFoundState = data.BossFound;
         CQuestManager.Restore(data.Quests);
-        CQuestManager.ApplyFlags(this);
         foreach (KeyValuePair<EEquipmentSlot, CItemEquipment> pair in data.Equipment)
         {
             if (_player.Equipment.TryGetValue(pair.Key, out CItemEquipment previous) &&
@@ -788,22 +760,6 @@ public class CGameManager : MonoBehaviour
             pair.Value?.OnEquip(_player);
         }
         _player.EquipmentResync();
-    }
-
-    /// <summary>
-    /// 퀘스트 상태에 맞춰 게임 매니저의 플래그를 갱신합니다.
-    /// </summary>
-    public void SetQuestFlag(EQuestList flag, EQuestState state)
-    {
-        if (flag == EQuestList.None) return;
-
-        _availableQuest &= ~flag;
-        _actingQuest &= ~flag;
-        _completedQuest &= ~flag;
-
-        if (state == EQuestState.None) _availableQuest |= flag;
-        else if (state == EQuestState.Completed) _completedQuest |= flag;
-        else _actingQuest |= flag;
     }
 
     private void ShowQuestion(string shownTitle, string shownText, Action action)
