@@ -136,7 +136,10 @@ public class CPlayer : CUnit
         set { 
             _pradonaPower = value; 
             CPlayerUI_Build script = FindFirstObjectByType<CPlayerUI_Build>();
-            script.InvokePradonaChanged(ActivePradonaPower);
+            if (script != null)
+            {
+                script.InvokePradonaChanged(ActivePradonaPower);
+            }
         }
     }
 

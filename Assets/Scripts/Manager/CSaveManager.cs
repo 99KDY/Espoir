@@ -23,9 +23,6 @@ public class CSaveData
     public List<int> itemQuantity;
     public List<int> itemEquipments;
     public List<int> itemQuickslot;
-    public int availableQuest;
-    public int actingQuest;
-    public int completedQuest;
     public int bossClear;
     public int pradonaPower;
     public List<float> bossTime;
@@ -132,39 +129,6 @@ public class CSaveData
         }
     }
 
-    public EQuestList AvailableQuest
-    {
-        get
-        {
-            return (EQuestList) availableQuest;
-        }
-        set
-        {
-            availableQuest = (int)value;
-        }
-    }
-    public EQuestList ActingQuest
-    {
-        get
-        {
-            return (EQuestList) actingQuest;
-        }
-        set
-        {
-            actingQuest = (int)value;
-        }
-    }
-    public EQuestList CompletedQuest
-    {
-        get
-        {
-            return (EQuestList) completedQuest;
-        }
-        set
-        {
-            completedQuest = (int)value;
-        }
-    }
     public EBossClear BossClear
     {
         get
@@ -278,14 +242,12 @@ public class CSaveData
             List<CItem> inventory,
             Dictionary<EEquipmentSlot, CItemEquipment> equipment,
             List<int> quickslot,
-            EQuestList availableQuest,
-            EQuestList actingQuest,
-            EQuestList completedQuest,
             EBossClear bossClear,
             EPradonaPower pradonaPower,
             Dictionary<EBossClear, float> bossTime,
             float playTime,
-            EBossClear bossFound
+            EBossClear bossFound,
+            List<CQuestSaveData> Quests
         )
     {
         this.version = version;
@@ -294,14 +256,12 @@ public class CSaveData
         this.Inventory = inventory;
         this.Equipment = equipment;
         this.Quickslot = quickslot;
-        this.AvailableQuest = availableQuest;
-        this.ActingQuest = actingQuest;
-        this.CompletedQuest = completedQuest;
         this.BossClear = bossClear;
         this.PradonaPower = pradonaPower;
         this.BossTime = bossTime;
         this.playTime = playTime;
         this.BossFound = bossFound;
+        this.Quests = Quests;
     }
 
     public CSaveData
@@ -312,17 +272,14 @@ public class CSaveData
         List<CItem> inventory,
         Dictionary<EEquipmentSlot, CItemEquipment> equipment,
         int[] quickslot,
-        EQuestList availableQuest,
-        EQuestList actingQuest,
-        EQuestList completedQuest,
         EBossClear bossClear,
         EPradonaPower pradonaPower,
         Dictionary<EBossClear, float> bossTime,
         float playTime,
-        EBossClear bossFound
+        EBossClear bossFound,
+        List<CQuestSaveData> Quests
     ) : this(version, currentStage, money, inventory, equipment,
-        new List<int>(quickslot), availableQuest,actingQuest, completedQuest,
-        bossClear, pradonaPower, bossTime, playTime, bossFound) { }
+        new List<int>(quickslot), bossClear, pradonaPower, bossTime, playTime, bossFound, Quests) { }
 }
 
 public static class CSaveManager 
@@ -331,13 +288,14 @@ public static class CSaveManager
     private static CSaveData[] _saveData = new CSaveData[_maxSaveSlot];
     private static int[] _saveDataErrorCode = new int[_maxSaveSlot];
     private static ESaveSlot _saveFlag = ESaveSlot.None;
+    private static readonly bool[] _migrationSaveFailed = new bool[_maxSaveSlot];
 
 #if UNITY_EDITOR
     private readonly static bool _isPersist = false;
 #else
     private readonly static bool _isPersist = true;
 #endif
-    public readonly static int Version = 4;
+    public readonly static int Version = 5;
 
     public static int MaxSaveSlot
     {
@@ -354,6 +312,12 @@ public static class CSaveManager
     {
         get { return _saveDataErrorCode; }
         private set { _saveDataErrorCode = value; }
+    }
+    public static bool HasMigrationSaveWarning(int index)
+    {
+        return index >= 0 &&
+               index < _migrationSaveFailed.Length &&
+               _migrationSaveFailed[index];
     }
 
     private static string GetSavepath(int slot)
@@ -446,6 +410,8 @@ public static class CSaveManager
                 File.Move(tempPath, path);
             }
 
+            _migrationSaveFailed[index] = false;
+
             _saveData[index] = data;
             _saveDataErrorCode[index] = 0;
             _saveFlag |= (ESaveSlot)(1 << index);
@@ -471,6 +437,8 @@ public static class CSaveManager
         if (_saveData[index] == null)
         {
             CLogger.Log($"{index} : 불러오기 시도 - 데이터가 없어, 로컬에서 시도함.");
+            _migrationSaveFailed[index] = false;
+
             string path = GetSavepath(index);
 
             try
@@ -493,13 +461,15 @@ public static class CSaveManager
                     _saveData[index] = loadedData;
                     if (migrated)
                     {
-                        if (SaveData(index, loadedData))
+                        _migrationSaveFailed[index] = !SaveData(index, loadedData);
+
+                        if (!_migrationSaveFailed[index])
                         {
-                            CLogger.Success($"저장슬롯 {index} - 병합 후 저장 성공!");
+                            CLogger.Success($"저장슬롯 {index} - 버전업 후 저장 성공");
                         }
                         else
                         {
-                            CLogger.Error($"저장슬롯 {index} - 병합 후 저장 실패");
+                            CLogger.Error($"저장슬롯 {index} - 버전업 후 저장 실패");
                         }
                     }
                     return true;
@@ -657,6 +627,25 @@ public static class CSaveManager
                 return 6;
             }
         }
+
+        HashSet<string> questIds = new HashSet<string>(StringComparer.Ordinal);
+
+        for(int i = 0; i < loadedData.Quests.Count; i++)
+        {
+            CQuestSaveData record = loadedData.Quests[i];
+            if (record == null ||
+                string.IsNullOrWhiteSpace(record.questId) ||
+                !questIds.Add(record.questId))
+            {
+                return 7;
+            }
+
+            EQuestState state = (EQuestState)record.state;
+            if (state is not (EQuestState.Active or EQuestState.Reportable or EQuestState.Completed))
+            {
+                return 7;
+            }
+        }
         return 0;
     }
 
@@ -676,6 +665,7 @@ public static class CSaveManager
                 File.Delete(path);
             }
 
+            _migrationSaveFailed[index] = false;
             _saveData[index] = null;
             _saveDataErrorCode[index] = -10;
             _saveFlag &= ~(ESaveSlot)(1 << index);
@@ -733,6 +723,24 @@ public static class CSaveManager
         {
             data.Quests = null;
             data.version = 4;
+            migrated = true;
+        }
+        if (data.Version == 4)
+        {
+            const string tutorialQuestId = "tutorial_leaving_day";
+            bool isPastTutorial = data.CurrentStage is 1 or 2 or 3;
+
+            if (isPastTutorial && !data.Quests.Exists(
+                quest => quest != null && quest.questId == tutorialQuestId))
+            {
+                data.Quests.Add(new CQuestSaveData
+                {
+                    questId = tutorialQuestId,
+                    state = (int)EQuestState.Completed
+                });
+            }
+
+            data.version = 5;
             migrated = true;
         }
         return migrated;

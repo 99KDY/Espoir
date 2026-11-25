@@ -180,8 +180,16 @@ public class CTitleManager : MonoBehaviour
             };
             int clearedCount = CGameManager.GetCompleteNumber(data.BossClear);
             int totalCount = CGameManager.GetMaxCompleteNumberStatic();
-            _saveSlots[slot].description.text =
-                $"{region}\n<size=75%>진척도 {clearedCount} / {totalCount}</size>";
+            if (CSaveManager.HasMigrationSaveWarning(slot))
+            {
+                _saveSlots[slot].description.text =
+                    $"{region}\n<size=75%>저장 파일 업데이트 실패 · 플레이 가능</size>";
+            }
+            else
+            {
+                _saveSlots[slot].description.text =
+                    $"{region}\n<size=75%>진척도 {clearedCount} / {totalCount}</size>";
+            }
         }
         else
         {
@@ -215,6 +223,9 @@ public class CTitleManager : MonoBehaviour
                     break;
                 case 6:
                     _saveSlots[slot].description.text = "퀵슬롯 데이터 오류";
+                    break;
+                case 7:
+                    _saveSlots[slot].description.text = "퀘스트 데이터 오류";
                     break;
                 default:
                     _saveSlots[slot].description.text = $": 알 수 없는 오류 - {CSaveManager.SaveErrorCode[slot]}";
