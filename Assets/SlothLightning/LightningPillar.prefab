@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 5551001286423122075}
   - component: {fileID: 2540718016047844296}
   - component: {fileID: 74729521477406440}
+  - component: {fileID: -2701211399218539407}
   m_Layer: 0
   m_Name: LightningPillar
   m_TagString: Untagged
@@ -98,3 +99,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _clip: {fileID: 4900000, guid: 16ee0356c5391844f8bac647d805c268, type: 3}
   _library: {fileID: 11400000, guid: e02f754b02f8a4f4eab42a91e4d87d37, type: 2}
+--- !u!114 &-2701211399218539407
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1738065317976995639}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7ec27560cc39bc044aa8b0d86219bc2d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

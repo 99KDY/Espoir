@@ -75,15 +75,14 @@ public class CSlothBoss : CEnemy, IBoss
     private int _secondNorm = Animator.StringToHash("nAttack02");
     private int _thirdNorm = Animator.StringToHash("nAttack03");
 
-    private int _firstSub = Animator.StringToHash("bAttack01");
-    private int _secondSub = Animator.StringToHash("bAttack02");
-    private int _thirdSub = Animator.StringToHash("bAttack03");
-    private int _forthSub = Animator.StringToHash("bAttack04");
+    private int _firstSub = Animator.StringToHash("sAttack01");
+    private int _secondSub = Animator.StringToHash("sAttack02");
+    private int _thirdSub = Animator.StringToHash("sAttack03");
+    private int _forthSub = Animator.StringToHash("sAttack04");
 
-    private int _firstMain = Animator.StringToHash("pAttack01");
-    private int _secondMain = Animator.StringToHash("pAttack02");
-    private int _thirdMain = Animator.StringToHash("pAttack03");
-    private int _finalMain = Animator.StringToHash("pAttack04");
+    private int _firstMain = Animator.StringToHash("mAttack01");
+    private int _secondMain = Animator.StringToHash("mAttack02");
+    private int _thirdMain = Animator.StringToHash("mAttack03");
 
 
     #endregion
@@ -1228,105 +1227,14 @@ public class CSlothBoss : CEnemy, IBoss
         }
         _atkTimer = 0;
 
-        await UniTask.Delay(1500);
+        await UniTask.Delay(2000);
         if (battleVersion != _battleVersion) return;
 
         if (_previewPattern != null)
         {
             _previewPattern.ClearPreview();
         }
-
-
-        List<Vector3> circleCenter = new List<Vector3>();
-
-        for (int i = 0; i < 4; i++)
-        {
-            float startAngle = 45f + (i * 90f);
-
-            Quaternion rot = Quaternion.Euler(0f, startAngle, 0f);
-
-            Vector3 dir = rot * this.transform.forward;
-
-            Vector3 currentPos = this.transform.position + (dir.normalized * _thunderOrbitRadius);
-
-            circleCenter.Add(currentPos);
-        }
-
-        int hitCount = 0;
-        bool isHit = false;
-
-        for (int i = 0; i < circleCenter.Count; i++)
-        {
-            int hit = Physics.OverlapSphereNonAlloc(circleCenter[i], _thunderHitRadius, _hitCollider, _targetMask);
-                     
-            if(hit > 0)
-            {
-                isHit = true;
-
-                hitCount += hit;
-
-                break;
-
-            }
-
-        }
-
-        if (isHit == true)
-        {
-            SDamageInfo damageToPlayer = new SDamageInfo(0.3f, ERatioSwitch.ByCurrent);
-            _player.OnHit(this, damageToPlayer);
-            CLogger.Log($"현재 플레이어 체력 : {_player.HpCurrent}");
-
-            isHit = false;
-        }
-
-
-        await UniTask.Delay(500);
-        
         _atkTimer = 0;
-
-        hitCount = 0;
-   
-        for(int i = 0; i < circleCenter.Count; i++)
-        {
-            if(_hitCollider == null)
-            {
-                continue;
-            }
-
-            if(_player == null || _player.HpCurrent <= 0)
-            {
-                continue;
-            }
-
-            circleCenter[i] = RotateValoteCal(circleCenter[i], this.transform.position, Vector3.up, (-_thunderAngle) * Time.deltaTime);
-
-            Vector3 hitPos = _player.transform.position - circleCenter[i];
-
-            float distance = hitPos.magnitude;
-
-            float range = Vector3.Distance(_player.transform.position, this.transform.position);
-
-            if(distance <= _thunderHitRadius && (range >= 10f && range <= 14f))
-            {
-                isHit= true;
-
-                break;
-            }
-
-
-        }
-
-        if (isHit == true)
-        {
-            SDamageInfo damageToPlayer = new SDamageInfo(0.3f, ERatioSwitch.ByCurrent);
-            _player.OnHit(this, damageToPlayer);
-            CLogger.Log($"현재 플레이어 체력 : {_player.HpCurrent}");
-
-            isHit = false;
-
-        }
-
 
         await UniTask.Delay(5000);
         if (battleVersion != _battleVersion) return;
