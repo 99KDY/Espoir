@@ -84,7 +84,7 @@ public class CPlayerUI_Build : MonoBehaviour
         UpdateHp();
         UpdateMp();
         if (_debugText != null) UpdateDebug();
-       // UpdateSkill();
+        UpdateSkill();
         UpdateQuickslot();
         UpdateStatus();
     }

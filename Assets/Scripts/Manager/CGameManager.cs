@@ -800,8 +800,9 @@ public class CGameManager : MonoBehaviour
 
     public int GetAvailableStage()
     {
-        int count = 0;
-        if (_bossClearState.HasFlag(EBossClear.Invidia)) count += 1;
+        // int count = 0;
+        // if (_bossClearState.HasFlag(EBossClear.Invidia)) count += 1;
+        int count = 1;
         if (_bossClearState.HasFlag(EBossClear.Pigritia)) count += 1;
         if (_bossClearState.HasFlag(EBossClear.Luxuria)) count += 1;
         return count;

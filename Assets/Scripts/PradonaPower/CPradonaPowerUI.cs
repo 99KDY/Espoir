@@ -1,4 +1,4 @@
-using System.Collections;
+Ôªøusing System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -8,19 +8,19 @@ using UnityEngine.UI;
 public class CPradonaPowerUI : MonoBehaviour
 {
     [SerializeField] private CPlayer _player;
-    [SerializeField] private GameObject _powerPanel;
-    [Tooltip("¡˙≈ı, ≈ΩøÂ, ≥™≈¬, ΩƒøÂ, ªˆøÂ, ∫–≥Î º¯º≠")]
+    [Tooltip("ÏßàÌà¨, ÌÉêÏöï, ÎÇòÌÉú, ÏãùÏöï, ÏÉâÏöï, Î∂ÑÎÖ∏ ÏàúÏÑú")]
     [SerializeField] private Button[] _powerButtons = new Button[6];
     [SerializeField] private TMP_Text _selectionCountText;
-    [SerializeField] private Button _applyButton;
-    [SerializeField] private Button _closeButton;
+    // [SerializeField] private Button _applyButton;
 
-    [Header("∞¯øÎ ≈¯∆¡")]
+    [Header("Í≥µÏö© Ìà¥ÌåÅ")]
     [SerializeField] private RectTransform _powerTooltip;
     [SerializeField] private TMP_Text _tooltipName;
     [SerializeField] private TMP_Text _tooltipDescription;
 
-    private const int MaxSelected = 3;
+    [Header("ÎîîÎ≤ÑÍ∑∏")]
+    [SerializeField] private bool _debug;
+
     private readonly EPradonaPower[] _powers =
     {
         EPradonaPower.Invidia,
@@ -33,36 +33,42 @@ public class CPradonaPowerUI : MonoBehaviour
 
     private readonly string[] _names =
     {
-        "¡˙≈ı", "≈ΩøÂ", "≥™≈¬", "ΩƒøÂ", "ªˆøÂ", "∫–≥Î"
+        "ÏßàÌà¨", "ÌÉêÏöï", "ÎÇòÌÉú", "ÏãùÏöï", "ÏÉâÏöï", "Î∂ÑÎÖ∏"
     };
 
-    // ∆¿ HUD¿« »ø∞˙ º≥∏Ì¿ª πŸ≈¡¿∏∑Œ ¿€º∫«— º±≈√√¢ πÆ±∏¿‘¥œ¥Ÿ.
+    // ÌåÄ HUDÏùò Ìö®Í≥º ÏÑ§Î™ÖÏùÑ Î∞îÌÉïÏúºÎ°ú ÏûëÏÑ±Ìïú ÏÑ†ÌÉùÏ∞Ω Î¨∏Íµ¨ÏûÖÎãàÎã§.
     private readonly string[] _descriptions =
     {
-        "¥Ÿ¿Ω ∞¯∞› ¿˚¡ﬂ Ω√, √÷¥Î √º∑¬¿« 15% »∏∫π«’¥œ¥Ÿ.",
-        "¥Ÿ¿Ω ∞¯∞› ¿˚¡ﬂ Ω√, ¿˚¿Ã πﬁ¥¬ «««ÿ∏¶ 20% ¡ı∞°Ω√≈µ¥œ¥Ÿ.",
-        "¥Ÿ¿Ω ¿⁄Ω≈¿Ã ∞¯∞›πﬁ¿ª ∂ß, «««ÿ∏¶ 99% ∞®º“ Ω√≈µ¥œ¥Ÿ.",
-        "¿œπ› ±‚º˙¿« ¿ÁªÁøÎ ¥Î±‚Ω√∞£¿ª √ ±‚»≠«’¥œ¥Ÿ.",
-        "±‚¿˝ »ø∞˙∏¶ «ÿ¡¶«’¥œ¥Ÿ.",
-        "3√ ∞£ ƒ°∏Ì≈∏ »Æ∑¸¿ª 1.5πË ¡ı∞°Ω√≈µ¥œ¥Ÿ."
+        "Îã§Ïùå Í≥µÍ≤© Ï†ÅÏ§ë Ïãú, ÏµúÎåÄ Ï≤¥Î†•Ïùò 15% ÌöåÎ≥µÌï©ÎãàÎã§.",
+        "Îã§Ïùå Í≥µÍ≤© Ï†ÅÏ§ë Ïãú, Ï†ÅÏù¥ Î∞õÎäî ÌîºÌï¥Î•º 20% Ï¶ùÍ∞ÄÏãúÌÇµÎãàÎã§.",
+        "Îã§Ïùå ÏûêÏã†Ïù¥ Í≥µÍ≤©Î∞õÏùÑ Îïå, ÌîºÌï¥Î•º 99% Í∞êÏÜå ÏãúÌÇµÎãàÎã§.",
+        "ÏùºÎ∞ò Í∏∞Ïà†Ïùò Ïû¨ÏÇ¨Ïö© ÎåÄÍ∏∞ÏãúÍ∞ÑÏùÑ Ï¥àÍ∏∞ÌôîÌï©ÎãàÎã§.",
+        "Í∏∞Ï†à Ìö®Í≥ºÎ•º Ìï¥Ï†úÌï©ÎãàÎã§.",
+        "3Ï¥àÍ∞Ñ ÏπòÎ™ÖÌÉÄ ÌôïÎ•†ÏùÑ 1.5Î∞∞ Ï¶ùÍ∞ÄÏãúÌÇµÎãàÎã§."
     };
 
     private readonly GameObject[] _selectedMarks = new GameObject[6];
     private EPradonaPower _draft;
     private bool _isOpen;
-    private bool _wasInputLocked;
-    private bool _changedGameState;
+    private int _displayedMaxSelected = -1;
     private float _noticeUntil;
     private readonly ColorBlock[] _originalColors = new ColorBlock[6];
 
     public bool IsOpen => _isOpen;
+    private int GetMaxSelected()
+    {
+        if (_debug) return 3;
+
+        CGameManager manager = CGameManager.Instance;
+        return manager != null ? manager.GetAvailableStage() : 0;
+    }
 
     private void Awake()
     {
-        if (_player == null || _powerPanel == null ||
-            _selectionCountText == null || _applyButton == null || _closeButton == null ||
-            _powerTooltip == null || _tooltipName == null || _tooltipDescription == null ||
-            _powerButtons == null || _powerButtons.Length != _powers.Length)
+        if (_selectionCountText == null || // _applyButton == null ||
+            _powerTooltip == null || _tooltipName == null ||
+            _tooltipDescription == null || _powerButtons == null ||
+            _powerButtons.Length != _powers.Length)
         {
             enabled = false;
             return;
@@ -94,23 +100,11 @@ public class CPradonaPowerUI : MonoBehaviour
             BindTooltip(i);
         }
 
-        _applyButton.onClick.AddListener(Apply);
-        _closeButton.onClick.AddListener(Close);
-        // º±≈√ ºˆøÕ æ»≥ª∞° πˆ∆∞¿ª ƒßπ¸«œ¡ˆ æ µµ∑œ ∆–≥Œ æ∆∑°¬ ø° ∞Ì¡§«’¥œ¥Ÿ.
-        RectTransform countRect = _selectionCountText.rectTransform;
-        countRect.anchorMin = countRect.anchorMax = new Vector2(0.5f, 0f);
-        countRect.pivot = new Vector2(0.5f, 0f);
-        countRect.anchoredPosition = new Vector2(0f, 75f);
-        countRect.sizeDelta = new Vector2(660f, 85f);
-        _selectionCountText.alignment = TextAlignmentOptions.Center;
-        _selectionCountText.enableAutoSizing = true;
-        _selectionCountText.fontSizeMin = 14f;
-        _selectionCountText.fontSizeMax = 24f;
-        _selectionCountText.overflowMode = TextOverflowModes.Truncate;
+        // _applyButton.onClick.AddListener(Apply);
+
         _selectionCountText.raycastTarget = false;
-        _powerTooltip.pivot = new Vector2(0f, 1f);
+        _powerTooltip.pivot = new Vector2(0.5f, 0f);
         HideTooltip();
-        _powerPanel.SetActive(false);
     }
 
     private void Update()
@@ -120,86 +114,53 @@ public class CPradonaPowerUI : MonoBehaviour
             _noticeUntil = 0f;
             RefreshSelection();
         }
+    }
+    private bool CanEdit()
+    {
         CGameManager manager = CGameManager.Instance;
 
-        if (_isOpen && (manager == null || manager.BattleState != EBattleState.None))
-        {
-            Close();
-            return;
-        }
-
-        if (Input.GetKeyDown(KeyCode.K))
-        {
-            if (_isOpen) Close();
-            else Open();
-        }
+        return _isOpen &&
+               _player != null &&
+               manager != null &&
+               manager.BattleState == EBattleState.None;
     }
 
-    public void Open()
+
+    public void Show(CPlayer player)
     {
-        if (_isOpen) return;
+        if (!isActiveAndEnabled || player == null) return;
 
-        CGameManager manager = CGameManager.Instance;
-        if (manager == null || manager.BattleState != EBattleState.None ||
-            manager.GameState != EGameState.Idle || _player.IsInputLocked)
-        {
-            return;
-        }
-
-        _draft = EPradonaPower.None;
-        foreach (EPradonaPower power in _powers)
-        {
-            if (_player.PradonaPower.HasFlag(power)) _draft |= power;
-        }
-
-        _wasInputLocked = _player.IsInputLocked;
-        _player.SetInputLocked(true);
-        _changedGameState = true;
-        manager.SetGameState(EGameState.UI);
+        _player = player;
+        _draft = player.PradonaPower & GetSelectablePowers();
 
         _isOpen = true;
         _noticeUntil = 0f;
+        HideTooltip();
         RefreshSelection();
-        HideTooltip();
-        _powerPanel.SetActive(true);
-    }
-
-    public void Close()
-    {
-        if (!_isOpen) return;
-
-        _isOpen = false;
-        _powerPanel.SetActive(false);
-        HideTooltip();
-        if (_player != null) _player.SetInputLocked(_wasInputLocked);
-
-        CGameManager manager = CGameManager.Instance;
-        if (_changedGameState && manager != null && manager.GameState == EGameState.UI)
-        {
-            manager.SetGameState(EGameState.Idle);
-        }
-        _changedGameState = false;
     }
 
     private void TogglePower(int index)
     {
-        if (!_isOpen) return;
+        if (!CanEdit()) return;
 
         EPradonaPower power = _powers[index];
-        if (_draft.HasFlag(power))
+        EPradonaPower available = GetSelectablePowers();
+        if (!available.HasFlag(power)) return;
+
+        bool selected = _draft.HasFlag(power);
+        if (!selected && CountSelected() >= GetMaxSelected())
         {
-            _draft &= ~power;
+            _noticeUntil = Time.unscaledTime + 10f;
+            RefreshSelection();
+            return;
         }
-        else
-        {
-            if (CountSelected() >= MaxSelected)
-            {
-                _noticeUntil = Time.unscaledTime + 10f;
-                RefreshSelection();
-                return;
-            }
-            _draft |= power;
-        }
+
+        EPradonaPower next = selected ? _draft & ~power : _draft | power;
+        if ((next & ~available) != EPradonaPower.None) return;
+        if (FindFirstObjectByType<CPlayerUI_Build>() == null) return;
+
+        _draft = next;
+        _player.PradonaPower = next;
         RefreshSelection();
     }
 
@@ -215,6 +176,9 @@ public class CPradonaPowerUI : MonoBehaviour
 
     private void RefreshSelection()
     {
+        bool canEdit = CanEdit();
+        EPradonaPower available = GetSelectablePowers();
+
         for (int i = 0; i < _powers.Length; i++)
         {
             bool selected = _draft.HasFlag(_powers[i]);
@@ -230,33 +194,54 @@ public class CPradonaPowerUI : MonoBehaviour
             }
             _powerButtons[i].transition = Selectable.Transition.ColorTint;
             _powerButtons[i].colors = colors;
+            _powerButtons[i].interactable = canEdit && available.HasFlag(_powers[i]);
         }
-        _selectionCountText.text = $"º±≈√ {CountSelected()} / {MaxSelected}∞≥";
-        if (_noticeUntil > Time.unscaledTime)
-            _selectionCountText.text += "\n√÷¥Î 3∞≥±Ó¡ˆ º±≈√«“ ºˆ ¿÷Ω¿¥œ¥Ÿ.";
-        _applyButton.interactable = CountSelected() <= MaxSelected;
-    }
+        _displayedMaxSelected = GetMaxSelected();
+        _selectionCountText.text = $"ÏÑ†ÌÉù {CountSelected()} / {_displayedMaxSelected}Í∞ú";
 
-    public void Apply()
+        if (_noticeUntil > Time.unscaledTime)
+        {
+            _selectionCountText.text += $"\nÏµúÎåÄ {_displayedMaxSelected}Í∞úÍπåÏßÄ ÏÑ†ÌÉùÌï† Ïàò ÏûàÏäµÎãàÎã§.";
+        }
+        // _applyButton.interactable = CanEdit() && CountSelected() <= MaxSelected;
+    }
+    private EPradonaPower GetSelectablePowers()
     {
-        if (!_isOpen || CountSelected() > MaxSelected) return;
+        if (_debug)
+        {
+            EPradonaPower all = EPradonaPower.None;
+            foreach (EPradonaPower power in _powers)
+            {
+                all |= power;
+            }
+            return all;
+        }
 
         CGameManager manager = CGameManager.Instance;
-        if (manager == null || manager.BattleState != EBattleState.None)
-        {
-            Close();
-            return;
-        }
+        EPradonaPower available = EPradonaPower.Invidia;
+        if (manager == null) return available;
 
-        // ±‚¡∏ «¡∑Œ∆€∆º∞° ∆¿ HUD¿« ±«¥… «•Ω√±Ó¡ˆ ∞ªΩ≈«’¥œ¥Ÿ.
-        if (FindFirstObjectByType<CPlayerUI_Build>() == null)
-        {
-            return;
-        }
+        EBossClear cleared = manager.BossClearState;
 
-        _player.PradonaPower = _draft;
-        Close();
+        if (cleared.HasFlag(EBossClear.Avaritia)) available |= EPradonaPower.Avaritia;
+        if (cleared.HasFlag(EBossClear.Pigritia)) available |= EPradonaPower.Pigritia;
+        if (cleared.HasFlag(EBossClear.Gula)) available |= EPradonaPower.Gula;
+        if (cleared.HasFlag(EBossClear.Luxuria)) available |= EPradonaPower.Luxuria;
+        if (cleared.HasFlag(EBossClear.Ira)) available |= EPradonaPower.Ira;
+
+        return available;
     }
+
+    //public void Apply()
+    //{
+    //    if (!CanEdit() || CountSelected() > MaxSelected) return;
+
+    //    // Ïñ¥ÏßúÌîº ÌîÑÎ°úÌçºÌã∞Ïùò setterÍ∞Ä Í∞±Ïã†Ìï®!
+    //    if (FindFirstObjectByType<CPlayerUI_Build>() == null) return;
+    //    if ((_draft & ~GetSelectablePowers()) != EPradonaPower.None) return;
+
+    //    _player.PradonaPower = _draft;
+    //}
 
     private void BindTooltip(int index)
     {
@@ -281,9 +266,15 @@ public class CPradonaPowerUI : MonoBehaviour
 
         _tooltipName.text = _names[index];
         _tooltipDescription.text = _descriptions[index];
-        Vector3[] corners = new Vector3[4];
-        ((RectTransform)_powerButtons[index].transform).GetWorldCorners(corners);
-        _powerTooltip.position = corners[2];
+
+        RectTransform button = (RectTransform)_powerButtons[index].transform;
+        Vector3 tooltipOrigin = new Vector3(
+            button.rect.center.x,
+            button.rect.yMax + 12f,
+            0f
+        );
+
+        _powerTooltip.position = button.TransformPoint(tooltipOrigin);
         _powerTooltip.SetAsLastSibling();
         _powerTooltip.gameObject.SetActive(true);
     }
@@ -295,6 +286,13 @@ public class CPradonaPowerUI : MonoBehaviour
 
     private void OnDisable()
     {
-        Close();
+        _isOpen = false;
+        _noticeUntil = 0f;
+        _player = null;
+
+        if (_powerTooltip != null)
+        {
+            HideTooltip();
+        }
     }
 }
