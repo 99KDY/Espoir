@@ -39,6 +39,16 @@ public class CTestCamera : MonoBehaviour
 
     public bool IsInputBlocked => isActiveAndEnabled && (_rotateModifier.IsPressed() || _isRotating);
 
+    /// <summary>
+    /// 지금 수평 각도(도).
+    /// </summary>
+    public float Yaw => _yaw;
+
+    /// <summary>
+    /// 휠로 정한 목표 거리.
+    /// </summary>
+    public float DesiredDistance => _desiredDistance;
+
     private Vector3 _followPosition;
     private float _distance;
     private float _desiredDistance;
@@ -49,6 +59,12 @@ public class CTestCamera : MonoBehaviour
     private Vector2 _cursorPosition;
     private CursorLockMode _previousLockMode;
     private bool _previousCursorVisible;
+    private float _returnTime = -1f;
+    private float _returnDuration;
+    private float _returnYawFrom;
+    private float _returnYawTo;
+    private float _returnPitchFrom;
+    private float _returnDistanceFrom;
 
     private void OnEnable()
     {
@@ -90,6 +106,19 @@ public class CTestCamera : MonoBehaviour
         _yaw = _defaultYaw;
     }
 
+    /// <summary>
+    /// 카메라를 기본 구도로 되돌립니다. 복귀 중 카메라를 조작하면 복귀를 멈춥니다.
+    /// </summary>
+    public void ReturnToDefault(float duration)
+    {
+        _returnTime = 0f;
+        _returnDuration = Mathf.Max(0.01f, duration);
+        _returnYawFrom = _yaw;
+        _returnYawTo = _yaw + Mathf.DeltaAngle(_yaw, _defaultYaw);
+        _returnPitchFrom = _pitchOffset;
+        _returnDistanceFrom = _desiredDistance;
+    }
+
     private void OnApplicationFocus(bool hasFocus)
     {
         _hasFocus = hasFocus;
@@ -102,9 +131,16 @@ public class CTestCamera : MonoBehaviour
 
         UpdateRotation();
 
-        if (_hasFocus && !IsPointerOverUi())
+        float scroll = _hasFocus && !IsPointerOverUi() ? _zoom.ReadValue<float>() : 0f;
+        if (_isRotating || Mathf.Abs(scroll) > 0f) _returnTime = -1f;
+
+        if (_returnTime >= 0f)
         {
-            float scroll = _zoom.ReadValue<float>();
+            UpdateReturn();
+        }
+
+        else if (Mathf.Abs(scroll) > 0f)
+        {
             _desiredDistance *= Mathf.Exp(-scroll * _zoomSensitivity);
             _desiredDistance = Mathf.Clamp(_desiredDistance, _distanceRange.x, _distanceRange.y);
         }
@@ -123,6 +159,21 @@ public class CTestCamera : MonoBehaviour
         Quaternion rotation = Quaternion.Euler(pitch, _yaw, 0f);
 
         transform.SetPositionAndRotation(pivot - rotation * Vector3.forward * _distance, rotation);
+    }
+
+    private void UpdateReturn()
+    {
+        _returnTime = Mathf.Min(_returnDuration, _returnTime + Time.unscaledDeltaTime);
+        float t = _returnTime / _returnDuration;
+        float e = t * t * t * (t * (t * 6f - 15f) + 10f);
+        float defaultDistance = Mathf.Clamp(_defaultDistance, _distanceRange.x, _distanceRange.y);
+
+        _yaw = Mathf.Lerp(_returnYawFrom, _returnYawTo, e);
+        _pitchOffset = _returnPitchFrom * (1f - e);
+        _desiredDistance = _returnDistanceFrom * Mathf.Pow(defaultDistance / _returnDistanceFrom, e);
+        _distance = _desiredDistance;
+
+        if (_returnTime >= _returnDuration) _returnTime = -1f;
     }
 
     private void UpdateRotation()

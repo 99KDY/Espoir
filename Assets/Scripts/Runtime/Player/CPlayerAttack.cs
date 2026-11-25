@@ -92,6 +92,7 @@ public class CPlayerAttack : MonoBehaviour
             {
                 result.hasHit = true;
                 result.hitFullyMarkedTarget |= hadFullMark;
+                ReportQuestHit(attacker, target);
 
                 if (mark == EHitMark.Add && target.HpCurrent > 0f)
                 {
@@ -108,6 +109,15 @@ public class CPlayerAttack : MonoBehaviour
         }
 
         return result;
+    }
+
+    private static void ReportQuestHit(CPlayer attacker, CUnit target)
+    {
+        if (!CQuestManager.HasTrackedQuests) return;
+        CPlayerSkill skill = attacker.Skill;
+        if (skill == null) return;
+
+        CQuestManager.ReportSkillHit(skill.CurrentSkill, target, skill.IsCurrentLink, skill.IsFinisherHit);
     }
 
     private int FindTargets(Vector3 attackCenter, Vector3 size, Quaternion rotation)

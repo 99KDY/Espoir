@@ -61,6 +61,21 @@ public class CInventoryUI : MonoBehaviour
     /// <summary>인벤토리 창이 화면에 열려 있는지 확인합니다.</summary>
     public bool IsOpen => _InventoryPanel.activeInHierarchy;
 
+    /// <summary>
+    /// 가방 창 전체의 RectTransform (다른 안내가 창을 가리지 않게 피할 때).
+    /// </summary>
+    public RectTransform PanelRect => _InventoryPanel.transform as RectTransform;
+
+    /// <summary>
+    /// 가방 칸 하나의 RectTransform 을 돌려줍니다. 범위를 벗어나면 null.
+    /// </summary>
+    public RectTransform GetSlotRect(int slotIndex)
+    {
+        if (_slotContent == null || slotIndex < 0 || slotIndex >= _slotContent.childCount) return null;
+
+        return _slotContent.GetChild(slotIndex) as RectTransform;
+    }
+
     private void Awake()
     {
         _itemIcons = new Image[_inventory.MaxItemSlot];
@@ -499,7 +514,9 @@ public class CInventoryUI : MonoBehaviour
         }
         else if (_menuTarget == MenuTarget.Bag && _selectedSlotIndex >= 0)
         {
+            CItem item = _inventory.GetItem(_selectedSlotIndex);
             success = _inventory.TryDiscardItem(_selectedSlotIndex, 1);
+            if (success) ItemDiscarded?.Invoke(item.Id);
         }
         else
         {
@@ -700,6 +717,7 @@ public class CInventoryUI : MonoBehaviour
         _goldText.text = $"{_inventory.Gold:N0} G";
     }
 
+    internal event System.Action<int> ItemDiscarded;
     public event System.Action<int, CItem> SellItemSelected;
     private bool _isShopSellMode;
 

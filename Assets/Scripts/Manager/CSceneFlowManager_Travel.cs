@@ -66,6 +66,7 @@ public partial class CSceneFlowManager
     private IEnumerator Co_Travel(ESceneId id, string sceneName)
     {
         _isTraveling = true;
+        if (_firstLoadFromTitle) CQuestManager.Clear();
         OnTravelStarted?.Invoke(id);
         CPlayer leaving = FindFirstObjectByType<CPlayer>();
         bool wasLeavingInputLocked = leaving != null && leaving.IsInputLocked;

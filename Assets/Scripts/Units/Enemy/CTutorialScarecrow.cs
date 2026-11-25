@@ -59,7 +59,7 @@ public class CTutorialScarecrow : CEnemy
 
     protected override void Die()
     {
-        // 공격 측에서 적중 직후의 체력으로 피해를 판정하므로 회복은 LateUpdate에서 처리한다. 
+        // 공격 측에서 적중 직후의 체력으로 피해를 판정하므로 회복은 LateUpdate에서 처리한다.
         _restoreHp = true;
     }
 }

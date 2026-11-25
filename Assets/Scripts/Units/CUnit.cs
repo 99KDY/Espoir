@@ -589,6 +589,7 @@ public abstract class CUnit : MonoBehaviour
             }
 
             SyncStatusEffect();
+            if (CQuestManager.HasTrackedQuests) CQuestManager.ReportStatusStack(this, id, status.Stack);
             return;
         }
         CStatus currentStatus = FindStatus(id);
@@ -620,8 +621,10 @@ public abstract class CUnit : MonoBehaviour
                 currentStatus.IsStackRemoving = false;
                 break;
             case EStatusStack.Ignore:
-                break;
+                return;
         }
+
+        if (CQuestManager.HasTrackedQuests) CQuestManager.ReportStatusStack(this, id, currentStatus.Stack);
     }
 
     /// <summary>

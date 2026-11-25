@@ -49,6 +49,8 @@ public class CPlayerSkill : MonoBehaviour
     private float _dashDistance;
     private bool _hasSpawnedEffect;
     private bool _hasAddedStrikeStack;
+    private bool _isCurrentLink;
+    private bool _isFinisherHit;
     private float _baseAttackSpeed;
 
     private readonly List<CSkillSO> _registeredSkills = new();
@@ -94,6 +96,21 @@ public class CPlayerSkill : MonoBehaviour
             return CanContinue(_lastBasicAttack, _animator.GetCurrentAnimatorStateInfo(0));
         }
     }
+
+    /// <summary>
+    /// 지금 실행 중인 스킬. 없으면 null.
+    /// </summary>
+    public CSkillSO CurrentSkill => _currentSkill != null ? _currentSkill.data : null;
+
+    /// <summary>
+    /// 지금 실행 중인 Q 가 막타 직후 연계로 시작됐는지 여부.
+    /// </summary>
+    public bool IsCurrentLink => _isCurrentLink;
+
+    /// <summary>
+    /// 지금 처리 중인 타격이 콤보 마지막 단계의 마지막 타격인지 여부.
+    /// </summary>
+    public bool IsFinisherHit => _isFinisherHit;
 
     /// <summary>
     /// 현재 왕관 상태에 맞는 평타 설정을 반환합니다.
@@ -364,6 +381,17 @@ public class CPlayerSkill : MonoBehaviour
     }
 
     /// <summary>
+    /// 지정한 스킬의 쿨타임을 초기화합니다.
+    /// </summary>
+    public void ResetCooldown(CSkillSO skill)
+    {
+        if (skill != null && _SKILLS.TryGetValue(skill, out CSkillRuntime runtime))
+        {
+            runtime.readyTime = 0f;
+        }
+    }
+
+    /// <summary>
     /// 등록된 모든 스킬의 쿨타임을 초기화합니다.
     /// </summary>
 
@@ -456,7 +484,7 @@ public class CPlayerSkill : MonoBehaviour
 
         if (skill is CLeviathanSkillSO && !_LEVIATHAN.IsIdle)
         {
-            return _LEVIATHAN.IsBuffActive && TryStartLeviathanFinisher(runtime, direction);
+            return _LEVIATHAN.IsBuffActive && TryStartLeviathanFinisher(runtime, direction, true);
         }
 
         if (Time.time < runtime.readyTime)
@@ -478,10 +506,12 @@ public class CPlayerSkill : MonoBehaviour
                 return false;
             }
 
+            CQuestManager.ReportSkillUse(skill);
             _CROWN.Use(_owner);
             runtime.readyTime = Time.time + skill.Cooldown;
-            CrownUsed?.Invoke(_owner.FindStatusStack(skill.CrownStatus.Id));
-            _audio?.PlayCrown(_owner.FindStatusStack(skill.CrownStatus.Id));
+            int crownStack = _owner.FindStatusStack(skill.CrownStatus.Id);
+            CrownUsed?.Invoke(crownStack);
+            _audio?.PlayCrown(crownStack);
             return true;
         }
 
@@ -520,7 +550,9 @@ public class CPlayerSkill : MonoBehaviour
             skill.Type == ESkillType.Strike;
         FinishSkill(isCanceling, keepEffects);
         _currentSkill = runtime;
+        _isCurrentLink = isFinisherLink;
         _stateCheckFrame = Time.frameCount + 1;
+        CQuestManager.ReportSkillUse(skill);
 
         // 대시만 보스배틀일 때 쿨 길어지게
         float cooldown = skill.Cooldown;
@@ -659,7 +691,7 @@ public class CPlayerSkill : MonoBehaviour
         if (_LEVIATHAN.IsFinisherPending && !_owner.IsInputLocked &&
             _SKILLS.TryGetValue(_LEVIATHAN.Settings, out CSkillRuntime runtime))
         {
-            TryStartLeviathanFinisher(runtime, _owner.GetPointerDirection());
+            TryStartLeviathanFinisher(runtime, _owner.GetPointerDirection(), false);
         }
     }
 
@@ -674,19 +706,21 @@ public class CPlayerSkill : MonoBehaviour
         runtime.readyTime = Time.time + runtime.data.Cooldown;
         _LEVIATHAN.BeginBuff(_owner);
         _audio?.PlayLeviathanBuff();
+        CQuestManager.ReportSkillUse(runtime.data);
         return true;
     }
 
-    private bool TryStartLeviathanFinisher(CSkillRuntime runtime, Vector3 direction)
+    private bool TryStartLeviathanFinisher(CSkillRuntime runtime, Vector3 direction, bool isManual)
     {
         bool isCanceling = IsBusy;
         FinishSkill(isCanceling);
         _currentSkill = runtime;
+        _isCurrentLink = false;
         _stateCheckFrame = Time.frameCount + 1;
         _direction = direction.sqrMagnitude > 0.0001f ? direction.normalized : transform.forward;
         _SPELL.Begin(_owner, _direction, runtime.data, _EFFECTS);
         _DASH_TRAIL.Reset(transform.position, runtime.data.DashTrail.firstDistance);
-        _LEVIATHAN.BeginFinisher(_owner);
+        _LEVIATHAN.BeginFinisher(_owner, isManual);
         _audio?.PlayLeviathanFinisher();
 
         if (isCanceling)
@@ -808,6 +842,7 @@ public class CPlayerSkill : MonoBehaviour
             {
                 _currentSkill.readyTime -= skill.MarkedCooldownReduction;
                 CooldownReduced?.Invoke(skill, skill.MarkedCooldownReduction);
+                CQuestManager.ReportCooldownReduced(skill);
             }
 
             _DASH_TRAIL.UpdateRush(skill.DashTrail, transform, _animator, _direction,
@@ -884,7 +919,9 @@ public class CPlayerSkill : MonoBehaviour
                 BasicAttackHitProcessed?.Invoke(skill, _stepIndex, _nextHitIndex - 1);
             }
 
+            _isFinisherHit = isBasicAttack && _stepIndex == skill.Steps.Length - 1 && _nextHitIndex == step.hits.Length;
             SPlayerHitResult result = _playerAttack.Attack(_owner, hit, hit.appliesMark);
+            _isFinisherHit = false;
 
             if (!result.hasHit)
             {

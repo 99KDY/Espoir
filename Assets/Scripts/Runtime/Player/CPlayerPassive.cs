@@ -13,6 +13,11 @@ public class CPlayerPassive
 
     private float _nextFlowLossTime;
 
+    /// <summary>
+    /// 질투의 낙인 상태.
+    /// </summary>
+    public CStatusSO Mark => _mark;
+
     internal bool HasFullMark(CUnit target)
     {
         return _mark != null && _mark.MaxStack > 0 && target.FindStatusStack(_mark.Id) >= _mark.MaxStack;

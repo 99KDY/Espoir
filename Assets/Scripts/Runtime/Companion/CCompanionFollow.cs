@@ -20,6 +20,30 @@ public class CCompanionFollow : MonoBehaviour
 
     private NavMeshAgent _agent;
     private float _nextPathTime;
+    private bool _isHolding;
+
+    /// <summary>
+    /// 따라가기를 잠시 멈추거나 다시 시작합니다 (대화 중 제자리에 서 있게 할 때).
+    /// </summary>
+    public void SetHold(bool isHolding)
+    {
+        _isHolding = isHolding;
+        if (isHolding && _agent != null && _agent.isOnNavMesh)
+        {
+            _agent.isStopped = true;
+            _agent.ResetPath();
+        }
+    }
+
+    /// <summary>
+    /// 내비 위 지정한 자리로 바로 옮깁니다 (불러오기 뒤 자리 맞춤).
+    /// </summary>
+    public void PlaceAt(Vector3 position, Quaternion rotation)
+    {
+        if (_agent != null && _agent.isOnNavMesh) _agent.Warp(position);
+        else transform.position = position;
+        transform.rotation = rotation;
+    }
 
     private void Awake()
     {
@@ -40,7 +64,7 @@ public class CCompanionFollow : MonoBehaviour
             return;
         }
 
-        if (_target == null)
+        if (_target == null || _isHolding)
         {
             _agent.isStopped = true;
             _animator.SetBool(_IS_MOVING_HASH, false);

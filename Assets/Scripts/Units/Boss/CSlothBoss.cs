@@ -1596,6 +1596,8 @@ public class CSlothBoss : CEnemy, IBoss
         if (_player != null) _target = _player.transform;
     }
 
+    public override EBossClear BossId => EBossClear.Pigritia;
+
     protected override void Die()
     {
         if (_isDead) return;

@@ -17,6 +17,8 @@ public class CPlayerLeviathan
     private int _stack;
     private bool _hasFlowCondition;
     private bool _isFinisherPending;
+    private bool _isManualFinisher;
+    private int _finisherStack;
     private int _finisherHitCount;
     private int _nextHit;
     private int _landedHits;
@@ -82,9 +84,11 @@ public class CPlayerLeviathan
         }
     }
 
-    internal void BeginFinisher(CPlayer player)
+    internal void BeginFinisher(CPlayer player, bool isManual)
     {
         _finisherHitCount = PlannedHitCount;
+        _isManualFinisher = isManual;
+        _finisherStack = _stack;
 
         // 피니쉬에도 버프를 적용하고 종료 시 제거한다. 시작이 늦어져 만료됐다면 다시 부여한다.
         CStatus buff = player.FindStatus(_settings.BuffStatus.Id);
@@ -141,6 +145,11 @@ public class CPlayerLeviathan
         if (!canceled && _nextHit < _finisherHitCount)
         {
             CLogger.Warn($"레비아탄 피니쉬가 {_nextHit}/{_finisherHitCount}타에서 끊겼습니다.");
+        }
+
+        if (!canceled && _nextHit >= _finisherHitCount)
+        {
+            CQuestManager.ReportLeviathanFinisher(_finisherStack, MaxStack, _isManualFinisher);
         }
 
         RemoveFinisherBuff();

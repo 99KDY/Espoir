@@ -65,7 +65,7 @@ public class CPlayerUI_Build : MonoBehaviour
             CLogger.Warn("CPlayerUI의 인스팩터에 플레이어 연결이 안되어 있음");
             return;
         }
-        InvokePradonaChanged(_player.PradonaPower);
+        InvokePradonaChanged(_player.ActivePradonaPower);
     }
 
     private void OnEnable()
@@ -281,7 +281,8 @@ public class CPlayerUI_Build : MonoBehaviour
         }
 
         _player.GetPradonaCooldown(out ratio, out remainCooldown);
-        _skillPradona.Refresh(ratio, remainCooldown, _player.PradonaPower != EPradonaPower.None && remainCooldown <= 0f);
+        bool canUse = _player.ActivePradonaPower != EPradonaPower.None && remainCooldown <= 0f;
+        _skillPradona.Refresh(ratio, remainCooldown, canUse);
     }
 
     public void UpdateQuickslot()

@@ -1523,6 +1523,8 @@ public class CPrideBoss : CEnemy, IBoss
     }
 
 
+    public override EBossClear BossId => EBossClear.Superbia;
+
     private void OnDisable()
     {
         ResetBattleState();

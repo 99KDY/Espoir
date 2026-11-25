@@ -20,6 +20,7 @@ public class CTalkCamera : MonoBehaviour
     [SerializeField, Min(0f)] private float _talkSharpness = 4.5f;
     [SerializeField, Min(0f)] private float _cineSharpness = 3f;
     [SerializeField] private bool _hideCompanionsInTalk = true;
+    [SerializeField, Min(0f)] private float _groundClearance;
 
     [Header("NPC 단독 카메라")]
     [SerializeField] private float _npcHeight = 1.46f;
@@ -227,6 +228,13 @@ public class CTalkCamera : MonoBehaviour
         float e = CCssEase.Smooth(_blend);
         Vector3 position = Vector3.Lerp(savePosition, _curPosition, e);
         Vector3 look = Vector3.Lerp(saveLook, _curLook, e);
+
+        if (_groundClearance > 0f)
+        {
+            float ground = GetGroundHeight(position, float.NegativeInfinity);
+            position.y = Mathf.Max(position.y, ground + _groundClearance);
+        }
+
         transform.SetPositionAndRotation(position, Quaternion.LookRotation(look - position, Vector3.up));
         _camera.fieldOfView = _baseFov + (_curFov - _baseFov) * e;
 
@@ -296,6 +304,12 @@ public class CTalkCamera : MonoBehaviour
         float cd = Mathf.Clamp(distance - 0.3f, _npcDistanceRange.x, _npcDistanceRange.y);
         Vector3 npcPosition = npcFeet - d * cd + right * (_side * _npcSide);
         npcPosition.y += _npcHeight;
+        if (_groundClearance > 0f)
+        {
+            float ground = GetGroundHeight(npcPosition, npcFeet.y);
+            npcPosition.y = Mathf.Max(npcPosition.y, ground + _groundClearance);
+        }
+
         Vector3 npcLook = npcFeet + right * (_side * _npcLookSide);
         npcLook.y += _npcLookHeight;
         float fov = Mathf.Min(40f, 27f * Mathf.Pow(2.7f / cd, 0.6f));
@@ -407,6 +421,8 @@ public class CTalkCamera : MonoBehaviour
 
         foreach (CCompanionFollow companion in FindObjectsByType<CCompanionFollow>(FindObjectsSortMode.None))
         {
+            if (_npc != null && _npc.transform.IsChildOf(companion.transform)) continue;
+
             foreach (Renderer target in companion.GetComponentsInChildren<Renderer>())
             {
                 if (!target.enabled) continue;

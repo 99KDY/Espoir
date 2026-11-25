@@ -162,7 +162,7 @@ public class CGameManager : MonoBehaviour
     public EGameState GameState => _gameState;
     public EBattleState BattleState => _battleState;
     public EBossClear BossClearState => _bossClearState;
-    public EQuestList AvailableQuest => _availableQuest;
+    public EQuestList AvailableQuest => CQuestManager.GetAvailableFlags(_availableQuest);
     public EQuestList ActingQuest => _actingQuest;
     public EQuestList CompletedQuest => _completedQuest;
     public bool IsInLobby => _isInLobby;
@@ -316,12 +316,19 @@ public class CGameManager : MonoBehaviour
             PlayerPrefs.SetInt(AutosaveKey, isOn ? 1 : 0);
             PlayerPrefs.Save();
         });
+
+        if (CQuestManager.IsReady) CQuestManager.ApplyFlags(this);
+        else if (CSceneFlowManager.Instance == null || CSceneFlowManager.Instance.TargetSaveData < 0)
+        {
+            CQuestManager.Restore(null);
+        }
     }
 
     void Update()
     {
         // 메뉴, 대화, 일시정지 시간은 플레이시간에 넣지 않는다.
         if (_gameState == EGameState.Idle) _playTime += Time.unscaledDeltaTime;
+        CQuestManager.Tick(_player);
 
         if (Input.GetKeyDown(KeyCode.P))
         {
@@ -695,6 +702,7 @@ public class CGameManager : MonoBehaviour
 
         _playTime = 0f;
         _bossFoundState = EBossClear.None;
+        CQuestManager.Restore(null);
         return SaveData(slot);
     }
 
@@ -731,7 +739,7 @@ public class CGameManager : MonoBehaviour
                 items,
                 _player.Equipment,
                 quickSlots,
-                _availableQuest,
+                AvailableQuest,
                 _actingQuest,
                 _completedQuest,
                 _bossClearState,
@@ -740,6 +748,7 @@ public class CGameManager : MonoBehaviour
                 _playTime,
                 _bossFoundState);
 
+        data.Quests = CQuestManager.Export();
         return CSaveManager.SaveData(slot, data);
     }
 
@@ -765,6 +774,8 @@ public class CGameManager : MonoBehaviour
         _bossTime = data.BossTime;
         _playTime = data.PlayTime;
         _bossFoundState = data.BossFound;
+        CQuestManager.Restore(data.Quests);
+        CQuestManager.ApplyFlags(this);
         foreach (KeyValuePair<EEquipmentSlot, CItemEquipment> pair in data.Equipment)
         {
             if (_player.Equipment.TryGetValue(pair.Key, out CItemEquipment previous) &&
@@ -777,6 +788,22 @@ public class CGameManager : MonoBehaviour
             pair.Value?.OnEquip(_player);
         }
         _player.EquipmentResync();
+    }
+
+    /// <summary>
+    /// 퀘스트 상태에 맞춰 게임 매니저의 플래그를 갱신합니다.
+    /// </summary>
+    public void SetQuestFlag(EQuestList flag, EQuestState state)
+    {
+        if (flag == EQuestList.None) return;
+
+        _availableQuest &= ~flag;
+        _actingQuest &= ~flag;
+        _completedQuest &= ~flag;
+
+        if (state == EQuestState.None) _availableQuest |= flag;
+        else if (state == EQuestState.Completed) _completedQuest |= flag;
+        else _actingQuest |= flag;
     }
 
     private void ShowQuestion(string shownTitle, string shownText, Action action)

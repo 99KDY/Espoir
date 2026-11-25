@@ -41,6 +41,9 @@ public class CTalkPresenter : MonoBehaviour
     [SerializeField, Min(0f)] private float _travelDelay = 0.75f;
     [SerializeField, Min(0f)] private float _travelFadeOutDelay = 0.5f;
 
+    [SerializeField] private string _topicPrompt = "무슨 이야기를 할까?";
+    [SerializeField] private string _normalTopic = "일반 대화";
+
     [Header("입력 (New Input System)")]
     [SerializeField] private InputAction _talkAction = new InputAction("Talk", InputActionType.Button, "<Keyboard>/f");
     [SerializeField] private InputAction _advanceAction = CreateAction("Advance",
@@ -61,6 +64,8 @@ public class CTalkPresenter : MonoBehaviour
     private bool _isOpen;
     private bool _isBusy;
     private CTalkNode _node;
+    private CTalkScriptSO _questTopic;
+    private readonly List<CTalkChoice> _CHOICES = new List<CTalkChoice>();
     private int _lineIndex;
     private string _text = string.Empty;
     private float _shown;
@@ -177,7 +182,7 @@ public class CTalkPresenter : MonoBehaviour
             {
                 _shown = _text.Length;
                 _isTyping = false;
-                if (_node != null && _node.HasChoices) _isPicking = true;
+                if (_CHOICES.Count > 0) _isPicking = true;
             }
 
             PaintProgress(now);
@@ -233,7 +238,7 @@ public class CTalkPresenter : MonoBehaviour
 
             bool isVisible = TryGetHeadScreen(npc, out Vector2 head);
             float distance = FlatDistance(feet, npc.FeetPosition);
-            bool isOn = distance < _nameRadius && isVisible && !_isOpen && !isSummoning;
+            bool isOn = distance < _nameRadius && isVisible && !_isOpen && !isSummoning && npc.IsTalkable;
             pair.Value.Tick(head, isOn, now);
         }
 
@@ -257,7 +262,17 @@ public class CTalkPresenter : MonoBehaviour
     /// </summary>
     public bool TryOpen()
     {
-        if (_isOpen || _isBusy || !_isInRange || _current == null || _dialog == null) return false;
+        if (!_isInRange) return false;
+        return TryOpen(_current, null);
+    }
+
+    /// <summary>
+    /// 거리와 상관없이 지정한 NPC 와 대화를 엽니다 (튜토리얼처럼 NPC 가 먼저 말을 거는 경우).
+    /// 지정한 대사부터 대화를 엽니다. 시작 대사를 생략하면 기본 대사로 시작합니다.
+    /// </summary>
+    public bool TryOpen(CTalkNpc npc, string startNode)
+    {
+        if (_isOpen || _isBusy || npc == null || _dialog == null) return false;
         if (_targetShop != null && _targetShop.IsOpen) return false;
 
         CGameManager manager = CGameManager.Instance;
@@ -266,6 +281,7 @@ public class CTalkPresenter : MonoBehaviour
         if (_inventoryUI == null) _inventoryUI = FindFirstObjectByType<CInventoryUI>();
         if (_inventoryUI != null && _inventoryUI.IsOpen) return false;
 
+        _current = npc;
         _isOpen = true;
         _HISTORY.Clear();
         _HISTORY_IS_MINE.Clear();
@@ -296,8 +312,28 @@ public class CTalkPresenter : MonoBehaviour
         _current.PlayDialogueBGM();
 
         _dialog.Open(_current.DisplayName, _current.Title, Time.unscaledTime);
+        CQuestManager.ReportTalk(_current.NpcId);
         bool isSummoned = _summoner != null && _summoner.IsSummoned;
-        Enter(_current.GetStartNode(isSummoned));
+        string first = _current.GetStartNode(isSummoned);
+        _questTopic = string.IsNullOrEmpty(startNode) ? _current.GetQuestTalk() : null;
+        if (_questTopic == null) Enter(string.IsNullOrEmpty(startNode) ? first : startNode);
+        else if (_current.FindNode(first, _mapKey) == null)
+        {
+            Enter(_current.SelectQuestTalk(_questTopic));
+            _questTopic = null;
+        }
+        else
+        {
+            ShowNode(new CTalkNode
+            {
+                ask = _topicPrompt,
+                choices = new[]
+                {
+                    new CTalkChoice { text = _questTopic.QuestLink.quest.Title },
+                    new CTalkChoice { text = _normalTopic, to = first },
+                },
+            });
+        }
         return true;
     }
 
@@ -342,7 +378,7 @@ public class CTalkPresenter : MonoBehaviour
         {
             _shown = _text.Length;
             _isTyping = false;
-            if (_node.HasChoices) _isPicking = true;
+            if (_CHOICES.Count > 0) _isPicking = true;
             PaintProgress(Time.unscaledTime);
             return;
         }
@@ -352,6 +388,12 @@ public class CTalkPresenter : MonoBehaviour
         if (_node.lines != null && ++_lineIndex < _node.lines.Length)
         {
             ShowLine(_node.lines[_lineIndex]);
+            return;
+        }
+
+        if (_node.HasChoices && _CHOICES.Count == 0)
+        {
+            Close();
             return;
         }
 
@@ -396,10 +438,28 @@ public class CTalkPresenter : MonoBehaviour
     public void Choose(int index)
     {
         if (!_isOpen || _isBusy || _isTyping || !_isPicking || _node == null || !_node.HasChoices) return;
-        if (index < 0 || index >= _node.choices.Length) return;
+        if (index < 0 || index >= _CHOICES.Count) return;
 
-        CTalkChoice choice = _node.choices[index];
+        CTalkChoice choice = _CHOICES[index];
+        if (_current == null || !_current.CanChoose(choice))
+        {
+            Close();
+            return;
+        }
+
         _pendingChoice = choice.text;
+        if (_questTopic != null)
+        {
+            CTalkScriptSO topic = _questTopic;
+            _questTopic = null;
+            if (index == 0)
+            {
+                if (_current.GetQuestTalk() != topic) Close();
+                else Enter(_current.SelectQuestTalk(topic));
+                return;
+            }
+        }
+        _current.ConfirmChoice(choice);
         Enter(choice.to);
     }
 
@@ -412,6 +472,20 @@ public class CTalkPresenter : MonoBehaviour
             CLogger.Warn($"CTalkPresenter: '{id}' 대사 묶음을 찾지 못해 대화를 닫습니다.");
             Close();
             return;
+        }
+
+        ShowNode(node);
+    }
+
+    private void ShowNode(CTalkNode node)
+    {
+        _CHOICES.Clear();
+        if (node.HasChoices)
+        {
+            foreach (CTalkChoice choice in node.choices)
+            {
+                if (_current.CanChoose(choice)) _CHOICES.Add(choice);
+            }
         }
 
         _node = node;
@@ -450,8 +524,7 @@ public class CTalkPresenter : MonoBehaviour
     {
         bool isPicking = _isPicking && !_isTyping;
         bool isWaiting = !_isTyping && !isPicking;
-        IReadOnlyList<CTalkChoice> choices = _node != null && _node.HasChoices ? _node.choices : null;
-        _dialog.SetProgress(Mathf.FloorToInt(_shown), isWaiting, isPicking, choices, now);
+        _dialog.SetProgress(Mathf.FloorToInt(_shown), isWaiting, isPicking, _CHOICES, now);
     }
 
     // 대화 전용 페이드가 있으면 암전 후 이동을 요청하고, 없으면 씬 전환의 페이드를 사용한다.
@@ -539,6 +612,8 @@ public class CTalkPresenter : MonoBehaviour
 
             foreach (CTalkNpc npc in CTalkNpc.All)
             {
+                if (!npc.IsTalkable) continue;
+
                 float distance = FlatDistance(feet, npc.FeetPosition);
 
                 if (distance < bestDistance)

@@ -366,6 +366,7 @@ public class CInventory : MonoBehaviour
         _cooldownEndTimes[cooldownKey] = Time.time + ConsumableCooltime;
 
         OnInventoryChanged?.Invoke();
+        CQuestManager.ReportItemUsed(origin.Id);
         return true;
     }
 

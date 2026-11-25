@@ -326,6 +326,7 @@ public partial class CStatus
                 {
                     attacker.GetHeal(0.15f, ERatioSwitch.ByMax);
                     attacker.RemoveStatus(this);
+                    CQuestManager.ReportPradonaPower();
                     return damage;
                 });
                 break;
