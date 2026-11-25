@@ -54,6 +54,16 @@ public class CEspoirBossFxDriver : MonoBehaviour
     private SAttackEffect[] _attacks;
 
     private int _previewGroup = -1;
+    private bool _isLocked;
+
+    public void SetLocked(bool locked)
+    {
+        _isLocked = locked;
+        if(_isLocked)
+        {
+            StopAll();
+        }
+    }
 
     /// <summary>재생 중 선택한 묶음만 표시합니다. 테스트 상태는 저장하지 않습니다.</summary>
     public void PreviewOnly(int group)
@@ -110,6 +120,12 @@ public class CEspoirBossFxDriver : MonoBehaviour
             StopAll();
             return;
         }
+
+        if (_isLocked)
+        {
+            return;
+        }
+
 
         for (int i = _effects.Count - 1; i >= 0; i--)
         {
