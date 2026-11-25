@@ -22000,7 +22000,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 30
   m_TargetDisplay: 0
 --- !u!114 &7669298445071917334
 MonoBehaviour:
@@ -22064,14 +22064,35 @@ MonoBehaviour:
   _itemContextMenu: {fileID: 3020127117076628883}
   _useButton: {fileID: 1331044064904158523}
   _quickSlotButton: {fileID: 4566349087801624687}
-  _quickSlotContent: {fileID: 7024983834689933490}
   _moveButton: {fileID: 5337241803784595163}
   _discardButton: {fileID: 8447478123958209568}
-  _isBattle: 0
+  _quickSlotContent: {fileID: 7024983834689933490}
   _necklaceIcon: {fileID: 1580314690808356177}
   _earringIcon: {fileID: 2613751334431981700}
   _braceletIcon: {fileID: 1166721784635241837}
   _ringIcon: {fileID: 470324744336156277}
+  _isBattle: 0
+  _useLegacyQuickSlotKeys: 1
+  _hudQuickSlotIcons:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  _hudQuickSlotQuantities:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  _hudQuickSlotCooldownTexts:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  _playerQuickSlotContent: {fileID: 0}
+  __hudQuickSlotCooldownFills: []
+  _goldText: {fileID: 0}
+  _quickSlotHintText: {fileID: 0}
+  _quickSlotHintPanel: {fileID: 0}
 --- !u!1 &8462582832846054659
 GameObject:
   m_ObjectHideFlags: 0

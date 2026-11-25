@@ -11,13 +11,13 @@ using Random = UnityEngine.Random;
 public class CPrideBoss : CEnemy, IBoss
 {
 
-    public enum EPrideBossState
+    private enum EPridePhase
     {
-        Idle = 0,
-        NormalAttack,
-        SubAttack,
-        MainAttack,
-        Dead
+        Phase1,
+        RecoveryPending,
+        Phase2,
+        FinalJudgmentPending,
+        Finisher
     }
 
     [Header("연결")]
@@ -62,7 +62,9 @@ public class CPrideBoss : CEnemy, IBoss
 
     private int _mainCounter = 0;
     private bool _nextMainIsCross = true;
-    private bool _isRage = false;
+
+    private EPridePhase _phase = EPridePhase.Phase1;
+    private bool IsRage => _phase == EPridePhase.Phase2;
 
     private Vector3 _arenaCenter;
 
@@ -92,7 +94,6 @@ public class CPrideBoss : CEnemy, IBoss
         _collider = GetComponent<CapsuleCollider>();
         _animator = GetComponentInChildren<Animator>(true);
         _realAttackDelay = _attackDelay;
-        _isRage = true;
     }
 
     protected override void Update()
@@ -141,7 +142,7 @@ public class CPrideBoss : CEnemy, IBoss
 
                 if (_mainCounter < 5)
                 {
-                    int subAttackRatio = _isRage ? 3 : 4;
+                    int subAttackRatio = IsRage ? 3 : 4;
                     switch(Random.Range(0, subAttackRatio))
                     {
                         case 0:
@@ -155,7 +156,7 @@ public class CPrideBoss : CEnemy, IBoss
                 }
                 else
                 {
-                    bool useCross = _isRage && _nextMainIsCross;
+                    bool useCross = IsRage && _nextMainIsCross;
 
                     if (useCross)
                     {
@@ -1551,10 +1552,6 @@ public class CPrideBoss : CEnemy, IBoss
             }
         }
 
-        _isRage = false;
-        _mainCounter = 0;
-        _nextMainIsCross = true;
-
         _activeSlamImpacts.Clear();
         CancellationTokenSource source = _cts;
         _cts = null;
@@ -1563,5 +1560,60 @@ public class CPrideBoss : CEnemy, IBoss
 
         source.Cancel();
         source.Dispose();
+    }
+    public void ResetPhaseState()
+    {
+        _phase = EPridePhase.Phase1;
+        _mainCounter = 0;
+        _nextMainIsCross = true;
+    }
+
+    public override void GetDamage(float value, ERatioSwitch ratioSwitch = ERatioSwitch.Constant, bool PenetrateInvincible = false)
+    {
+        if (HpCurrent <= 0f || (IsInvincible && !PenetrateInvincible)) return;
+
+        if (value <= 0f || _phase == EPridePhase.Finisher)
+        {
+            base.GetDamage(value, ratioSwitch, PenetrateInvincible);
+            return;
+        }
+
+        if (_phase == EPridePhase.RecoveryPending
+            || _phase == EPridePhase.FinalJudgmentPending) return;
+
+        float incomingDamage = value;
+
+        switch (ratioSwitch)
+        {
+            case ERatioSwitch.Constant:
+                break;
+            case ERatioSwitch.ByMax:
+                incomingDamage *= HpMax;
+                break;
+            case ERatioSwitch.ByCurrent:
+                incomingDamage *= HpCurrent;
+                break;
+            case ERatioSwitch.ByLose:
+                incomingDamage *= HpMax - HpCurrent;
+                break;
+            default:
+                base.GetDamage(value, ratioSwitch, PenetrateInvincible);
+                return;
+        }
+
+        bool isFirstPhase = _phase == EPridePhase.Phase1;
+        float thresholdHp = HpMax * (isFirstPhase ? 0.5f : 0.025f);
+        float damageToThreshold = Mathf.Max(0f, HpCurrent - thresholdHp);
+
+        if (incomingDamage < damageToThreshold)
+        {
+            base.GetDamage(value, ratioSwitch, PenetrateInvincible);
+            return;
+        }
+
+        base.GetDamage(damageToThreshold, ERatioSwitch.Constant, PenetrateInvincible);
+        _phase = isFirstPhase
+            ? EPridePhase.RecoveryPending
+            : EPridePhase.FinalJudgmentPending;
     }
 }

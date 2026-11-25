@@ -237,14 +237,45 @@ public class CInventory : MonoBehaviour
             return false;
         }
 
-        if (fromIndex == toIndex || _items[fromIndex] == null)
+        if (fromIndex == toIndex)
         {
             return false;
         }
-        CItem temp = _items[toIndex];
+        
 
-        _items[toIndex] = _items[fromIndex];
-        _items[fromIndex] = temp;
+        CItem source = _items[fromIndex];
+        CItem target = _items[toIndex];
+
+        if (source == null)
+        {
+            return false;
+        }
+
+        if(source is CItemConsumable && target is CItemConsumable && source.Id == target.Id)
+        {
+            int space = _maxItemQuantity - target.Quantity;
+
+            if (space <= 0)
+            {
+                return false;
+            }
+
+            int moveQuantity = Mathf.Min(space, source.Quantity);
+
+            target.Quantity += moveQuantity;
+            source.Quantity -= moveQuantity;
+
+            if (source.Quantity == 0)
+            {
+                _items[fromIndex] = null;
+            }
+        }
+
+        else
+        {
+            _items[toIndex] = source;
+            _items[fromIndex] = target;
+        }
 
         OnInventoryChanged?.Invoke();
         return true;

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -280,8 +280,18 @@ public partial class CCharacterInfoUI : MonoBehaviour
 
         int previous = _tab;
         _tab = tab;
-        if (_powerPanel != null) _powerPanel.SetActive(false);
         BeginTabChange(previous, Time.unscaledTime);
+        if (_powerPanel != null)
+        {
+            bool showPower = _tab == _HELPER_TAB;
+            _powerPanel.SetActive(showPower);
+
+            if (showPower)
+            {
+                CPradonaPowerUI powerUI = _powerPanel.GetComponentInChildren<CPradonaPowerUI>();
+                if (powerUI != null) powerUI.Show(_player);
+            }
+        }
         if (_stage != null) _stage.ChangeTab(_tab);
         else if (_tab == _HELPER_TAB) OnHelperRevealed();
     }
@@ -337,7 +347,6 @@ public partial class CCharacterInfoUI : MonoBehaviour
         if (!_isOpen || _tab != _HELPER_TAB) return;
 
         SetIdentity(true, Time.unscaledTime, false);
-        if (_powerPanel != null) _powerPanel.SetActive(true);
     }
 
     private void FindSceneObjects()
