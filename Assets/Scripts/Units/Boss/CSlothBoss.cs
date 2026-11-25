@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
+using Unity.VisualScripting;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -83,7 +84,7 @@ public class CSlothBoss : CEnemy, IBoss
     private int _firstMain = Animator.StringToHash("mAttack01");
     private int _secondMain = Animator.StringToHash("mAttack02");
     private int _thirdMain = Animator.StringToHash("mAttack03");
-
+    private int _grogiState = Animator.StringToHash("tGrogi");
 
     #endregion
 
@@ -120,6 +121,7 @@ public class CSlothBoss : CEnemy, IBoss
     private bool _isDead;
     private bool _onGrogi;
 
+    private CEspoirBossFxDriver _fxDriver;
     private CancellationTokenSource _cts;
 
 
@@ -158,6 +160,8 @@ public class CSlothBoss : CEnemy, IBoss
         _previewInnerPattern = this.GetComponentInChildren<CPreviewPattern>();
         _animator = this.GetComponent<Animator>();
         _patternPos = _previewPattern.transform.position;
+
+        _fxDriver = GetComponentInChildren<CEspoirBossFxDriver>();
 
     }
 
@@ -250,10 +254,9 @@ public class CSlothBoss : CEnemy, IBoss
 
             else
             {
-
-
+                
                 _returnDelayTime = _isMain ? 7 : 3;
-                CLogger.Log("Boss Pattern Executing");
+
             }
 
         }
@@ -547,7 +550,7 @@ public class CSlothBoss : CEnemy, IBoss
     private void DoubleHookAttack()
     {
 
-        int hit = NormalFindPlayer(4f);
+        int hit = NormalFindPlayer(3f);
 
         for (int i = 0; i < hit; i++)
         {
@@ -1080,41 +1083,56 @@ public class CSlothBoss : CEnemy, IBoss
 
     private async UniTaskVoid FreezeAnimation(float duration, CancellationToken cancelAnima)
     {
+        CLogger.Warn("애니메이션 이벤트 실행됨");
         _animator.speed = 0.2f;
 
         if (_player == null)
         {
-            CLogger.Error("플레이어를 참조하지 않았습니다.");
+            CLogger.Warn("플레이어를 참조하지 않았습니다.");
             return;
         }
 
+    
         SDamageInfo recieveDamage = new SDamageInfo(_player.Attack);
 
         float patternStartHP = this.HpCurrent;
+        CLogger.Warn("여기까진 통과1");
 
+      
 
         try
         {
+            
             this.OnHit(_player, recieveDamage);
-
+            CLogger.Warn("여기까진 통과2");
+            
             await UniTask.Delay
                 (
                     TimeSpan.FromSeconds(6),
                     ignoreTimeScale: true,
                     cancellationToken: cancelAnima
                 );
-
+            
             float bossCurrentHP = this.HpCurrent;
-
+            
             if ((patternStartHP - bossCurrentHP) >= patternStartHP * 0.035)
             {
+                _animator.speed = 1f;
                 _onGrogi = true;
-
+                _fxDriver?.StopAll();
+                CLogger.Warn("VfxStop!!!!");
+            
+                return;
             }
+            
+            CLogger.Warn("여기까진 통과5");
+
+       
         }
 
         catch (OperationCanceledException)
         {
+            _fxDriver?.StopAll();
             return;
         }
 
@@ -1122,7 +1140,9 @@ public class CSlothBoss : CEnemy, IBoss
         {
             if (this != null)
             {
+                CLogger.Warn("여기는 시간 초기화");
                 _animator.speed = 1f;
+
             }
 
         }
@@ -1243,20 +1263,7 @@ public class CSlothBoss : CEnemy, IBoss
         _onAttack = false;
 
     }
-
-    private Vector3 RotateValoteCal(Vector3 startPos, Vector3 pivot, Vector3 axis, float angle)
-    {
-        Vector3 dir = startPos - pivot;
-        dir = Quaternion.AngleAxis(angle, axis) * dir;
-        
-
-        return (pivot + dir);
-    }
-
-
-
-
-
+       
     private void EarthShaker()
     {
         int hit = FindPlayer(20);
@@ -1407,15 +1414,15 @@ public class CSlothBoss : CEnemy, IBoss
 
     private void ShootLightningBeam()
     {
-        Vector3 boxSize = new Vector3(4f, 4f, 25f);
+        Vector3 boxSize = new Vector3(6f, 6f, 25f);
 
         Vector3 startPos = this.transform.forward * 1f;
 
-        Vector3 boxCenter = (this.transform.position + this.transform.forward * 1f) + (this.transform.forward * (boxSize.z * 0.5f));
+        Vector3 boxCenter = (this.transform.position + startPos) + (this.transform.forward * (boxSize.z * 0.5f));
 
         Quaternion boxRot = this.transform.rotation;
 
-        int hitCount = Physics.OverlapBoxNonAlloc(boxCenter, boxSize * 0.8f, _hitCollider, boxRot , _targetMask);
+        int hitCount = Physics.OverlapBoxNonAlloc(boxCenter, boxSize * 0.5f, _hitCollider, boxRot , _targetMask);
 
         for (int i = 0; i < hitCount; i++) 
         {
@@ -1465,8 +1472,15 @@ public class CSlothBoss : CEnemy, IBoss
             _animator.ResetTrigger(_firstMain);
             _animator.ResetTrigger(_secondMain);
             _animator.ResetTrigger(_thirdMain);
+            _animator.ResetTrigger (_grogiState);
+            
+            CLogger.Warn("GrogiState 함수야!!");
 
-            _animator.SetTrigger("tGrogi");
+            _atkTimer = 0f;
+            _delayTimer = 0f;
+            _fxDriver?.SetLocked(true);
+            _animator.SetTrigger(_grogiState);
+
         }
 
         _grogiTimer += Time.fixedDeltaTime;
@@ -1479,8 +1493,7 @@ public class CSlothBoss : CEnemy, IBoss
         _onGrogi = false;
         _onAttack = false;
         _currentState = ESlothBossState.Idle;
-        _atkTimer = 0f;
-        _delayTimer = 0f;
+        _fxDriver?.SetLocked(false);
 
     }
 
@@ -1527,6 +1540,17 @@ public class CSlothBoss : CEnemy, IBoss
         return hit;
     }
 
+
+    private Vector3 RotateBox(Vector3 startPos, Vector3 pivot, Vector3 axis, float angle)
+    {
+        Vector3 dir = startPos - pivot;
+        dir = Quaternion.AngleAxis(angle, axis) * dir;
+
+
+        return (pivot + dir);
+    }
+
+
     private void OnValidate()
     {
         if (_player == null) return;
@@ -1567,10 +1591,10 @@ public class CSlothBoss : CEnemy, IBoss
         _grogiTimer = 0f;
         normalCount = 0;
 
-        if (_animator != null && _animator.isActiveAndEnabled)
+        if (_animator != null && _animator.isActiveAndEnabled)  
         {
             _animator.speed = 1f;
-            _animator.ResetTrigger("tGrogi");
+            _animator.ResetTrigger(_grogiState);
         }
 
         // 공격 대기 시간(_atkTime)은 공격 중에 0 으로 바뀌므로 첫 소환 때(전투 전) 값을 기억해 두고 되돌림
