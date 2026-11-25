@@ -37,14 +37,23 @@ public enum EBattleState
 public enum EBossClear
 {
     None = 0,
+    [InspectorName("질투")]
     Invidia     = 1 << 0,
+    [InspectorName("탐욕")]
     Avaritia    = 1 << 1,
+    [InspectorName("나태")]
     Pigritia    = 1 << 2,
+    [InspectorName("폭식")]
     Gula        = 1 << 3,
+    [InspectorName("색욕")]
     Luxuria     = 1 << 4,
+    [InspectorName("분노")]
     Ira         = 1 << 5,
+    [InspectorName("오만")]
     Superbia    = 1 << 6,
+    [InspectorName("프라도나")]
     Pradona     = 1 << 7,
+    [InspectorName("보스들(미사용)")]
     AvailableBoss = Pigritia | Luxuria | Superbia | Pradona,
 }
 
