@@ -244,7 +244,6 @@ public class CShopUI : MonoBehaviour
             quantityLabel.fontSize = 20f;
             quantityLabel.enableAutoSizing = false;
             quantityLabel.alignment = TextAlignmentOptions.BottomRight;
-            quantityLabel.color = Color.black;
             quantityLabel.raycastTarget = false;
             quantityLabel.transform.SetAsLastSibling();
             _sellIcons[i].raycastTarget = false;
@@ -476,6 +475,21 @@ public class CShopUI : MonoBehaviour
         }
 
         _sellTotalText.text = $"판매 목록 {count}/20칸 · 합계 {total:N0} G";
+
+        List<CItem> pendingItems = new List<CItem>();
+
+        for (int i = 0; i < _sellEntries.Length; i++)
+        {
+            if (_sellEntries[i] != null)
+            {
+                pendingItems.Add(_sellEntries[i].Item);
+            }
+        }
+
+        if (_inventoryUI != null)
+        {
+            _inventoryUI.SetSalePendingItems(pendingItems);
+        }
     }
 
     public void ConfirmSell()
