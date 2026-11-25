@@ -9551,7 +9551,7 @@ MonoBehaviour:
   _powerTooltip: {fileID: 6914532376849343804}
   _tooltipName: {fileID: 2031687996286061121}
   _tooltipDescription: {fileID: 3673026971092463639}
-  _debug: 1
+  _debug: 0
 --- !u!1 &3891001452501861245
 GameObject:
   m_ObjectHideFlags: 0
