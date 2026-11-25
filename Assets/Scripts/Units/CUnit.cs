@@ -3,6 +3,20 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public struct SStatusInfo
+{
+    public int statusId;
+    public float duration;
+    public int stack;
+
+    public SStatusInfo(int statusId, float duration = -1, int stack = 1)
+    {
+        this.statusId = statusId;
+        this.duration = duration;
+        this.stack = stack;
+    }
+}
+
 public struct SDamageInfo
 {
     public float damage;
@@ -10,11 +24,11 @@ public struct SDamageInfo
     public bool isFixed;
     public ERatioSwitch ratioSwitch;
     public bool enableCritical;
-    public List<CStatusSO> stateOnHit;
+    public List<SStatusInfo> stateOnHit;
     public float armorPenetration;
     public bool forceCritical;
 
-    public SDamageInfo(float damage, bool isFixed, ERatioSwitch ratioSwitch, bool enableCritical, List<CStatusSO> stateOnHit
+    public SDamageInfo(float damage, bool isFixed, ERatioSwitch ratioSwitch, bool enableCritical, List<SStatusInfo> stateOnHit
         ,float armorPenetration = 0f, bool forceCritical = false)
     {
         this.damage = damage;
@@ -26,7 +40,7 @@ public struct SDamageInfo
         this.forceCritical = forceCritical;
     }
 
-    public SDamageInfo (float damage, bool isFixed, bool enableCritical, List<CStatusSO> stateOnHit
+    public SDamageInfo (float damage, bool isFixed, bool enableCritical, List<SStatusInfo> stateOnHit
         ,float armorPenetration = 0f, bool forceCritical = false)
     {
         this.damage = damage;
@@ -42,7 +56,7 @@ public struct SDamageInfo
         : this(damage, false, ratioSwitch, true, null, 0f, false) { }
     public SDamageInfo(float damage, bool isFixed, ERatioSwitch ratioSwitch = ERatioSwitch.Constant)
         : this(damage, isFixed, ratioSwitch, true, null, 0f, false) { }
-    public SDamageInfo(float damage, bool isFixed, List<CStatusSO> stateOnHit)
+    public SDamageInfo(float damage, bool isFixed, List<SStatusInfo> stateOnHit)
     : this(damage, isFixed, true, stateOnHit, 0f, false) { }
 }
 
@@ -336,7 +350,7 @@ public abstract class CUnit : MonoBehaviour
         {
             for (int i = 0; i < damage.stateOnHit.Count; i++)
             {
-                defender.AddStatus(damage.stateOnHit[i].Id);
+                defender.AddStatus(damage.stateOnHit[i]);
             }
         }
         AfterHit(attacker, defender);
@@ -617,6 +631,11 @@ public abstract class CUnit : MonoBehaviour
     public void AddStatus(CStatus status)
     {
         AddStatus(status.Id, status.Duration, status.Stack);
+    }
+
+    public void AddStatus(SStatusInfo status)
+    {
+        AddStatus(status.statusId, status.duration, status.stack);
     }
 
     public int FindStatusStack(int id)
