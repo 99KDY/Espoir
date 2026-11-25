@@ -14,11 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _id: 39
   _name: "\uAE30\uC808"
-  _icon: {fileID: 21300000, guid: d553ff10ac2f43f9a1f7239ac16f822c, type: 3}
+  _icon: {fileID: 21300000, guid: c2b2cb4e38614654812988a9c7f196da, type: 3}
   _description: 
   _tooltip: "\uD604\uC7AC \uAE30\uC808\uC0C1\uD0DC\uC785\uB2C8\uB2E4."
-  _isDebuff: 0
-  _duration: 0
+  _isDebuff: 1
+  _duration: 1
   _stack: 1
   _maxStack: 0
   _remove: 0
