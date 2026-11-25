@@ -17,37 +17,48 @@ MonoBehaviour:
   _nodes:
   - id: hello
     lines:
-    - "…킁. 바람 냄새가 달라졌어. 너도 맡아 봐. 모래 냄새야."
-    - "나, 이제 사막으로 가. 여길 떠나면 이 개울로는 다시 못 돌아와."
-    ask:
+    - "\u2026\uD081. \uBC14\uB78C \uB0C4\uC0C8\uAC00 \uB2EC\uB77C\uC84C\uC5B4. \uB108\uB3C4
+      \uB9E1\uC544 \uBD10. \uBAA8\uB798 \uB0C4\uC0C8\uC57C."
+    - "\uB098, \uC774\uC81C \uC0AC\uB9C9\uC73C\uB85C \uAC00. \uC5EC\uAE38 \uB5A0\uB098\uBA74
+      \uC774 \uAC1C\uC6B8\uB85C\uB294 \uB2E4\uC2DC \uBABB \uB3CC\uC544\uC640."
+    ask: 
     choices: []
     next: choice
     end: 0
-    dest:
+    dest: 
   - id: choice
     lines: []
-    ask: "…같이 갈래?"
+    ask: "\u2026\uAC19\uC774 \uAC08\uB798?"
     choices:
-    - text: "응. 같이 사막으로 가자."
+    - text: "\uC751. \uAC19\uC774 \uC0AC\uB9C9\uC73C\uB85C \uAC00\uC790."
       to: leave
-    - text: "아직은 여기 있을래."
+      questAction: 2
+    - text: "\uC544\uC9C1\uC740 \uC5EC\uAE30 \uC788\uC744\uB798."
       to: stay
-    next:
+    next: 
     end: 0
-    dest:
+    dest: 
   - id: leave
     lines:
-    - "그럼 내 발자국을 밟아. 모래가 지우기 전에."
-    ask:
+    - "\uADF8\uB7FC \uB0B4 \uBC1C\uC790\uAD6D\uC744 \uBC1F\uC544. \uBAA8\uB798\uAC00
+      \uC9C0\uC6B0\uAE30 \uC804\uC5D0."
+    ask: 
     choices: []
-    next:
+    next: 
     end: 2
     dest: m51
   - id: stay
     lines:
-    - "그래. 물소리 좀 더 듣고 와. 난 여기 있을게."
-    ask:
+    - "\uADF8\uB798. \uBB3C\uC18C\uB9AC \uC880 \uB354 \uB4E3\uACE0 \uC640. \uB09C
+      \uC5EC\uAE30 \uC788\uC744\uAC8C."
+    ask: 
     choices: []
-    next:
+    next: 
     end: 1
-    dest:
+    dest: 
+  _questLink:
+    quest: {fileID: 11400000, guid: 6ea19b29232aee84e82a2656cdf29923, type: 2}
+    offerNode: 
+    progressNode: 
+    reportNode: hello
+    doneNode: leave

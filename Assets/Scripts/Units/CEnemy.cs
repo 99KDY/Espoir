@@ -16,10 +16,25 @@ public class CEnemy : CUnit
     [SerializeField] private int _dropCount = 1;
     [SerializeField] private List<SDropTable> _drops;
 
+    [Header("퀘스트 대상 판정")]
+    [Tooltip("직접 배치한 몬스터의 원본 프리팹입니다. 스포너는 소환할 때 자동으로 지정합니다.")]
+    [SerializeField] private CEnemy _sourcePrefab;
+
+    private bool _hasReportedKill;
     private bool _isDropped = false;
     protected bool _isChasingPlayer = false;
     public virtual bool IsChasingPlayer => _isChasingPlayer;
     public virtual string DisplayName => string.Empty;
+
+    /// <summary>
+    /// 퀘스트의 대상을 판별할 때 사용하는 원본 프리팹입니다.
+    /// </summary>
+    public CEnemy SourcePrefab => _sourcePrefab;
+
+    /// <summary>
+    /// 보스의 식별값. 일반 몬스터는 None.
+    /// </summary>
+    public virtual EBossClear BossId => EBossClear.None;
 
     public List<SDropTable> Drops
     {
@@ -60,15 +75,39 @@ public class CEnemy : CUnit
         base.Update();
     }
 
+    /// <summary>
+    /// 스포너가 소환한 몬스터의 원본 프리팹을 기록합니다.
+    /// </summary>
+    public void SetSourcePrefab(CEnemy prefab)
+    {
+        _sourcePrefab = prefab;
+    }
+
     // 디버그용
     public void CallDie()
     {
         this.Die();
     }
 
+    /// <summary>
+    /// 체력을 회복하고 되살아난 몬스터의 처치 판정을 초기화합니다.
+    /// </summary>
+    public override void GetHeal(float value, ERatioSwitch ratioSwitch = ERatioSwitch.Constant,
+        bool forceHeal = false)
+    {
+        base.GetHeal(value, ratioSwitch, forceHeal);
+        if (HpCurrent > 0f) _hasReportedKill = false;
+    }
+
     protected override void Die()
     {
         base.Die();
+        if (HpCurrent <= 0f && !_hasReportedKill)
+        {
+            _hasReportedKill = true;
+            CQuestManager.ReportKill(this);
+        }
+
         CPlayer player = FindFirstObjectByType<CPlayer>();
         if (!_isDropped)
         {

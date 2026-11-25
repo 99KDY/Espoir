@@ -25,6 +25,7 @@ public class CTalkNpc : MonoBehaviour
     [SerializeField] private Transform _bodyBone;
     [SerializeField] private CTalkScriptSO _script;
     [SerializeField] private CTravelGuideSO _travelGuide;
+    [SerializeField, InspectorName("의뢰 대화 목록")] private CTalkScriptSO[] _questTalks;
 
     [Header("머리 위 자리 (이름표 · 말 걸기 표시)")]
     [SerializeField] private Transform _headBone;
@@ -58,8 +59,10 @@ public class CTalkNpc : MonoBehaviour
     private float _topY;
     private bool _hasTop;
     private int _talkHash;
+    private CTalkScriptSO _selectedTalk;
     private List<CTalkNode> _travelNodes;
     private string _travelMapKey;
+    private bool _isTalkable = true;
 
     /// <summary>
     /// 지금 켜져 있는 NPC 목록.
@@ -75,6 +78,11 @@ public class CTalkNpc : MonoBehaviour
     public float CreatureHeight => _creatureHeight;
 
     public bool IsTalking => _talker != null;
+
+    /// <summary>
+    /// 플레이어가 직접 말을 걸 수 있는지 반환합니다.
+    /// </summary>
+    public bool IsTalkable => _isTalkable;
     public CTravelGuideSO TravelGuide => _travelGuide;
     public Vector3 FeetPosition => transform.position;
 
@@ -176,6 +184,7 @@ public class CTalkNpc : MonoBehaviour
     /// </summary>
     public string GetStartNode(bool isBossSummoned)
     {
+        _selectedTalk = null;
         _travelNodes = null;
         if (_script != null) return _script.GetStartNode(isBossSummoned);
         return "hello";
@@ -186,6 +195,8 @@ public class CTalkNpc : MonoBehaviour
     /// </summary>
     public CTalkNode FindNode(string id, string mapKey)
     {
+        if (_selectedTalk != null) return _selectedTalk.Find(id);
+
         if (_travelGuide != null)
         {
             if (_travelNodes == null || _travelMapKey != mapKey)
@@ -203,6 +214,71 @@ public class CTalkNpc : MonoBehaviour
         }
 
         return _script != null ? _script.Find(id) : null;
+    }
+
+    /// <summary>
+    /// 이름표와 F 말 걸기를 켜거나 끕니다.
+    /// </summary>
+    public void SetTalkable(bool isTalkable)
+    {
+        _isTalkable = isTalkable;
+    }
+
+    internal CTalkScriptSO GetQuestTalk()
+    {
+        if (_questTalks == null) return null;
+
+        CTalkScriptSO active = null;
+        CTalkScriptSO offer = null;
+        foreach (CTalkScriptSO talk in _questTalks)
+        {
+            CQuestSO quest = talk != null ? talk.QuestLink?.quest : null;
+            if (quest == null) continue;
+
+            switch (CQuestManager.GetState(quest))
+            {
+                case EQuestState.Reportable: return talk;
+                case EQuestState.Active:
+                    if (active == null) active = talk;
+                    break;
+                case EQuestState.None:
+                    if (offer == null && CQuestManager.CanAccept(quest)) offer = talk;
+                    break;
+            }
+        }
+
+        return active != null ? active : offer;
+    }
+
+    internal string SelectQuestTalk(CTalkScriptSO talk)
+    {
+        _selectedTalk = talk;
+        return talk.GetStartNode(false);
+    }
+
+    private CTalkQuestLink CurrentQuest => _selectedTalk != null
+        ? _selectedTalk.QuestLink : (_travelGuide == null && _script != null ? _script.QuestLink : null);
+
+    internal bool CanChoose(CTalkChoice choice)
+    {
+        if (choice == null) return false;
+        if (choice.questAction == ETalkQuestAction.None) return true;
+
+        CQuestSO quest = CurrentQuest?.quest;
+        return choice.questAction switch
+        {
+            ETalkQuestAction.Accept => CQuestManager.CanAccept(quest),
+            ETalkQuestAction.Report => CQuestManager.GetState(quest) == EQuestState.Reportable,
+            _ => false,
+        };
+    }
+
+    /// <summary>
+    /// 선택한 대화 항목의 퀘스트 동작을 처리합니다.
+    /// </summary>
+    public void ConfirmChoice(CTalkChoice choice)
+    {
+        CurrentQuest?.OnChoiceConfirmed(choice.questAction);
     }
 
     /// <summary>

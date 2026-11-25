@@ -24,6 +24,11 @@ public class CMonsterHpView : MonoBehaviour
     [SerializeField] private float _trailSpeed = 0.9f;
     [SerializeField] private float _textDeadAlpha = 0.35f;
 
+    [Header("질투의 낙인")]
+    [SerializeField] private CStatusSO _markStatus;
+    [SerializeField] private CanvasGroup _markGroup;
+    [SerializeField] private CHudDiamond[] _markPips;
+
     // 일반 피격과 치명타 흔들림의 정규화 키프레임입니다.
     private static readonly float[] _SHAKE_T = { 0f, 0.3f, 0.65f, 1f };
     private static readonly Vector2[] _SHAKE_V = { Vector2.zero, new Vector2(1f, 0f), new Vector2(-1f, 0f),
@@ -37,6 +42,12 @@ public class CMonsterHpView : MonoBehaviour
     private const float _FLASH_CRIT_TIME = 0.5f;
     private const float _WHITE_TIME = 0.3f;
     private const float _DEAD_GONE = 1.8f;
+    private const float _MARK_POP_TIME = 0.35f;
+    private const float _MARK_FULL_PERIOD = 1f;
+    private static readonly Color _MARK_OFF_FILL = new Color(8f / 255f, 10f / 255f, 18f / 255f, 0.55f);
+    private static readonly Color _MARK_OFF_BORDER = new Color(1f, 240f / 255f, 222f / 255f, 0.55f);
+    private static readonly Color _MARK_ON_FILL = new Color(1f, 61f / 255f, 82f / 255f);
+    private static readonly Color _MARK_ON_BORDER = new Color(1f, 158f / 255f, 168f / 255f);
 
     private readonly char[] _PCT_CHARS = new char[8];
     private int _pctCount;
@@ -59,6 +70,9 @@ public class CMonsterHpView : MonoBehaviour
     private SCssTransition _textAlpha;
     private SCssTransition _boxAlpha;
     private SCssTransition _low;
+    private SCssTransition _markAlpha;
+    private int _markCount;
+    private float[] _markPopTimes;
 
     /// <summary>
     /// 붙어 있는 몬스터.
@@ -104,6 +118,7 @@ public class CMonsterHpView : MonoBehaviour
         _textAlpha.Snap(1f);
         _boxAlpha.Snap(1f);
         _low.Snap(_h < _lowThreshold ? 1f : 0f);
+        ResetMarks();
         gameObject.SetActive(true);
         Tick(now, 0f);
     }
@@ -114,6 +129,7 @@ public class CMonsterHpView : MonoBehaviour
     public void Release()
     {
         _target = null;
+        ResetMarks();
         if (gameObject.activeSelf) gameObject.SetActive(false);
     }
 
@@ -166,6 +182,67 @@ public class CMonsterHpView : MonoBehaviour
         }
 
         Paint(now);
+        PaintMarks(now);
+    }
+
+    private void PaintMarks(float now)
+    {
+        if (_markStatus == null || _markGroup == null || _markPips == null) return;
+
+        int count = _isDead ? 0 : Mathf.Min(_markPips.Length, _target.FindStatusStack(_markStatus.Id));
+        if (count != _markCount)
+        {
+            for (int i = 0; i < _markPips.Length; i++)
+            {
+                if (_markPips[i] == null) continue;
+                bool isOn = i < count;
+                if (isOn && i >= _markCount) _markPopTimes[i] = now;
+                _markPips[i].Fill = isOn ? _MARK_ON_FILL : _MARK_OFF_FILL;
+                _markPips[i].BorderColor = isOn ? _MARK_ON_BORDER : _MARK_OFF_BORDER;
+                if (!isOn) _markPips[i].SetShadow(0f, Color.clear);
+            }
+
+            _markAlpha.Set(count > 0 ? 1f : 0f, now, 0.2f, 0f, CCssEasing.EASE);
+            _markCount = count;
+        }
+
+        _markGroup.alpha = _markAlpha.Evaluate(now);
+        if (_markCount == 0) return;
+
+        float full = _markCount >= _markPips.Length
+            ? 0.5f - 0.5f * Mathf.Cos(now / _MARK_FULL_PERIOD * Mathf.PI * 2f) : 0f;
+
+        for (int i = 0; i < _markCount; i++)
+        {
+            if (_markPips[i] == null) continue;
+            float pop = Mathf.Clamp01((now - _markPopTimes[i]) / _MARK_POP_TIME);
+            float eased = CCssEasing.Evaluate(new Vector4(0.2f, 0.9f, 0.3f, 1.5f), pop);
+            float scale = Mathf.LerpUnclamped(1.9f, 1f, eased);
+            _markPips[i].rectTransform.localScale = Vector3.one * scale;
+            _markPips[i].SetShadow(4f + 6f * full, new Color(1f, 61f / 255f, 82f / 255f, 0.7f + 0.3f * full));
+        }
+    }
+
+    private void ResetMarks()
+    {
+        _markCount = 0;
+        _markAlpha.Snap(0f);
+        if (_markGroup != null) _markGroup.alpha = 0f;
+        if (_markPips == null) return;
+        if (_markPopTimes == null || _markPopTimes.Length != _markPips.Length)
+        {
+            _markPopTimes = new float[_markPips.Length];
+        }
+
+        for (int i = 0; i < _markPips.Length; i++)
+        {
+            _markPopTimes[i] = -99f;
+            if (_markPips[i] == null) continue;
+            _markPips[i].Fill = _MARK_OFF_FILL;
+            _markPips[i].BorderColor = _MARK_OFF_BORDER;
+            _markPips[i].SetShadow(0f, Color.clear);
+            _markPips[i].rectTransform.localScale = Vector3.one;
+        }
     }
 
     private void Paint(float now)

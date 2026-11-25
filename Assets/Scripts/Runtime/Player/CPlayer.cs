@@ -53,6 +53,7 @@ public class CPlayer : CUnit
     private bool _isInvincible;
     private bool _isInputLocked;
     private EPradonaPower _pradonaPower;
+    private EPradonaPower _temporaryPradonaPower;
     private float _pradonaCooldown;
 
     protected float _hpMaxBaseline = 1;
@@ -78,8 +79,14 @@ public class CPlayer : CUnit
     public CInventory Inventory => _inventory;
     protected override IReadOnlyList<CStatus> EquipmentStatusForEffects => _equipmentStatus;
     public CPlayerPassive Passive => _passive;
+
+    /// <summary>
+    /// 플레이어의 스킬 상태를 반환합니다.
+    /// </summary>
+    public CPlayerSkill Skill => _skill;
     public IReadOnlyList<CSkillSO> Skills => _skill.RegisteredSkills;
     public bool IsInputLocked => _isInputLocked;
+    internal bool WasPradonaPressed => _pradonaInput?.action?.WasPressedThisFrame() == true;
 
     public Dictionary<EEquipmentSlot, CItemEquipment> Equipment
     {
@@ -129,8 +136,31 @@ public class CPlayer : CUnit
         set { 
             _pradonaPower = value; 
             CPlayerUI_Build script = FindFirstObjectByType<CPlayerUI_Build>();
-            script.InvokePradonaChanged(_pradonaPower);
+            script.InvokePradonaChanged(ActivePradonaPower);
         }
+    }
+
+    /// <summary>
+    /// 훈련 중 임시로 받은 권능을 포함해 사용할 수 있는 권능을 반환합니다.
+    /// </summary>
+    public EPradonaPower ActivePradonaPower => _pradonaPower | _temporaryPradonaPower;
+
+    /// <summary>
+    /// 훈련 중 사용할 임시 권능을 설정합니다.
+    /// </summary>
+    public void SetTemporaryPradonaPower(EPradonaPower power)
+    {
+        _temporaryPradonaPower = power;
+        CPlayerUI_Build script = FindFirstObjectByType<CPlayerUI_Build>();
+        if (script != null) script.InvokePradonaChanged(ActivePradonaPower);
+    }
+
+    /// <summary>
+    /// 프라도나 권능의 재사용 대기시간을 초기화합니다.
+    /// </summary>
+    public void ResetPradonaCooldown()
+    {
+        _pradonaCooldown = 0f;
     }
 
     public void EquipmentResync()
@@ -658,7 +688,7 @@ public class CPlayer : CUnit
 
         if (canAct &&
             Time.timeScale > 0f &&
-            _pradonaPower != EPradonaPower.None &&
+            ActivePradonaPower != EPradonaPower.None &&
             _pradonaCooldown <= 0f &&
             _pradonaInput?.action?.WasPressedThisFrame() == true)
         {
@@ -703,6 +733,22 @@ public class CPlayer : CUnit
     private static bool IsPointerControl(InputAction action)
     {
         return action.activeControl != null && action.activeControl.device is Pointer;
+    }
+
+    internal bool WasSkillPressed(ESkillType type)
+    {
+        if (type == ESkillType.Dash) return _dashInput?.action?.WasPressedThisFrame() == true;
+        if (_skillSlots == null) return false;
+
+        foreach (SSkillSlot slot in _skillSlots)
+        {
+            if (slot.skill != null && slot.skill.Type == type && slot.input?.action?.WasPressedThisFrame() == true)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     internal Vector3 GetPointerDirection()
@@ -756,23 +802,24 @@ public class CPlayer : CUnit
     private void CastPradonaPower()
     {
         _pradonaCooldown = _pradonaCooldownSet;
-        if (_pradonaPower.HasFlag(EPradonaPower.Invidia))
+        EPradonaPower power = ActivePradonaPower;
+        if (power.HasFlag(EPradonaPower.Invidia))
         {
             AddStatus(31);
         }
-        if (_pradonaPower.HasFlag(EPradonaPower.Avaritia))
+        if (power.HasFlag(EPradonaPower.Avaritia))
         {
             AddStatus(32);
         }
-        if (_pradonaPower.HasFlag(EPradonaPower.Pigritia))
+        if (power.HasFlag(EPradonaPower.Pigritia))
         {
             AddStatus(34);
         }
-        if (_pradonaPower.HasFlag(EPradonaPower.Gula))
+        if (power.HasFlag(EPradonaPower.Gula))
         {
             _skill.ResetCooldowns(true, true, false);
         }
-        if (_pradonaPower.HasFlag(EPradonaPower.Luxuria))
+        if (power.HasFlag(EPradonaPower.Luxuria))
         {
             for (int i = _status.Count - 1; i >= 0; i--)
             {
@@ -783,7 +830,7 @@ public class CPlayer : CUnit
                 }
             }
         }
-        if (_pradonaPower.HasFlag(EPradonaPower.Ira))
+        if (power.HasFlag(EPradonaPower.Ira))
         {
             AddStatus(35);
         }
@@ -793,6 +840,11 @@ public class CPlayer : CUnit
     {
         remainCooldown = _pradonaCooldown;
         ratio = _pradonaCooldown / _pradonaCooldownSet;
+    }
+
+    internal void Kill()
+    {
+        if (HpCurrent > 0f) base.GetDamage(HpCurrent, ERatioSwitch.Constant, true);
     }
 
     protected override void Die()

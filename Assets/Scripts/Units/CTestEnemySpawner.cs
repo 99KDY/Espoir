@@ -106,7 +106,8 @@ public class CTestEnemySpawner : MonoBehaviour
             );
 
 
-        Instantiate(target, targetPos, targetRot, transform);
+        GameObject spawned = Instantiate(target, targetPos, targetRot, transform);
+        if (spawned.TryGetComponent<CEnemy>(out CEnemy enemy)) enemy.SetSourcePrefab(targetScript);
     }
 
     private bool TryGetSpawnPosition(out Vector3 spawnPos)

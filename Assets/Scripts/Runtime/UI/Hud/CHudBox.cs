@@ -47,6 +47,8 @@ public class CHudBox : MaskableGraphic
     [SerializeField] private bool _isSheen;
     [SerializeField] private float _sheenOffset = -1.25f;
 
+    public bool IsCircle => _isCircle;
+
     /// <summary>배경색(그라데이션이면 시작 색).</summary>
     public Color Fill
     {

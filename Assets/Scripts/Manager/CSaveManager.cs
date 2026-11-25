@@ -31,6 +31,7 @@ public class CSaveData
     public List<float> bossTime;
     public float playTime;
     public int bossFound;
+    public List<CQuestSaveData> quests;
     #endregion
 
     #region Property
@@ -217,6 +218,22 @@ public class CSaveData
         }
     }
 
+    /// <summary>
+    /// 퀘스트 진행 기록입니다. 이전 저장 데이터는 빈 목록으로 읽습니다.
+    /// </summary>
+    public List<CQuestSaveData> Quests
+    {
+        get
+        {
+            if (quests == null) quests = new List<CQuestSaveData>();
+            return quests;
+        }
+        set
+        {
+            quests = value ?? new List<CQuestSaveData>();
+        }
+    }
+
     public Dictionary<EBossClear, float> BossTime
     {
         get
@@ -320,7 +337,7 @@ public static class CSaveManager
 #else
     private readonly static bool _isPersist = true;
 #endif
-    public readonly static int Version = 3;
+    public readonly static int Version = 4;
 
     public static int MaxSaveSlot
     {
@@ -704,13 +721,20 @@ public static class CSaveManager
             data.BossTime = null;
             data.version = 2;
         }
+        bool migrated = false;
         if (data.Version == 2)
         {
             data.PlayTime = data.playTime;
             data.BossFound |= data.BossClear;
             data.version = 3;
-            return true;
+            migrated = true;
         }
-        return false;
+        if (data.Version == 3)
+        {
+            data.Quests = null;
+            data.version = 4;
+            migrated = true;
+        }
+        return migrated;
     }
 }
