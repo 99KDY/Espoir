@@ -50,6 +50,20 @@ public class CPrideBoss : CEnemy, IBoss
     [Header("디버그 로그")]
     [SerializeField] private bool _enableLog = false;
 
+    [Header("회복 패턴 무력화 게이지")]
+    [SerializeField, Min(1f)] private float _recoveryGroggyHpMax = 2000f;
+
+    [Header("최종 심판")]
+    [SerializeField, Min(1f)] private float _judgmentGroggyHpMax = 2000f;
+
+    private const float RecoveryDuration = 8f;
+    private const float RecoveryHealRatio = 0.5f;
+
+    private const float JudgmentDuration = 6f;
+
+    private float _groggyRemainHp;
+    private float _groggyRemainTime;
+
 
     private Rigidbody _rb;
     private CapsuleCollider _collider;
@@ -64,15 +78,39 @@ public class CPrideBoss : CEnemy, IBoss
     private bool _nextMainIsCross = true;
 
     private EPridePhase _phase = EPridePhase.Phase1;
+    private Vector3 _arenaCenter;
+    public bool IsGroggy { get; private set; }
     private bool IsRage => _phase == EPridePhase.Phase2;
 
-    private Vector3 _arenaCenter;
+    private bool CanFight => _player != null && _previewPattern != null && HpCurrent > 0f && _player.HpCurrent > 0f;
+    private bool IsGroggyPhase => _phase == EPridePhase.RecoveryPending ||
+                    _phase == EPridePhase.FinalJudgmentPending;
 
-    private bool CanFight => _player != null && _previewPattern != null
-                             && HpCurrent > 0f && _player.HpCurrent > 0f;
-
-    private static readonly int BackstepSlamTrigger = Animator.StringToHash("tBackstepSlam");
+    #region Animator Hash
     private static readonly int IdleState = Animator.StringToHash("BaseLayer.Idle");
+
+    // 백스텝
+    private static readonly int BackstepTrigger = Animator.StringToHash("tBackstep");
+
+    // 검 소환 및 발사
+    private static readonly int SwordSummonTrigger = Animator.StringToHash("tSwordSummon");
+    private static readonly int SwordLaunchTrigger = Animator.StringToHash("tSwordLaunch");
+
+    // 비행 및 착지
+    private static readonly int RiseTrigger = Animator.StringToHash("tRise");
+    private static readonly int LandTrigger = Animator.StringToHash("tLand");
+
+    // 회복
+    private static readonly int HealStartTrigger = Animator.StringToHash("tHealStart");
+    private static readonly int HealEndTrigger = Animator.StringToHash("tHealEnd");
+
+    // 무력화
+    private static readonly int KneelTrigger = Animator.StringToHash("tKneel");
+    private static readonly int KneelEndTrigger = Animator.StringToHash("tKneelEnd");
+
+    // 사망
+    private static readonly int DeathTrigger = Animator.StringToHash("tDeath");
+    #endregion
 
     protected override void Awake()
     {
@@ -99,6 +137,8 @@ public class CPrideBoss : CEnemy, IBoss
     protected override void Update()
     {
         base.Update();
+
+        if (_phase == EPridePhase.Finisher) return;
 
         if (!CanFight)
         {
@@ -131,12 +171,27 @@ public class CPrideBoss : CEnemy, IBoss
         {
             while (!token.IsCancellationRequested)
             {
-                await UniTask.Delay(1500, delayTiming: PlayerLoopTiming.LastUpdate,
-                    cancellationToken: token);
+                if (!IsGroggyPhase)
+                {
+                    await UniTask.Delay(1500, delayTiming: PlayerLoopTiming.LastUpdate,
+                        cancellationToken: token);
+                }
 
                 if (!CanFight ||
                     GetPlayerDistanceSquared() > _battleEndRadius * _battleEndRadius)
                 {
+                    return;
+                }
+
+                if (_phase == EPridePhase.RecoveryPending)
+                {
+                    await RunRecoveryPattern(token);
+                    continue;
+                }
+
+                if (_phase == EPridePhase.FinalJudgmentPending)
+                {
+                    await RunFinalJudgmentPattern(token);
                     return;
                 }
 
@@ -205,7 +260,7 @@ public class CPrideBoss : CEnemy, IBoss
 
                 if (_animator != null && _animator.isActiveAndEnabled)
                 {
-                    _animator.SetTrigger(BackstepSlamTrigger);
+                    _animator.SetTrigger(BackstepTrigger);
                 }
 
                 await UniTask.WhenAll(
@@ -229,6 +284,7 @@ public class CPrideBoss : CEnemy, IBoss
                 (TryGetMoveDestination(behindPlayer, out Vector3 destination) ||
                 TryGetMoveDestination(behindPlayer + sideOffset, out destination)))
             {
+                _animator?.SetTrigger(SwordSummonTrigger);
                 await FlyWarpSwordTask(destination, token);
                 token.ThrowIfCancellationRequested();
 
@@ -271,6 +327,7 @@ public class CPrideBoss : CEnemy, IBoss
         }
 
         // 1번: 기본 낙하와 이동 불가 시 대체 공격.
+        _animator?.SetTrigger(SwordSummonTrigger);
         await SlamTask(_player.transform.position, _realAttackDelay * 1f, 0.2f, _attackRadius, token,
                         new SDamageInfo(100f, false, ERatioSwitch.Constant, false, null));
     }
@@ -351,6 +408,7 @@ public class CPrideBoss : CEnemy, IBoss
                 }
             }
 
+            _animator?.SetTrigger(RiseTrigger);
             await MoveBossTask(restPosition + Vector3.up * 3f, 0.45f, token);
             if (!CanFight) return;
 
@@ -405,6 +463,7 @@ public class CPrideBoss : CEnemy, IBoss
 
             if (!CanFight) return;
 
+            _animator?.SetTrigger(LandTrigger);
             await MoveBossTask(restPosition, 0.8f, token);
         }
         finally
@@ -493,6 +552,7 @@ public class CPrideBoss : CEnemy, IBoss
             }
 
             startedHovering = true;
+            _animator?.SetTrigger(RiseTrigger);
             await MoveBossTask(center + Vector3.up * 5f, 0.45f, token);
             if (!CanFight) return;
 
@@ -600,6 +660,7 @@ public class CPrideBoss : CEnemy, IBoss
                 }
             }
 
+            _animator?.SetTrigger(LandTrigger);
             await MoveBossTask(center, 0.8f, token);
         }
         finally
@@ -620,6 +681,108 @@ public class CPrideBoss : CEnemy, IBoss
             await UniTask.Delay(800, delayTiming: PlayerLoopTiming.LastUpdate,
                 cancellationToken: token);
         }
+    }
+
+    private async UniTask RunRecoveryPattern(CancellationToken token)
+    {
+        if (_animator != null && _animator.isActiveAndEnabled)
+        {
+            _animator.ResetTrigger(SwordSummonTrigger);
+            _animator.ResetTrigger(SwordLaunchTrigger);
+            _animator.Play(IdleState, 0, 0f);
+            _animator.SetTrigger(HealStartTrigger);
+        }
+
+        // 손을 드는 동작을 보여준 뒤 회복과 무력화 판정을 시작
+        await UniTask.Delay(1000, delayTiming: PlayerLoopTiming.LastUpdate,
+            cancellationToken: token);
+        if (!CanFight) return;
+
+        _groggyRemainHp = _recoveryGroggyHpMax;
+        _groggyRemainTime = RecoveryDuration;
+
+        while (_groggyRemainTime > 0f && _groggyRemainHp > 0f)
+        {
+            await UniTask.NextFrame(PlayerLoopTiming.LastUpdate, token);
+            if (!CanFight) return;
+            if (_groggyRemainHp <= 0f) break;
+
+            float step = Mathf.Min(Time.deltaTime, _groggyRemainTime);
+            _groggyRemainTime -= step;
+            GetHeal(RecoveryHealRatio * step / RecoveryDuration, ERatioSwitch.ByMax);
+        }
+
+        _groggyRemainTime = 0f;
+        _phase = EPridePhase.Phase2;
+        _mainCounter = 0;
+
+        if (_groggyRemainHp <= 0f)
+        {
+            IsGroggy = true;
+            _animator?.SetTrigger(KneelTrigger);
+            await UniTask.Delay(2500, delayTiming: PlayerLoopTiming.LastUpdate,
+                cancellationToken: token);
+
+            IsGroggy = false;
+            _animator?.SetTrigger(KneelEndTrigger);
+            await UniTask.Delay(1250, delayTiming: PlayerLoopTiming.LastUpdate,
+                cancellationToken: token);
+        }
+        else
+        {
+            _animator?.SetTrigger(HealEndTrigger);
+            await UniTask.Delay(900, delayTiming: PlayerLoopTiming.LastUpdate,
+                cancellationToken: token);
+        }
+    }
+
+    private void PlayGroggyStartAnimation()
+    {
+        if (_animator == null || !_animator.isActiveAndEnabled) return;
+
+        _animator.ResetTrigger(SwordSummonTrigger);
+        _animator.ResetTrigger(SwordLaunchTrigger);
+        _animator.Play(IdleState, 0, 0f);
+        _animator.SetTrigger(HealStartTrigger);
+    }
+
+    private async UniTask RunFinalJudgmentPattern(CancellationToken token)
+    {
+        PlayGroggyStartAnimation();
+
+        await UniTask.Delay(1000, delayTiming: PlayerLoopTiming.LastUpdate,
+            cancellationToken: token);
+        if (!CanFight) return;
+
+        _groggyRemainHp = _judgmentGroggyHpMax;
+        _groggyRemainTime = JudgmentDuration;
+
+        while (_groggyRemainTime > 0f && _groggyRemainHp > 0f)
+        {
+            await UniTask.NextFrame(PlayerLoopTiming.LastUpdate, token);
+            if (!CanFight) return;
+
+            _groggyRemainTime = Mathf.Max(0f, _groggyRemainTime - Time.deltaTime);
+        }
+
+        _groggyRemainTime = 0f;
+
+        if (_groggyRemainHp > 0f)
+        {
+            _player.Kill();
+            return;
+        }
+
+        IsGroggy = true;
+        _phase = EPridePhase.Finisher;
+        _animator?.SetTrigger(DeathTrigger);
+
+        // 3.8초 사망 클립과 전환 시간을 확보
+        await UniTask.Delay(4000, delayTiming: PlayerLoopTiming.LastUpdate,
+            cancellationToken: token);
+        if (!CanFight) return;
+
+        base.GetDamage(HpCurrent, ERatioSwitch.Constant, true);
     }
 
     private async UniTask RunMainLaserVolley(GameObject[] swords, Vector3[] starts, Vector3[] directions,
@@ -920,6 +1083,7 @@ public class CPrideBoss : CEnemy, IBoss
         float spreadRadius = _attackRadius * 1f;
         float innerDistance = aimedRadius + spreadRadius + escapeGap;
 
+        _animator?.SetTrigger(SwordSummonTrigger);
         for (int i = 0; i < 2; i++)
         {
             token.ThrowIfCancellationRequested();
@@ -969,6 +1133,7 @@ public class CPrideBoss : CEnemy, IBoss
 
     private async UniTask RunSeveralSlam(bool special, CancellationToken token)
     {
+        _animator?.SetTrigger(SwordSummonTrigger);
         for (int i = 0; i < 5; i++)
         {
             token.ThrowIfCancellationRequested();
@@ -1036,7 +1201,7 @@ public class CPrideBoss : CEnemy, IBoss
 
         if (_animator != null && _animator.isActiveAndEnabled)
         {
-            _animator.SetTrigger(BackstepSlamTrigger);
+            _animator.SetTrigger(BackstepTrigger);
         }
 
         await BackstepTask(-forward, token);
@@ -1167,6 +1332,7 @@ public class CPrideBoss : CEnemy, IBoss
         Vector3 end = start + direction.normalized * 15f;
         SDamageInfo damage = new SDamageInfo(100f, false, ERatioSwitch.Constant, false, null);
 
+        _animator?.SetTrigger(SwordSummonTrigger);
         return LineSwordTask(start, end, width: 1.5f, warningTime: 1.5f,
             flightTime:  0.15f, damage: damage, token: token);
     }
@@ -1282,6 +1448,7 @@ public class CPrideBoss : CEnemy, IBoss
                 delayTiming: PlayerLoopTiming.LastUpdate,
                 cancellationToken: token);
 
+            _animator?.SetTrigger(SwordLaunchTrigger);
             float deltaT = 0f;
             while (deltaT < fallingTime)
             {
@@ -1429,6 +1596,7 @@ public class CPrideBoss : CEnemy, IBoss
             if (!CanFight) return;
 
             preview.ClearPreview();
+            _animator?.SetTrigger(SwordLaunchTrigger);
             sword = Instantiate(_warpSwordPrefab, start + swordOffset,
                                 Quaternion.LookRotation(forward));
             
@@ -1537,6 +1705,14 @@ public class CPrideBoss : CEnemy, IBoss
 
     public void ResetBattleState()
     {
+        _groggyRemainTime = 0f;
+        IsGroggy = false;
+
+        if (_phase == EPridePhase.Finisher && _hpCurrent > 0)
+        {
+            _phase = EPridePhase.FinalJudgmentPending;
+        }
+
         foreach (CEspoirBossFxPlayer fx in _activeSlamImpacts)
         {
             if (fx != null) fx.Stop();
@@ -1544,10 +1720,19 @@ public class CPrideBoss : CEnemy, IBoss
 
         if (_animator != null && _animator.isActiveAndEnabled)
         {
-            _animator.ResetTrigger(BackstepSlamTrigger);
+            _animator.ResetTrigger(BackstepTrigger);
+            _animator.ResetTrigger(SwordSummonTrigger);
+            _animator.ResetTrigger(SwordLaunchTrigger);
+            _animator.ResetTrigger(RiseTrigger);
+            _animator.ResetTrigger(LandTrigger);
+            _animator.ResetTrigger(HealStartTrigger);
+            _animator.ResetTrigger(HealEndTrigger);
+            _animator.ResetTrigger(KneelTrigger);
+            _animator.ResetTrigger(KneelEndTrigger);
+            _animator.ResetTrigger(DeathTrigger);
 
-            if (_animator.IsInTransition(0) ||
-                _animator.GetCurrentAnimatorStateInfo(0).fullPathHash != IdleState)
+            if (HpCurrent > 0f && (_animator.IsInTransition(0) ||
+                _animator.GetCurrentAnimatorStateInfo(0).fullPathHash != IdleState))
             {
                 _animator.Play(IdleState, 0, 0f);
             }
@@ -1571,16 +1756,13 @@ public class CPrideBoss : CEnemy, IBoss
 
     public override void GetDamage(float value, ERatioSwitch ratioSwitch = ERatioSwitch.Constant, bool PenetrateInvincible = false)
     {
-        if (HpCurrent <= 0f || (IsInvincible && !PenetrateInvincible)) return;
+        if (HpCurrent <= 0f || (IsInvincible && !PenetrateInvincible) || _phase == EPridePhase.Finisher) return;
 
-        if (value <= 0f || _phase == EPridePhase.Finisher)
+        if (value <= 0f)
         {
             base.GetDamage(value, ratioSwitch, PenetrateInvincible);
             return;
         }
-
-        if (_phase == EPridePhase.RecoveryPending
-            || _phase == EPridePhase.FinalJudgmentPending) return;
 
         float incomingDamage = value;
 
@@ -1602,6 +1784,15 @@ public class CPrideBoss : CEnemy, IBoss
                 return;
         }
 
+        if (IsGroggyPhase)
+        {
+            if (_groggyRemainTime > 0f)
+            {
+                _groggyRemainHp = Mathf.Max(0f, _groggyRemainHp - incomingDamage);
+            }
+            return;
+        }
+
         bool isFirstPhase = _phase == EPridePhase.Phase1;
         float thresholdHp = HpMax * (isFirstPhase ? 0.5f : 0.025f);
         float damageToThreshold = Mathf.Max(0f, HpCurrent - thresholdHp);
@@ -1613,18 +1804,28 @@ public class CPrideBoss : CEnemy, IBoss
         }
 
         base.GetDamage(damageToThreshold, ERatioSwitch.Constant, PenetrateInvincible);
-        _phase = isFirstPhase
-            ? EPridePhase.RecoveryPending
-            : EPridePhase.FinalJudgmentPending;
+        _phase = isFirstPhase ? EPridePhase.RecoveryPending : EPridePhase.FinalJudgmentPending;
     }
 
-    public bool TryGetGroggyInfo(out float remainHp, out float maxHp, out float remainTime, out float maxTime)
+    protected override void Die()
     {
-        remainHp = 0f;
-        maxHp = 1f;
-        remainTime = 0f;
-        maxTime = 1f;
+        base.Die();
+        if (HpCurrent > 0f) return;
 
-        return false;
+        CGameManager.Instance?.SetBossCleared(BossId);
+        CGameManager.Instance?.EndBossTimer(BossId, true);
+    }
+
+    public bool TryGetGroggyInfo(out float remainHp, out float maxHp,
+    out float remainTime, out float maxTime)
+    {
+        bool isJudgment = _phase == EPridePhase.FinalJudgmentPending;
+
+        remainHp = _groggyRemainHp;
+        maxHp = isJudgment ? _judgmentGroggyHpMax : _recoveryGroggyHpMax;
+        remainTime = _groggyRemainTime;
+        maxTime = isJudgment ? JudgmentDuration : RecoveryDuration;
+
+        return IsGroggyPhase && _groggyRemainTime > 0f;
     }
 }

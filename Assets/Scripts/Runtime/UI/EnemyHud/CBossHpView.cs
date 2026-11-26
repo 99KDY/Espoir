@@ -729,7 +729,7 @@ public class CBossHpView : MonoBehaviour
 
     private bool UpdateGroggyResult()
     {
-        bool succeeded = _boss is CSlothBoss sloth && sloth.IsGroggy;
+        bool succeeded = _boss is IBoss boss && boss.IsGroggy;
 
         if (_wasGroggyCheckActive)
         {
