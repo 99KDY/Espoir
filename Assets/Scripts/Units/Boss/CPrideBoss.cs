@@ -33,6 +33,13 @@ public class CPrideBoss : CEnemy, IBoss
     [SerializeField] private GameObject _warpSwordPrefab;
     [SerializeField] private GameObject _warpArrivalFxPrefab;
 
+    [Header("페이즈 이펙트")]
+    [SerializeField] private CEspoirBossFxPlayer _phaseRingFxPrefab;
+    [SerializeField] private CEspoirBossFxPlayer _judgmentOrbFxPrefab;
+    [SerializeField] private ParticleSystem _judgmentOrbBreakFxPrefab;
+    [SerializeField] private Transform _judgmentOrbAnchor;
+    [SerializeField, Min(0.01f)] private float _judgmentOrbScale = 0.2f;
+
     [Header("인식범위 (확인용)")]
     [SerializeField] private float _battleStartRadius = 20f;
     [SerializeField] private float _battleEndRadius = 25f;
@@ -56,6 +63,20 @@ public class CPrideBoss : CEnemy, IBoss
     [Header("최종 심판")]
     [SerializeField, Min(1f)] private float _judgmentGroggyHpMax = 2000f;
 
+    [Header("전투영역")]
+    [SerializeField] private CBossArena _arena;
+
+    [Header("사운드")]
+    [SerializeField] private AudioSource _SE_ShowPattern;
+    [SerializeField] private AudioSource _SE_FallingSword;
+    [SerializeField] private AudioSource _SE_ShootingSword;
+    [SerializeField] private AudioSource _SE_ChargingLaser;
+    [SerializeField] private AudioSource _SE_ShootingLaser;
+    [SerializeField] private AudioSource _SE_Groggy;
+    [SerializeField] private AudioSource _SE_HealPattern;
+    [SerializeField] private AudioSource _SE_JudgementPattern;
+    [SerializeField] private AudioSource _SE_JudgementFailed;
+
     private const float RecoveryDuration = 8f;
     private const float RecoveryHealRatio = 0.5f;
 
@@ -63,6 +84,8 @@ public class CPrideBoss : CEnemy, IBoss
 
     private float _groggyRemainHp;
     private float _groggyRemainTime;
+
+    private CEspoirBossFxPlayer _phaseFx;
 
 
     private Rigidbody _rb;
@@ -85,6 +108,8 @@ public class CPrideBoss : CEnemy, IBoss
     private bool CanFight => _player != null && _previewPattern != null && HpCurrent > 0f && _player.HpCurrent > 0f;
     private bool IsGroggyPhase => _phase == EPridePhase.RecoveryPending ||
                     _phase == EPridePhase.FinalJudgmentPending;
+
+    public override EBossClear BossId => EBossClear.Superbia;
 
     #region Animator Hash
     private static readonly int IdleState = Animator.StringToHash("BaseLayer.Idle");
@@ -146,18 +171,16 @@ public class CPrideBoss : CEnemy, IBoss
             return;
         }
 
-        float distanceSquared = GetPlayerDistanceSquared();
-
         if (_cts != null)
         {
-            if (distanceSquared > _battleEndRadius * _battleEndRadius)
+            if (!IsPlayerInBattleArea(_battleEndRadius))
             {
                 ResetBattleState();
             }
             return;
         }
 
-        if (distanceSquared <= _battleStartRadius * _battleStartRadius)
+        if (IsPlayerInBattleArea(_battleStartRadius))
         {
             _cts = new CancellationTokenSource();
             RunBattleLoop(_cts.Token).Forget();
@@ -178,7 +201,7 @@ public class CPrideBoss : CEnemy, IBoss
                 }
 
                 if (!CanFight ||
-                    GetPlayerDistanceSquared() > _battleEndRadius * _battleEndRadius)
+                    !IsPlayerInBattleArea(_battleEndRadius))
                 {
                     return;
                 }
@@ -288,7 +311,7 @@ public class CPrideBoss : CEnemy, IBoss
                 await FlyWarpSwordTask(destination, token);
                 token.ThrowIfCancellationRequested();
 
-                if (!CanFight || GetPlayerDistanceSquared() > _battleEndRadius * _battleEndRadius)
+                if (!CanFight || !IsPlayerInBattleArea(_battleEndRadius))
                 {
                     return;
                 }
@@ -593,6 +616,9 @@ public class CPrideBoss : CEnemy, IBoss
                 beams[i] = beam;
             }
 
+            if (_SE_ShowPattern != null) _SE_ShowPattern.Play();
+            if (_SE_ChargingLaser != null) _SE_ChargingLaser.Play();
+
             elapsed = 0f;
             while (elapsed < warningTime)
             {
@@ -614,6 +640,7 @@ public class CPrideBoss : CEnemy, IBoss
             }
 
             
+            if (_SE_ShootingLaser != null) _SE_ShootingLaser.Play();
             float nextHitTime = 0f;
 
             elapsed = 0f;
@@ -700,6 +727,8 @@ public class CPrideBoss : CEnemy, IBoss
 
         _groggyRemainHp = _recoveryGroggyHpMax;
         _groggyRemainTime = RecoveryDuration;
+        PlayPhaseRingFx(recovery: true);
+        if (_SE_HealPattern != null) _SE_HealPattern.Play();
 
         while (_groggyRemainTime > 0f && _groggyRemainHp > 0f)
         {
@@ -712,6 +741,8 @@ public class CPrideBoss : CEnemy, IBoss
             GetHeal(RecoveryHealRatio * step / RecoveryDuration, ERatioSwitch.ByMax);
         }
 
+        if (_SE_HealPattern != null) _SE_HealPattern.Stop();
+        StopPhaseFx();
         _groggyRemainTime = 0f;
         _phase = EPridePhase.Phase2;
         _mainCounter = 0;
@@ -719,6 +750,8 @@ public class CPrideBoss : CEnemy, IBoss
         if (_groggyRemainHp <= 0f)
         {
             IsGroggy = true;
+            if (_SE_Groggy != null) _SE_Groggy.Play();
+            PlayRecoveryBreakFlash();
             _animator?.SetTrigger(KneelTrigger);
             await UniTask.Delay(2500, delayTiming: PlayerLoopTiming.LastUpdate,
                 cancellationToken: token);
@@ -734,6 +767,7 @@ public class CPrideBoss : CEnemy, IBoss
             await UniTask.Delay(900, delayTiming: PlayerLoopTiming.LastUpdate,
                 cancellationToken: token);
         }
+        if (CanFight) AddStatus(40);
     }
 
     private void PlayGroggyStartAnimation()
@@ -756,6 +790,8 @@ public class CPrideBoss : CEnemy, IBoss
 
         _groggyRemainHp = _judgmentGroggyHpMax;
         _groggyRemainTime = JudgmentDuration;
+        Transform orbCore = PlayJudgmentOrbFx();
+        if (_SE_JudgementPattern != null) _SE_JudgementPattern.Play();
 
         while (_groggyRemainTime > 0f && _groggyRemainHp > 0f)
         {
@@ -763,18 +799,43 @@ public class CPrideBoss : CEnemy, IBoss
             if (!CanFight) return;
 
             _groggyRemainTime = Mathf.Max(0f, _groggyRemainTime - Time.deltaTime);
+
+            if (_phaseFx != null && orbCore != null)
+            {
+                _phaseFx.Advance(0f);
+                AlignJudgmentOrb(orbCore);
+            }
         }
 
+        Vector3? orbBreakPosition = orbCore != null ? orbCore.position : (Vector3?)null;
+        if (_SE_JudgementPattern != null) _SE_JudgementPattern.Stop();
+        StopPhaseFx();
         _groggyRemainTime = 0f;
+        _phase = EPridePhase.Finisher;
 
         if (_groggyRemainHp > 0f)
         {
-            _player.Kill();
+            PlayPhaseRingFx(recovery: false);
+            if (_phaseFx != null)
+            {
+                await UniTask.Delay(300, delayTiming: PlayerLoopTiming.LastUpdate,
+                    cancellationToken: token);
+            }
+
+            if (CanFight)
+            {
+                if (_SE_JudgementFailed != null) _SE_JudgementFailed.Play();
+                _player.Kill();
+            }
             return;
         }
 
         IsGroggy = true;
-        _phase = EPridePhase.Finisher;
+        if (_SE_Groggy != null) _SE_Groggy.Play();
+        if (orbBreakPosition.HasValue)
+        {
+            PlayJudgmentOrbBreakFx(orbBreakPosition.Value);
+        }
         _animator?.SetTrigger(DeathTrigger);
 
         // 3.8초 사망 클립과 전환 시간을 확보
@@ -802,7 +863,7 @@ public class CPrideBoss : CEnemy, IBoss
         Vector3[] initialPositions = new Vector3[beamCount];
         Quaternion[] initialRotations = new Quaternion[beamCount];
 
-        SDamageInfo damage = new SDamageInfo(isFinale ? 1000f : 300f, false, ERatioSwitch.Constant, false, null);
+        SDamageInfo damage = new SDamageInfo(isFinale ? 0.95f : 300f, false, isFinale ? ERatioSwitch.ByMax : ERatioSwitch.Constant, false, null);
 
         try
         {
@@ -816,6 +877,9 @@ public class CPrideBoss : CEnemy, IBoss
                 previews[i] = Instantiate(_linePreviewPattern);
                 previews[i].Show(starts[i], starts[i] + directions[i] * length, width);
             }
+
+            if (_SE_ShowPattern != null) _SE_ShowPattern.Play();
+            if (!isFinale && _SE_ChargingLaser != null) _SE_ChargingLaser.Play();
 
             const float turnTime = 0.25f;
             const float fadeInTime = 0.15f;
@@ -885,6 +949,7 @@ public class CPrideBoss : CEnemy, IBoss
                 preview.ClearPreview();
             }
 
+            if (_SE_ShootingLaser != null) _SE_ShootingLaser.Play();
             bool hit = false;
             float elapsed = 0f;
 
@@ -1036,6 +1101,7 @@ public class CPrideBoss : CEnemy, IBoss
                 streaks[i] = ShowMainBeam(center, starts[i], centerTip, 0.24f);
             }
 
+            if (_SE_ChargingLaser != null) _SE_ChargingLaser.Play();
             float chargeTime = waitTime - aimTime;
             float elapsed = 0f;
 
@@ -1088,7 +1154,7 @@ public class CPrideBoss : CEnemy, IBoss
         {
             token.ThrowIfCancellationRequested();
 
-            if (!CanFight || GetPlayerDistanceSquared() > _battleEndRadius * _battleEndRadius)
+            if (!CanFight || !IsPlayerInBattleArea(_battleEndRadius))
             {
                 return;
             }
@@ -1110,7 +1176,7 @@ public class CPrideBoss : CEnemy, IBoss
             }
 
             slams[0] = SlamTask(center, readyTime, fallingTime, aimedRadius, token,
-                new SDamageInfo(200f, false, ERatioSwitch.Constant, false, null), 3f, TryConsumeHit);
+                new SDamageInfo(250f, false, ERatioSwitch.Constant, false, null), 3f, TryConsumeHit);
 
             int spreadCount = slams.Length - 1;
             float angleOffset = Random.Range(0f, 360f);
@@ -1124,7 +1190,7 @@ public class CPrideBoss : CEnemy, IBoss
                 Vector3 point = center + direction * distance;
 
                 slams[j + 1] = SlamTask(point, readyTime, fallingTime, spreadRadius, token,
-                    new SDamageInfo(200f, false, ERatioSwitch.Constant, false, null), 2f, TryConsumeHit);
+                    new SDamageInfo(150f, false, ERatioSwitch.Constant, false, null), 2f, TryConsumeHit, playSound: false);
             }
 
             await UniTask.WhenAll(slams);
@@ -1138,7 +1204,7 @@ public class CPrideBoss : CEnemy, IBoss
         {
             token.ThrowIfCancellationRequested();
 
-            if (!CanFight || GetPlayerDistanceSquared() > _battleEndRadius * _battleEndRadius)
+            if (!CanFight || !IsPlayerInBattleArea(_battleEndRadius))
             {
                 return;
             }
@@ -1163,7 +1229,8 @@ public class CPrideBoss : CEnemy, IBoss
                 Vector3 direction = new Vector3(Mathf.Sin(angleOffset), 0f, Mathf.Cos(angleOffset));
                 Vector3 point = _player.transform.position + direction * distance;
                 SlamTask(point, _realAttackDelay, 0.2f, _attackRadius, token,
-                new SDamageInfo(150f, false, ERatioSwitch.Constant, false, null), 1.5f, TryConsumeHit).Forget();
+                    new SDamageInfo(150f, false, ERatioSwitch.Constant, false, null),
+                    1.5f, TryConsumeHit, playSound: false).Forget();
             }
 
             await UniTask.Delay(TimeSpan.FromSeconds(_realAttackDelay * 2 / 3f),
@@ -1207,7 +1274,7 @@ public class CPrideBoss : CEnemy, IBoss
         await BackstepTask(-forward, token);
         token.ThrowIfCancellationRequested();
 
-        if (!CanFight || GetPlayerDistanceSquared() > _battleEndRadius * _battleEndRadius)
+        if (!CanFight || !IsPlayerInBattleArea(_battleEndRadius))
         {
             return;
         }
@@ -1249,13 +1316,157 @@ public class CPrideBoss : CEnemy, IBoss
             Vector3 end = start + toCrossing.normalized * pathLength;
             float flightTime = pathLength / speed;
 
-            swords[i] = LineSwordTask(start, end, 1.5f, 1f, flightTime, damage, token, TryConsumeHit);
+            swords[i] = LineSwordTask(start, end, 1.5f, 1f, flightTime, damage, token,
+                TryConsumeHit, playSound: i == 0);
         }
 
         await UniTask.WhenAll(swords);
     }
     #endregion
 
+    #region VFX
+    private CEspoirBossFxPlayer CreatePhaseFx(CEspoirBossFxPlayer prefab,
+    Vector3 position)
+    {
+        if (prefab == null) return null;
+
+        CEspoirBossFxPlayer fx = Instantiate(prefab, position, Quaternion.identity);
+        if (fx.Stage == null)
+        {
+            fx.Stop();
+            return null;
+        }
+
+        fx.screenEffects = false;
+        return fx;
+    }
+
+    private void PlayPhaseRingFx(bool recovery)
+    {
+        Vector3 center = _rb.position;
+        if (TryGetGround(center, out RaycastHit ground)) center.y = ground.point.y;
+        center += Vector3.up * 0.05f;
+
+        _phaseFx = CreatePhaseFx(_phaseRingFxPrefab, center);
+        if (_phaseFx == null) return;
+
+        CEspoirBossFxPlayer fx = _phaseFx;
+        fx.SetElements(new CEspoirBossFxPlayer.CElementSetting[]
+        {
+        new CEspoirBossFxPlayer.CElementSetting
+        {
+            isGroup = true,
+            group = CEspoirBossFxPlayer.EEffectGroup.Ground,
+            hidden = !recovery,
+            overrideRadius = recovery,
+            innerRadius = 2.8f,
+            outerRadius = 3.5f
+        }
+        });
+
+        if (recovery)
+        {
+            fx.PreviewGroup = (int)CEspoirBossFxPlayer.EEffectGroup.Ground;
+            fx.clock = () => 0.74f;
+        }
+        else
+        {
+            float startedAt = Time.time;
+            fx.clock = () => 0.8f + (Time.time - startedAt);
+        }
+
+        fx.Advance(0f);
+        Transform ring = fx.Stage.Find("Ground/fx0_RingField");
+        if (ring != null) fx.transform.position += center - ring.position;
+    }
+
+    private Transform PlayJudgmentOrbFx()
+    {
+        if (_judgmentOrbAnchor == null) return null;
+
+        _phaseFx = CreatePhaseFx(_judgmentOrbFxPrefab, _judgmentOrbAnchor.position);
+        if (_phaseFx == null) return null;
+
+        CEspoirBossFxPlayer fx = _phaseFx;
+        fx.PreviewGroup = (int)CEspoirBossFxPlayer.EEffectGroup.Orb;
+        fx.stageScale *= _judgmentOrbScale;
+        fx.ApplyStageScale();
+        fx.clock = () => Mathf.Lerp(1.12f, 3.55f,
+            1f - Mathf.Clamp01(_groggyRemainTime / JudgmentDuration));
+
+        fx.Advance(0f);
+        Transform orbCore = fx.Stage.Find("fx0_OrbCore");
+        if (orbCore == null)
+        {
+            StopPhaseFx();
+            return null;
+        }
+
+        AlignJudgmentOrb(orbCore);
+        return orbCore;
+    }
+
+    private void AlignJudgmentOrb(Transform orbCore)
+    {
+        Vector3 center = _judgmentOrbAnchor.position + Vector3.up * 0.25f;
+        _phaseFx.transform.position += center - orbCore.position;
+    }
+
+    private void PlayRecoveryBreakFlash()
+    {
+        Bounds body = _collider.bounds;
+        Vector3 chest = body.center + Vector3.up * (body.extents.y * 0.3f);
+        CEspoirBossFxPlayer fx = CreatePhaseFx(_phaseRingFxPrefab, chest);
+        if (fx == null) return;
+
+        const float flashSourceTime = 0.8f;
+        const float flashHoldTime = 0.08f;
+        const float flashDuration = 0.35f;
+
+        fx.OnlyObjectIndex = 3;
+        fx.stageScale *= 0.55f;
+        fx.ApplyStageScale();
+
+        fx.clock = () => flashSourceTime;
+        fx.Advance(0f);
+
+        Transform flash = fx.Stage.Find("fx3_PunchFlash");
+        if (flash == null || !flash.TryGetComponent(out MeshRenderer flashRenderer))
+        {
+            fx.Stop();
+            return;
+        }
+
+        fx.transform.position += chest - flash.position;
+
+        // 원본 프레임은 고정하고, 섬광의 밝기만 별도로 줄인다.
+        Material flashMaterial = flashRenderer.sharedMaterial;
+        int fadeProperty = Shader.PropertyToID("uT");
+        float startedAt = Time.time;
+        flashMaterial.SetFloat(fadeProperty, 0f);
+        fx.clock = () =>
+        {
+            float fade = Mathf.InverseLerp(flashHoldTime, flashDuration, Time.time - startedAt);
+            flashMaterial.SetFloat(fadeProperty, fade);
+            return flashSourceTime;
+        };
+
+        Destroy(fx.gameObject, flashDuration);
+    }
+
+    private void PlayJudgmentOrbBreakFx(Vector3 position)
+    {
+        if (_judgmentOrbBreakFxPrefab == null) return;
+
+        Instantiate(_judgmentOrbBreakFxPrefab, position, Quaternion.identity);
+    }
+
+    private void StopPhaseFx()
+    {
+        if (_phaseFx != null) _phaseFx.Stop();
+        _phaseFx = null;
+    }
+    #endregion
     private async UniTask BackstepTask(Vector3 direction, CancellationToken token)
     {
         // 0.25초 동안 뒤로 이동
@@ -1355,6 +1566,11 @@ public class CPrideBoss : CEnemy, IBoss
 
         destination.y = ground.point.y + 0.02f;
 
+        if (_arena != null && !_arena.Contains(destination))
+        {
+            return false;
+        }
+
         Bounds bounds = _collider.bounds;
         float radius = Mathf.Max(bounds.extents.x, bounds.extents.z);
         float halfSegment = Mathf.Max(0f, bounds.extents.y - radius);
@@ -1415,7 +1631,7 @@ public class CPrideBoss : CEnemy, IBoss
 
 
     private async UniTask SlamTask(Vector3 attackPoint, float readyTime, float fallingTime, float radius, CancellationToken token,
-        SDamageInfo damage, float swordScale = 1f, Func<bool> tryConsumeHit = null)
+        SDamageInfo damage, float swordScale = 1f, Func<bool> tryConsumeHit = null, bool playSound = true)
     {
         if (TryGetGround(attackPoint, out RaycastHit ground))
         {
@@ -1436,6 +1652,7 @@ public class CPrideBoss : CEnemy, IBoss
         try
         {
             preview.ShowCirclePattern(64, radius);
+            if (playSound && _SE_ShowPattern != null) _SE_ShowPattern.Play();
 
             Vector3 airPoint = attackPoint + Vector3.up * 12f;
             if (_swordPrefab != null)
@@ -1467,6 +1684,7 @@ public class CPrideBoss : CEnemy, IBoss
             if (HpCurrent <= 0f || _player == null || _player.HpCurrent <= 0f) return;
 
             PlaySlamImpact(preview.transform.position, radius);
+            if (playSound && _SE_FallingSword != null) _SE_FallingSword.Play();
 
             Vector3 offset = _player.transform.position - attackPoint;
             offset.y = 0f;
@@ -1559,7 +1777,7 @@ public class CPrideBoss : CEnemy, IBoss
     }
 
     private async UniTask LineSwordTask(Vector3 start, Vector3 end, float width, float warningTime, float flightTime,
-        SDamageInfo damage, CancellationToken token, Func<bool> tryConsumeHit = null)
+        SDamageInfo damage, CancellationToken token, Func<bool> tryConsumeHit = null, bool playSound = true)
     {
         if (_linePreviewPattern == null || _warpSwordPrefab == null || !CanFight) return;
         if (width <= 0f || warningTime < 0f || flightTime <= 0f) return;
@@ -1589,6 +1807,7 @@ public class CPrideBoss : CEnemy, IBoss
         try
         {
             preview.Show(start, end, width);
+            if (playSound && _SE_ShowPattern != null) _SE_ShowPattern.Play();
             await UniTask.Delay(TimeSpan.FromSeconds(warningTime),
                                 delayTiming: PlayerLoopTiming.LastUpdate,
                                 cancellationToken: token);
@@ -1599,6 +1818,7 @@ public class CPrideBoss : CEnemy, IBoss
             _animator?.SetTrigger(SwordLaunchTrigger);
             sword = Instantiate(_warpSwordPrefab, start + swordOffset,
                                 Quaternion.LookRotation(forward));
+            if (playSound && _SE_ShootingSword != null) _SE_ShootingSword.Play();
             
             TrailRenderer trail = sword.GetComponent<TrailRenderer>();
             if (trail != null)
@@ -1689,8 +1909,15 @@ public class CPrideBoss : CEnemy, IBoss
         }
     }
 
+    private bool IsPlayerInBattleArea(float fallbackRadius)
+    {
+        if (_arena != null)
+        {
+            return _arena.Contains(_player.transform.position);
+        }
 
-    public override EBossClear BossId => EBossClear.Superbia;
+        return GetPlayerDistanceSquared() <= fallbackRadius * fallbackRadius;
+    }
 
     private void OnDisable()
     {
@@ -1705,6 +1932,7 @@ public class CPrideBoss : CEnemy, IBoss
 
     public void ResetBattleState()
     {
+        StopPhaseFx();
         _groggyRemainTime = 0f;
         IsGroggy = false;
 
@@ -1746,12 +1974,22 @@ public class CPrideBoss : CEnemy, IBoss
 
         source.Cancel();
         source.Dispose();
+
+        if (_SE_ShowPattern != null) _SE_ShowPattern.Stop();
+        if (_SE_FallingSword != null) _SE_FallingSword.Stop();
+        if (_SE_ShootingSword != null) _SE_ShootingSword.Stop();
+        if (_SE_ChargingLaser != null) _SE_ChargingLaser.Stop();
+        if (_SE_ShootingLaser != null) _SE_ShootingLaser.Stop();
+        if (_SE_Groggy != null) _SE_Groggy.Stop();
+        if (_SE_HealPattern != null) _SE_HealPattern.Stop();
+        if (_SE_JudgementPattern != null) _SE_JudgementPattern.Stop();
     }
     public void ResetPhaseState()
     {
         _phase = EPridePhase.Phase1;
         _mainCounter = 0;
         _nextMainIsCross = true;
+        if (_SE_JudgementFailed != null) _SE_JudgementFailed.Stop();
     }
 
     public override void GetDamage(float value, ERatioSwitch ratioSwitch = ERatioSwitch.Constant, bool PenetrateInvincible = false)
