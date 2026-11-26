@@ -40,8 +40,9 @@ public class CLightningPillarTrigger : MonoBehaviour
         CLogger.Log($"플레이어의 레이어 : {other.gameObject.layer}");
 
         SDamageInfo damageToPlayer = new SDamageInfo(0.3f, ERatioSwitch.ByCurrent);
-        
+        SStatusInfo stunToPlayer = new SStatusInfo(39, 1f, 1);
         player.OnHit(_boss, damageToPlayer);
+        player.AddStatus(stunToPlayer);
         
         CLogger.Log($"플레이어 체력 : {player.HpCurrent}");
 

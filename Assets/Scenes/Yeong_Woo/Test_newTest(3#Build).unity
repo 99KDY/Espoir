@@ -3740,6 +3740,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6310008738440688260, guid: fc44008c7d95e394abbb953b8b53d960, type: 3}
+      propertyPath: _attacks.Array.data[9].prefab
+      value: 
+      objectReference: {fileID: 1596556570140021387, guid: f6f7cdc445ebad74e99d26651ad5bdb5, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -4167,6 +4171,7 @@ MonoBehaviour:
   _blendOutTime: 0.7
   _talkSharpness: 4.5
   _cineSharpness: 3
+  _hideCompanionsInTalk: 1
   _npcHeight: 1.46
   _npcLookHeight: 1.27
   _npcSide: 0.42
@@ -4175,6 +4180,9 @@ MonoBehaviour:
   _largeFov: 36
   _largeScreenRatio: 0.62
   _largeSideAngle: 0.45
+  _creatureFov: 30
+  _creatureScreenRatio: 0.46
+  _creatureSideAngle: 0.14
 --- !u!114 &981769432
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5496,6 +5504,9 @@ MonoBehaviour:
   _dialogueBgm: 7
   _talkRadius: 4.8
   _isLarge: 1
+  _isCreature: 0
+  _creatureHeight: 1.2
+  _bodyBone: {fileID: 0}
   _script: {fileID: 11400000, guid: f660cc24c6041b543997e9c4da3327bc, type: 2}
   _travelGuide: {fileID: 0}
   _headBone: {fileID: 0}
@@ -5506,6 +5517,7 @@ MonoBehaviour:
   _talkTrigger: Talk
   _turnToTalker: 0
   _turnSharpness: 5
+  _returnToHomeYaw: 1
   _placeNearPlayerOnStart: 0
   _spawnReference: {fileID: 0}
   _groundMask:
