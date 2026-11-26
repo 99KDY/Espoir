@@ -5,10 +5,15 @@ using UnityEngine;
 public interface IBoss
 {
     public void ResetBattleState();
+    public bool TryGetGroggyInfo(out float remainHp, out float maxHp, out float remainTime, out float maxTime);
 }
 
 public class CEnemy : CUnit
 {
+    [Header("몬스터 이름 및 설명")]
+    [SerializeField] protected string _name;
+    [SerializeField] protected string _nickname;
+
     [Header("몬스터 정보 (테스트 전용, 우선시됨)")]
     [SerializeField] private CEnemyStatSO _targetStatSO;
 
@@ -23,6 +28,9 @@ public class CEnemy : CUnit
     private bool _hasReportedKill;
     private bool _isDropped = false;
     protected bool _isChasingPlayer = false;
+
+    public string Name => _name;
+    public string Nickname => _nickname;
     public virtual bool IsChasingPlayer => _isChasingPlayer;
     public virtual string DisplayName => string.Empty;
 

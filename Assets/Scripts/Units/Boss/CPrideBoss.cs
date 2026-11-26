@@ -1001,7 +1001,7 @@ public class CPrideBoss : CEnemy, IBoss
                 new SDamageInfo(150f, false, ERatioSwitch.Constant, false, null), 1.5f, TryConsumeHit).Forget();
             }
 
-            await UniTask.Delay((int)(_realAttackDelay * 2000 / 3f),
+            await UniTask.Delay(TimeSpan.FromSeconds(_realAttackDelay * 2 / 3f),
                 delayTiming: PlayerLoopTiming.LastUpdate,
                 cancellationToken: token);
         }
@@ -1278,8 +1278,7 @@ public class CPrideBoss : CEnemy, IBoss
                 sword.transform.localScale *= swordScale;
             }
 
-            await UniTask.Delay(
-                (int) (readyTime * 1000) - (int) (fallingTime * 1000),
+            await UniTask.Delay(TimeSpan.FromSeconds(readyTime - fallingTime),
                 delayTiming: PlayerLoopTiming.LastUpdate,
                 cancellationToken: token);
 
@@ -1617,5 +1616,15 @@ public class CPrideBoss : CEnemy, IBoss
         _phase = isFirstPhase
             ? EPridePhase.RecoveryPending
             : EPridePhase.FinalJudgmentPending;
+    }
+
+    public bool TryGetGroggyInfo(out float remainHp, out float maxHp, out float remainTime, out float maxTime)
+    {
+        remainHp = 0f;
+        maxHp = 1f;
+        remainTime = 0f;
+        maxTime = 1f;
+
+        return false;
     }
 }
