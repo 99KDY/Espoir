@@ -1122,7 +1122,6 @@ public class CSlothBoss : CEnemy, IBoss
                 _fxDriver?.StopAll();
                 CLogger.Warn("VfxStop!!!!");
             
-                return;
             }
             
             CLogger.Warn("여기까진 통과5");
