@@ -103,6 +103,7 @@ public class CTooltipUI : MonoBehaviour
         _tooltip.gameObject.SetActive(true);
         _tooltip.text = target.Tooltip;
     }
+    
     public void Enable(CQuickslotUI target)
     {
         _isOn = true;

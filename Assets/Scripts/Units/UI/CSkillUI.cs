@@ -1,5 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Text.RegularExpressions;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -22,11 +24,23 @@ public class CSkillUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     [SerializeField] private bool _useWholeSeconds = false;
     [Tooltip("켜면 마우스를 올려도 설명을 띄우지 않습니다(꾹 누름 등 다른 컴포넌트가 Tooltip UI 로 띄움).")]
     [SerializeField] private bool _tooltipOnHold = false;
-    public string Tooltip => $"{_name}\n<size=75%>{_tooltipText}</size>";
+
+    private static readonly Regex _attackToken = new Regex(
+        @"(?<![A-Za-z0-9_.])([0-9]+(?:\.[0-9]+)?)attack(?![A-Za-z0-9_])");
+
+    private const string _DamageColor = "#FFA64D";
+    private CPlayer _player;
+
+    public string Tooltip => $"{_name}\n<size=75%>{ReplaceRealDamage(_tooltipText, _player.Attack)}</size>";
     public string TooltipText
     {
         get { return _tooltipText; }
         set { _tooltipText = value; }
+    }
+
+    private void Start()
+    {
+        _player = FindAnyObjectByType<CPlayer>();
     }
 
     public void Refresh(float ratio, float remainCooldown, bool enableUse = true)
@@ -65,5 +79,22 @@ public class CSkillUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     public void OnPointerExit(PointerEventData eventData)
     {
         _tooltipUI.Disable();
+    }
+
+    private static string ReplaceRealDamage(string text, float attack)
+    {
+        if (string.IsNullOrEmpty(text)) return text;
+
+        return _attackToken.Replace(text, match =>
+        {
+            if (!float.TryParse(match.Groups[1].Value, NumberStyles.Float,
+                CultureInfo.InvariantCulture, out float multiplier))
+            {
+                return match.Value;
+            }
+
+            float damage = attack * multiplier;
+            return $"<color={_DamageColor}>{damage:N0}</color>";
+        });
     }
 }
