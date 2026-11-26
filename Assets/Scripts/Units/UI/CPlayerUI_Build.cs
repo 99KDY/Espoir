@@ -396,12 +396,12 @@ public class CPlayerUI_Build : MonoBehaviour
         if (string.IsNullOrWhiteSpace(temp))
         {
             _skillPradona.TooltipText =
-                "재사용 대기시간 60초\r\n프라도나가 권능으로 당신을 도와줍니다.\n\n현재 선택된 권능이 없어 사용할 수 없습니다.";
+                "재사용 대기시간 60초\r\n선택한 권능을 발동합니다. 기절 중에도 사용할 수 있습니다.\n\n현재 선택된 권능이 없어 사용할 수 없습니다.";
         }
         else
         {
             _skillPradona.TooltipText =
-            "재사용 대기시간 60초\r\n프라도나가 권능으로 당신을 도와줍니다.\n\n" + temp;
+            "재사용 대기시간 60초\r\n선택한 권능을 발동합니다. 기절 중에도 사용할 수 있습니다.\n\n" + temp;
         }
     }
 }
