@@ -10,8 +10,6 @@ using Random = UnityEngine.Random;
 
 public class CSlothBoss : CEnemy, IBoss
 {
-
-
     public enum ESlothBossState
     {
         Idle = 0,
@@ -21,8 +19,6 @@ public class CSlothBoss : CEnemy, IBoss
         Dead,
         Grogi
     }
-
-
 
     #region 인스팩터
     [SerializeField] private CPlayer _player;
@@ -120,9 +116,14 @@ public class CSlothBoss : CEnemy, IBoss
     private bool _isDead;
     private bool _onGrogi;
 
+    private const float GroggyDamageRatio = 0.035f;
+    private float _groggyStartHp;
+    private float _groggyDuration;
+    private float _groggyEndTime;
+
     private CancellationTokenSource _cts;
 
-
+    public bool IsGroggy => _onGrogi;
     #endregion
 
 
@@ -201,6 +202,7 @@ public class CSlothBoss : CEnemy, IBoss
 
             return;
         }
+        if (_groggyDuration > 0f) return;
 
         LookAtPlayer();
 
@@ -1080,36 +1082,31 @@ public class CSlothBoss : CEnemy, IBoss
 
     private async UniTaskVoid FreezeAnimation(float duration, CancellationToken cancelAnima)
     {
-        _animator.speed = 0.2f;
-
         if (_player == null)
         {
             CLogger.Error("플레이어를 참조하지 않았습니다.");
             return;
         }
 
-        SDamageInfo recieveDamage = new SDamageInfo(_player.Attack);
-
+        CancellationTokenSource source = _cts;
         float patternStartHP = this.HpCurrent;
 
+        _groggyStartHp = patternStartHP;
+        _groggyDuration = duration;
+        _groggyEndTime = Time.unscaledTime + duration;
+        _animator.speed = 0.2f;
 
         try
         {
-            this.OnHit(_player, recieveDamage);
-
-            await UniTask.Delay
-                (
-                    TimeSpan.FromSeconds(6),
-                    ignoreTimeScale: true,
-                    cancellationToken: cancelAnima
+            await UniTask.WaitUntil(
+                () => GetGroggyRemainHp() <= 0f ||
+                Time.unscaledTime >= _groggyEndTime,
+                cancellationToken: cancelAnima
                 );
 
-            float bossCurrentHP = this.HpCurrent;
-
-            if ((patternStartHP - bossCurrentHP) >= patternStartHP * 0.035)
+            if (isActiveAndEnabled && HpCurrent > 0f && GetGroggyRemainHp() <= 0f)
             {
                 _onGrogi = true;
-
             }
         }
 
@@ -1120,11 +1117,11 @@ public class CSlothBoss : CEnemy, IBoss
 
         finally
         {
-            if (this != null)
+            if (this != null && ReferenceEquals(_cts, source))
             {
+                _groggyDuration = 0f;
                 _animator.speed = 1f;
             }
-
         }
 
     }
@@ -1562,6 +1559,7 @@ public class CSlothBoss : CEnemy, IBoss
         _cts?.Cancel();
         _cts?.Dispose();
         _cts = null;
+        _groggyDuration = 0f;
 
         _onGrogi = false;
         _grogiTimer = 0f;
@@ -1620,5 +1618,33 @@ public class CSlothBoss : CEnemy, IBoss
         CGameManager.Instance?.EndBossTimer(EBossClear.Pigritia, true);
         
         base.Die();
+    }
+
+    private float GetGroggyRemainHp()
+    {
+        float maxHp = _groggyStartHp * GroggyDamageRatio;
+        float damageTaken = _groggyStartHp - HpCurrent;
+        return Mathf.Clamp(maxHp - damageTaken, 0f, maxHp);
+    }
+
+    public bool TryGetGroggyInfo(out float remainHp, out float maxHp, out float remainTime, out float maxTime)
+    {
+        remainHp = 0f;
+        maxHp = 1f;
+        remainTime = 0f;
+        maxTime = 1f;
+
+        if (!isActiveAndEnabled || HpCurrent <= 0f || _groggyDuration <= 0f)
+        {
+            return false;
+        }
+
+        maxHp = _groggyStartHp * GroggyDamageRatio;
+        float damageTaken = _groggyStartHp - HpCurrent;
+        remainHp = GetGroggyRemainHp();
+
+        maxTime = _groggyDuration;
+        remainTime = Mathf.Max(0f, _groggyEndTime - Time.unscaledTime);
+        return true;
     }
 }

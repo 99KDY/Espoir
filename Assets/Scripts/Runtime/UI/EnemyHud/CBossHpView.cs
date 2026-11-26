@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Cysharp.Threading.Tasks;
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -90,6 +91,11 @@ public class CBossHpView : MonoBehaviour
     [SerializeField] private TMP_Text _currentTimer;
     [SerializeField] private TMP_Text _bestTimer;
 
+    [Header("무력화 게이지")]
+    [SerializeField] private CCssBoxGraphic _groggyBar;
+    [SerializeField] private TMP_Text _groggyRemainHp;
+    [SerializeField] private TMP_Text _groggyRemainTime;
+
     // 피격과 치명타 흔들림의 정규화 시간별 위치입니다.
     private static readonly float[] _SHAKE_T = { 0f, 0.2f, 0.5f, 0.8f, 1f };
     private static readonly Vector2[] _SHAKE_V = { Vector2.zero, new Vector2(-3f, 1f), new Vector2(2f, -1f),
@@ -157,6 +163,10 @@ public class CBossHpView : MonoBehaviour
     private readonly List<CStatus> _removedStatus = new();
     private int _debuffViewCount;
 
+    // 그로기 부분
+    private bool _wasGroggyCheckActive;
+    private float _groggyHideAt = -1f;
+
     /// <summary>
     /// 지금 화면에 보이는지 (검증 · 다른 UI 참고용).
     /// </summary>
@@ -174,6 +184,15 @@ public class CBossHpView : MonoBehaviour
         _title.text = _bossTitle;
         _hpLabel.text = "HP";
         SetShown(false);
+    }
+
+    private void Start()
+    {
+        if (_boss != null)
+        {
+            _name.text = _boss.Name;
+            _title.text = _boss.Nickname;
+        }
     }
 
     private void OnEnable()
@@ -230,7 +249,7 @@ public class CBossHpView : MonoBehaviour
 
         UpdateState(now);
         UpdateTexts();
-        Layout();
+        Layout(UpdateGroggy());
         Paint(now);
         UpdateStatus();
         UpdateTimerText();
@@ -273,6 +292,11 @@ public class CBossHpView : MonoBehaviour
     {
         _isShown = isShown;
         if (_content != null && _content.activeSelf != isShown) _content.SetActive(isShown);
+        if (!isShown)
+        {
+            _wasGroggyCheckActive = false;
+            _groggyHideAt = -1;
+        }
     }
 
     // 등장 시 막대를 왼쪽부터 채우며 이름과 배경을 표시합니다.
@@ -392,7 +416,7 @@ public class CBossHpView : MonoBehaviour
     }
 
     // 퍼센트 글자 폭에 맞춰 전체 폭을 계산하고 화면 중앙에 배치합니다.
-    private void Layout()
+    private void Layout(bool showGroggy)
     {
         SBossLayout l = _layout;
         float tagW = CHudNumberFormat.CssWidth(_tagText, _PCT_CHARS, _pctCount) + l.tagPaddingX * 2f;
@@ -429,11 +453,23 @@ public class CBossHpView : MonoBehaviour
         float barBottom = l.barTop + l.barHeight;
         float lineBottom = l.top + l.portraitSize + l.lineBelow;
         float statusTop = Mathf.Max(barBottom, lineBottom) + 6f;
+        float timerBaseline = Mathf.Max(barBottom, l.tagTop + l.tagHeight) + 20f;
+
+        if (showGroggy)
+        {
+            float groggyTop = statusTop;
+            float groggyBaseline = groggyTop + 26f;
+
+            PlaceBox(_groggyBar.rectTransform, columnX, groggyTop, l.barWidth, 8f);
+            PlaceText(_groggyRemainHp, columnX, groggyBaseline);
+            PlaceText(_groggyRemainTime, columnX + l.barWidth - 75f, groggyBaseline);
+
+            statusTop += 42f;
+            timerBaseline = statusTop + 16f;
+        }
 
         if (_statusRoot != null)
             PlaceBox(_statusRoot, columnX, statusTop, l.barWidth, 30f);
-
-        float timerBaseline = Mathf.Max(barBottom, l.tagTop + l.tagHeight) + 20f;
 
         if (_currentTimer != null)
             PlaceText(_currentTimer, columnRight, timerBaseline);
@@ -643,5 +679,76 @@ public class CBossHpView : MonoBehaviour
     {
         int seconds = (int)(time * 100f);
         return $"{seconds / 6000:D2}:{seconds / 100 % 60:D2}<size=72%>.{seconds % 100:D2}</size>";
+    }
+
+    private bool UpdateGroggy()
+    {
+        if (_groggyBar == null || _groggyRemainHp == null || _groggyRemainTime == null)
+            return false;
+
+        if (!(_boss is IBoss boss) ||
+            !boss.TryGetGroggyInfo(out float remainHp, out float maxHp,
+                                  out float remainTime, out _))
+        {
+            return UpdateGroggyResult();
+        }
+
+        float ratio = Mathf.Clamp01(remainHp / maxHp);
+        _groggyBar.SetDynamic(
+            new Vector4(ratio, ratio, 0f, 0f),
+            Vector4.zero,
+            Vector3.zero,
+            Vector4.zero
+        );
+
+        _groggyRemainHp.SetText($"{Mathf.CeilToInt(remainHp):0} / {Mathf.CeilToInt(maxHp):0}");
+        _groggyRemainTime.SetText($"{remainTime:0.0}s");
+
+        _wasGroggyCheckActive = true;
+        _groggyHideAt = -1f;
+        SetGroggyVisible(true);
+        return true;
+    }
+
+    private void SetGroggyVisible(bool visible)
+    {
+        if (_groggyBar.gameObject.activeSelf == visible) return;
+        else if (_groggyBar.gameObject.activeSelf)
+        {
+            _groggyBar.gameObject.SetActive(false);
+            _groggyRemainHp.gameObject.SetActive(false);
+            _groggyRemainTime.gameObject.SetActive(false);
+        }
+        else
+        {
+            _groggyBar.gameObject.SetActive(true);
+            _groggyRemainHp.gameObject.SetActive(true);
+            _groggyRemainTime.gameObject.SetActive(true);
+        }
+    }
+
+    private bool UpdateGroggyResult()
+    {
+        bool succeeded = _boss is CSlothBoss sloth && sloth.IsGroggy;
+
+        if (_wasGroggyCheckActive)
+        {
+            _wasGroggyCheckActive = false;
+
+            if (succeeded)
+            {
+                _groggyHideAt = Time.unscaledTime + 1.2f;
+
+                _groggyBar.SetDynamic(
+                    Vector4.zero, Vector4.zero, Vector3.zero, Vector4.zero);
+
+                _groggyRemainHp.SetText("무력화 성공");
+                _groggyRemainTime.SetText("");
+            }
+        }
+
+        bool visible = succeeded && Time.unscaledTime < _groggyHideAt;
+        SetGroggyVisible(visible);
+        return visible;
     }
 }

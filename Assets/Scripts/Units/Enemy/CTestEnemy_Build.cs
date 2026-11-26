@@ -17,7 +17,6 @@ public class CTestEnemy_Build : CEnemy
 
     #region 인스팩터
     [Header("Enemy Info")]
-    [SerializeField] private string _name = "Skeleton";
     [SerializeField] private LayerMask _tartgetMask;
 
     [SerializeField] private float _offsetDir = 1.5f;

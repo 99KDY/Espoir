@@ -15,7 +15,6 @@ MonoBehaviour:
   _questId: tutorial_leaving_day
   _assetGuid: 6ea19b29232aee84e82a2656cdf29923
   _title: "\uB5A0\uB098\uB294 \uB0A0"
-  _questFlag: 1
   _objectives:
   - id: camera
     kind: 9
@@ -42,6 +41,7 @@ MonoBehaviour:
     arriveRadius: 3
     supplyItem: {fileID: 0}
     supplyCount: 1
+    replacementItem: {fileID: 0}
   - id: walk
     kind: 7
     text: "\uAC1C\uC6B8 \uAC74\uB108 \uD6C8\uB828\uC7A5\uAE4C\uC9C0"
@@ -67,6 +67,7 @@ MonoBehaviour:
     arriveRadius: 4
     supplyItem: {fileID: 0}
     supplyCount: 1
+    replacementItem: {fileID: 0}
   - id: equip
     kind: 5
     text: "\uCD08\uC2EC\uC790\uC758 \uBAA9\uAC78\uC774 \uC7A5\uCC29"
@@ -146,6 +147,7 @@ MonoBehaviour:
     arriveRadius: 3
     supplyItem: {fileID: 0}
     supplyCount: 1
+    replacementItem: {fileID: 0}
   - id: link
     kind: 1
     text: "\uB9C9\uD0C0 \uC9C1\uD6C4 Q\uB85C \uC5F0\uACC4"
@@ -173,6 +175,7 @@ MonoBehaviour:
     arriveRadius: 3
     supplyItem: {fileID: 0}
     supplyCount: 1
+    replacementItem: {fileID: 0}
   - id: mark
     kind: 3
     text: "\uD5C8\uC218\uC544\uBE44\uC5D0 \uB099\uC778 \uB2E4\uC12F \uAC1C"
@@ -198,6 +201,7 @@ MonoBehaviour:
     arriveRadius: 3
     supplyItem: {fileID: 0}
     supplyCount: 1
+    replacementItem: {fileID: 0}
   - id: rush
     kind: 4
     text: "\uB099\uC778\uC774 \uAF49 \uCC2C \uD5C8\uC218\uC544\uBE44\uB97C E\uB85C"
@@ -224,6 +228,7 @@ MonoBehaviour:
     arriveRadius: 3
     supplyItem: {fileID: 0}
     supplyCount: 1
+    replacementItem: {fileID: 0}
   - id: crown1
     kind: 2
     text: "\uB9C9\uD0C0 \uB4A4 W"
@@ -251,6 +256,7 @@ MonoBehaviour:
     arriveRadius: 3
     supplyItem: {fileID: 0}
     supplyCount: 1
+    replacementItem: {fileID: 0}
   - id: crown2
     kind: 3
     text: "\uC655\uAD00 \uB450 \uACB9 \uC313\uAE30"
@@ -276,6 +282,7 @@ MonoBehaviour:
     arriveRadius: 3
     supplyItem: {fileID: 0}
     supplyCount: 1
+    replacementItem: {fileID: 0}
   - id: crown4
     kind: 1
     text: "\uC655\uAD00 \uD3C9\uD0C0 \uB124 \uBC88\uC9F8\uAE4C\uC9C0 \uB9DE\uD788\uAE30"
@@ -303,6 +310,7 @@ MonoBehaviour:
     arriveRadius: 3
     supplyItem: {fileID: 0}
     supplyCount: 1
+    replacementItem: {fileID: 0}
   - id: ult
     kind: 10
     text: "R\uB85C \uAE68\uC6B0\uACE0 \uC5F4 \uCE78 \uBAA8\uC544 \uB2E4\uC2DC R"
@@ -328,6 +336,7 @@ MonoBehaviour:
     arriveRadius: 3
     supplyItem: {fileID: 0}
     supplyCount: 1
+    replacementItem: {fileID: 0}
   - id: power
     kind: 11
     text: "V\uB85C \uAD8C\uB2A5 \uBC1B\uACE0 \uD55C \uB300 \uCE58\uAE30"
@@ -353,5 +362,9 @@ MonoBehaviour:
     arriveRadius: 3
     supplyItem: {fileID: 0}
     supplyCount: 1
+    replacementItem: {fileID: 0}
   _reportText: "\uD138\uBCF5\uC774\uC640 \uC774\uC57C\uAE30\uD558\uAE30"
   _reportNpcId: fluffy
+  _prerequisite: {fileID: 0}
+  _requiredBosses: 0
+  _bossClearReward: 0

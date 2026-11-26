@@ -80,6 +80,8 @@ MonoBehaviour:
   _statusEffectAnchor: {fileID: 0}
   _statusEffectOffset: {x: 0, y: 0, z: 0}
   _statusEffectRadius: 1
+  _name: "\uBCA8\uD328\uACE0\uB974"
+  _nickname: "\uB098\uD0DC\uC758 \uAD70\uC8FC"
   _targetStatSO: {fileID: 0}
   _dropCount: 3
   _drops:
@@ -87,6 +89,7 @@ MonoBehaviour:
     isEquipment: 1
     rarity: 3
     chance: 1
+  _sourcePrefab: {fileID: 0}
   _player: {fileID: 0}
   _targetMask:
     serializedVersion: 2
@@ -115,6 +118,9 @@ MonoBehaviour:
   _previewInnerPattern: {fileID: 0}
   _areaAngle: 30
   _divideArea: 6
+  _thunderOrbitRadius: 11
+  _thunderSpeed: 90
+  _thunderHitRadius: 2.5
 --- !u!95 &7484433350781376968
 Animator:
   serializedVersion: 5
