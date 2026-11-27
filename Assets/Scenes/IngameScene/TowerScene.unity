@@ -4340,6 +4340,10 @@ PrefabInstance:
       propertyPath: _arena
       value: 
       objectReference: {fileID: 641608243}
+    - target: {fileID: 8670983954707699309, guid: 6333a78c10505134eae8bdf1aeabc36e, type: 3}
+      propertyPath: _attacksPerMainPattern
+      value: 10
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

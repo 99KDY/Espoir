@@ -1277,8 +1277,8 @@ public class CPrideBoss : CEnemy, IBoss
                 }
 
                 slams[0] = SlamTask(center, readyTime, fallingTime, aimedRadius, token,
-                    new SDamageInfo(250f, false, ERatioSwitch.Constant, false, null), 3f, TryConsumeHit);
-
+                                new SDamageInfo(250f, false, ERatioSwitch.Constant, false, null),
+                                3f, TryConsumeHit, playLaunchAnimation: false);
                 int spreadCount = slams.Length - 1;
                 float angleOffset = Random.Range(0f, 360f);
 
@@ -1291,7 +1291,8 @@ public class CPrideBoss : CEnemy, IBoss
                     Vector3 point = center + direction * distance;
 
                     slams[j + 1] = SlamTask(point, readyTime, fallingTime, spreadRadius, token,
-                        new SDamageInfo(150f, false, ERatioSwitch.Constant, false, null), 2f, TryConsumeHit, playSound: false);
+                                        new SDamageInfo(150f, false, ERatioSwitch.Constant, false, null),
+                                        2f, TryConsumeHit, playSound: false, playLaunchAnimation: false);
                 }
 
                 await UniTask.WhenAll(slams);
@@ -1759,10 +1760,11 @@ public class CPrideBoss : CEnemy, IBoss
         if (_animator == null || !_animator.isActiveAndEnabled) return;
 
         _animator.SetBool(SwordHoldParameter, false);
+        _animator.ResetTrigger(SwordLaunchTrigger);
 
         if (!token.IsCancellationRequested && CanContinueAttack)
         {
-            _animator.SetTrigger(SwordLaunchTrigger);
+            _animator.CrossFadeInFixedTime(IdleState, 0.2f, 0);
         }
     }
 
