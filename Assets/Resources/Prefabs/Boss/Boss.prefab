@@ -284,6 +284,26 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1929441329760321138}
     m_Modifications:
+    - target: {fileID: 2865902835125882281, guid: 2b9010af2269c5b4bb4b27dee833a85c, type: 3}
+      propertyPath: _attacks.Array.size
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 2865902835125882281, guid: 2b9010af2269c5b4bb4b27dee833a85c, type: 3}
+      propertyPath: _attacks.Array.data[10].scale
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2865902835125882281, guid: 2b9010af2269c5b4bb4b27dee833a85c, type: 3}
+      propertyPath: _attacks.Array.data[10].state
+      value: Boss_Main04_OrbSlam(no Grogi)
+      objectReference: {fileID: 0}
+    - target: {fileID: 2865902835125882281, guid: 2b9010af2269c5b4bb4b27dee833a85c, type: 3}
+      propertyPath: _attacks.Array.data[10].prefab
+      value: 
+      objectReference: {fileID: 4104000000000000003, guid: 0bd3c2d4f36f4cb7b553cf162e28b3c1, type: 3}
+    - target: {fileID: 2865902835125882281, guid: 2b9010af2269c5b4bb4b27dee833a85c, type: 3}
+      propertyPath: _attacks.Array.data[10].holdTime
+      value: 1.7
+      objectReference: {fileID: 0}
     - target: {fileID: 5733645997801023973, guid: 2b9010af2269c5b4bb4b27dee833a85c, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
