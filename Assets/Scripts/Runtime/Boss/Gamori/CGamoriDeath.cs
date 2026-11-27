@@ -10,6 +10,7 @@ public sealed class CGamoriDeath : MonoBehaviour, IGamoriCine
 {
     [SerializeField] private CBossSummoner _summoner;
     [SerializeField] private CGamoriBoss _boss;
+    [SerializeField] private CGamoriEntrance _entrance;
     [SerializeField] private Animator _animator;
     [SerializeField] private Transform _motionRoot;
     [SerializeField] private CPlayer _player;
@@ -155,6 +156,7 @@ public sealed class CGamoriDeath : MonoBehaviour, IGamoriCine
         Show(_HIDDEN);
         if (_boss) _boss.gameObject.SetActive(false);
         Show(_BODY_HIDDEN);
+        if (_entrance) _entrance.ShowNpc(true);
         if (CGameManager.Instance && CGameManager.Instance.GameState == EGameState.Cinematic)
             CGameManager.Instance.SetGameState(EGameState.Idle);
         if (_player) _player.SetInputLocked(false);

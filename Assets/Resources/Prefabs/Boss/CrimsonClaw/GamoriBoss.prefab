@@ -2182,7 +2182,7 @@ MonoBehaviour:
   _readyState: Base Layer.Ready
   _recoveryBlend: 0.3
   _minNextAttackDelay: 2.5
-  _damageMultiplier: 1
+  _damageMultiplier: 12.59
   _playbackRanges:
   - start: 0.8
     end: 0.806
@@ -2213,6 +2213,8 @@ MonoBehaviour:
   _stomp: 8.72
   _dash: 9.53
   _burst: 10.24
+  _dashMultiplier: 4.2
+  _burstHealthRatio: 0.99
   _stompRadius: 7.001491
   _burstRadius: 4.4731746
   _leapLength: 8.8068

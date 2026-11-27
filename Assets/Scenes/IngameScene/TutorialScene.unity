@@ -3623,6 +3623,8 @@ MonoBehaviour:
     grantsPower: 0
   - objectiveId: potion
     introNode: potion
+    equipObjectiveId: equip
+    equippedIntroNode: necklace_equipped
     remind: "1\uBC88 \uD0A4\uB85C \uD3EC\uC158 \uD55C \uBCD1 \uB9C8\uC154 \uBD10."
     keys:
     - key: 1

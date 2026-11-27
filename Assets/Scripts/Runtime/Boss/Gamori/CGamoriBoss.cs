@@ -246,6 +246,7 @@ public sealed class CGamoriBoss : CGamoriCombatant, IBoss
     public override void GetDamage(float value, ERatioSwitch ratioSwitch = ERatioSwitch.Constant,
         bool penetrateInvincible = false)
     {
+        if (!isActiveAndEnabled) return;
         base.GetDamage(value, ratioSwitch, penetrateInvincible);
         if (_player) TrackHealth();
     }

@@ -135,6 +135,16 @@ Shader "Espoir/Boss/GamoriToon"
     {
         Tags { "RenderType" = "Opaque" "Queue" = "Geometry" }
 
+        CGINCLUDE
+        float _RetreatFade;
+
+        void ApplyRetreatFade(float2 pixel)
+        {
+            float noise = frac(52.9829189 * frac(dot(floor(pixel), float2(0.06711056, 0.00583715))));
+            clip(noise - _RetreatFade);
+        }
+        ENDCG
+
         Pass
         {
             Name "TOON"
@@ -319,6 +329,7 @@ Shader "Espoir/Boss/GamoriToon"
 
             float4 frag(v2f i, float facing : VFACE) : SV_Target
             {
+                ApplyRetreatFade(i.pos.xy);
                 float burnEdge;
                 clip(GamoriBurn(i.worldPos, burnEdge) - 0.5);
                 float3 uHeadCenter = _ToonHeadCenter.xyz;
@@ -771,6 +782,7 @@ Shader "Espoir/Boss/GamoriToon"
 
             float4 frag(v2f i) : SV_Target
             {
+                ApplyRetreatFade(i.pos.xy);
                 float burnEdge;
                 clip(GamoriBurn(i.worldPos, burnEdge) - 0.5);
                 SHADOW_CASTER_FRAGMENT(i)
@@ -865,6 +877,7 @@ Shader "Espoir/Boss/GamoriToon"
 
             float4 frag(v2f i) : SV_Target
             {
+                ApplyRetreatFade(i.pos.xy);
                 float burnEdge;
                 clip(GamoriBurn(i.worldPos, burnEdge) - 0.5);
                 float3 a = tex2D(_MainTex, i.uv).rgb * _BaseColor.rgb;
