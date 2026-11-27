@@ -12,7 +12,7 @@ public class CTestEnemy : CEnemy
     //    Idle = 0,
     //    Moving,
     //    Attack,
-        
+
     //}
 
     #region 인스팩터
@@ -23,7 +23,7 @@ public class CTestEnemy : CEnemy
     [SerializeField] private float _moveSpeed = 3.0f;
     [SerializeField] private float _rotateSpeed = 30.0f;
     [SerializeField] private float _sightView = 6.0f;
-    
+
     [SerializeField] private float _forgetTime = 1.0f;
     [SerializeField] private float _patrolTime = 2.0f;
 
@@ -35,12 +35,14 @@ public class CTestEnemy : CEnemy
     [SerializeField] float _attackTimer = 0.0f;
     [SerializeField] float _forgetTimer = 0.0f;
     [SerializeField] float _patrolTimer = 0.0f;
-    
+
     [SerializeField] private bool _OnTarget = false;
     [SerializeField] private bool _sightCheck = false;
     [SerializeField] private LayerMask _obtacleMask;
     [SerializeField] private Collider[] _hitCollider = new Collider[2];
 
+    [Header("사운드")]
+    [SerializeField] private AudioSource _atkAudio;
     #endregion 
 
     private CPlayer Player => _player;
@@ -55,7 +57,7 @@ public class CTestEnemy : CEnemy
 
     #region Animator
     [SerializeField] private Animator _animator;
-    
+
     private int _hashMove = Animator.StringToHash("bMove");
     private int _hashAttack = Animator.StringToHash("tAttack");
     private int _hashDie = Animator.StringToHash("bDie");
@@ -111,8 +113,8 @@ public class CTestEnemy : CEnemy
 
 
         // TODO : 주기적으로 공격하기
-       
-        if(_attackTimer > 2.0f)
+
+        if (_attackTimer > 2.0f)
         {
             OnAttack();
         }
@@ -132,13 +134,13 @@ public class CTestEnemy : CEnemy
 
     private void OnTargetMove()
     {
-        if(_target == null && _isAttack == true)
+        if (_target == null && _isAttack == true)
         {
             return;
         }
 
 
-        Vector3 target = new Vector3(_target.position.x , 0f , _target.position.z);
+        Vector3 target = new Vector3(_target.position.x, 0f, _target.position.z);
 
         Vector3 toTarget = target - transform.position;
 
@@ -146,19 +148,19 @@ public class CTestEnemy : CEnemy
 
         _OnTarget = distance <= _sightView ? true : false;
         _isPatrol = !_OnTarget;
-                
-        if(_OnTarget == true)
+
+        if (_OnTarget == true)
         {
             _isMove = true;
 
             FollowPlayer(target, distance);
-            
+
             _forgetTimer = 0.0f;
         }
 
         else
         {
-            if(_forgetTimer < _forgetTime)
+            if (_forgetTimer < _forgetTime)
             {
                 _forgetTimer += Time.deltaTime;
 
@@ -193,7 +195,7 @@ public class CTestEnemy : CEnemy
 
         }
 
-            _animator.SetBool(_hashMove, _isMove);
+        _animator.SetBool(_hashMove, _isMove);
 
     }
 
@@ -239,7 +241,7 @@ public class CTestEnemy : CEnemy
 
     }
 
-#endregion
+    #endregion
 
 
     #region Rigidbody Move
@@ -259,13 +261,13 @@ public class CTestEnemy : CEnemy
 
 
         Vector3 target = new Vector3(_target.position.x, this.transform.position.y, _target.position.z);
-               
+
         Vector3 toTarget = target - transform.position;
 
         float distance = toTarget.magnitude;
 
         _OnTarget = distance > _sightView ? false : true;
-        
+
         if (_OnTarget == true)
         {
             // CLogger.Log("타겟이 들어왔다.");
@@ -372,7 +374,7 @@ public class CTestEnemy : CEnemy
     // 이동 전용
     private void OnTargetMove_Fixed()
     {
-        if(_rb == null)
+        if (_rb == null)
         {
             return;
         }
@@ -381,7 +383,7 @@ public class CTestEnemy : CEnemy
         {
             float speed = _isReturn ? 1.5f * _moveSpeed : _moveSpeed;
 
-            _rb.velocity = new Vector3(_movePos.x * speed , _rb.velocity.y , _movePos.z * speed);
+            _rb.velocity = new Vector3(_movePos.x * speed, _rb.velocity.y, _movePos.z * speed);
 
         }
 
@@ -401,7 +403,7 @@ public class CTestEnemy : CEnemy
     {
 
 
-        if(_isMove == true)
+        if (_isMove == true)
         {
             return;
         }
@@ -409,8 +411,8 @@ public class CTestEnemy : CEnemy
         Vector3 toPlayer = new Vector3(_player.transform.position.x, this.transform.position.y, _player.transform.position.z);
 
         Vector3 toTarget = toPlayer - this.transform.position;
-        
-        if(toTarget.magnitude <= 2.0f)
+
+        if (toTarget.magnitude <= 2.0f)
         {
             _isAttack = true;
             if (_isAttack)
@@ -418,19 +420,14 @@ public class CTestEnemy : CEnemy
                 // TODO : TakeDamage 공격로직 추가 예정
                 HitPlayer(this);
                 _animator.SetTrigger(_hashAttack);
-                if (_soundManager != null)
-                {
-                    _soundManager.PlaySE(EEffectSound.MonsterSlash);
-                }
-
 
             }
 
         }
 
-        else if(toTarget.magnitude > 2.0f)
+        else if (toTarget.magnitude > 2.0f)
         {
-            _isAttack= false;
+            _isAttack = false;
         }
 
         _attackTimer = 0f;
@@ -481,14 +478,14 @@ public class CTestEnemy : CEnemy
         }
 
         return hit;
-        
+
     }
 
     private void HitPlayer(CUnit attacker)
     {
         int hit = FindPlayer();
-        
-        for(int  i = 0; i < hit; i++)
+
+        for (int i = 0; i < hit; i++)
         {
 
             if (_hitCollider[i] == null)
@@ -498,20 +495,20 @@ public class CTestEnemy : CEnemy
 
             CUnit player = _hitCollider[i].GetComponent<CUnit>();
 
-            if(player == null)
+            if (player == null)
             {
                 continue;
             }
 
-            if(player.HpCurrent <= 0f)
+            if (player.HpCurrent <= 0f)
             {
                 continue;
             }
 
             SDamageInfo damagePlayer = new SDamageInfo(attacker.Attack);
-            
+
             float lastHP = player.HpCurrent;
-            
+
             player.OnHit(attacker, player, damagePlayer);
             if (_soundManager != null)
             {
@@ -521,11 +518,18 @@ public class CTestEnemy : CEnemy
 
         }
 
- 
+
 
     }
 
-
+    private void PlayAtkSound()
+    {
+        if (_soundManager != null)
+        {
+            _soundManager.PlaySE(EEffectSound.MonsterSlash);
+            if (_atkAudio != null) _atkAudio.Play();
+        }
+    }
 
 
     private void EnemyPatrol()
@@ -566,7 +570,6 @@ public class CTestEnemy : CEnemy
         }
     
     }
-
 
 
     private void OnDrawGizmos()
