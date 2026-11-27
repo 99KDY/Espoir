@@ -610,8 +610,12 @@ MonoBehaviour:
   _name: 
   _nickname: 
   _targetStatSO: {fileID: 0}
-  _dropCount: 1
-  _drops: []
+  _dropCount: 3
+  _drops:
+  - stage: 3
+    isEquipment: 1
+    rarity: 3
+    chance: 1
   _sourcePrefab: {fileID: 0}
   _player: {fileID: 0}
   _previewPattern: {fileID: 851047416706587755, guid: 3d56617bb82fb404eae644a9d2c9f4e5, type: 3}
