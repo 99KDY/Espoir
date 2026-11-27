@@ -72,7 +72,7 @@ public class CTestEnemySpawner : MonoBehaviour
         Vector3 offset = _player.transform.position - transform.position;
         offset.y = 0f;
 
-        return offset.sqrMagnitude <= _spawnRadius * _spawnRadius;
+        return offset.sqrMagnitude <= 4 * _spawnRadius * _spawnRadius;
     }
 
     private bool ResetWhenMax()

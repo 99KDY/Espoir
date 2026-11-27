@@ -415,7 +415,6 @@ public class CGameManager : MonoBehaviour
                 _soundManager.PlayBGM(EBackgroundSound.BaseBGM);
                 break;
             case EGameState.UI:
-                SetPaused(false);
                 break;
             case EGameState.Setting:
                 _menuBackground.alpha = 0;
@@ -440,7 +439,6 @@ public class CGameManager : MonoBehaviour
                 break;
             case EGameState.UI:
                 _soundManager.PlaySE(EEffectSound.QuestionAppear);
-                SetPaused(true);
                 break;
             case EGameState.Setting:
                 _soundManager.PlaySE(EEffectSound.QuestionAppear);
@@ -455,6 +453,7 @@ public class CGameManager : MonoBehaviour
                 SetPaused(true);
                 break;
             case EGameState.Gameover:
+                CloseGameplayPanels();
                 _soundManager.PlaySE(EEffectSound.Beep);
                 EndBossTimer(_attempBoss, false);
                 _menuBackground.alpha = 1;
@@ -489,18 +488,13 @@ public class CGameManager : MonoBehaviour
                 _soundManager.PlayBGM(EBackgroundSound.BaseBGM);
                 break;
             case EBattleState.NormalBattle:
+                CloseGameplayPanels();
                 _player.InvokeOnBattleStart(false);
                 _soundManager.PlayBGM(EBackgroundSound.BattleBGM);
                 break;
+
             case EBattleState.BossBattle:
-                if (_shopUI != null && _shopUI.IsOpen)
-                {
-                    _shopUI.Close();
-                }
-                if (_inventoryUI != null && _inventoryUI.IsOpen)
-                {
-                    _inventoryUI.SetInventoryOpen(false);
-                }
+                CloseGameplayPanels();
                 _player.InvokeOnBattleStart(true);
                 _soundManager.PlayBGM(EBackgroundSound.BossBGM);
                 break;
@@ -598,6 +592,24 @@ public class CGameManager : MonoBehaviour
             {
                 _player.RemoveStatus(26, true);
             }
+        }
+    }
+
+    private void CloseGameplayPanels()
+    {
+        if (_shopUI != null && _shopUI.IsOpen)
+        {
+            _shopUI.Close();
+        }
+
+        if (_inventoryUI != null && _inventoryUI.IsOpen)
+        {
+            _inventoryUI.SetInventoryOpen(false);
+        }
+
+        if (_characterInfoUI != null && _characterInfoUI.IsOpen)
+        {
+            _characterInfoUI.Close();
         }
     }
 
