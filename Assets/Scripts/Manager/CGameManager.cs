@@ -415,7 +415,6 @@ public class CGameManager : MonoBehaviour
                 _soundManager.PlayBGM(EBackgroundSound.BaseBGM);
                 break;
             case EGameState.UI:
-                SetPaused(false);
                 break;
             case EGameState.Setting:
                 _menuBackground.alpha = 0;
@@ -440,7 +439,6 @@ public class CGameManager : MonoBehaviour
                 break;
             case EGameState.UI:
                 _soundManager.PlaySE(EEffectSound.QuestionAppear);
-                SetPaused(true);
                 break;
             case EGameState.Setting:
                 _soundManager.PlaySE(EEffectSound.QuestionAppear);
