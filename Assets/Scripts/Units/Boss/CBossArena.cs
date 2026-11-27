@@ -3,6 +3,8 @@
 [RequireComponent(typeof(BoxCollider))]
 public class CBossArena : MonoBehaviour
 {
+    [SerializeField] private bool _circular;
+
     private BoxCollider _box;
 
     private void Awake()
@@ -14,6 +16,13 @@ public class CBossArena : MonoBehaviour
     {
         Vector3 offset = transform.InverseTransformPoint(worldPosition) - _box.center;
         Vector3 halfSize = _box.size * 0.5f;
+
+        if (_circular)
+        {
+            float radius = Mathf.Min(halfSize.x, halfSize.z);
+            return offset.x * offset.x + offset.z * offset.z <= radius * radius
+                && Mathf.Abs(offset.y) <= halfSize.y;
+        }
 
         return Mathf.Abs(offset.x) <= halfSize.x
             && Mathf.Abs(offset.y) <= halfSize.y

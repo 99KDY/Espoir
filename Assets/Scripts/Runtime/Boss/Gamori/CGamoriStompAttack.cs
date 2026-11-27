@@ -23,8 +23,8 @@ public sealed class CGamoriStompAttack : CGamoriSequenceAttack, IGamoriCine
     private Quaternion _rotation;
     private float _leapDistance, _dashDistance;
     private int _step;
-    [Tooltip("플레이어 최대 체력 대비 피해 비율입니다. X는 착지, Y는 돌진, Z는 마지막 가시입니다.")]
-    [SerializeField] private Vector3 _healthRatios = new Vector3(0.79f, 0.2f, 0.99f);
+    [SerializeField, Min(0f)] private float _dashMultiplier = 4.2f;
+    [SerializeField, Range(0f, 1f)] private float _burstHealthRatio = 0.99f;
     [SerializeField] private float _dashHalfWidth = 1f;
     private float _dashProgress;
     private bool _dashHit;
@@ -103,7 +103,7 @@ public sealed class CGamoriStompAttack : CGamoriSequenceAttack, IGamoriCine
 
         if (_step == 1 && time >= _stomp)
         {
-            HitCircle(_landing, _stompRadius, _healthRatios.x);
+            if (IsInCircle(_landing, _stompRadius)) HitTarget();
             _step++;
         }
 
@@ -144,7 +144,7 @@ public sealed class CGamoriStompAttack : CGamoriSequenceAttack, IGamoriCine
             if (time >= _burst)
             {
                 _burstLocked = true;
-                HitCircle(_burstCenter, _burstRadius, _healthRatios.z);
+                if (IsInCircle(_burstCenter, _burstRadius)) Player.GetDamage(_burstHealthRatio, ERatioSwitch.ByMax);
             }
         }
     }
@@ -184,7 +184,7 @@ public sealed class CGamoriStompAttack : CGamoriSequenceAttack, IGamoriCine
                 Vector3 side = Vector3.ProjectOnPlane(offset, Vector3.up) - nearest * _dashDirection;
                 if (Mathf.Abs(offset.y) < 2f && side.magnitude <= _dashHalfWidth * Scale)
                 {
-                    Player.GetDamage(_healthRatios.y, ERatioSwitch.ByMax);
+                    HitTarget(_dashMultiplier);
                     _dashHit = true;
                 }
                 _dashProgress = mapped;
@@ -207,11 +207,10 @@ public sealed class CGamoriStompAttack : CGamoriSequenceAttack, IGamoriCine
         if (_step >= 1 && MotionRoot) SettleAtMotionRoot();
     }
 
-    private void HitCircle(Vector3 center, float radius, float ratio)
+    private bool IsInCircle(Vector3 center, float radius)
     {
         Vector3 offset = Player.transform.position - center;
         radius *= Scale;
-        if (Mathf.Abs(offset.y) < 2f && offset.x * offset.x + offset.z * offset.z <= radius * radius)
-            Player.GetDamage(ratio, ERatioSwitch.ByMax);
+        return Mathf.Abs(offset.y) < 2f && offset.x * offset.x + offset.z * offset.z <= radius * radius;
     }
 }

@@ -38,6 +38,8 @@ public sealed class CGamoriEntrance : MonoBehaviour, IGamoriCine
     [SerializeField] private float _vignetteStart = 0.4f, _vignetteEnd = 14.5f;
     [SerializeField] private float _cameraOut = 14.87f;
 
+    [SerializeField, Min(0.01f)] private float _retreatDuration = 1.4f;
+
     [Header("플레이어")]
     [Tooltip("왕좌 앞 기준점에서 플레이어까지의 거리(m)입니다.")]
     [SerializeField] private float _playerDistance = 9.5f;
@@ -50,6 +52,12 @@ public sealed class CGamoriEntrance : MonoBehaviour, IGamoriCine
     private Vector3 _origin;
     private Quaternion _rotation;
     private float _time = -1f;
+    private static readonly int _RETREAT_FADE = Shader.PropertyToID("_RetreatFade");
+    private readonly List<Collider> _RETREAT_COLLIDERS = new List<Collider>();
+    private readonly List<CEnvironmentGradeMask> _RETREAT_MASKS = new List<CEnvironmentGradeMask>();
+    private Renderer[] _retreatRenderers;
+    private MaterialPropertyBlock _retreatProperties;
+    private float _retreatTime = -1f;
     private bool _pending;
     private bool _settled;
     private bool _cardShown;
@@ -83,19 +91,69 @@ public sealed class CGamoriEntrance : MonoBehaviour, IGamoriCine
         _summoner.OnSummonChanged -= OnSummonChanged;
         _pending = false;
         if (IsPlaying) Finish();
+        if (_retreatTime >= 0f) FinishRetreat();
     }
 
     private void OnSummonChanged(bool isSummoned)
     {
         if (isSummoned)
         {
+            if (_retreatTime >= 0f) FinishRetreat();
             _pending = true;
             return;
         }
         _pending = false;
         if (IsPlaying) Finish();
         if (!_boss || _boss.HpCurrent <= 0f) return;
+        _boss.enabled = false;
+        if (_chase) _chase.enabled = false;
+        foreach (Collider body in _boss.GetComponentsInChildren<Collider>())
+        {
+            if (!body.enabled) continue;
+            _RETREAT_COLLIDERS.Add(body);
+            body.enabled = false;
+        }
+        foreach (CEnvironmentGradeMask mask in _boss.GetComponentsInChildren<CEnvironmentGradeMask>())
+        {
+            if (!mask.enabled) continue;
+            _RETREAT_MASKS.Add(mask);
+            mask.enabled = false;
+        }
+        if (_retreatRenderers == null)
+        {
+            _retreatRenderers = _boss.GetComponentsInChildren<SkinnedMeshRenderer>(true);
+            _retreatProperties = new MaterialPropertyBlock();
+        }
+        _retreatTime = 0f;
+    }
+
+    private void SetRetreatFade(float amount)
+    {
+        foreach (Renderer part in _retreatRenderers)
+        {
+            if (!part) continue;
+            part.GetPropertyBlock(_retreatProperties);
+            _retreatProperties.SetFloat(_RETREAT_FADE, amount);
+            part.SetPropertyBlock(_retreatProperties);
+        }
+    }
+
+    private void FinishRetreat()
+    {
+        _retreatTime = -1f;
         _boss.gameObject.SetActive(false);
+        SetRetreatFade(0f);
+        foreach (Collider body in _RETREAT_COLLIDERS)
+        {
+            if (body) body.enabled = true;
+        }
+        foreach (CEnvironmentGradeMask mask in _RETREAT_MASKS)
+        {
+            if (mask) mask.enabled = true;
+        }
+        _RETREAT_COLLIDERS.Clear();
+        _RETREAT_MASKS.Clear();
+        _boss.enabled = true;
         ShowNpc(true);
     }
 
@@ -115,6 +173,14 @@ public sealed class CGamoriEntrance : MonoBehaviour, IGamoriCine
 
     private void Update()
     {
+        if (_retreatTime >= 0f)
+        {
+            _retreatTime += Time.deltaTime;
+            float amount = Mathf.Clamp01(_retreatTime / _retreatDuration);
+            SetRetreatFade(CCssEase.Smooth(amount));
+            if (amount >= 1f) FinishRetreat();
+            return;
+        }
         if (_pending && _boss.gameObject.activeInHierarchy) Begin();
         if (!IsPlaying) return;
 
@@ -225,7 +291,7 @@ public sealed class CGamoriEntrance : MonoBehaviour, IGamoriCine
         }
     }
 
-    private void ShowNpc(bool isShown)
+    internal void ShowNpc(bool isShown)
     {
         _npc.SetTalkable(isShown);
         if (isShown) Show(_NPC_HIDDEN);
