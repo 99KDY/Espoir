@@ -207,7 +207,7 @@ public class CPrideBoss : CEnemy, IBoss
             {
                 if (!IsGroggyPhase)
                 {
-                    await UniTask.Delay(2000, delayTiming: PlayerLoopTiming.LastUpdate,
+                    await UniTask.Delay(1500, delayTiming: PlayerLoopTiming.LastUpdate,
                         cancellationToken: token);
                 }
 
@@ -535,8 +535,8 @@ public class CPrideBoss : CEnemy, IBoss
         if (_arena == null || !CanContinueAttack) return;
         if (!TryGetMoveDestination(_arenaCenter, out Vector3 center)) return;
 
-        const int waveCount = 9;
-        const int swordsPerWave = 6;
+        const int waveCount = 15;
+        const int swordsPerWave = 7;
         const float readyTime = 1.3f;
         const float fallingTime = 0.25f;
         const float radius = 3f;
@@ -560,7 +560,6 @@ public class CPrideBoss : CEnemy, IBoss
                 if (!CanContinueAttack) return;
 
                 points.Clear();
-                slams.Clear();
 
                 bool hitApplied = false;
                 bool TryConsumeHit()
@@ -569,6 +568,14 @@ public class CPrideBoss : CEnemy, IBoss
                     hitApplied = true;
                     return true;
                 }
+
+                Vector3 aimedPoint = _player.transform.position;
+                aimedPoint.y = center.y;
+
+                points.Add(aimedPoint);
+                slams.Add(SlamTask(aimedPoint, readyTime, fallingTime, radius,
+                    token, damage, 1.5f, TryConsumeHit,
+                    playSound: true, playLaunchAnimation: false));
 
                 for (int attempt = 0; attempt < 36 && points.Count < swordsPerWave; attempt++)
                 {
@@ -599,7 +606,7 @@ public class CPrideBoss : CEnemy, IBoss
                         playSound, playLaunchAnimation: false));
                 }
 
-                await UniTask.WhenAll(slams);
+                await UniTask.Delay(TimeSpan.FromSeconds(readyTime * 0.33));
 
                 if (wave + 1 < waveCount && CanContinueAttack)
                 {
@@ -607,6 +614,8 @@ public class CPrideBoss : CEnemy, IBoss
                         delayTiming: PlayerLoopTiming.LastUpdate, cancellationToken: token);
                 }
             }
+
+            await UniTask.WhenAll(slams);
         }
         finally
         {
