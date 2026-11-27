@@ -637,6 +637,7 @@ MonoBehaviour:
     m_Bits: 193
   _mainBeamMaterial: {fileID: 2100000, guid: 0af926cfc217fd440b989ff7e4a52dde, type: 2}
   _crossLaserRadius: 14
+  _attacksPerMainPattern: 10
   _enableLog: 1
   _recoveryGroggyHpMax: 2000
   _judgmentGroggyHpMax: 2000

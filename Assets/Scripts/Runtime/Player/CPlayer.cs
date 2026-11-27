@@ -55,6 +55,7 @@ public class CPlayer : CUnit
     private EPradonaPower _pradonaPower;
     private EPradonaPower _temporaryPradonaPower;
     private float _pradonaCooldown;
+    private bool _pauseMainStatusTimer;
 
     protected float _hpMaxBaseline = 1;
     protected float _attackBaseline = 0;
@@ -149,6 +150,12 @@ public class CPlayer : CUnit
     /// </summary>
     public EPradonaPower ActivePradonaPower => _pradonaPower | _temporaryPradonaPower;
     internal float PradonaCooldownDuration => _pradonaCooldownSet;
+
+    public bool PauseMainStatusTimer
+    {
+        get { return _pauseMainStatusTimer; }
+        set { _pauseMainStatusTimer = value; }
+    }
 
     /// <summary>
     /// 훈련 중 사용할 임시 권능을 설정합니다.
@@ -864,5 +871,14 @@ public class CPlayer : CUnit
         _skill?.CancelSkill();
 
         CGameManager.Instance?.SetGameState(EGameState.Gameover);
+    }
+    protected override bool ShouldAdvanceStatusDuration(CStatus status)
+    {
+        return !_pauseMainStatusTimer ||
+            (
+                status.Id != 25 && // 왕관
+                status.Id != 29 && // 레비아탄
+                status.Id != 10 // 질투
+            );
     }
 }

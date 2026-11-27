@@ -199,25 +199,26 @@ public class QACheatCommands : MonoBehaviour
             return;
         }
 
-        CSlothBoss[] bosses = FindObjectsOfType<CSlothBoss>();
-        if (bosses == null || bosses.Length == 0)
-        {
-            CLogger.Log("[QA] 씬에서 보스를 찾지 못했습니다.");
-            return;
-        }
-
+        CEnemy[] enemies = FindObjectsOfType<CEnemy>();
         float ratio = Mathf.Clamp(percent, 1, 100) / 100f;
+        int count = 0;
 
-        for (int i = 0; i < bosses.Length; i++)
+        for (int i = 0; i < enemies.Length; i++)
         {
-            CSlothBoss boss = bosses[i];
-            if (boss == null || boss.HpCurrent <= 0f)
+            CEnemy boss = enemies[i];
+            if (boss is not IBoss || boss.HpCurrent <= 0f)
             {
                 continue;
             }
 
             boss.GetDamage(ratio, ERatioSwitch.ByMax);
-            CLogger.Log($"[QA] 보스 체력 {percent}% 감소. 현재 {boss.HpCurrent} / {boss.HpMax}");
+            count++;
+            CLogger.Log($"[QA] {boss.name} 체력 {percent}% 감소. 현재 {boss.HpCurrent} / {boss.HpMax}");
+        }
+
+        if (count == 0)
+        {
+            CLogger.Log("[QA] 씬에서 보스를 찾지 못했습니다.");
         }
     }
 
