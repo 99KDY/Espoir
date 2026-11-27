@@ -85,6 +85,7 @@ public class CPlayer : CUnit
     /// </summary>
     public CPlayerSkill Skill => _skill;
     public IReadOnlyList<CSkillSO> Skills => _skill.RegisteredSkills;
+    internal bool EscapeActionsBlocked { get; set; }
     public bool IsInputLocked => _isInputLocked;
     internal bool WasPradonaPressed => _pradonaInput?.action?.WasPressedThisFrame() == true;
 
@@ -147,6 +148,7 @@ public class CPlayer : CUnit
     /// 훈련 중 임시로 받은 권능을 포함해 사용할 수 있는 권능을 반환합니다.
     /// </summary>
     public EPradonaPower ActivePradonaPower => _pradonaPower | _temporaryPradonaPower;
+    internal float PradonaCooldownDuration => _pradonaCooldownSet;
 
     /// <summary>
     /// 훈련 중 사용할 임시 권능을 설정합니다.
@@ -679,7 +681,8 @@ public class CPlayer : CUnit
 
         UpdateQuickslotInput();
 
-        if (!_isInputLocked && !IsStunned && _dashInput.action.WasPressedThisFrame() && _skill.TryDash(GetPointerDirection()))
+        if (!_isInputLocked && !IsStunned && !EscapeActionsBlocked && _dashInput.action.WasPressedThisFrame() &&
+            _skill.TryDash(GetPointerDirection()))
         {
             return;
         }
@@ -689,7 +692,7 @@ public class CPlayer : CUnit
         // UI 위에서 누른 마우 스 입력만 막는다. 같은 액션의 키보드 입력(C)은 그대로 둔다.
         bool isPointerOverUi = EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
 
-        if (canAct &&
+        if (canAct && !EscapeActionsBlocked &&
             Time.timeScale > 0f &&
             ActivePradonaPower != EPradonaPower.None &&
             _pradonaCooldown <= 0f &&
@@ -709,6 +712,7 @@ public class CPlayer : CUnit
             {
                 foreach (SSkillSlot slot in _skillSlots)
                 {
+                    if (EscapeActionsBlocked && slot.skill && slot.skill.Type == ESkillType.Rush) continue;
                     if (slot.input.action.WasPressedThisFrame() && _skill.TryUse(slot.skill, GetPointerDirection()))
                     {
                         break;
