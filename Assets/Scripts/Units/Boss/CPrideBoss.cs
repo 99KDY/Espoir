@@ -53,6 +53,7 @@ public class CPrideBoss : CEnemy, IBoss
     [Header("메인 패턴용")]
     [SerializeField] private Material _mainBeamMaterial;
     [SerializeField, Min(1f)] private float _crossLaserRadius = 14f;
+    [SerializeField] private int _attacksPerMainPattern = 10;
 
     [Header("디버그 로그")]
     [SerializeField] private bool _enableLog = false;
@@ -87,7 +88,6 @@ public class CPrideBoss : CEnemy, IBoss
 
     private CEspoirBossFxPlayer _phaseFx;
 
-
     private Rigidbody _rb;
     private CapsuleCollider _collider;
 
@@ -98,7 +98,15 @@ public class CPrideBoss : CEnemy, IBoss
     private const float MainLaserSwordScale = 1.2f;
 
     private int _mainCounter = 0;
-    private bool _nextMainIsCross = true;
+
+    private enum EPrideMainPattern
+    {
+        TripleLaser,
+        SwordRain,
+        CrossLaser,
+    }
+
+    private EPrideMainPattern _nextMainPattern;
 
     private EPridePhase _phase = EPridePhase.Phase1;
     private Vector3 _arenaCenter;
@@ -108,7 +116,7 @@ public class CPrideBoss : CEnemy, IBoss
     private bool CanFight => _player != null && _previewPattern != null && HpCurrent > 0f && _player.HpCurrent > 0f;
     private bool IsGroggyPhase => _phase == EPridePhase.RecoveryPending ||
                     _phase == EPridePhase.FinalJudgmentPending;
-
+    private bool CanContinueAttack => CanFight && !IsGroggyPhase && IsPlayerInBattleArea(_battleEndRadius);
     public override EBossClear BossId => EBossClear.Superbia;
 
     #region Animator Hash
@@ -135,6 +143,9 @@ public class CPrideBoss : CEnemy, IBoss
 
     // 사망
     private static readonly int DeathTrigger = Animator.StringToHash("tDeath");
+
+    // 손 계속 들고있기
+    private static readonly int SwordHoldParameter = Animator.StringToHash("bSwordHold");
     #endregion
 
     protected override void Awake()
@@ -196,7 +207,7 @@ public class CPrideBoss : CEnemy, IBoss
             {
                 if (!IsGroggyPhase)
                 {
-                    await UniTask.Delay(1500, delayTiming: PlayerLoopTiming.LastUpdate,
+                    await UniTask.Delay(2000, delayTiming: PlayerLoopTiming.LastUpdate,
                         cancellationToken: token);
                 }
 
@@ -218,36 +229,45 @@ public class CPrideBoss : CEnemy, IBoss
                     return;
                 }
 
-                if (_mainCounter < 5)
+                if (_mainCounter < _attacksPerMainPattern)
                 {
                     int subAttackRatio = IsRage ? 3 : 4;
-                    switch(Random.Range(0, subAttackRatio))
+                    if (Random.Range(0, subAttackRatio) == 0)
                     {
-                        case 0:
-                            await RunSubAttack(token);
-                            break;
-                        default:
-                            await RunNormalAttack(token);
-                            break;
+                        await RunSubAttack(token);
                     }
+                    else
+                    {
+                        await RunNormalAttack(token);
+                    }
+
+                    token.ThrowIfCancellationRequested();
                     _mainCounter++;
                 }
                 else
                 {
-                    bool useCross = IsRage && _nextMainIsCross;
+                    EPrideMainPattern nextPattern = EPrideMainPattern.TripleLaser;
 
-                    if (useCross)
+                    switch (_nextMainPattern)
                     {
-                        await RunRotatingCrossLaserAttack(token);
-                    }
-                    else
-                    {
-                        await RunMainLaserAttack(token);
+                        case EPrideMainPattern.TripleLaser:
+                            await RunMainLaserAttack(token);
+                            nextPattern = EPrideMainPattern.SwordRain;
+                            break;
+
+                        case EPrideMainPattern.SwordRain:
+                            await RunSwordRain(token);
+                            if (IsRage) nextPattern = EPrideMainPattern.CrossLaser;
+                            break;
+
+                        case EPrideMainPattern.CrossLaser:
+                            await RunRotatingCrossLaserAttack(token);
+                            break;
                     }
 
                     token.ThrowIfCancellationRequested();
                     _mainCounter = 0;
-                    _nextMainIsCross = !useCross;
+                    _nextMainPattern = nextPattern;
                 }
             }
         }
@@ -379,10 +399,9 @@ public class CPrideBoss : CEnemy, IBoss
     #region MainPattern
     private async UniTask RunMainLaserAttack(CancellationToken token)
     {
-        if (!CanFight || _linePreviewPattern == null ||
+        if (!CanContinueAttack || _linePreviewPattern == null ||
             _warpSwordPrefab == null || _mainBeamMaterial == null) return;
 
-        const int invincibleStatusId = 38;
         Rigidbody body = _rb;
         if (!TryGetMoveDestination(_arenaCenter, out Vector3 restPosition)) return;
         Vector3 groundOrigin = restPosition;
@@ -394,22 +413,15 @@ public class CPrideBoss : CEnemy, IBoss
 
         bool arrivedAtCenter = false;
         bool wasKinematic = body.isKinematic;
-        CStatus invincible = null;
         GameObject[] swords = new GameObject[3];
 
         try
         {
-            if (FindStatus(invincibleStatusId) == null)
-            {
-                AddStatus(invincibleStatusId, duration: 0f);
-                invincible = FindStatus(invincibleStatusId);
-            }
-
             if (!wasKinematic) body.velocity = Vector3.zero;
             body.isKinematic = true;
 
             await MoveBossTask(restPosition, 0.45f, token);
-            if (!CanFight) return;
+            if (!CanContinueAttack) return;
 
             arrivedAtCenter = true;
 
@@ -431,9 +443,10 @@ public class CPrideBoss : CEnemy, IBoss
                 }
             }
 
-            _animator?.SetTrigger(RiseTrigger);
-            await MoveBossTask(restPosition + Vector3.up * 3f, 0.45f, token);
-            if (!CanFight) return;
+            //_animator?.SetTrigger(RiseTrigger);
+            //await MoveBossTask(restPosition + Vector3.up * 3f, 0.45f, token);
+
+            if (!CanContinueAttack) return;
 
             foreach (GameObject sword in swords)
             {
@@ -473,7 +486,7 @@ public class CPrideBoss : CEnemy, IBoss
 
                 await RunMainLaserVolley(swords, spreadStarts, spreadDirections, false, token);
 
-                if (!CanFight) return;
+                if (!CanContinueAttack) return;
             }
 
             forward = AimFrom(groundOrigin, forward);
@@ -484,10 +497,10 @@ public class CPrideBoss : CEnemy, IBoss
 
             await RunMainLaserVolley(swords, finalStarts, finalDirections, true, token);
 
-            if (!CanFight) return;
+            if (!CanContinueAttack) return;
 
-            _animator?.SetTrigger(LandTrigger);
-            await MoveBossTask(restPosition, 0.8f, token);
+            //_animator?.SetTrigger(LandTrigger);
+            //await MoveBossTask(restPosition, 0.8f, token);
         }
         finally
         {
@@ -501,11 +514,9 @@ public class CPrideBoss : CEnemy, IBoss
                 if (arrivedAtCenter) body.position = restPosition;
                 body.isKinematic = wasKinematic;
             }
-
-            if (this != null && invincible != null) RemoveStatus(invincible);
         }
 
-        if (CanFight)
+        if (CanContinueAttack)
         {
             await UniTask.Delay(1000, delayTiming: PlayerLoopTiming.LastUpdate,
                 cancellationToken: token);
@@ -516,6 +527,90 @@ public class CPrideBoss : CEnemy, IBoss
             Vector3 direction = _player.transform.position - start;
             direction.y = 0f;
             return direction.sqrMagnitude > 0.0001f ? direction.normalized : fallback;
+        }
+    }
+
+    private async UniTask RunSwordRain(CancellationToken token)
+    {
+        if (_arena == null || !CanContinueAttack) return;
+        if (!TryGetMoveDestination(_arenaCenter, out Vector3 center)) return;
+
+        const int waveCount = 9;
+        const int swordsPerWave = 6;
+        const float readyTime = 1.3f;
+        const float fallingTime = 0.25f;
+        const float radius = 3f;
+        const float minSpacing = radius * 2f;
+
+        SDamageInfo damage = new SDamageInfo(
+            180f, false, ERatioSwitch.Constant, false, null);
+        List<Vector3> points = new List<Vector3>(swordsPerWave);
+        List<UniTask> slams = new List<UniTask>(swordsPerWave);
+
+        await MoveBossTask(center, 0.45f, token);
+        if (!CanContinueAttack) return;
+
+        BeginSwordHold();
+
+        try
+        {
+            for (int wave = 0; wave < waveCount; wave++)
+            {
+                token.ThrowIfCancellationRequested();
+                if (!CanContinueAttack) return;
+
+                points.Clear();
+                slams.Clear();
+
+                bool hitApplied = false;
+                bool TryConsumeHit()
+                {
+                    if (hitApplied) return false;
+                    hitApplied = true;
+                    return true;
+                }
+
+                for (int attempt = 0; attempt < 36 && points.Count < swordsPerWave; attempt++)
+                {
+                    Vector3 point = _arena.GetRandomGroundCandidate(radius);
+                    if (!TryGetGround(point, out RaycastHit ground)) continue;
+
+                    point.y = ground.point.y;
+                    if (!_arena.Contains(point)) continue;
+
+                    bool overlaps = false;
+                    for (int i = 0; i < points.Count; i++)
+                    {
+                        Vector3 offset = point - points[i];
+                        offset.y = 0f;
+
+                        if (offset.sqrMagnitude >= minSpacing * minSpacing) continue;
+
+                        overlaps = true;
+                        break;
+                    }
+
+                    if (overlaps) continue;
+
+                    bool playSound = points.Count == 0;
+                    points.Add(point);
+                    slams.Add(SlamTask(point, readyTime, fallingTime, radius,
+                        token, damage, 1.5f, TryConsumeHit,
+                        playSound, playLaunchAnimation: false));
+                }
+
+                await UniTask.WhenAll(slams);
+
+                if (wave + 1 < waveCount && CanContinueAttack)
+                {
+                    await UniTask.Delay(slams.Count == 0 ? 1650 : 150,
+                        delayTiming: PlayerLoopTiming.LastUpdate, cancellationToken: token);
+                }
+            }
+        }
+        finally
+        {
+            EndSwordHold(token);
         }
     }
 
@@ -568,6 +663,7 @@ public class CPrideBoss : CEnemy, IBoss
             await MoveBossTask(center, moveTime, token);
             if (!CanFight) return;
 
+            _player.PauseMainStatusTimer = true;
             if (FindStatus(invincibleStatusId) == null)
             {
                 AddStatus(invincibleStatusId, duration: 0f);
@@ -692,6 +788,7 @@ public class CPrideBoss : CEnemy, IBoss
         }
         finally
         {
+            if (_player != null) _player.PauseMainStatusTimer = false;
             if (crossRoot != null) Destroy(crossRoot);
 
             if (_rb != null)
@@ -746,6 +843,7 @@ public class CPrideBoss : CEnemy, IBoss
         _groggyRemainTime = 0f;
         _phase = EPridePhase.Phase2;
         _mainCounter = 0;
+        _nextMainPattern = EPrideMainPattern.CrossLaser;
 
         if (_groggyRemainHp <= 0f)
         {
@@ -891,7 +989,7 @@ public class CPrideBoss : CEnemy, IBoss
             while (turnElapsed < turnTime)
             {
                 await UniTask.NextFrame(PlayerLoopTiming.LastUpdate, token);
-                if (!CanFight) return;
+                if (!CanContinueAttack) return;
 
                 turnElapsed += Time.deltaTime;
                 float t = Mathf.SmoothStep(0f, 1f, turnElapsed / turnTime);
@@ -917,7 +1015,7 @@ public class CPrideBoss : CEnemy, IBoss
                     delayTiming: PlayerLoopTiming.LastUpdate, cancellationToken: token);
             }
 
-            if (!CanFight) return;
+            if (!CanContinueAttack) return;
 
             for (int i = 0; i < beamCount; i++)
             {
@@ -931,7 +1029,7 @@ public class CPrideBoss : CEnemy, IBoss
             while (fadeInElapsed < fadeInTime)
             {
                 await UniTask.NextFrame(PlayerLoopTiming.LastUpdate, token);
-                if (!CanFight) return;
+                if (!CanContinueAttack) return;
 
                 fadeInElapsed += Time.deltaTime;
                 float alpha = Mathf.SmoothStep(0f, 1f, fadeInElapsed / fadeInTime);
@@ -953,7 +1051,7 @@ public class CPrideBoss : CEnemy, IBoss
             bool hit = false;
             float elapsed = 0f;
 
-            while (elapsed < activeTime && CanFight)
+            while (elapsed < activeTime && CanContinueAttack)
             {
                 if (!hit)
                 {
@@ -1073,7 +1171,7 @@ public class CPrideBoss : CEnemy, IBoss
         while (aimElapsed < aimTime)
         {
             await UniTask.NextFrame(PlayerLoopTiming.LastUpdate, token);
-            if (!CanFight) return;
+            if (!CanContinueAttack) return;
 
             aimElapsed += Time.deltaTime;
             float t = Mathf.SmoothStep(0f, 1f, aimElapsed / aimTime);
@@ -1108,7 +1206,7 @@ public class CPrideBoss : CEnemy, IBoss
             while (elapsed < chargeTime)
             {
                 await UniTask.NextFrame(PlayerLoopTiming.LastUpdate, token);
-                if (!CanFight) return;
+                if (!CanContinueAttack) return;
 
                 elapsed += Time.deltaTime;
                 float progress = Mathf.Clamp01(elapsed / chargeTime);
@@ -1149,97 +1247,115 @@ public class CPrideBoss : CEnemy, IBoss
         float spreadRadius = _attackRadius * 1f;
         float innerDistance = aimedRadius + spreadRadius + escapeGap;
 
-        _animator?.SetTrigger(SwordSummonTrigger);
-        for (int i = 0; i < 2; i++)
+        BeginSwordHold();
+
+        try
         {
-            token.ThrowIfCancellationRequested();
-
-            if (!CanFight || !IsPlayerInBattleArea(_battleEndRadius))
+            for (int i = 0; i < 2; i++)
             {
-                return;
+                token.ThrowIfCancellationRequested();
+
+                if (!CanFight || !IsPlayerInBattleArea(_battleEndRadius))
+                {
+                    return;
+                }
+
+                float additionalTime = i % 2 == 1 ? 1.5f : 1.5f;
+
+                float readyTime = Mathf.Max(fallingTime, _realAttackDelay * 0.75f * additionalTime);
+                Vector3 center = _player.transform.position;
+                int swordCount = i == 0 ? 1 : 5;
+                UniTask[] slams = new UniTask[swordCount];
+
+                bool hitApplied = false;
+
+                bool TryConsumeHit()
+                {
+                    if (hitApplied) return false;
+                    hitApplied = true;
+                    return true;
+                }
+
+                slams[0] = SlamTask(center, readyTime, fallingTime, aimedRadius, token,
+                    new SDamageInfo(250f, false, ERatioSwitch.Constant, false, null), 3f, TryConsumeHit);
+
+                int spreadCount = slams.Length - 1;
+                float angleOffset = Random.Range(0f, 360f);
+
+                for (int j = 0; j < spreadCount; j++)
+                {
+                    float angle = (angleOffset + j * (360f / spreadCount)
+                        + Random.Range(-15f, 15f)) * Mathf.Deg2Rad;
+                    float distance = Random.Range(innerDistance, innerDistance + 3f);
+                    Vector3 direction = new Vector3(Mathf.Sin(angle), 0f, Mathf.Cos(angle));
+                    Vector3 point = center + direction * distance;
+
+                    slams[j + 1] = SlamTask(point, readyTime, fallingTime, spreadRadius, token,
+                        new SDamageInfo(150f, false, ERatioSwitch.Constant, false, null), 2f, TryConsumeHit, playSound: false);
+                }
+
+                await UniTask.WhenAll(slams);
             }
-
-            float additionalTime = i % 2 == 1 ? 1.5f : 1.5f;
-
-            float readyTime = Mathf.Max(fallingTime, _realAttackDelay * 0.75f * additionalTime);
-            Vector3 center = _player.transform.position;
-            int swordCount = i == 0 ? 1 : 5;
-            UniTask[] slams = new UniTask[swordCount];
-
-            bool hitApplied = false;
-
-            bool TryConsumeHit()
-            {
-                if (hitApplied) return false;
-                hitApplied = true;
-                return true;
-            }
-
-            slams[0] = SlamTask(center, readyTime, fallingTime, aimedRadius, token,
-                new SDamageInfo(250f, false, ERatioSwitch.Constant, false, null), 3f, TryConsumeHit);
-
-            int spreadCount = slams.Length - 1;
-            float angleOffset = Random.Range(0f, 360f);
-
-            for (int j = 0; j < spreadCount; j++)
-            {
-                float angle = (angleOffset + j * (360f / spreadCount)
-                    + Random.Range(-15f, 15f)) * Mathf.Deg2Rad;
-                float distance = Random.Range(innerDistance, innerDistance + 3f);
-                Vector3 direction = new Vector3(Mathf.Sin(angle), 0f, Mathf.Cos(angle));
-                Vector3 point = center + direction * distance;
-
-                slams[j + 1] = SlamTask(point, readyTime, fallingTime, spreadRadius, token,
-                    new SDamageInfo(150f, false, ERatioSwitch.Constant, false, null), 2f, TryConsumeHit, playSound: false);
-            }
-
-            await UniTask.WhenAll(slams);
         }
+        finally
+        {
+            EndSwordHold(token);
+        }
+        
     }
 
     private async UniTask RunSeveralSlam(bool special, CancellationToken token)
     {
-        _animator?.SetTrigger(SwordSummonTrigger);
-        for (int i = 0; i < 5; i++)
+        List<UniTask> slams = new List<UniTask>();
+        BeginSwordHold();
+
+        try
         {
-            token.ThrowIfCancellationRequested();
-
-            if (!CanFight || !IsPlayerInBattleArea(_battleEndRadius))
+            for (int i = 0; i < 5; i++)
             {
-                return;
+                token.ThrowIfCancellationRequested();
+                if (!CanContinueAttack) return;
+
+                bool hitApplied = false;
+                bool TryConsumeHit()
+                {
+                    if (hitApplied) return false;
+                    hitApplied = true;
+                    return true;
+                }
+
+                SDamageInfo damage = new SDamageInfo(
+                    150f, false, ERatioSwitch.Constant, false, null);
+
+                Vector3 center = _player.transform.position;
+                slams.Add(SlamTask(center, _realAttackDelay, 0.2f, _attackRadius,
+                    token, damage, 1.5f, TryConsumeHit, playLaunchAnimation: false));
+
+                if (special)
+                {
+                    float angle = Random.Range(0f, 360f) * Mathf.Deg2Rad;
+                    float distance = Random.Range(_attackRadius * 2f + 0.5f, _attackRadius * 2f + 3f);
+                    Vector3 direction = new Vector3(Mathf.Sin(angle), 0f, Mathf.Cos(angle));
+                    Vector3 point = center + direction * distance;
+
+                    slams.Add(SlamTask(point, _realAttackDelay, 0.2f, _attackRadius,
+                        token, damage, 1.5f, TryConsumeHit,
+                        playSound: false, playLaunchAnimation: false));
+                }
+
+                if (i < 4)
+                {
+                    await UniTask.Delay(TimeSpan.FromSeconds(_realAttackDelay * 2f / 3f),
+                        delayTiming: PlayerLoopTiming.LastUpdate, cancellationToken: token);
+                }
             }
 
-            bool hitApplied = false;
-
-            bool TryConsumeHit()
-            {
-                if (hitApplied) return false;
-                hitApplied = true;
-                return true;
-            }
-
-            SlamTask(_player.transform.position, _realAttackDelay, 0.2f, _attackRadius, token,
-                new SDamageInfo(150f, false, ERatioSwitch.Constant, false, null), 1.5f, TryConsumeHit).Forget();
-
-
-            if (special)
-            {
-                float angleOffset = Random.Range(0f, 360f) * Mathf.Deg2Rad;
-                float distance = Random.Range(_attackRadius * 2f + 0.5f, _attackRadius * 2f + 3f);
-                Vector3 direction = new Vector3(Mathf.Sin(angleOffset), 0f, Mathf.Cos(angleOffset));
-                Vector3 point = _player.transform.position + direction * distance;
-                SlamTask(point, _realAttackDelay, 0.2f, _attackRadius, token,
-                    new SDamageInfo(150f, false, ERatioSwitch.Constant, false, null),
-                    1.5f, TryConsumeHit, playSound: false).Forget();
-            }
-
-            await UniTask.Delay(TimeSpan.FromSeconds(_realAttackDelay * 2 / 3f),
-                delayTiming: PlayerLoopTiming.LastUpdate,
-                cancellationToken: token);
+            await UniTask.WhenAll(slams);
         }
-
-        await UniTask.Delay(2000, delayTiming: PlayerLoopTiming.LastUpdate,
-            cancellationToken: token);
+        finally
+        {
+            EndSwordHold(token);
+        }
     }
 
     private async UniTask RunBackstepSwordVolley(CancellationToken token)
@@ -1629,10 +1745,32 @@ public class CPrideBoss : CEnemy, IBoss
         return toPlayer.sqrMagnitude;
     }
 
+    private void BeginSwordHold()
+    {
+        if (_animator == null || !_animator.isActiveAndEnabled) return;
+
+        _animator.ResetTrigger(SwordLaunchTrigger);
+        _animator.SetBool(SwordHoldParameter, true);
+        _animator.SetTrigger(SwordSummonTrigger);
+    }
+
+    private void EndSwordHold(CancellationToken token)
+    {
+        if (_animator == null || !_animator.isActiveAndEnabled) return;
+
+        _animator.SetBool(SwordHoldParameter, false);
+
+        if (!token.IsCancellationRequested && CanContinueAttack)
+        {
+            _animator.SetTrigger(SwordLaunchTrigger);
+        }
+    }
 
     private async UniTask SlamTask(Vector3 attackPoint, float readyTime, float fallingTime, float radius, CancellationToken token,
-        SDamageInfo damage, float swordScale = 1f, Func<bool> tryConsumeHit = null, bool playSound = true)
+        SDamageInfo damage, float swordScale = 1f, Func<bool> tryConsumeHit = null, bool playSound = true, bool playLaunchAnimation = true)
     {
+        if (!CanContinueAttack) return;
+
         if (TryGetGround(attackPoint, out RaycastHit ground))
         {
             attackPoint.y = ground.point.y;
@@ -1665,7 +1803,13 @@ public class CPrideBoss : CEnemy, IBoss
                 delayTiming: PlayerLoopTiming.LastUpdate,
                 cancellationToken: token);
 
-            _animator?.SetTrigger(SwordLaunchTrigger);
+            if (!CanContinueAttack) return;
+
+            if (playLaunchAnimation)
+            {
+                _animator?.SetTrigger(SwordLaunchTrigger);
+            }
+
             float deltaT = 0f;
             while (deltaT < fallingTime)
             {
@@ -1689,6 +1833,7 @@ public class CPrideBoss : CEnemy, IBoss
             Vector3 offset = _player.transform.position - attackPoint;
             offset.y = 0f;
 
+            if (!CanContinueAttack) return;
             if (offset.sqrMagnitude <= radius * radius &&
                 (tryConsumeHit == null || tryConsumeHit()))
             {
@@ -1958,6 +2103,7 @@ public class CPrideBoss : CEnemy, IBoss
             _animator.ResetTrigger(KneelTrigger);
             _animator.ResetTrigger(KneelEndTrigger);
             _animator.ResetTrigger(DeathTrigger);
+            _animator.SetBool(SwordHoldParameter, false);
 
             if (HpCurrent > 0f && (_animator.IsInTransition(0) ||
                 _animator.GetCurrentAnimatorStateInfo(0).fullPathHash != IdleState))
@@ -1988,7 +2134,7 @@ public class CPrideBoss : CEnemy, IBoss
     {
         _phase = EPridePhase.Phase1;
         _mainCounter = 0;
-        _nextMainIsCross = true;
+        _nextMainPattern = EPrideMainPattern.TripleLaser;
         if (_SE_JudgementFailed != null) _SE_JudgementFailed.Stop();
     }
 

@@ -19,4 +19,18 @@ public class CBossArena : MonoBehaviour
             && Mathf.Abs(offset.y) <= halfSize.y
             && Mathf.Abs(offset.z) <= halfSize.z;
     }
+
+    public Vector3 GetRandomGroundCandidate(float padding)
+    {
+        Vector3 halfSize = _box.size * 0.5f;
+        float x = Mathf.Max(0f, halfSize.x - padding);
+        float z = Mathf.Max(0f, halfSize.z - padding);
+
+        Vector3 localPoint = new Vector3(
+            _box.center.x + Random.Range(-x, x),
+            0f,
+            _box.center.z + Random.Range(-z, z));
+
+        return transform.TransformPoint(localPoint);
+    }
 }
