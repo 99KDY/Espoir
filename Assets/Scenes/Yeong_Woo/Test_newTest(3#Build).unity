@@ -4550,6 +4550,8 @@ MonoBehaviour:
   _statusEffectAnchor: {fileID: 0}
   _statusEffectOffset: {x: 0, y: 0, z: 0}
   _statusEffectRadius: 1
+  _name: 
+  _nickname: 
   _targetStatSO: {fileID: 0}
   _dropCount: 1
   _drops: []
