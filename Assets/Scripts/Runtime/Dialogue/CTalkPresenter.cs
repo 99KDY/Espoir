@@ -484,7 +484,15 @@ public class CTalkPresenter : MonoBehaviour
         {
             foreach (CTalkChoice choice in node.choices)
             {
-                if (_current.CanChoose(choice)) _CHOICES.Add(choice);
+                if (!_current.CanChoose(choice)) continue;
+                if (_summoner == null && choice.questAction == ETalkQuestAction.None &&
+                    !string.IsNullOrEmpty(choice.to))
+                {
+                    CTalkNode target = _current.FindNode(choice.to, _mapKey);
+                    if (target?.end == ETalkEnd.Summon && !target.HasChoices && string.IsNullOrEmpty(target.next))
+                        continue;
+                }
+                _CHOICES.Add(choice);
             }
         }
 

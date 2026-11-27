@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -393,15 +394,8 @@ public class CPlayerUI_Build : MonoBehaviour
 
         temp = temp.TrimEnd('\n');
 
-        if (string.IsNullOrWhiteSpace(temp))
-        {
-            _skillPradona.TooltipText =
-                "재사용 대기시간 60초\r\n선택한 권능을 발동합니다. 기절 중에도 사용할 수 있습니다.\n\n현재 선택된 권능이 없어 사용할 수 없습니다.";
-        }
-        else
-        {
-            _skillPradona.TooltipText =
-            "재사용 대기시간 60초\r\n선택한 권능을 발동합니다. 기절 중에도 사용할 수 있습니다.\n\n" + temp;
-        }
+        if (string.IsNullOrWhiteSpace(temp)) temp = "선택한 권능이 없어 지금은 사용할 수 없습니다";
+        string cooldown = _player.PradonaCooldownDuration.ToString("0.##", CultureInfo.InvariantCulture);
+        _skillPradona.TooltipText = $"재사용 대기시간 {cooldown}초\n선택한 권능을 발동합니다\n기절 상태에서도 사용할 수 있습니다\n" + temp;
     }
 }
