@@ -17,7 +17,7 @@ public class CTestEnemySpawner : MonoBehaviour
     private float _timer = 0;
     private float _peaceTimer = 0f;
     private bool _isBattleActive;
-    private int groundMask = LayerMask.GetMask("Ground");
+    private int groundMask;
 
     private void Awake()
     {
@@ -37,6 +37,7 @@ public class CTestEnemySpawner : MonoBehaviour
                 return;
             }
         }
+        groundMask = LayerMask.GetMask("Ground");
     }
 
     void Start()
