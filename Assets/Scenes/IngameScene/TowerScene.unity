@@ -4340,30 +4340,6 @@ PrefabInstance:
       propertyPath: _arena
       value: 
       objectReference: {fileID: 641608243}
-    - target: {fileID: 8670983954707699309, guid: 6333a78c10505134eae8bdf1aeabc36e, type: 3}
-      propertyPath: _dropCount
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 8670983954707699309, guid: 6333a78c10505134eae8bdf1aeabc36e, type: 3}
-      propertyPath: _drops.Array.size
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8670983954707699309, guid: 6333a78c10505134eae8bdf1aeabc36e, type: 3}
-      propertyPath: _drops.Array.data[0].stage
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 8670983954707699309, guid: 6333a78c10505134eae8bdf1aeabc36e, type: 3}
-      propertyPath: _drops.Array.data[0].chance
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8670983954707699309, guid: 6333a78c10505134eae8bdf1aeabc36e, type: 3}
-      propertyPath: _drops.Array.data[0].rarity
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 8670983954707699309, guid: 6333a78c10505134eae8bdf1aeabc36e, type: 3}
-      propertyPath: _drops.Array.data[0].isEquipment
-      value: 1
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
