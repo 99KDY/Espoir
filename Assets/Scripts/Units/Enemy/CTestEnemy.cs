@@ -94,15 +94,27 @@ public class CTestEnemy : CEnemy
     protected override void Update()
     {
         base.Update();
-        if (_hpCurrent <= 0)
-        {
-            _isChasingPlayer = false;
-            _isDie = true;
-            _animator.SetBool(_hashDie, true);
-            Destroy(this.gameObject, 3f);
-        }
+
         if (_isDie)
         {
+            return;
+        }
+
+        if (_hpCurrent <= 0f)
+        {
+            _isDie = true;
+            _isChasingPlayer = false;
+            _isMove = false;
+            _movePos = Vector3.zero;
+
+            if (_rb != null)
+            {
+                _rb.velocity = new Vector3(0f, _rb.velocity.y, 0f);
+            }
+
+            _animator.SetBool(_hashMove, false);
+            _animator.SetBool(_hashDie, true);
+            Destroy(gameObject, 3f);
             return;
         }
         // TODO : 플레이어를 쫓아가기

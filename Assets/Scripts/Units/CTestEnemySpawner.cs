@@ -17,6 +17,7 @@ public class CTestEnemySpawner : MonoBehaviour
     private float _timer = 0;
     private float _peaceTimer = 0f;
     private bool _isBattleActive;
+    private int groundMask = LayerMask.GetMask("Ground");
 
     private void Awake()
     {
@@ -146,7 +147,20 @@ public class CTestEnemySpawner : MonoBehaviour
 
             if (enableSpawn)
             {
-                spawnPos = targetPos;
+                Vector3 rayOrigin = targetPos + Vector3.up * 2f;
+
+                if (!Physics.Raycast(
+                        rayOrigin,
+                        Vector3.down,
+                        out RaycastHit groundHit,
+                        5f,
+                        groundMask,
+                        QueryTriggerInteraction.Ignore))
+                {
+                    continue;
+                }
+
+                spawnPos = groundHit.point + Vector3.up * 0.25f;
                 return true;
             }
         }
