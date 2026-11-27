@@ -85,14 +85,14 @@ float4 GamoriDistortOut(float2 off, float4 grabPos, float4 scrPos) {
   float s = vUv.x, y = vUv.y, lag = uHead - s;
   if (lag < 0.0) discard;
   float life = clamp(lag / max(uHead - uTail, 0.001), 0.0, 1.0);
-  float env = lerp(smoothstep(0.0, 0.06, lag) * (1.0 - life) * smoothstep(uTail, uTail + 0.1, s), 1.0, uFlat);   
-  env *= sin(3.14159 * y);                                                                                  
+  float env = lerp(smoothstep(0.0, 0.06, lag) * (1.0 - life) * smoothstep(uTail, uTail + 0.1, s), 1.0, uFlat);
+  env *= sin(3.14159 * y);
   float2 g = float2(ddx(y), ddy(y));
   float gl = length(g);
   if (gl < 1e-7) discard;
-  float prof = uWaves < 0.5 ? sin((y - 0.5) * 6.28318) : sin(y * 3.14159 * uWaves - uTime * 16.0);   
-  float2 off = (g / gl) * prof * env * uAmt;       
-  
+  float prof = uWaves < 0.5 ? sin((y - 0.5) * 6.28318) : sin(y * 3.14159 * uWaves - uTime * 16.0);
+  float2 off = (g / gl) * prof * env * uAmt;
+
   return GamoriDistortOut(off, i.grabPos, i.scrPos);
 
         return 0;

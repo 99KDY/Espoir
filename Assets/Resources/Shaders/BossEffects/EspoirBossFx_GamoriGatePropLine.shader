@@ -59,7 +59,7 @@ Shader "EspoirBossFx/GamoriGatePropLine" {
       static float vRing;
       static float4 _fc;
 
-float3 squash(float3 w) {      
+float3 squash(float3 w) {
   float3 gb = (EspoirStagePoint(uGP)) - (normalize(EspoirStageDir(uGN)))
       * (uBack * length(EspoirStageDir(float3(0.0, 1.0, 0.0)))), rd = w - _WorldSpaceCameraPos;
   float den = dot(rd, (normalize(EspoirStageDir(uGN))));
@@ -84,9 +84,9 @@ void propBody()
 }
 
 static float2 gQ;
-bool inOpen(float2 q) {      
+bool inOpen(float2 q) {
   float k = uOpenK;
-  if (uKind < 0.5) {       
+  if (uKind < 0.5) {
     float hw = uShp.x * k;
     if (q.y < 0.0 || q.y > uShp.z) return false;
     float w = hw;
@@ -97,19 +97,19 @@ bool inOpen(float2 q) {
     }
     return abs(q.x) < w;
   }
-  if (uKind < 1.5) {       
+  if (uKind < 1.5) {
     float2 d = float2(q.x / max(uShp.x * k, 0.001), (q.y - uShp.z) / max(uShp.y * k, 0.001));
     return dot(d, d) < 1.0 && q.y > 0.0;
   }
-  if (uKind < 2.5) {       
+  if (uKind < 2.5) {
     float y = q.y / uShp.y * 2.0 - 1.0;
     if (abs(y) > 1.0) return false;
     return abs(q.x) < uShp.x * k * pow(max(1.0 - pow(abs(y), 1.8), 0.0), 0.75);
   }
-  if (q.y < 0.0 || q.y > uShp.y) return false;      
+  if (q.y < 0.0 || q.y > uShp.y) return false;
   return abs(q.x) < uShp.x * k * (1.0 - q.y / uShp.y);
 }
-float portal(float3 P) {     
+float portal(float3 P) {
   float sd = dot(P - (EspoirStagePoint(uGP)), (normalize(EspoirStageDir(uGN))));
   sd /= length(EspoirStageDir(float3(0.0, 1.0, 0.0))); if (sd >= 0.0) return 0.0;
   float3 rd = P - _WorldSpaceCameraPos; float den = dot(rd, (normalize(EspoirStageDir(uGN))));
@@ -153,7 +153,7 @@ float portal(float3 P) {
         vUv = i.vUv;
         vRing = i.vRing;
         _fc = 0;
- if (uNoChunk > 0.5 && vRing > 0.9) discard; float fog = portal(vW); propBody(); _fc.rgb = lerp(_fc.rgb, uVoid, fog); 
+ if (uNoChunk > 0.5 && vRing > 0.9) discard; float fog = portal(vW); propBody(); _fc.rgb = lerp(_fc.rgb, uVoid, fog);
         return EspoirOut(_fc);
       }
       ENDCG

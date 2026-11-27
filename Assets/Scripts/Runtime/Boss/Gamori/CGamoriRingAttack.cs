@@ -76,4 +76,3 @@ public class CGamoriRingAttack : CGamoriAttack
         if (_ring) Destroy(_ring.gameObject);
     }
 }
-

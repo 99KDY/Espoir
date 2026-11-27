@@ -64,7 +64,7 @@ Shader "EspoirBossFx/GamoriGateProp" {
       static float vRing;
       static float4 _fc;
 
-float3 squash(float3 w) {      
+float3 squash(float3 w) {
   float3 gb = (EspoirStagePoint(uGP)) - (normalize(EspoirStageDir(uGN)))
       * (uBack * length(EspoirStageDir(float3(0.0, 1.0, 0.0)))), rd = w - _WorldSpaceCameraPos;
   float den = dot(rd, (normalize(EspoirStageDir(uGN))));
@@ -86,26 +86,26 @@ void propBody() {
   float dz = propDis();
   if (dz < uDis) discard;
   float burn = uDis > 0.0 ? 1.0 - smoothstep(0.0, 0.07, dz - uDis) : 0.0;
-  float3 n = cross(ddx(vW), ddy(vW));                        
-  n = dot(n, n) > 1e-20 ? normalize(n) : normalize(vN);      
+  float3 n = cross(ddx(vW), ddy(vW));
+  n = dot(n, n) > 1e-20 ? normalize(n) : normalize(vN);
   float3 V = normalize(_WorldSpaceCameraPos - vW);
   if (dot(n, V) < 0.0) n = -n;
   float l = dot(n, normalize(EspoirStageDir(float3(0.4, 0.8, 0.45))));
   float3 c = lerp(uShade, uMid, smoothstep(-0.12, -0.02, l));
   c = lerp(c, uLight, smoothstep(0.42, 0.52, l));
   c = invACES(c);
-  float fr = pow(clamp(1.0 - dot(n, V), 0.0, 1.0), 2.5);     
+  float fr = pow(clamp(1.0 - dot(n, V), 0.0, 1.0), 2.5);
   float bottom = 1.0 - smoothstep(0.0, 0.6, vL.y / uH);
   c += uHot * (uGlow * (0.9 * bottom * bottom + 0.6 * fr) + uBase * bottom * bottom);
-  c += uHot * (1.0 - smoothstep(0.0, 0.1, uGrow - vUv.x)) * step(uGrow, 1.0) * 1.3;      
+  c += uHot * (1.0 - smoothstep(0.0, 0.1, uGrow - vUv.x)) * step(uGrow, 1.0) * 1.3;
   c = lerp(c, uHot * 1.4, burn);
   _fc = float4(c, 1.0);
 }
 
 static float2 gQ;
-bool inOpen(float2 q) {      
+bool inOpen(float2 q) {
   float k = uOpenK;
-  if (uKind < 0.5) {       
+  if (uKind < 0.5) {
     float hw = uShp.x * k;
     if (q.y < 0.0 || q.y > uShp.z) return false;
     float w = hw;
@@ -116,19 +116,19 @@ bool inOpen(float2 q) {
     }
     return abs(q.x) < w;
   }
-  if (uKind < 1.5) {       
+  if (uKind < 1.5) {
     float2 d = float2(q.x / max(uShp.x * k, 0.001), (q.y - uShp.z) / max(uShp.y * k, 0.001));
     return dot(d, d) < 1.0 && q.y > 0.0;
   }
-  if (uKind < 2.5) {       
+  if (uKind < 2.5) {
     float y = q.y / uShp.y * 2.0 - 1.0;
     if (abs(y) > 1.0) return false;
     return abs(q.x) < uShp.x * k * pow(max(1.0 - pow(abs(y), 1.8), 0.0), 0.75);
   }
-  if (q.y < 0.0 || q.y > uShp.y) return false;      
+  if (q.y < 0.0 || q.y > uShp.y) return false;
   return abs(q.x) < uShp.x * k * (1.0 - q.y / uShp.y);
 }
-float portal(float3 P) {     
+float portal(float3 P) {
   float sd = dot(P - (EspoirStagePoint(uGP)), (normalize(EspoirStageDir(uGN))));
   sd /= length(EspoirStageDir(float3(0.0, 1.0, 0.0))); if (sd >= 0.0) return 0.0;
   float3 rd = P - _WorldSpaceCameraPos; float den = dot(rd, (normalize(EspoirStageDir(uGN))));
@@ -172,7 +172,7 @@ float portal(float3 P) {
         vUv = i.vUv;
         vRing = i.vRing;
         _fc = 0;
- if (uNoChunk > 0.5 && vRing > 0.9) discard; float fog = portal(vW); propBody(); _fc.rgb = lerp(_fc.rgb, uVoid, fog); 
+ if (uNoChunk > 0.5 && vRing > 0.9) discard; float fog = portal(vW); propBody(); _fc.rgb = lerp(_fc.rgb, uVoid, fog);
         return EspoirOut(_fc);
       }
       ENDCG

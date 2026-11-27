@@ -75,12 +75,12 @@ float3 rot(float3 p, float3 ax, float a)
   float carry = 1.0 - exp(-max(age, 0.0) / 0.09);
   float3 c = float3(lerp(aFrom, aTo, u).xy, aTo.z + (lerp(aFrom, aTo, u).z - aTo.z) * (1.0 + _GamoriPathAdd)) + uDir
       * (0.3 + 0.55 * s3) * carry + float3(sin(ph * 43.0), 0.0, cos(ph * 43.0)) * 0.13 * carry;
-  c.y -= (0.3 + 0.6 * frac(ph * 3.1)) * age * age * 2.0;                       
+  c.y -= (0.3 + 0.6 * frac(ph * 3.1)) * age * age * 2.0;
   c.y = max(c.y, 0.03);
   float s = aSeed.w * step(0.0, age) * (1.0 - smoothstep(0.5, 1.0, k));
   float3 ax = normalize(aAxis); float ang = ph * 6.283 + uT * (5.0 + 7.0 * frac(ph * 7.31));
   float3 p = rot(position * s, ax, ang), n = rot(normal, ax, ang);
-  p += uDir * dot(p, uDir) * 3.2 * exp(-max(age, 0.0) / 0.06);                  
+  p += uDir * dot(p, uDir) * 3.2 * exp(-max(age, 0.0) / 0.06);
   vUv = uv; vTint = frac(ph * 13.7); vHot = 0.25 * exp(-max(age, 0.0) / 0.1);
   vN = normalize(mul((float3x3)unity_ObjectToWorld, n));
   float4 w = mul(unity_ObjectToWorld, float4(c + p, 1.0)); vW = w.xyz;
@@ -109,8 +109,8 @@ float3 rot(float3 p, float3 ax, float a)
   float l = dot(n, normalize(EspoirStageDir(float3(0.4, 0.8, 0.45))));
   float3 c = lerp(uShade, uMid, smoothstep(-0.12, -0.02, l));
   c = lerp(c, uLight, smoothstep(0.32, 0.42, l));
-  c = lerp(c, uLight * 1.25 + float3(0.06, 0.02, 0.03), smoothstep(0.78, 0.84, vUv.y) * 0.7);      
-  c *= 0.72 + 0.5 * vTint;                                                                     
+  c = lerp(c, uLight * 1.25 + float3(0.06, 0.02, 0.03), smoothstep(0.78, 0.84, vUv.y) * 0.7);
+  c *= 0.72 + 0.5 * vTint;
   c = invACES(clamp(c, 0.0, 0.95));
   c += uHot * vHot * 0.7;
   _fc = float4(c, 1.0);

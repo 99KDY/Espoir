@@ -48,7 +48,7 @@ float4 redLight(float I) {
         v2f o = (v2f)0;
         position = IN.vertex.xyz;
         uv = IN.uv;
- vUv = uv; float4 w = mul(unity_ObjectToWorld, float4(position, 1.0)); vW = w.xyz; o.pos = mul(UNITY_MATRIX_VP, w); 
+ vUv = uv; float4 w = mul(unity_ObjectToWorld, float4(position, 1.0)); vW = w.xyz; o.pos = mul(UNITY_MATRIX_VP, w);
         o.vUv = vUv;
         o.vW = vW;
         return o;

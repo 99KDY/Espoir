@@ -95,18 +95,18 @@ float propDis() {
   float dz = propDis();
   if (dz < uDis) discard;
   float burn = uDis > 0.0 ? 1.0 - smoothstep(0.0, 0.07, dz - uDis) : 0.0;
-  float3 n = cross(ddx(vW), ddy(vW));                        
-  n = dot(n, n) > 1e-20 ? normalize(n) : normalize(vN);      
+  float3 n = cross(ddx(vW), ddy(vW));
+  n = dot(n, n) > 1e-20 ? normalize(n) : normalize(vN);
   float3 V = normalize(_WorldSpaceCameraPos - vW);
   if (dot(n, V) < 0.0) n = -n;
   float l = dot(n, normalize(EspoirStageDir(float3(0.4, 0.8, 0.45))));
   float3 c = lerp(uShade, uMid, smoothstep(-0.12, -0.02, l));
   c = lerp(c, uLight, smoothstep(0.42, 0.52, l));
   c = invACES(c);
-  float fr = pow(clamp(1.0 - dot(n, V), 0.0, 1.0), 2.5);     
+  float fr = pow(clamp(1.0 - dot(n, V), 0.0, 1.0), 2.5);
   float bottom = 1.0 - smoothstep(0.0, 0.6, vL.y / uH);
   c += uHot * (uGlow * (0.9 * bottom * bottom + 0.6 * fr) + uBase * bottom * bottom);
-  c += uHot * (1.0 - smoothstep(0.0, 0.1, uGrow - vUv.x)) * step(uGrow, 1.0) * 1.3;      
+  c += uHot * (1.0 - smoothstep(0.0, 0.1, uGrow - vUv.x)) * step(uGrow, 1.0) * 1.3;
   c = lerp(c, uHot * 1.4, burn);
   _fc = float4(c, 1.0);
 

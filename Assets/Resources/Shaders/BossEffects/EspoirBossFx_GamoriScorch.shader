@@ -57,7 +57,7 @@ float2 hash2(float2 p)
 {
     p = float2(dot(p, float2(127.1, 311.7)), dot(p, float2(269.5, 183.3))); return frac(sin(p) * 43758.5453);
 }
-float vedge(float2 x) {      
+float vedge(float2 x) {
   float2 n = floor(x), f = frac(x), mg = ((float2)(0.0)), mr = ((float2)(0.0));
   float md = 8.0;
   for (int j = -1; j <= 1; j++) for (int i = -1; i <= 1; i++) {
@@ -76,7 +76,7 @@ float vedge(float2 x) {
       v2f vert(appdata IN) {
         v2f o = (v2f)0;
         position = IN.vertex.xyz;
- vP = position.xy; o.pos = UnityObjectToClipPos(float4(position, 1.0)); 
+ vP = position.xy; o.pos = UnityObjectToClipPos(float4(position, 1.0));
         o.vP = vP;
         return o;
       }
@@ -92,21 +92,21 @@ float vedge(float2 x) {
   if (da > uHalf + 0.25) discard;
   float nz = tex2D(uNoise, q * 0.3 + uSeed).r, nz2 = tex2D(uNoise, q * 0.9 - uSeed).g;
   float side = r * sin(clamp(uHalf - da, -1.5708, 1.5708));
-  float eb0 = min(uR - r, side);                                              
-  float eb = eb0 + (nz - 0.56) * uRag * 2.0 * smoothstep(0.3, 1.6, r);        
+  float eb0 = min(uR - r, side);
+  float eb = eb0 + (nz - 0.56) * uRag * 2.0 * smoothstep(0.3, 1.6, r);
   if (eb < 0.0) discard;
   float2 cq = float2(a * 5.0, pow(max(r, 0.01), 0.8) * 1.15) + float2(uSeed * 3.1, uSeed);
   float e1 = vedge(cq), e2 = vedge(cq * 2.6 + 7.3);
-  float w = (0.03 + 0.036 * nz2) * (1.0 - uClose);      
+  float w = (0.03 + 0.036 * nz2) * (1.0 - uClose);
   float c1 = (1.0 - smoothstep(w, w + 0.03, e1)) * step(0.002, w);
   float c2 = (1.0 - smoothstep(w * 0.45, w * 0.45 + 0.03, e2)) * uFine * smoothstep(0.3, 0.62, nz) * step(0.002, w);
   float inb = smoothstep(0.0, 0.35, eb);
   float crack = max(c1, c2) * uCrack * inb;
-  float glow = (1.0 - smoothstep(w, w + 0.2, e1)) * uCrack * uHot * 0.3 * inb;      
-  float core = 1.0 - smoothstep(w * 0.3, w * 0.62, e1);                         
+  float glow = (1.0 - smoothstep(w, w + 0.2, e1)) * uCrack * uHot * 0.3 * inb;
+  float core = 1.0 - smoothstep(w * 0.3, w * 0.62, e1);
   float lineV = (1.0 - smoothstep(0.02, 0.05, eb0)) * uLineOn;
   float ember = (1.0 - smoothstep(0.0, 0.32, eb)) * uEmber * (0.55 + 0.45 * sin(uT * 9.0 + nz * 20.0));
-  float I = 0.05 + 0.1 * nz;                                                  
+  float I = 0.05 + 0.1 * nz;
   I = max(I, glow);
   I = lerp(I, lerp(0.4 + 0.3 * uHot, 0.04, core * c1), crack);
   I = max(I, ember * (0.4 + 0.3 * uHot));

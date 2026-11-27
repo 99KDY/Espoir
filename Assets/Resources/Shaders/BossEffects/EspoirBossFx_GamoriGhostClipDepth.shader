@@ -109,14 +109,14 @@ float3 ramp(float i) {
   float fr = clamp(1.0 - abs(dot(normalize(vN), normalize(vV))), 0.0, 1.0);
   float3 q = vP * uNScale;
   float n = tex2D(uNoise, q.xy + float2(uSeed, q.z * 0.3)).a * 0.7 + tex2D(uNoise, q.zy * 2.2 + uSeed).r * 0.3;
-  
+
   float h = lerp(distance(vP, uWrist) * 0.3, (vP.y - uWrist.y - uOff.y) * 0.22, uBodyMode);
   float th = uT * 1.25 - 0.15 - h;
   float vis = smoothstep(th, th + 0.04, n);
   float edge = vis * (1.0 - smoothstep(th + 0.04, th + 0.1, n)) * step(0.02, uT);
   float flow = tex2D(uNoise, float2(q.x * 1.5 + uSeed, q.y * 3.0 - uTime * 0.6)).b;
   float cool = lerp(1.08, 0.62, uT);
-  
+
   float I = (uBase + pow(fr, lerp(1.9, 2.4, uBodyMode)) * (0.68 + 0.3 * uBoost) + (flow - 0.5) * 0.14
       * (1.0 - uBodyMode)) * cool + edge * 0.3;
   float3 col = ramp(clamp(I, 0.0, 0.9 + 0.1 * uBoost));

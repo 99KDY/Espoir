@@ -56,7 +56,7 @@ float4 GamoriDistortOut(float2 off, float4 grabPos, float4 scrPos) {
         v2f o = (v2f)0;
         position = IN.vertex.xyz;
         uv = IN.uv;
- vUv = uv; float4 w = mul(unity_ObjectToWorld, float4(position, 1.0)); vW = w.xyz; o.pos = mul(UNITY_MATRIX_VP, w); 
+ vUv = uv; float4 w = mul(unity_ObjectToWorld, float4(position, 1.0)); vW = w.xyz; o.pos = mul(UNITY_MATRIX_VP, w);
         o.vUv = vUv;
         o.vW = vW;
         o.grabPos = ComputeGrabScreenPos(o.pos);
@@ -73,7 +73,7 @@ float4 GamoriDistortOut(float2 off, float4 grabPos, float4 scrPos) {
   float ring = exp(-pow((r - uR) / uW, 2.0)) * (1.0 - smoothstep(0.8, 1.0, r));
   float2 d = normalize(float2(pe.x, pe.y * uEx));
   float2 gr = float2(ddx(r), ddy(r)); float2 off = (gr / max(length(gr), 1e-7)) * ring * uAmt;
-  
+
   return GamoriDistortOut(off, i.grabPos, i.scrPos);
 
         return 0;

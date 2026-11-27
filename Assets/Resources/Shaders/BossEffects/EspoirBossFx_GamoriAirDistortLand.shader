@@ -68,7 +68,7 @@ float4 GamoriDistortOut(float2 off, float4 grabPos, float4 scrPos) {
   float3 p = uCenter + (position - uCenter) * (1.0 - uGrow);
   float3 d = p - uCenter;
   float3 dn = normalize(d);
-  if (dn.y < 0.0) dn.y *= smoothstep(0.0, 1.0, p.y - uLand);      
+  if (dn.y < 0.0) dn.y *= smoothstep(0.0, 1.0, p.y - uLand);
   p += dn * uExpand * lerp(0.35 + uv.y, 1.0 + 0.25 * uv.y, uRigid);
   vWorld = mul(unity_ObjectToWorld, float4(p, 1.0)).xyz;
   vWorld.y = max(vWorld.y, EspoirStagePoint(float3(0.0, uFloor, 0.0)).y);
@@ -88,14 +88,14 @@ float4 GamoriDistortOut(float2 off, float4 grabPos, float4 scrPos) {
   float s = vUv.x, y = vUv.y, lag = uHead - s;
   if (lag < 0.0) discard;
   float life = clamp(lag / max(uHead - uTail, 0.001), 0.0, 1.0);
-  float env = lerp(smoothstep(0.0, 0.06, lag) * (1.0 - life) * smoothstep(uTail, uTail + 0.1, s), 1.0, uFlat);   
-  env *= sin(3.14159 * y);                                                                                  
+  float env = lerp(smoothstep(0.0, 0.06, lag) * (1.0 - life) * smoothstep(uTail, uTail + 0.1, s), 1.0, uFlat);
+  env *= sin(3.14159 * y);
   float2 g = float2(ddx(y), ddy(y));
   float gl = length(g);
   if (gl < 1e-7) discard;
-  float prof = uWaves < 0.5 ? sin((y - 0.5) * 6.28318) : sin(y * 3.14159 * uWaves - uTime * 16.0);   
-  float2 off = (g / gl) * prof * env * uAmt;       
-  
+  float prof = uWaves < 0.5 ? sin((y - 0.5) * 6.28318) : sin(y * 3.14159 * uWaves - uTime * 16.0);
+  float2 off = (g / gl) * prof * env * uAmt;
+
   return GamoriDistortOut(off, i.grabPos, i.scrPos);
 
         return 0;

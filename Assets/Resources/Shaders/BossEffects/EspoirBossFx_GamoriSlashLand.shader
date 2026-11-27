@@ -71,7 +71,7 @@ float3 ramp(float i) {
   float3 p = uCenter + (position - uCenter) * (1.0 - uGrow);
   float3 d = p - uCenter;
   float3 dn = normalize(d);
-  if (dn.y < 0.0) dn.y *= smoothstep(0.0, 1.0, p.y - uLand);      
+  if (dn.y < 0.0) dn.y *= smoothstep(0.0, 1.0, p.y - uLand);
   p += dn * uExpand * lerp(0.35 + uv.y, 1.0 + 0.25 * uv.y, uRigid);
   vWorld = mul(unity_ObjectToWorld, float4(p, 1.0)).xyz;
   vWorld.y = max(vWorld.y, EspoirStagePoint(float3(0.0, uFloor, 0.0)).y);
@@ -98,7 +98,7 @@ float3 ramp(float i) {
   float n1 = tex2D(uNoise, float2(sn * 1.6 + uSeed, y * 0.35 - uTime * 0.12)).r;
   float n2 = tex2D(uNoise, float2(sn * 4.0 - uTime * 0.35 + uSeed, y * 1.2)).g;
   float streak = tex2D(uNoise, float2(sn * 0.8 + uSeed * 0.3, y * 1.0)).b;
-  
+
   float width = lerp(uThick, uThick * 0.22, pow(life, 0.7));
   float inner = 1.0 - width + ((n1 - 0.5) * 0.55 * (0.25 + life) - streak * 0.18 * life) * uRough;
   float body = smoothstep(inner, inner + 0.035, y);

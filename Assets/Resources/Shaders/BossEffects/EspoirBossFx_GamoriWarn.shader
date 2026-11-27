@@ -50,7 +50,7 @@ Shader "EspoirBossFx/GamoriWarn" {
         v2f o = (v2f)0;
         position = IN.vertex.xyz;
 
-  vQ = position.xy * uHalf + uCen;                                    
+  vQ = position.xy * uHalf + uCen;
   float3 w = uO + float3(uDir.y, 0.0, -uDir.x) * vQ.x + float3(uDir.x, 0.0, uDir.y) * vQ.y;
   o.pos = UnityObjectToClipPos(float4(w, 1.0));
 
@@ -65,30 +65,30 @@ Shader "EspoirBossFx/GamoriWarn" {
         _fc = 0;
 
   float2 q = vQ;
-  float r = length(q), d, s;                                           
+  float r = length(q), d, s;
   if (uShape < 0.5) { d = uA1 - r; s = r / uA1; }
   else if (uShape < 1.5)
   {
       float an = abs(atan2(q.x, q.y)); d = min(uA1 - r, sin(clamp(uA2 - an, -1.57, 1.57)) * r); s = r / uA1;
   }
   else { d = min(min(q.y, uA1 - q.y), uA2 - abs(q.x)); s = q.y / uA1; }
-  float n2 = tex2D(uNoise, q * 0.14 + float2(uT * 0.02, -uT * 0.015)).r;                         
-  float n4 = tex2D(uNoise, q * 0.43 - float2(uT * 0.03, uT * 0.02)).r;                           
-  
+  float n2 = tex2D(uNoise, q * 0.14 + float2(uT * 0.02, -uT * 0.015)).r;
+  float n4 = tex2D(uNoise, q * 0.43 - float2(uT * 0.03, uT * 0.02)).r;
+
   float inside = smoothstep(0.0, 0.03, d);
   if (inside < 0.003) discard;
-  float rim = exp(-max(d, 0.0) / uRimW) * inside;                                                  
+  float rim = exp(-max(d, 0.0) / uRimW) * inside;
   float base = 0.16 + 0.14 * n2 + 0.10 * smoothstep(0.4, 1.0, s);
   float fill = 0.0, lead = 0.0;
-  if (uMode < 1.5) {                                
+  if (uMode < 1.5) {
     float f = uP * 1.04;
     fill = 1.0 - smoothstep(f - 0.03, f + 0.01, s);
     lead = exp(-abs(s - f) / 0.035) * step(0.02, uP) * (1.0 - smoothstep(0.92, 1.0, uP));
-  } else if (uMode < 2.5) {                         
+  } else if (uMode < 2.5) {
     float f = (1.0 - uP) * 1.02;
     fill = smoothstep(f - 0.01, f + 0.03, s);
     lead = exp(-abs(s - f) / 0.035) * (1.0 - smoothstep(0.9, 1.0, uP));
-  } else {                                          
+  } else {
     fill = uBeat * (0.55 + 0.45 * n2);
   }
   float grain = 0.85 + 0.3 * n2 * n4;

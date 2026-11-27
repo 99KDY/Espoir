@@ -137,8 +137,8 @@ float3 rot(float3 p, float3 ax, float a)
   float l = dot(n, normalize(EspoirStageDir(float3(0.4, 0.8, 0.45))));
   float3 c = lerp(uShade, uMid, smoothstep(-0.12, -0.02, l));
   c = lerp(c, uLight, smoothstep(0.32, 0.42, l));
-  c = lerp(c, uLight * 1.25 + float3(0.06, 0.02, 0.03), smoothstep(0.78, 0.84, vUv.y) * 0.7);      
-  c *= 0.72 + 0.5 * vTint;                                                                     
+  c = lerp(c, uLight * 1.25 + float3(0.06, 0.02, 0.03), smoothstep(0.78, 0.84, vUv.y) * 0.7);
+  c *= 0.72 + 0.5 * vTint;
   c = invACES(clamp(c, 0.0, 0.95));
   c += uHot * vHot * 0.7;
   _fc = float4(c, 1.0);

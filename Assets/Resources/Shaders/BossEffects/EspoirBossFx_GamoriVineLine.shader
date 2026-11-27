@@ -66,7 +66,7 @@ float propDis() {
 
   vUv = uv; vRing = uv2.x;
   float k = uGrow > 1.5 ? 1.0 : smoothstep(0.0, 0.11, uGrow - uv.x);
-  float3 p = lerp(aCen, position, k * uThick);                    
+  float3 p = lerp(aCen, position, k * uThick);
   vL = p; vN = normalize(mul((float3x3)unity_ObjectToWorld, normal));
   p += normal * uPush * k;
   float4 w = mul(unity_ObjectToWorld, float4(p, 1.0));

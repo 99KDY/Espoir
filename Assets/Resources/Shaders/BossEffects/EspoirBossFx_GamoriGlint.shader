@@ -35,7 +35,7 @@ Shader "EspoirBossFx/GamoriGlint" {
       v2f vert(appdata IN) {
         v2f o = (v2f)0;
         position = IN.vertex.xyz;
- vP = position.xy; o.pos = UnityObjectToClipPos(float4(position, 1.0)); 
+ vP = position.xy; o.pos = UnityObjectToClipPos(float4(position, 1.0));
         o.vP = vP;
         return o;
       }
